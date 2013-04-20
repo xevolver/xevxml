@@ -83,6 +83,15 @@ static void attribSgVarRefExp(stringstream& istr,SgNode* node)
   }
 }
 
+static void attribSgPragma(stringstream& istr,SgNode* node)
+{
+  SgPragma* n = isSgPragma(node);
+  /* todo: the line should be split into tokens, and written as attriutes */
+  if(n) {
+    istr << " pragma=\"" << n->get_pragma() << "\" ";
+  }
+}
+
 static void attribSgVariableDeclaration(stringstream& istr,SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
@@ -130,6 +139,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node)
 
   attribSgInitializedName(istr,node);
   attribSgVarRefExp(istr,node);
+  attribSgPragma(istr,node);
   attribSgVariableDeclaration(istr,node);
   attribSgFunctionDeclaration(istr,node);
 

@@ -4,7 +4,7 @@ LD	= $(CXX)
 ROSEROOT	= /home/tacky/local
 
 INCLUDE	= -I$(ROSEROOT)/include
-CXXFLAGS= -g -Wall -Wno-deprecated -MD $(INCLUDE) 
+CXXFLAGS= -g -Wall -Wno-deprecated $(INCLUDE) 
 
 ROSELIB	= -L$(ROSEROOT)/lib -lrose -lxalan-c -lxerces-c
 LIBS	= $(ROSELIB) $(JVMLIB)

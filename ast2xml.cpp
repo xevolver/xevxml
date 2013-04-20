@@ -41,6 +41,7 @@ static void writeInternalNode(stringstream& sstr,
     for(size_t i(0);i<args.size()/sizeof(void*);i++)
       visitor.traverse(args[i],att);
   }
+
   return;
 }
 
@@ -133,7 +134,7 @@ static bool isLeafNode(SgNode* node)
     return false;
   if( hasType(node) )
     return false;
-
+  
   return true;
 }
 

@@ -10,6 +10,38 @@ using namespace std;
 
 #define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
 
+static int Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
+{
+  try {
+    xe::XercesDOMParser parser;
+    string buf = tr.str();
+    xe::MemBufInputSource 
+      membuf((const XMLByte*)buf.c_str(), buf.length(), "memory_buffer");
+    parser.parse(membuf);
+    xe::DOMDocument* doc = parser.getDocument();
+
+    //class Xml2AstVisitor visit(prj->get_file(0).getFileName(),ofn.c_str(),prj);
+    class Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
+    visit.visit(doc,0);
+  }
+  catch (...){
+    return 1;
+  }
+  return 0;
+}
+
+
+void Xml2Ast(stringstream& str, SgProject* prj, string ofn)
+{
+  if(Xml2AstDOMVisit(str,prj,ofn)==1){
+    cerr << "Error: XML parsing failed" << endl;
+    ABORT();
+  }
+  // Other terminations and cleanup.
+  return;
+}
+
+
 Xml2AstVisitor::
 Xml2AstVisitor(const string& ifn, const string& ofn, SgProject* prj)
 {
@@ -39,6 +71,8 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgSourceFile);
       VISIT(SgGlobal);
       VISIT(SgBasicBlock);
+      VISIT(SgPragmaDeclaration);
+      VISIT(SgPragma);
       VISIT(SgVariableDeclaration);
       VISIT(SgFunctionDeclaration);
       VISIT(SgFunctionParameterList);
@@ -71,13 +105,24 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgPointerType);
      
       VISIT(SgExprStatement);
+      VISIT(SgForStatement);
+      VISIT(SgForInitStatement);
       VISIT(SgReturnStmt);
       VISIT(SgFunctionDefinition);
       
       VISIT(SgVarRefExp);
       VISIT(SgCastExp);
+
+      VISIT(SgPlusPlusOp);
       VISIT(SgAssignOp);
+      VISIT(SgPlusAssignOp);
       VISIT(SgAddOp);
+      VISIT(SgLessThanOp);
+
+      if( nname != "PreprocessingInfo" ) {
+	cerr << "unknown AST node found " << nname << endl;
+	ABORT();
+      }
     }
   }
   return 0;
@@ -112,6 +157,51 @@ Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
     child=child->getNextSibling();
   } 
   sb::popScopeStack();
+  return ret;
+}
+
+SgNode* 
+Xml2AstVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
+{
+  SgPragmaDeclaration* ret = 0;
+  SgPragma* pr = 0;
+
+  xe::DOMNode* child=node->getFirstChild();
+  while(child) {
+    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      SgNode* astchild = this->visit(child);
+      if(pr==0)
+	pr = isSgPragma(astchild);
+    }
+    child=child->getNextSibling();
+  } 
+  if(pr) {
+    ret = sb::buildPragmaDeclaration(pr->get_pragma()); 
+  }
+  else ABORT();
+  
+  return ret;
+}
+
+SgNode* 
+Xml2AstVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
+{
+  SgPragma* ret = 0;
+  xe::DOMNamedNodeMap* amap = node->getAttributes();
+  xe::DOMNode* att = 0;
+  string line;
+
+  if(amap) {
+    att=amap->getNamedItem(xe::XMLString::transcode("pragma"));
+    if(att)
+      line = xe::XMLString::transcode(att->getNodeValue());
+  }
+
+  if(line.size()) {
+    ret = sb::buildPragma(line); 
+  }
+  else ABORT();
+  
   return ret;
 }
 
@@ -294,48 +384,108 @@ Xml2AstVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAssignOp(xercesc::DOMNode* node, SgNode* astParent)
+Xml2AstVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgExpression* lhs = 0;
-  SgExpression* rhs = 0;
+  SgForStatement* ret = 0;
+  SgStatement* ini  = 0;
+  SgStatement* test = 0;
+  SgExpression* inc = 0;
+  SgStatement* body = 0;
+
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
-    if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
-      if(lhs==0)
-	lhs = isSgExpression(astchild);
-      else if(rhs==0)
-	rhs = isSgExpression(astchild);
+    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      SgNode* astchild = this->visit(child,ret);
+      /* assuming these stmts appear in this order */
+      if(ini==0)
+	ini = isSgStatement(astchild);
+      else if (test==0)
+	test = isSgStatement(astchild);
+      else if (inc==0)
+	inc = isSgExpression(astchild);
+      else if(body==0)
+	body = isSgStatement(astchild);
     }
     child=child->getNextSibling();
   } 
-  if( lhs && rhs )
-    return sb::buildAssignOp(lhs,rhs);
-  else
-    ABORT();
+  ret = sb::buildForStatement(ini,test,inc,body);
+  
+  return ret;
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAddOp(xe::DOMNode* node, SgNode* astParent)
+Xml2AstVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgExpression* lhs = 0;
-  SgExpression* rhs = 0;
+  SgForInitStatement* ret = 0;
+  SgStatement* stmt  = 0;
+  SgStatementPtrList lst;
+
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       SgNode* astchild = this->visit(child);
-      if(lhs==0)
-	lhs = isSgExpression(astchild);
-      else if(rhs==0)
-	rhs = isSgExpression(astchild);
+      if((stmt = isSgStatement(astchild))!=0)
+	lst.push_back(stmt);
     }
     child=child->getNextSibling();
   } 
-  if( lhs && rhs )
-    return sb::buildAddOp(lhs,rhs);
-  else 
+  if(lst.size())
+    ret = sb::buildForInitStatement(lst);
+  else
     ABORT();
+  return ret;
 }
+
+#define VISIT_BINARY_OP(op)						\
+  SgNode*								\
+  Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
+  {									\
+    SgExpression* lhs = 0;						\
+    SgExpression* rhs = 0;						\
+    xe::DOMNode* child=node->getFirstChild();				\
+    while(child) {							\
+      if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){	\
+	SgNode* astchild = this->visit(child);				\
+	if(lhs==0)							\
+	  lhs = isSgExpression(astchild);				\
+	else if(rhs==0)							\
+	  rhs = isSgExpression(astchild);				\
+      }									\
+      child=child->getNextSibling();					\
+    }									\
+    if( lhs && rhs )							\
+      return sb::build##op(lhs,rhs);					\
+    else								\
+      ABORT();								\
+  }									
+
+#define VISIT_UNARY_OP(op)						\
+  SgNode*								\
+  Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
+  {									\
+    SgExpression* exp = 0;						\
+    xe::DOMNode* child=node->getFirstChild();				\
+    while(child) {							\
+      if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){	\
+	SgNode* astchild = this->visit(child);				\
+	if(exp==0)							\
+	  exp = isSgExpression(astchild);				\
+      }									\
+      child=child->getNextSibling();					\
+    }									\
+    if( exp )							\
+      return sb::build##op(exp);					\
+    else								\
+      ABORT();								\
+  }									
+  
+
+VISIT_UNARY_OP(PlusPlusOp);
+VISIT_BINARY_OP(AssignOp);
+VISIT_BINARY_OP(PlusAssignOp);
+VISIT_BINARY_OP(AddOp);
+VISIT_BINARY_OP(LessThanOp);
+
 
 SgNode* 
 Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)

@@ -52,18 +52,25 @@ public:
   SgNode* visitSgGlobal(xercesc::DOMNode* node, SgNode* astParent=0);
 
 
-
+  SgNode* visitSgPragmaDeclaration(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgPragma(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgVariableDeclaration(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgFunctionDeclaration(xercesc::DOMNode* node, SgNode* astParent=0);
+
 
   SgNode* visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgNode* visitSgBasicBlock(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgNode* visitSgExprStatement(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent=0);
 
+  SgNode* visitSgPlusPlusOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgPlusAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgAddOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgLessThanOp(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgNode* visitSgVarRefExp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgCastExp(xercesc::DOMNode* node, SgNode* astParent=0);

@@ -12,6 +12,7 @@
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
+
   <!-- remove return stmts -->
   <xsl:template match="SgReturnStmt">
     <!--
@@ -24,4 +25,17 @@
       <SgIntVal value="10"/>
     </SgReturnStmt>
   </xsl:template>
+
+  <xsl:template match="SgForStatement/SgPlusAssignOp/SgIntVal">
+    <SgIntVal value="2"/>
+  </xsl:template>
+
+  <xsl:template match="SgForStatement/SgPlusPlusOp">
+    <SgPlusAssignOp>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+      <SgIntVal value="1"/>
+    </SgPlusAssignOp>
+  </xsl:template>
+
 </xsl:stylesheet>
