@@ -107,6 +107,7 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgExprStatement);
       VISIT(SgForStatement);
       VISIT(SgForInitStatement);
+      VISIT(SgIfStmt);
       VISIT(SgReturnStmt);
       VISIT(SgFunctionDefinition);
       
@@ -114,8 +115,10 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgCastExp);
 
       VISIT(SgPlusPlusOp);
+      VISIT(SgMinusOp);
       VISIT(SgAssignOp);
       VISIT(SgPlusAssignOp);
+      VISIT(SgMultAssignOp);
       VISIT(SgAddOp);
       VISIT(SgLessThanOp);
 
@@ -436,6 +439,33 @@ Xml2AstVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParen
   return ret;
 }
 
+SgNode* 
+Xml2AstVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgIfStmt* ret = 0;
+  SgStatement* tstmt  = 0;
+  SgStatement* fstmt  = 0;
+  SgExprStatement* cond  = 0;
+
+  xe::DOMNode* child=node->getFirstChild();
+  while(child) {
+    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      SgNode* astchild = this->visit(child,ret);
+      /* assuming these stmts appear in this order */
+      if(cond==0)
+	cond = isSgExprStatement(astchild);
+      else if (tstmt==0)
+	tstmt = isSgStatement(astchild);
+      else if (fstmt==0)
+	fstmt = isSgStatement(astchild);
+    }
+    child=child->getNextSibling();
+  } 
+  ret = sb::buildIfStmt(cond,tstmt,fstmt);
+
+  return ret;
+}
+
 #define VISIT_BINARY_OP(op)						\
   SgNode*								\
   Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
@@ -481,8 +511,10 @@ Xml2AstVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParen
   
 
 VISIT_UNARY_OP(PlusPlusOp);
+VISIT_UNARY_OP(MinusOp);
 VISIT_BINARY_OP(AssignOp);
 VISIT_BINARY_OP(PlusAssignOp);
+VISIT_BINARY_OP(MultAssignOp);
 VISIT_BINARY_OP(AddOp);
 VISIT_BINARY_OP(LessThanOp);
 

@@ -13,29 +13,43 @@
     </xsl:copy>
   </xsl:template>
 
-  <!-- remove return stmts -->
-  <xsl:template match="SgReturnStmt">
-    <!--
+
+  <xsl:template match="SgForStatement">
     <xsl:copy>
       <xsl:copy-of select="@*"/>
-      <xsl:apply-templates/>
-      </xsl:copy>
+      <xsl:apply-templates select="./*[1]"/>
+      <xsl:apply-templates select="./*[2]"/>
+      <xsl:apply-templates select="./*[3]"/>
+      <xsl:element name="SgBasicBlock">
+	<xsl:copy-of select="./*[4]"/>
+	<xsl:element name="SgExprStatement">
+	  <xsl:element name="SgPlusPlusOp">
+	    <xsl:copy-of select="./*[3]/SgVarRefExp[1]"/>
+	  </xsl:element>
+	</xsl:element>
+	<xsl:copy-of select="./*[4]"/>
+      </xsl:element>
+    </xsl:copy>
+  </xsl:template>
+
+
+  <xsl:template match="SgForStatement/SgPlusPlusOp">
+    <xsl:variable name="PlusPlusOp">
+      <xsl:element name="SgPlusAssignOp">
+	<xsl:copy-of select="@*"/>
+	<xsl:copy-of select="./SgVarRefExp[1]"/>
+	<SgIntVal value="1"/>
+      </xsl:element>
+    </xsl:variable>
+    <!--
+    <xsl:copy-of select="./$PlusPlusOp"/>
     -->
-    <SgReturnStmt>
-      <SgIntVal value="10"/>
-    </SgReturnStmt>
+    <!--<xsl:apply-templates select="./$PlusPlusOp"/>-->
   </xsl:template>
 
   <xsl:template match="SgForStatement/SgPlusAssignOp/SgIntVal">
-    <SgIntVal value="2"/>
-  </xsl:template>
-
-  <xsl:template match="SgForStatement/SgPlusPlusOp">
-    <SgPlusAssignOp>
+    <xsl:copy>
       <xsl:copy-of select="@*"/>
-      <xsl:apply-templates/>
-      <SgIntVal value="1"/>
-    </SgPlusAssignOp>
+    </xsl:copy>
   </xsl:template>
-
 </xsl:stylesheet>

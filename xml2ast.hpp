@@ -65,10 +65,13 @@ public:
   SgNode* visitSgExprStatement(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgNode* visitSgPlusPlusOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgMinusOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgPlusAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgMultAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgAddOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgLessThanOp(xercesc::DOMNode* node, SgNode* astParent=0);
 
