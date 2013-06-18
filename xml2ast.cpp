@@ -111,6 +111,7 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgReturnStmt);
       VISIT(SgFunctionDefinition);
       
+      VISIT(SgNullExpression);
       VISIT(SgVarRefExp);
       VISIT(SgCastExp);
 
@@ -432,10 +433,9 @@ Xml2AstVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParen
     }
     child=child->getNextSibling();
   } 
-  if(lst.size())
-    ret = sb::buildForInitStatement(lst);
-  else
-    ABORT();
+  //lst could be empty
+  ret = sb::buildForInitStatement(lst);
+
   return ret;
 }
 
@@ -518,6 +518,11 @@ VISIT_BINARY_OP(MultAssignOp);
 VISIT_BINARY_OP(AddOp);
 VISIT_BINARY_OP(LessThanOp);
 
+SgNode* 
+Xml2AstVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)
+{
+  return sb::buildNullExpression();
+}
 
 SgNode* 
 Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)

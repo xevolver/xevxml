@@ -75,6 +75,7 @@ public:
   SgNode* visitSgAddOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgLessThanOp(xercesc::DOMNode* node, SgNode* astParent=0);
 
+  SgNode* visitSgNullExpression(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgVarRefExp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgCastExp(xercesc::DOMNode* node, SgNode* astParent=0);
 

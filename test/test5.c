@@ -6,7 +6,7 @@ int func(int a,double b,int c)
 {
   float j=0.0f;  
 #pragma xev unroll 2
-  for(a=0;a<N;a++)
+  for(;;)
     c=c+3;
 
   return 0;
