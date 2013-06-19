@@ -74,6 +74,9 @@ public:
   SgNode* visitSgMultAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgAddOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgLessThanOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgAndOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgOrOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgEqualityOp(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgNode* visitSgNullExpression(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgVarRefExp(xercesc::DOMNode* node, SgNode* astParent=0);

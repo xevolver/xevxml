@@ -122,6 +122,9 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgMultAssignOp);
       VISIT(SgAddOp);
       VISIT(SgLessThanOp);
+      VISIT(SgAndOp);
+      VISIT(SgOrOp);
+      VISIT(SgEqualityOp);
 
       if( nname != "PreprocessingInfo" ) {
 	cerr << "unknown AST node found " << nname << endl;
@@ -494,6 +497,18 @@ Xml2AstVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
   Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
   {									\
     SgExpression* exp = 0;						\
+    xe::DOMNamedNodeMap* amap = node->getAttributes();			\
+    xe::DOMNode* modeatt = 0;						\
+    stringstream mode;							\
+    int imode=0;							\
+    if(amap) {								\
+      modeatt=amap->getNamedItem(xe::XMLString::transcode("mode"));	\
+      if(modeatt)							\
+	mode << xe::XMLString::transcode(modeatt->getNodeValue());	\
+    }									\
+    if(mode.str().size()){						\
+      mode >> imode;							\
+    }									\
     xe::DOMNode* child=node->getFirstChild();				\
     while(child) {							\
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){	\
@@ -503,8 +518,9 @@ Xml2AstVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
       }									\
       child=child->getNextSibling();					\
     }									\
-    if( exp )							\
-      return sb::build##op(exp);					\
+    if( exp ) 								\
+      return sb::build##op(exp,						\
+			   imode?SgUnaryOp::postfix:SgUnaryOp::prefix); \
     else								\
       ABORT();								\
   }									
@@ -517,6 +533,9 @@ VISIT_BINARY_OP(PlusAssignOp);
 VISIT_BINARY_OP(MultAssignOp);
 VISIT_BINARY_OP(AddOp);
 VISIT_BINARY_OP(LessThanOp);
+VISIT_BINARY_OP(AndOp);
+VISIT_BINARY_OP(OrOp);
+VISIT_BINARY_OP(EqualityOp);
 
 SgNode* 
 Xml2AstVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)

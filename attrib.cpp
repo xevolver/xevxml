@@ -43,6 +43,13 @@ DEFINE_VALUE_EXP(SgUnsignedShortVal);
 DEFINE_VALUE_EXP(SgUnsignedIntVal);
 DEFINE_VALUE_EXP(SgUnsignedLongVal);
 DEFINE_VALUE_EXP(SgUnsignedLongLongIntVal);
+static void attribSgUnaryOp(stringstream& istr,SgNode* node)	
+{								
+  SgUnaryOp* n = isSgUnaryOp(node);					
+  if(n) {							
+    istr << " mode=\"" << n->get_mode() << "\" ";		
+  }								
+}
 
 static void writeValueAttribs(stringstream& istr,SgNode* node)
 {
@@ -142,6 +149,6 @@ void writeXmlAttribs(stringstream& istr,SgNode* node)
   attribSgPragma(istr,node);
   attribSgVariableDeclaration(istr,node);
   attribSgFunctionDeclaration(istr,node);
-
+  attribSgUnaryOp(istr,node);
   return;
 }
