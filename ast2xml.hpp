@@ -44,6 +44,8 @@ protected:
 };
 
 extern void Ast2Xml(std::stringstream& str, SgProject* prj, int fileid=0);
+extern std::string REPLACE( std::string, std::string, std::string);
+extern std::string REP_XML( std::string);
 
 #endif
 

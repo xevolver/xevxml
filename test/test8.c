@@ -5,7 +5,7 @@ int func(int a,double b,int c)
   float j=0.0f;  
   
   a++;
-  ++c;
+  --c;
   return 0;
 }
 
