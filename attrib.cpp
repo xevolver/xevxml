@@ -3,10 +3,12 @@
 * @brief    the line should be split into tokens, and written as attriutes
 */
 #include <rose.h>
+#include "xevxml.hpp"
 #include "ast2xml.hpp"
 #include "attrib.hpp"
 
 using namespace std;
+using namespace xevxml;
 
 #define CALL_ATTRIB(ty) attrib##ty(istr,node)
 /*
@@ -281,7 +283,7 @@ static void attribSgStringVal(stringstream& istr,SgNode* node)
 
   if(n) {
     str = n->get_value();
-    str = REP_XML( str );
+    str = XmlStr2Entity( str );
     istr << " value=\"" << str << "\"";
   }
 }
@@ -467,7 +469,7 @@ static void attribSgAsmStmt(stringstream& istr,SgNode* node)
   
   if(n) {
     str = n->get_assemblyCode();
-    str = REP_XML( str );
+    str = XmlStr2Entity( str );
     istr << " volatile=\"" << n->get_isVolatile() << "\"";
     istr << " asm_code=\"" << str << "\"";
   }

@@ -6,6 +6,7 @@ namespace si=SageInterface;
 namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
+using namespace xevxml;
 
 SgType* 
 Xml2AstVisitor::buildModifierType(xe::DOMNode* node, SgType* itype)

@@ -9,39 +9,19 @@
 
 using namespace std;
 
-string REPLACE( string str1, string str2, string str3 )
-{
-  string::size_type  Pos( str1.find( str2 ) );
 
-  while( Pos != string::npos ){
-    str1.replace( Pos, str2.length(), str3 );
-    Pos = str1.find( str2, Pos + str3.length() );
+namespace xevxml {
+  void Ast2Xml(stringstream& sstr, SgProject* prj, int fileid)
+  {
+    Ast2XmlVisitor visitor(sstr);
+    Ast2XmlInheritedAttribute att;
+    visitor.traverseWithinFile(&prj->get_file(fileid),att);
+    
+    return;
   }
-  
-  return str1;
 }
 
-
-string REP_XML( string str )
-{
-    str = REPLACE( str,"&","&amp;" );
-    str = REPLACE( str,"<","&lt;" );
-    str = REPLACE( str,">","&gt;" );
-    str = REPLACE( str,"\"","&quot;" );
-    str = REPLACE( str,"\'","&apos;" );
-    return str;
-}
-
-
-void Ast2Xml(stringstream& sstr, SgProject* prj, int fileid)
-{
-  Ast2XmlVisitor visitor(sstr);
-  Ast2XmlInheritedAttribute att;
-  visitor.traverseWithinFile(&prj->get_file(fileid),att);
-  
-  return;
-}
-
+using namespace xevxml;
 /*!
 * @brief        hasInternalNode
 */
@@ -479,7 +459,7 @@ void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
         }
         else {
           str = (*info)[i]->getString();
-          str = REP_XML( str );                     
+          str = XmlStr2Entity( str );                     
           sstr_ << "<PreprocessingInfo pos=\"";
           sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
           sstr_ << " type=\"";

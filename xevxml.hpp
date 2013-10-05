@@ -14,7 +14,12 @@
     abort();							\
   }
 
-extern void XmlInitialize(void);
-extern void XmlFinalize(void);
+namespace xevxml {
+  extern void XmlInitialize(void);
+  extern void XmlFinalize(void);
+  extern std::string XmlStr2Entity( std::string);
+
+
+}
 
 #endif

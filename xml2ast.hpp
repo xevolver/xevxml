@@ -22,6 +22,7 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/framework/Wrapper4InputSource.hpp>
 
+namespace xevxml {
 class Xml2AstVisitor
 {
   SgSourceFile*      _file;
@@ -306,8 +307,10 @@ public:
   SgFile* getSgFile() {return _file;}
 };
 
-extern void Xml2Ast(std::stringstream& str, 
-		    SgProject* prj, 
-		    std::string ofn="output.c");
+
+extern SgFile* Xml2Ast(std::stringstream& str, 
+		       SgProject* prj, 
+		       std::string ofn="output.c");
+}
 
 #endif

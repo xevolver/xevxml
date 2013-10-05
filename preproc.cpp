@@ -6,6 +6,7 @@ namespace si=SageInterface;
 namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
+using namespace xevxml;
 
 void 
 Xml2AstVisitor::checkPreprocInfo(xe::DOMNode* node, SgNode* astNode)

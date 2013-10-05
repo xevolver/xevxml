@@ -22,8 +22,9 @@ using namespace std;
 //#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
 #define VISIT(x) if(nname==#x) { SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
 
-static int Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
+static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
 {
+  SgFile* ret = 0;
   try {
     xe::XercesDOMParser parser;
     string buf = tr.str();
@@ -33,24 +34,34 @@ static int Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
     xe::DOMDocument* doc = parser.getDocument();
 
     //class Xml2AstVisitor visit(prj->get_file(0).getFileName(),ofn.c_str(),prj);
-    class Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
+    unlink(ofn.c_str());
+    class xevxml::Xml2AstVisitor visit(ofn.c_str(),ofn.c_str(),prj);
     visit.visit(doc,0);
+    ret = visit.getSgFile();
   }
   catch (...){
-    return 1;
+    return 0;
   }
-  return 0;
+  return ret;
 }
 
-void Xml2Ast(stringstream& str, SgProject* prj, string ofn)
+namespace xevxml {
+SgFile* Xml2Ast(stringstream& str, SgProject* prj, string ofn)
 {
-  if(Xml2AstDOMVisit(str,prj,ofn)==1){
+  SgFile* ret = 0;
+  if((ret=Xml2AstDOMVisit(str,prj,ofn))==0){
     cerr << "Error: XML parsing failed" << endl;
     ABORT();
   }
   // Other terminations and cleanup.
-  return;
+  return ret;
 }
+
+}
+
+
+using namespace xevxml;
+
 
 Xml2AstVisitor::
 Xml2AstVisitor(const string& ifn, const string& ofn, SgProject* prj)
@@ -730,10 +741,10 @@ SgNode*
 Xml2AstVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgForStatement* ret = 0;
-  SgStatement* ini  = 0;
-  SgStatement* test = 0;
-  SgExpression* inc = 0;
-  SgStatement* body = 0;
+  SgStatement*    ini = 0;
+  SgStatement*    tst = 0;
+  SgExpression*   inc = 0;
+  SgStatement*    bdy = 0;
 
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
@@ -742,16 +753,16 @@ Xml2AstVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
       /* assuming these stmts appear in this order */
       if(ini==0)
 	ini = isSgStatement(astchild);
-      else if (test==0)
-	test = isSgStatement(astchild);
+      else if (tst==0)
+	tst = isSgStatement(astchild);
       else if (inc==0)
 	inc = isSgExpression(astchild);
-      else if(body==0)
-	body = isSgStatement(astchild);
+      else if (bdy==0)
+	bdy = isSgStatement(astchild);
     }
     child=child->getNextSibling();
   } 
-  ret = sb::buildForStatement(ini,test,inc,body);
+  ret = sb::buildForStatement(ini,tst,inc,bdy);
   
   return ret;
 }
