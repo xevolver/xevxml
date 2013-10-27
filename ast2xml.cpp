@@ -11,11 +11,12 @@ using namespace std;
 
 
 namespace xevxml {
-  void Ast2Xml(stringstream& sstr, SgProject* prj, int fileid)
+  //void Ast2Xml(stringstream& sstr, SgProject* prj, int fileid)
+  void Ast2Xml(stringstream& sstr, SgFile* file, Ast2XmlOpt* opt)
   {
     Ast2XmlVisitor visitor(sstr);
-    Ast2XmlInheritedAttribute att;
-    visitor.traverseWithinFile(&prj->get_file(fileid),att);
+    Ast2XmlInheritedAttribute att(opt);
+    visitor.traverseWithinFile(file,att);
     
     return;
   }
@@ -108,10 +109,12 @@ static void writeTypesRecursive(stringstream& sstr,
   
   sstr << '<';
   sstr << t->class_name();
-  sstr << " address=\"";
-  sstr.setf(ios::hex,ios::basefield);
-  sstr << t << "\"";
-  sstr.unsetf(ios::hex);
+  if(att.opt->address){
+    sstr << " address=\"";
+    sstr.setf(ios::hex,ios::basefield);
+    sstr << t << "\"";
+    sstr.unsetf(ios::hex);
+  }
   writeModifierType(sstr,t);
   
   string s = t->class_name();
@@ -401,7 +404,7 @@ Ast2XmlInheritedAttribute
 Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node, 
 						   Ast2XmlInheritedAttribute att)
 {
-  Ast2XmlInheritedAttribute retatt;
+  Ast2XmlInheritedAttribute retatt(att.opt);
   SgLocatedNode* loc = isSgLocatedNode(node);
   AttachedPreprocessingInfoType* info=0; 
   if(loc) info = loc->getAttachedPreprocessingInfo();
@@ -411,11 +414,12 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   retatt.level = att.level+1;
   sstr_ << '<';
   sstr_ << node->class_name();  
-  sstr_ << " address=\"";
-  sstr_.setf(ios::hex,ios::basefield);
-  sstr_ << node << "\"" ;
-  sstr_.unsetf(ios::hex);
-
+  if(att.opt->address){
+    sstr_ << " address=\"";
+    sstr_.setf(ios::hex,ios::basefield);
+    sstr_ << node << "\"";
+    sstr_.unsetf(ios::hex);
+  }
   /* write attributes of this element */
   writeXmlAttribs(sstr_,node);
 

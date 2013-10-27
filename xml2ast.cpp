@@ -60,14 +60,25 @@ SgFile* Xml2Ast(stringstream& str, SgProject* prj, string ofn)
 }
 
 
-using namespace xevxml;
 
+using namespace xevxml;
 
 Xml2AstVisitor::
 Xml2AstVisitor(const string& ifn, const string& ofn, SgProject* prj)
 {
+  //_file = isSgSourceFile(&prj->get_file(0));
   _file = isSgSourceFile(sb::buildFile(ifn,ofn,prj));
+  //_file = new SgSourceFile();
   if(_file==0){ ABORT(); }
+
+  if(ofn[ofn.size()-1] !='c'){
+    //_file->get_project()->set_Fortran_only(true);
+    _file->set_outputLanguage(SgFile::e_Fortran_output_language);
+    //file->set_outputFormat(SgFile::e_fixed_form_output_format);
+    _file->set_outputFormat(SgFile::e_free_form_output_format);
+    _file->set_sourceFileUsesFortran90FileExtension(true);
+    SageBuilder::symbol_table_case_insensitive_semantics = true;
+  }
 }
 
 Xml2AstVisitor::
@@ -674,7 +685,6 @@ SgNode*
 Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock* ret = sb::buildBasicBlock();
-  
   sb::pushScopeStack(ret);
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
@@ -687,7 +697,6 @@ Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
     }
     child=child->getNextSibling();
   }
-
   sb::popScopeStack();
 
   return ret;
@@ -2228,8 +2237,8 @@ Xml2AstVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astPare
 
   SgFunctionType* ftyp = new SgFunctionType(SgTypeVoid::createType(), false);
   SgProgramHeaderStatement* ret = new SgProgramHeaderStatement(astParent->get_file_info(),SgName(name.c_str()), ftyp, NULL);
-  ret->set_definingDeclaration(ret);
 
+  ret->set_definingDeclaration(ret);
   ret->set_scope(sb::topScopeStack());
   ret->set_parent(sb::topScopeStack());
 
@@ -2247,8 +2256,9 @@ Xml2AstVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astPare
         typ = isSgType(astchild);
       if( blk==0 )
         blk = isSgFunctionDefinition(astchild);
-      if(def==0)
+      if(def==0) {
         def = isSgBasicBlock(astchild);
+      }
       if(lst==0)
         lst = isSgFunctionParameterList(astchild);
     }

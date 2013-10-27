@@ -4,12 +4,19 @@
 #include <rose.h>
 
 namespace xevxml {
+class Ast2XmlOpt {
+public:
+  bool address;
+  Ast2XmlOpt() {address=false;}
+  ~Ast2XmlOpt() {}
+};
 
 class Ast2XmlInheritedAttribute
 {
 public:
   int level;
-  Ast2XmlInheritedAttribute ():level(0) {};
+  Ast2XmlOpt* opt;
+  Ast2XmlInheritedAttribute (Ast2XmlOpt* o):level(0),opt(o){};
 };
 
 class Ast2XmlVisitorInternal: public AstTopDownProcessing <Ast2XmlInheritedAttribute>
@@ -45,7 +52,8 @@ protected:
   }
 };
 
-extern void Ast2Xml(std::stringstream& str, SgProject* prj, int fileid=0);
+
+extern void Ast2Xml(std::stringstream& str, SgFile* file, Ast2XmlOpt* opt = NULL);
 }
 
 

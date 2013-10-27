@@ -63,6 +63,7 @@ static void attribSgUnaryOp(stringstream& istr,SgNode* node)
 
 static void writeValueAttribs(stringstream& istr,SgNode* node)
 {
+
   CALL_ATTRIB(SgBoolValExp);
   CALL_ATTRIB(SgCharVal);
   CALL_ATTRIB(SgWcharVal);
