@@ -33,22 +33,22 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
 
     switch (c) {
     case 0:
-      printf("option %s", long_options[option_index].name);
+      cerr << "option " << long_options[option_index].name << endl;
       if (optarg) {
-	printf(" with arg %s", optarg);
+	cerr << " with arg " <<  optarg;
 	if(option_index==0)
 	  SgProject::set_verbose(atoi(optarg));
 	if(option_index==1)
 	  opt->address = atoi(optarg);
       }
-      printf("\n");
+      cerr << "\n";
       break;
 
     case '?':
       break;
       
     default:
-      printf("?? getopt returned character code 0%o ??\n", c);
+      cerr << "?? getopt returned character code " << c << endl;
     }
   }
   for(int i(optind);i<argc;i++)
@@ -73,19 +73,19 @@ int main(int argc, char** argv)
   file = &sageProject->get_file(sageProject->numberOfFiles()-1);
 
   xevxml::XmlInitialize();
-  /*
   xevxml::Ast2Xml(xmlString1,file,&opt);
 
   cout << xmlString1.str();
-  */
+
+  /*
   char c;
   while((c=cin.get()) != cin.eof()){
     xmlString1 << c;
   }
 
-  xevxml::Xml2Ast(xmlString1,sageProject,"dummy.f");
+  xevxml::Xml2Ast(xmlString1,sageProject,"dummy.c");
   sageProject->unparse();
-
+  */
   xevxml::XmlFinalize();
   return 0;
 }

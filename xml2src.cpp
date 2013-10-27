@@ -5,6 +5,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+  ofstream ofs(argv[1]);
   SgProject* sageProject=frontend(argc,argv);
   //SgProject* sageProject=frontend(argc,argv);
   char c;
@@ -23,12 +24,15 @@ int main(int argc, char** argv)
   //cerr << fn << ":" << sageProject->get_Fortran_only() << endl;
   xevxml::XmlInitialize();
   
-  SgFile* file = xevxml::Xml2Ast(istr,sageProject,"dummy.f");
+  SgFile* file = xevxml::Xml2Ast(istr,sageProject,fn);
   //AstPostProcessing(file);
-  file->unparse();
-  //std::cout << xmlString1.str();
 
+  //cerr << "Writing to " << file->getFileName() << endl;
+  //file->unparse();
+  //std::cout << xmlString1.str();
+  ofs << file->unparseToCompleteString()  << endl;
   xevxml::XmlFinalize();
+  //cerr << "Creating " << sageProject->get_file(sageProject->numberOfFiles()-1).getFileName() << endl;
   //sageProject->get_file(sageProject->numberOfFiles()-1).unparse();
   //sageProject->unparse();
   return 0;

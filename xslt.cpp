@@ -40,6 +40,7 @@ int main(int argc,char** argv)
   while((c=cin.get()) != cin.eof()){
     istr << c;
   }
+  cerr << "reading files completed " << endl;
 
   XsltTransform(istr,ostr,fn);
 

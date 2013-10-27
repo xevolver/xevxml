@@ -20,7 +20,8 @@ using namespace std;
 
 
 //#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
-#define VISIT(x) if(nname==#x) { SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
+//#define VISIT(x) if(nname==#x) { cerr << #x << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
+#define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
 
 static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
 {
@@ -32,10 +33,11 @@ static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
       membuf((const XMLByte*)buf.c_str(), buf.length(), "memory_buffer");
     parser.parse(membuf);
     xe::DOMDocument* doc = parser.getDocument();
-
+    
     //class Xml2AstVisitor visit(prj->get_file(0).getFileName(),ofn.c_str(),prj);
-    unlink(ofn.c_str());
+    //unlink(ofn.c_str());
     class xevxml::Xml2AstVisitor visit(ofn.c_str(),ofn.c_str(),prj);
+    //class xevxml::Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
     visit.visit(doc,0);
     ret = visit.getSgFile();
   }
@@ -66,11 +68,12 @@ using namespace xevxml;
 Xml2AstVisitor::
 Xml2AstVisitor(const string& ifn, const string& ofn, SgProject* prj)
 {
-  //_file = isSgSourceFile(&prj->get_file(0));
-  _file = isSgSourceFile(sb::buildFile(ifn,ofn,prj));
+  _file = isSgSourceFile(&prj->get_file(0));
+  //_file = isSgSourceFile(sb::buildFile(ifn,ofn,prj));
   //_file = new SgSourceFile();
   if(_file==0){ ABORT(); }
 
+#if 0
   if(ofn[ofn.size()-1] !='c'){
     //_file->get_project()->set_Fortran_only(true);
     _file->set_outputLanguage(SgFile::e_Fortran_output_language);
@@ -78,7 +81,13 @@ Xml2AstVisitor(const string& ifn, const string& ofn, SgProject* prj)
     _file->set_outputFormat(SgFile::e_free_form_output_format);
     _file->set_sourceFileUsesFortran90FileExtension(true);
     SageBuilder::symbol_table_case_insensitive_semantics = true;
+    cerr << "Output Language: Fortran" << endl;
   }
+  else {
+    _file->set_outputLanguage(SgFile::e_C_output_language);
+    cerr << "Output Language: C" << endl;
+  }
+#endif
 }
 
 Xml2AstVisitor::
@@ -335,18 +344,31 @@ SgNode*
 Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 {
   SgGlobal* ret = _file->get_globalScope();
+  //  SgGlobal* ret = si::getFirstGlobalScope(_file->get_project());
   sb::pushScopeStack(ret);
 
+  //cerr << ret->get_numberOfTraversalSuccessors() << endl;
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       SgStatement* astchild = isSgStatement(this->visit(child,astParent));
-      if(astchild)
+      if(astchild) {
 	si::appendStatement (astchild,isSgScopeStatement(ret));
+
+      }
     }
     child=child->getNextSibling();
   } 
   sb::popScopeStack();
+  //cerr << ret->unparseToString() ;
+
+  //cerr << ret->get_numberOfTraversalSuccessors() << endl;
+#if 0
+  for(int i(0);i<ret->get_numberOfTraversalSuccessors();i++){
+    cerr << i << ":" << ret->get_traversalSuccessorByIndex(i)->class_name() << endl;
+  }
+  cerr << _file->get_numberOfTraversalSuccessors() << endl;
+#endif
   return ret;
 }
 
