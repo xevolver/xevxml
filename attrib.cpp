@@ -589,10 +589,29 @@ static void attribSgInquireStatement(stringstream& istr,SgNode* node)
   }
 }
 
-
-void writeXmlAttribs(stringstream& istr,SgNode* node)
+void writeFlopsAttribs(stringstream& istr,SgNode* node,
+		       xevxml::Ast2XmlOpt* opt)
 {
+  if(opt->rosehpct==0) return;
+  SgLocatedNode * loc = isSgLocatedNode(node);
+  if(loc && loc->attributeExists ("PAPI_FP_OPS") ){
+    const RoseHPCT::MetricAttr* flops_attr =
+      dynamic_cast<const RoseHPCT::MetricAttr *> 
+    (loc->getAttribute ("PAPI_FP_OPS"));
+    
+    if(flops_attr) {
+      istr << " flops=";
+      istr << const_cast<RoseHPCT::MetricAttr *> (flops_attr)->toString ();
+    }
+  }
+}
+
+void writeXmlAttribs(stringstream& istr,SgNode* node,
+		     xevxml::Ast2XmlOpt* opt)
+{
+
   writeValueAttribs(istr,node);
+  writeFlopsAttribs(istr,node,opt);
 
   attribSgInitializedName(istr,node);
   attribSgVarRefExp(istr,node);

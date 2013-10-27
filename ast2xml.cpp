@@ -421,7 +421,7 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
     sstr_.unsetf(ios::hex);
   }
   /* write attributes of this element */
-  writeXmlAttribs(sstr_,node);
+  writeXmlAttribs(sstr_,node,att.opt);
 
   if (isLeafNode(node) && info == 0)
     sstr_ << "/>" << endl;

@@ -18,7 +18,7 @@ int main(int argc, char** argv)
   string fn(argv[1]);
   stringstream istr;
 
-  while((c=cin.get()) != cin.eof()){
+  while(cin.get(c)){
     istr << c;
   }
   //cerr << fn << ":" << sageProject->get_Fortran_only() << endl;

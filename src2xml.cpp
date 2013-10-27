@@ -15,13 +15,14 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
   vector<string> args;
   
   args.push_back(argv[0]);
-
+#if 0
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = {
       {"xev:verbose", required_argument, 0,  0 },
       {"xev:address", required_argument, 0,  0 },
+      {"xev:rosehpct", required_argument, 0,  0 },
       {0,         0,                 0,  0 }
     };
     
@@ -40,6 +41,8 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
 	  SgProject::set_verbose(atoi(optarg));
 	if(option_index==1)
 	  opt->address = atoi(optarg);
+	if(option_index==2)
+	  opt->rosehpct = atoi(optarg);
       }
       cerr << "\n";
       break;
@@ -51,8 +54,13 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
       cerr << "?? getopt returned character code " << c << endl;
     }
   }
-  for(int i(optind);i<argc;i++)
+#endif
+  //for(int i(optind);i<argc;i++)
+  opt->rosehpct=1;
+  for(int i(1);i<argc;i++)
     args.push_back(argv[i]);
+  if( opt->rosehpct )
+    opt->profiles = RoseHPCT::loadProfilingFiles(args);
   return args;
 }
 
@@ -71,6 +79,10 @@ int main(int argc, char** argv)
   sageProject = frontend(cmdopt(argc,argv,&opt));
   dup2(fd,1); // printf messages are written to stdout  
   file = &sageProject->get_file(sageProject->numberOfFiles()-1);
+
+  if(opt.rosehpct)
+    RoseHPCT::attachMetrics (opt.profiles, 
+			     sageProject, sageProject->get_verbose () > 0);
 
   xevxml::XmlInitialize();
   xevxml::Ast2Xml(xmlString1,file,&opt);

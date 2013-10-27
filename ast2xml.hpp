@@ -2,12 +2,16 @@
 #define ___AST2XML_HPP___
 
 #include <rose.h>
+#include <rosehpct/rosehpct.hh>
 
 namespace xevxml {
 class Ast2XmlOpt {
 public:
   bool address;
-  Ast2XmlOpt() {address=false;}
+  bool rosehpct;
+  RoseHPCT::ProgramTreeList_t profiles;
+
+  Ast2XmlOpt() {address=false;rosehpct=false;}
   ~Ast2XmlOpt() {}
 };
 

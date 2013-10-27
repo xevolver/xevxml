@@ -3,10 +3,11 @@ LD	= $(CXX)
 
 ROSEROOT	= /home/tacky/local
 
-INCLUDE	= -I$(ROSEROOT)/include
+LIBXML2=/usr/include/libxml2
+INCLUDE	= -I$(ROSEROOT)/include  -I$(LIBXML2)
 CXXFLAGS= -g -Wall -Wno-deprecated $(INCLUDE) 
 
-ROSELIB	= -L$(ROSEROOT)/lib -lrose -lxalan-c -lxerces-c
+ROSELIB	= -L$(ROSEROOT)/lib -lrosehpct -lxml2 -lrose -lxalan-c -lxerces-c
 LIBS	= $(ROSELIB) $(JVMLIB)
 SRCS    =  ast2xml.cpp xml2ast.cpp attrib.cpp \
 	 xmlutils.cpp type.cpp preproc.cpp

@@ -37,17 +37,16 @@ int main(int argc,char** argv)
 
   xevxml::XmlInitialize();
 
-  while((c=cin.get()) != cin.eof()){
+  //while((c=cin.get()) != cin.eof()){
+  while(cin.get(c)){
     istr << c;
   }
-  cerr << "reading files completed " << endl;
 
   XsltTransform(istr,ostr,fn);
 
-  cout << ostr.str();
+  cout << ostr.str() << flush;
 
   xevxml::XmlFinalize();  
   return 0;
 }
-
 
