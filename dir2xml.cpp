@@ -139,8 +139,10 @@ static std::string DirVisit(stringstream& itr, stringstream& dtr)
   xevxml::Dir2XmlVisitor visit(idoc);
   visit.getDefs(ddoc);
   visit.visit();
+  stringstream ost;
 
-  xevxml::XmlWriteToString(idoc,dtr);
+  xevxml::XmlWriteToString(idoc,ost);
+  ret = ost.str();
   return ret;
 }
 
@@ -167,10 +169,9 @@ int main(int argc, char** argv)
 
   xevxml::XmlInitialize();
   
-  DirVisit(istr,dstr);
+  cout << DirVisit(istr,dstr);
 
   xevxml::XmlFinalize();
-  cout << dstr.str();
   return 0;
 }
 
