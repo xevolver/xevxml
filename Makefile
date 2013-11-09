@@ -16,7 +16,7 @@ SRCS    =  ast2xml.cpp xml2ast.cpp attrib.cpp \
 OBJS	= ${SRCS:.cpp=.o}
 DEPS	= ${SRCS:.cpp=.d}
 
-TARGET	= src2xml xsltrans xml2src
+TARGET	= src2xml xsltrans xml2src dir2xml
 
 .SUFFIXES: .cpp .o
 
@@ -30,6 +30,9 @@ xsltrans: $(OBJS) xslt.o
 
 xml2src: $(OBJS) xml2src.o
 	$(LD) $(OBJS) xml2src.o -o $@ $(LIBS)
+
+dir2xml: $(OBJS) dir2xml.o
+	$(LD) $(OBJS) dir2xml.o -o $@ $(LIBS)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -o $@ -c $^

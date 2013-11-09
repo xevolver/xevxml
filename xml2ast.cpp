@@ -51,50 +51,50 @@ using namespace std;
 //#define VISIT(x) if(nname==#x) { cerr << #x << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
 #define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
 
-static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj, string ofn)
+
+static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj)
 {
   SgFile* ret = 0;
   try {
+    xe::DOMDocument* doc = 0;
     xe::XercesDOMParser parser;
     string buf = tr.str();
     xe::MemBufInputSource 
       membuf((const XMLByte*)buf.c_str(), buf.length(), "memory_buffer");
     parser.parse(membuf);
-    xe::DOMDocument* doc = parser.getDocument();
-    
+    doc = parser.getDocument();
+
     //class Xml2AstVisitor visit(prj->get_file(0).getFileName(),ofn.c_str(),prj);
     //unlink(ofn.c_str());
-    class xevxml::Xml2AstVisitor visit(ofn.c_str(),ofn.c_str(),prj);
+    class xevxml::Xml2AstVisitor visit(prj);
     //class xevxml::Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
     visit.visit(doc,0);
     ret = visit.getSgFile();
   }
-  catch (...){
+  catch(...) {
     return 0;
   }
   return ret;
 }
 
 namespace xevxml {
-SgFile* Xml2Ast(stringstream& str, SgProject* prj, string ofn)
+SgFile* Xml2Ast(stringstream& str, SgProject* prj)
 {
   SgFile* ret = 0;
-  if((ret=Xml2AstDOMVisit(str,prj,ofn))==0){
+  if((ret=Xml2AstDOMVisit(str,prj))==0){
     cerr << "Error: XML parsing failed" << endl;
     ABORT();
   }
   // Other terminations and cleanup.
   return ret;
 }
-
 }
 
 
 
 using namespace xevxml;
 
-Xml2AstVisitor::
-Xml2AstVisitor(const string& ifn, const string& ofn, SgProject* prj)
+Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
 {
   _file = isSgSourceFile(&prj->get_file(0));
   //_file = isSgSourceFile(sb::buildFile(ifn,ofn,prj));

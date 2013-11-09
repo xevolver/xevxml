@@ -59,9 +59,7 @@ class Xml2AstVisitor
 {
   SgSourceFile*      _file;
 public:
-  Xml2AstVisitor(const std::string& ifn, 
-		 const std::string& ofn, 
-		 SgProject* prj);
+  Xml2AstVisitor(SgProject* prj);
   ~Xml2AstVisitor();
 
   void visit2(xercesc::DOMNode* node,int depth=0)
@@ -339,10 +337,7 @@ public:
   SgFile* getSgFile() {return _file;}
 };
 
-
-extern SgFile* Xml2Ast(std::stringstream& str, 
-		       SgProject* prj, 
-		       std::string ofn="output.c");
+extern SgFile* Xml2Ast(std::stringstream& str,SgProject* prj);
 }
 
 #endif

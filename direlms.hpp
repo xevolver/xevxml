@@ -1,4 +1,6 @@
 /**
+ * @file     direls.hpp
+ * @brief    XML elements for directive definitions
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
@@ -28,28 +30,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef ___XEVXML_H___
-#define ___XEVXML_H___
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <rose.h>
+#ifndef ___DIRELMS_H___
+#define ___DIRELMS_H___
 
-#include <xercesc/dom/DOMDocument.hpp>
-
-#define ABORT()			 {				\
-    std::cerr << "ERROR @ " << __func__ << " :";		\
-    std::cerr << __FILE__ ;					\
-    std::cerr << "(" << __LINE__ << "): " << std::endl;		\
-    abort();							\
-  }
-
-namespace xevxml {
-  extern void XmlInitialize(void);
-  extern void XmlFinalize(void);
-  extern std::string XmlStr2Entity( std::string);
-  extern bool XmlWriteToString( xercesc::DOMNode* node, std::stringstream& str );
-}
+#define D_PREFIX "xev"
+#define D_DIRECTIVE "DIRECTIVE"
+#define D_CLAUSE "CLAUSE"
+#define D_LIST "PLIST"
+#define D_ARG "LI"
 
 #endif

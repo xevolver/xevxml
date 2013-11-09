@@ -31,8 +31,13 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "xevxml.hpp"
+
+#include <xercesc/dom/DOM.hpp>
+#include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
+#include <xercesc/framework/StdOutFormatTarget.hpp>
+#include <xercesc/framework/MemBufFormatTarget.hpp>
 
 namespace xe=xercesc;
 namespace xa=xalanc;
@@ -80,4 +85,31 @@ string XmlStr2Entity( string str )
     str = REPLACE( str,"\'","&apos;" );
     return str;
 }
+
+bool XmlWriteToString( xe::DOMNode* node, std::stringstream& str )
+{
+  XMLCh tempStr[100];
+  xe::XMLString::transcode("LS", tempStr, 99);
+  xe::DOMImplementation *impl = xe::DOMImplementationRegistry::getDOMImplementation(tempStr);
+  xe::DOMLSSerializer *ser = ((xe::DOMImplementationLS*)impl)->createLSSerializer();
+  if (ser-> getDomConfig()-> canSetParameter(xe::XMLUni::fgDOMWRTFormatPrettyPrint, true)){
+    ser-> getDomConfig()-> setParameter(xe::XMLUni::fgDOMWRTFormatPrettyPrint, true);
+  }
+  ser-> setNewLine(xe::XMLString::transcode("\r\n"));
+
+  //XMLFormatTarget *formatTarget = new LocalFileFormatTarget( tempFilePath );
+  //xe::XMLFormatTarget *formatTarget = new xe::StdOutFormatTarget();
+  xe::MemBufFormatTarget *formatTarget = new xe::MemBufFormatTarget();
+  xe::DOMLSOutput *output = ((xe::DOMImplementationLS*)impl)-> createLSOutput();
+  output-> setByteStream(formatTarget);
+  ser->write(node,output);
+  
+  char* s = (char*)formatTarget->getRawBuffer();
+  str << s;
+  ser->release();
+  delete formatTarget;
+  output->release();
+  return true;
+} 
+
 }

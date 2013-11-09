@@ -56,7 +56,7 @@ int main(int argc, char** argv)
   //cerr << fn << ":" << sageProject->get_Fortran_only() << endl;
   xevxml::XmlInitialize();
   
-  SgFile* file = xevxml::Xml2Ast(istr,sageProject,fn);
+  SgFile* file = xevxml::Xml2Ast(istr,sageProject);
   //AstPostProcessing(file);
 
   //cerr << "Writing to " << file->getFileName() << endl;
