@@ -188,18 +188,22 @@ Xml2AstVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
       length = xe::XMLString::transcode(nameatt->getNodeValue());
     }
   }
-
+  
   if( length.size() ){
     int ival = atoi(length.c_str());
-    SgIntVal* v = new SgIntVal( ival,length );
+    Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+    //v->set_file_info(info);
+    SgIntVal* v = new SgIntVal( info,ival,length );
     ret = sb::buildStringType( (SgExpression*)v );
-    
   }
   else {
     SgAsteriskShapeExp* ast 
       = new SgAsteriskShapeExp(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
     ret = sb::buildStringType( (SgExpression*)ast );
   }
+
+  if(ret==0) ABORT();
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -296,6 +300,8 @@ Xml2AstVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     ret->set_dim_info( lst );
   }
 
+  if(ret==0) ABORT();
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -331,7 +337,9 @@ Xml2AstVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
     }
     child=child->getNextSibling();
   }
-    
+
+  if(ret==0) ABORT();
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -373,6 +381,8 @@ Xml2AstVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
   }
   else ABORT();
 
+  if(ret==0) ABORT();
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -414,6 +424,8 @@ Xml2AstVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
   }
   else ABORT();
 
+  if(ret==0) ABORT();
+  ret->set_parent(astParent);
   return ret;
 }
 

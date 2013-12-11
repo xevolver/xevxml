@@ -1,18 +1,26 @@
 <DEFS>
   <DIRECTIVE name="test">
     <CLAUSE name="param">
-      <LI value="1"/>
+      <PLIST>
+	<LI value="1"/>
+      </PLIST>
     </CLAUSE>
     <CLAUSE name="param2">
-      <LI value="1"/>
+      <PLIST>
+	<LI value="1"/>
+      </PLIST>
     </CLAUSE>
   </DIRECTIVE>
   <DIRECTIVE name="test2">
     <CLAUSE name="param">
-      <LI value="1"/>
+      <PLIST>
+	<LI value="1"/>
+      </PLIST>
     </CLAUSE>
     <CLAUSE name="param2">
-      <LI value="1"/>
+      <PLIST>
+	<LI value="1"/>
+      </PLIST>
     </CLAUSE>
   </DIRECTIVE>
 </DEFS>

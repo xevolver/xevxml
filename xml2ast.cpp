@@ -51,6 +51,23 @@ using namespace std;
 //#define VISIT(x) if(nname==#x) { cerr << #x << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
 #define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
 
+class TestAST : public AstSimpleProcessing 
+{
+public:
+  TestAST() {}
+  ~TestAST() {}
+
+  void visit(SgNode* n){
+    if(n){
+      //cerr << n->class_name() << ": ";
+      void* p = n->get_parent();
+      //cerr << p <<endl;
+      if(p==0) ABORT();
+      //cerr << n->unparseToString();
+    }
+  }
+};
+
 
 static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj)
 {
@@ -70,6 +87,11 @@ static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj)
     //class xevxml::Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
     visit.visit(doc,0);
     ret = visit.getSgFile();
+    
+    TestAST test;
+    test.traverse(ret,preorder);
+
+    //AstTests::runAllTests(prj);
   }
   catch(...) {
     return 0;
@@ -100,6 +122,11 @@ Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
   //_file = isSgSourceFile(sb::buildFile(ifn,ofn,prj));
   //_file = new SgSourceFile();
   if(_file==0){ ABORT(); }
+  
+  Sg_File_Info* info 
+    = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  _file->set_file_info(info);
+  info->set_parent(_file);
 
 #if 0
   if(ofn[ofn.size()-1] !='c'){
@@ -359,20 +386,56 @@ SgNode*
 Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
 {
   xe::DOMNode* child=node->getFirstChild();
+  xe::DOMNamedNodeMap* amap = node->getAttributes();
+  xe::DOMNode* langatt = 0;
+  string langid;
+  xe::DOMNode* fmtatt = 0;
+  string fmtid;
+
+  if(amap) {
+    langatt=amap->getNamedItem(xe::XMLString::transcode("language"));
+    if(langatt)
+      langid = xe::XMLString::transcode(langatt->getNodeValue());
+    fmtatt=amap->getNamedItem(xe::XMLString::transcode("format"));
+    if(fmtatt)
+      fmtid = xe::XMLString::transcode(fmtatt->getNodeValue());
+  }
+  // 0:error, 1: unknown, 2:C, 3:C++, 4:Fortran
+  if(langid=="2"){
+    _file->set_C_only(true);
+    _file->set_outputLanguage(SgFile::e_C_output_language);
+  }
+  else if(langid=="4"){
+    _file->set_Fortran_only(true);
+    _file->set_outputLanguage(SgFile::e_Fortran_output_language);
+    SageBuilder::symbol_table_case_insensitive_semantics = true;
+    if(fmtid=="1") // 0:unknown, 1:fixed, 2:free
+      _file->set_outputFormat(SgFile::e_fixed_form_output_format);
+    else
+      _file->set_outputFormat(SgFile::e_free_form_output_format);
+  }
+  //cerr << _file->get_outputLanguage() << ":" << _file->get_outputFormat() << endl;
+
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       this->visit(child,_file);
     }
     child=child->getNextSibling();
   } 
+  
   return _file;
 }
 
 SgNode* 
 Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 {
-  SgGlobal* ret = _file->get_globalScope();
-  //  SgGlobal* ret = si::getFirstGlobalScope(_file->get_project());
+  SgGlobal* ret = new SgGlobal(_file->get_file_info());
+  _file->set_globalScope(ret);
+  ret->set_parent(_file);
+  //SgGlobal* ret = _file->get_globalScope();
+  //Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  //ret->set_file_info(info);
+  //SgGlobal* ret = si::getFirstGlobalScope(_file->get_project());
   sb::pushScopeStack(ret);
 
   //cerr << ret->get_numberOfTraversalSuccessors() << endl;
@@ -389,17 +452,26 @@ Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
   } 
   sb::popScopeStack();
   //cerr << ret->unparseToString() ;
-
   //cerr << ret->get_numberOfTraversalSuccessors() << endl;
+
+
 #if 0
   for(int i(0);i<ret->get_numberOfTraversalSuccessors();i++){
+
     cerr << i << ":" << ret->get_traversalSuccessorByIndex(i)->class_name() << endl;
+    for(int j(0);j<ret->get_traversalSuccessorByIndex(i)->get_numberOfTraversalSuccessors();j++){
+      SgNode* n = ret->get_traversalSuccessorByIndex(i)->get_traversalSuccessorByIndex(j);
+      if( isSgLocatedNode(n) && isSgFunctionParameterList(n)==0 ) {
+	cerr << j << ":" << n->class_name() <<endl;
+	cerr << n->unparseToString() << endl;
+      }
+    }
   }
-  cerr << _file->get_numberOfTraversalSuccessors() << endl;
+  //cerr << _file->get_numberOfTraversalSuccessors() << endl;
 #endif
   return ret;
 }
-
+  
 SgNode* 
 Xml2AstVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
@@ -507,9 +579,11 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 					 name->get_type(),
 					 name->get_initializer());
 
+    if(ret==0) ABORT();
     if( varList.size() > 1 )  
       ret->get_variables() = varList;
-
+    for(size_t i(0);i<varList.size();i++)
+      varList[i]->set_parent(ret);
   }
   else ABORT();
 
@@ -633,8 +707,9 @@ Xml2AstVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     ((ret->get_declarationModifier()).get_storageModifier()).setDefault();
     
   if( def == 0 ) {
-    SgFunctionDefinition* def 
-      = new SgFunctionDefinition(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
+    Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+    info->setOutputInCodeGeneration();
+    SgFunctionDefinition* def = new SgFunctionDefinition(info);
     ret->set_definition( def );
     def->set_parent(ret);
     ret->get_declarationModifier().get_storageModifier().setExtern();
@@ -697,8 +772,10 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
       {
 	// add (block data) 0828
 	SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
-	fdf = new SgFunctionDefinition( Sg_File_Info::generateDefaultFileInfoForTransformationNode(),def );
-	ret = new SgProcedureHeaderStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode(),SgName(name), functionType,  fdf );
+	Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+	info->setOutputInCodeGeneration();
+	fdf = new SgFunctionDefinition( info,def );
+	ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf );
 	fdf->set_parent(ret);
 	ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
       }
@@ -1245,16 +1322,19 @@ Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
   xe::DOMNamedNodeMap*   amap    = node->getAttributes();
   xe::DOMNode*           nameatt = 0;
   string                 name;
-  
+  SgNode* ret=0;
+
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("name"));
     if(nameatt)
       name = xe::XMLString::transcode(nameatt->getNodeValue());
   }
   if(name.size())
-    return sb::buildVarRefExp(name);
+    ret= sb::buildVarRefExp(name);
   else 
     ABORT();
+  ret->set_parent(astParent);
+  return ret;
 }
 
 SgNode* 
@@ -1335,7 +1415,6 @@ Xml2AstVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
     if(nameatt)
       name = xe::XMLString::transcode(nameatt->getNodeValue());
   }
-
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -1349,7 +1428,7 @@ Xml2AstVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   } 
 
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
-
+  if(typ) typ->set_parent(ret); // this must be true
   return ret;
 }
 
@@ -1397,6 +1476,7 @@ Xml2AstVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
       baseType ival;							\
       val >> ival;							\
       ret = sb::build##buildVal(ival);					\
+	ret->set_parent(astParent);					\
     }									\
     else ABORT();							\
     return ret;								\
@@ -1848,6 +1928,8 @@ Xml2AstVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
   if(!lst.empty()) {
     ret->set_implicit_none( false );
     ret->get_variables() = lst;
+    for(size_t i(0);i<lst.size();i++)
+      lst[i]->set_parent(ret);
   }
 
   return ret;
@@ -1916,6 +1998,11 @@ Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
   ret = new SgFortranDo( astParent->get_file_info(), ini,bnd,inc,body);
   ret->set_old_style( style );
   ret->set_has_end_statement( enddo );
+
+  if(ini) ini->set_parent(ret);
+  if(bnd) bnd->set_parent(ret);
+  if(inc) inc->set_parent(ret);
+  if(body) body->set_parent(ret);
 
   if( slabel.size() )
     ret->set_string_label( slabel );
@@ -2284,9 +2371,10 @@ Xml2AstVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astPare
       name = xe::XMLString::transcode(nameatt->getNodeValue());
   }
   else ABORT();
-
+  
   SgFunctionType* ftyp = new SgFunctionType(SgTypeVoid::createType(), false);
-  SgProgramHeaderStatement* ret = new SgProgramHeaderStatement(astParent->get_file_info(),SgName(name.c_str()), ftyp, NULL);
+  SgProgramHeaderStatement* ret 
+    = new SgProgramHeaderStatement(astParent->get_file_info(),SgName(name.c_str()), ftyp, NULL);
 
   ret->set_definingDeclaration(ret);
   ret->set_scope(sb::topScopeStack());
@@ -2317,13 +2405,21 @@ Xml2AstVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astPare
 
   SgFunctionDefinition* programDefinition = new SgFunctionDefinition(ret, def);
 
-  def->setCaseInsensitive(true);
-  programDefinition->setCaseInsensitive(true);
 
+  def->setCaseInsensitive(true);
   def->set_parent(programDefinition);
+
+  programDefinition->setCaseInsensitive(true);
   programDefinition->set_parent(ret);
 
+  Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForCompilerGeneratedNode();
+  info->setOutputInCodeGeneration();
+  programDefinition->set_file_info(info);
+
   ret->set_name(SgName(name.c_str()));
+  ret->set_definition(programDefinition);
+  if(def->get_file_info()==0) ABORT();
+  if(programDefinition->get_file_info()==0) ABORT();
 
   return ret;
 }
@@ -2396,8 +2492,9 @@ Xml2AstVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
     nameatt=amap->getNamedItem(xe::XMLString::transcode("nlabel"));
     if(nameatt) {
       nlabel = xe::XMLString::transcode(nameatt->getNodeValue());
-      if( nlabel.size() )
+      if( nlabel.size() ){
         ino = atoi( nlabel.c_str() );
+      }
     }
   }
 
@@ -2487,7 +2584,7 @@ Xml2AstVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
       dbl = xe::XMLString::transcode(nameatt->getNodeValue());
     }
   }
-  
+  //cerr << "SgFormatItem |" << fmt << "| end" << endl;
   val = sb::buildStringVal( fmt );
   
   if( sgl == "1" )                                  // add (0821)
@@ -2681,64 +2778,66 @@ Xml2AstVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       SgNode* astchild = this->visit(child,ret);
-      
+
       exp = isSgExpression(astchild);
-      switch( flg[ino] ){
-      case 1:
-	ret->set_unit( exp );
-	break;
-      case 2:
-	ret->set_iostat( exp );
-	break;
-      case 3:
-	lbl = isSgLabelRefExp(astchild);
-	ret->set_err( lbl );
-	lbl->set_parent(ret);
-	break;
-      case 4:
-	ret->set_file( exp );
-	break;
-      case 5:
-	ret->set_status( exp );
-	break;
-      case 6:
-	ret->set_access( exp );
-	break;
-      case 7:
-	ret->set_form( exp );
-	break;
-      case 8:
-	ret->set_recl( exp );
-	break;
-      case 9:
-	ret->set_blank( exp );
-	break;
-      case 10:
-	ret->set_position( exp );
-	break;
-      case 11:
-	ret->set_action( exp );
-	break;
-      case 12:
-	ret->set_delim( exp );
-	break;
-      case 13:
-	ret->set_pad( exp );
-	break;
-      case 14:
-	ret->set_iomsg( exp );
-	break;
-      case 15:
-	ret->set_round( exp );
-	break;
-      case 16:
-	ret->set_sign( exp );
-	break;
-      case 17:
-	ret->set_asynchronous( exp );
-	break;
+      if(exp) {
+	switch( flg[ino] ){
+	case 1:
+	  ret->set_unit( exp );
+	  break;
+	case 2:
+	  ret->set_iostat( exp );
+	  break;
+	case 3:
+	  lbl = isSgLabelRefExp(astchild);
+	  ret->set_err( lbl );
+	  lbl->set_parent(ret);
+	  break;
+	case 4:
+	  ret->set_file( exp );
+	  break;
+	case 5:
+	  ret->set_status( exp );
+	  break;
+	case 6:
+	  ret->set_access( exp );
+	  break;
+	case 7:
+	  ret->set_form( exp );
+	  break;
+	case 8:
+	  ret->set_recl( exp );
+	  break;
+	case 9:
+	  ret->set_blank( exp );
+	  break;
+	case 10:
+	  ret->set_position( exp );
+	  break;
+	case 11:
+	  ret->set_action( exp );
+	  break;
+	case 12:
+	  ret->set_delim( exp );
+	  break;
+	case 13:
+	  ret->set_pad( exp );
+	  break;
+	case 14:
+	  ret->set_iomsg( exp );
+	  break;
+	case 15:
+	  ret->set_round( exp );
+	  break;
+	case 16:
+	  ret->set_sign( exp );
+	  break;
+	case 17:
+	  ret->set_asynchronous( exp );
+	  break;
+	}
+	ino++;
       }
-      ino++;
     }
     child=child->getNextSibling();
   }
@@ -2820,7 +2919,9 @@ Xml2AstVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
   
   SgModuleStatement* ret = buildModuleStatementAndDefinition(
                 SgName( name.c_str() ), sb::topScopeStack());
-  ret->set_file_info(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
+  Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  info->setOutputInCodeGeneration();
+  ret->set_file_info(info);
   SgClassDefinition*    exp=0;
 
   xe::DOMNode* child=node->getFirstChild();
@@ -2902,17 +3003,26 @@ Xml2AstVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
   SgStringVal*            ret = 0;
   xe::DOMNamedNodeMap*    amap = node->getAttributes();
   xe::DOMNode*            valatt = 0;
+  xe::DOMNode*            apsatt = 0;
   string                  str;
+  int                     flag=0;
+
   if(amap) {
     valatt=amap->getNamedItem(xe::XMLString::transcode("value"));
     if(valatt)
       str = xe::XMLString::transcode(valatt->getNodeValue());
+    apsatt=amap->getNamedItem(xe::XMLString::transcode("SingleQuote"));
+    if(apsatt){
+      flag = atoi(xe::XMLString::transcode(apsatt->getNodeValue()));
+    }
   }
   
   //if(str.size())                                // del (0821)
   ret = sb::buildStringVal(str);
   //else ABORT();                                 // del (0821)
-  
+  ret->set_parent(astParent);
+  if(apsatt)
+    ret->set_usesSingleQuotes(flag);
   return ret;
 }
 

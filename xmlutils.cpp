@@ -86,6 +86,16 @@ string XmlStr2Entity( string str )
     return str;
 }
 
+string XmlEntity2Str( string str )
+{
+  str = REPLACE( str,"&amp;","&" );
+  str = REPLACE( str,"&lt;","<" );
+  str = REPLACE( str,"&gt;",">" );
+  str = REPLACE( str,"&quot;","\"" );
+  str = REPLACE( str,"&apos;","\'" );
+    return str;
+}
+
 bool XmlWriteToString( xe::DOMNode* node, std::stringstream& str )
 {
   XMLCh tempStr[100];

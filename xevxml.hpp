@@ -49,6 +49,7 @@ namespace xevxml {
   extern void XmlInitialize(void);
   extern void XmlFinalize(void);
   extern std::string XmlStr2Entity( std::string);
+  extern std::string XmlEntity2Str( std::string);
   extern bool XmlWriteToString( xercesc::DOMNode* node, std::stringstream& str );
 }
 

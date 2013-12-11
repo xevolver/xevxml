@@ -8,3 +8,4 @@ int main(int argc,char** argv)
 #pragma xev test2 param(10)
   return 0;
 }
+

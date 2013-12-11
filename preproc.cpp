@@ -73,13 +73,15 @@ Xml2AstVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
   
   if(pos.str().size() && typ.str().size()){
     int pval,tval;
-    std::string content 
-      = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
+    std::string content = "";
+    if(node->getFirstChild())
+      content = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
+    //cerr << "#####################" << content;
     pos >> pval;
     typ >> tval;
+    content = XmlEntity2Str(content);
     si::attachArbitraryText(isSgLocatedNode(astParent),content,
 				       (PreprocessingInfo::RelativePositionType)pval);
-    
   }
   else ABORT();
   

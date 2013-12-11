@@ -81,7 +81,7 @@ class Ast2XmlVisitor:public Ast2XmlVisitorInternal
 {
 public:
   Ast2XmlVisitor(std::stringstream& s): Ast2XmlVisitorInternal(s){
-    sstr_ << "<?xml version=\"1.0\" encoding=\"shift_jis\"?>" << std::endl;
+    sstr_ << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
   }
   ~Ast2XmlVisitor() {}
 protected:

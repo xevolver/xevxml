@@ -89,6 +89,30 @@ static void attribSgUnaryOp(stringstream& istr,SgNode* node)
   }								
 }
 
+static void attribSgStringVal(stringstream& istr,SgNode* node)
+{
+  SgStringVal*      n = isSgStringVal(node);
+  std::string       str;
+
+  if(n) {
+    str = n->get_value();
+    str = XmlStr2Entity( str );
+    istr << " value=\"" << str << "\"";
+
+    if( n->get_usesSingleQuotes() == true )
+      istr << " SingleQuote=\"1\" ";
+    /*
+    else
+      istr << " SingleQuote=\"0\" ";
+    if( n->get_usesDoubleQuotes() == true )
+      istr << " DoubleQuote=\"1\" ";
+    else
+      istr << " DoubleQuote=\"0\" ";
+    */
+  }
+}
+
+
 static void writeValueAttribs(stringstream& istr,SgNode* node)
 {
 
@@ -104,7 +128,7 @@ static void writeValueAttribs(stringstream& istr,SgNode* node)
   CALL_ATTRIB(SgEnumVal);
   CALL_ATTRIB(SgLongDoubleVal);
   CALL_ATTRIB(SgShortVal);
-  //CALL_ATTRIB(SgStringVal);
+  CALL_ATTRIB(SgStringVal);
   CALL_ATTRIB(SgUnsignedCharVal);
   CALL_ATTRIB(SgUnsignedShortVal);
   CALL_ATTRIB(SgUnsignedIntVal);
@@ -305,18 +329,6 @@ static void attribSgFunctionRefExp(stringstream& istr,SgNode* node)
   }
 }
 
-static void attribSgStringVal(stringstream& istr,SgNode* node)
-{
-  SgStringVal*      n = isSgStringVal(node);
-  std::string       str;
-
-  if(n) {
-    str = n->get_value();
-    str = XmlStr2Entity( str );
-    istr << " value=\"" << str << "\"";
-  }
-}
-
 static void attribSgSizeOfOp(stringstream& istr,SgNode* node)
 {
   SgSizeOfOp*      n = isSgSizeOfOp(node);
@@ -417,7 +429,7 @@ static void attribSgFormatItem(stringstream& istr,SgNode* node)
   if(n) {
     SgStringVal* v = isSgStringVal(n->get_data());
     if(v)
-      istr << " fmt=\"" << v->get_value() << "\" ";
+      istr << " fmt=\"" << xevxml::XmlStr2Entity(v->get_value()) << "\" ";
     if( v->get_usesSingleQuotes() == true )
       istr << " SingleQuote=\"1\" ";
     else
@@ -636,6 +648,16 @@ void writeFlopsAttribs(stringstream& istr,SgNode* node,
 #endif
 }
 
+void attribSgSourceFile(stringstream& istr,SgNode* node)
+{
+  SgSourceFile*  n = isSgSourceFile(node);  
+  if(n) {
+    istr << " filename=\"" << n->get_sourceFileNameWithoutPath() << "\"";
+    istr << " language=\"" << n->get_outputLanguage() << "\"";
+    istr << " format=\"" << n->get_outputFormat() << "\"";
+  }
+}
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     xevxml::Ast2XmlOpt* opt)
 {
@@ -643,6 +665,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   writeValueAttribs(istr,node);
   writeFlopsAttribs(istr,node,opt);
 
+  attribSgSourceFile(istr,node);
   attribSgInitializedName(istr,node);
   attribSgVarRefExp(istr,node);
   attribSgPragma(istr,node);
@@ -658,7 +681,6 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgAttributeSpecificationStatement(istr,node);   
   attribSgFortranDo(istr,node);                         
   attribSgFunctionRefExp(istr,node);                    
-  attribSgStringVal(istr,node);                         
   attribSgPrintStatement(istr,node);                    
   attribSgSizeOfOp(istr,node);                          
   attribSgClassDeclaration(istr,node);                  
