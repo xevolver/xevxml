@@ -39,6 +39,8 @@
 #include <rosehpct/rosehpct.hh>
 #endif
 
+#define XEV_PRAGMA_PREFIX "!$xev"
+
 namespace xevxml {
 class Ast2XmlOpt {
 public:

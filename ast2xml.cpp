@@ -34,6 +34,7 @@
 #include "ast2xml.hpp"
 #include "attrib.hpp"
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -462,6 +463,7 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   return retatt;
 }
 
+
 /* --- AST postprocessing (called after coming back from the child nodes) --- */
 void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
 						    Ast2XmlInheritedAttribute att)
@@ -477,17 +479,20 @@ void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
       for(size_t i(0);i<(*info).size();i++) {
        
         str = (*info)[i]->getString();
-        idx = str.find( "$PRAGMA" );
+        //idx = str.find( "$PRAGMA" );
+	std::transform(str.begin(),str.end(),str.begin(),::tolower);
+        idx = str.find( XEV_PRAGMA_PREFIX );
+	/*
         if( idx < 0 )
             idx = str.find( "$pragma");
-
-        if( idx > 0 ) {
+	*/
+        if( idx >= 0 ) {
           sstr_ << "<SgPragmaDeclaration >\n";
           sstr_ << "  "; // indent
           sstr_ << "<SgPragma pragma=\"";
-          sstr_ << str.substr( idx+7 ) << "\" />\n";
+	  // assuming Fortran directives start with !$
+          sstr_ << str.substr( idx+strlen("!$") ) << "\" />\n";
           sstr_ << "</SgPragmaDeclaration >\n";
-
         }
         else {
           str = (*info)[i]->getString();
