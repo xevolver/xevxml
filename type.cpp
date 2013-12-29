@@ -292,15 +292,24 @@ Xml2AstVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
       }
       child=child->getNextSibling();
     }
-    ret->set_base_type( typ );
-    typ->set_parent(ret);
-    ret->set_rank( rnk );
-    lst=sb::buildExprListExp( exprs );
-    lst->set_parent(ret);
-    ret->set_dim_info( lst );
+    if(ret==0) ABORT();
+    if(typ){
+      ret->set_base_type( typ );
+      typ->set_parent(ret);
+    }
+    else ABORT();
+    if(rnk){
+      if(exprs.size() != (size_t)rnk) ABORT();
+      ret->set_rank( rnk );
+      lst=sb::buildExprListExp( exprs );
+      lst->set_parent(ret);
+      //std::cerr << lst->unparseToCompleteString() << std::endl;
+      for(size_t i=0;i<exprs.size();i++)
+	exprs[i]->set_parent(lst);
+      ret->set_dim_info( lst );
+    }
   }
 
-  if(ret==0) ABORT();
   ret->set_parent(astParent);
   return ret;
 }
@@ -313,17 +322,19 @@ Xml2AstVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
   SgModifierType*     mdf = 0;
   SgTypedefType*      tdf = 0;
   SgPointerType*      ptr = 0;
+  SgArrayType*        ary = 0;
   
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+      SgNode* astchild = this->visit(child,ret);
       typ = isSgType(astchild);
       
-      if( (mdf==0) && (tdf==0) && (ptr==0) ){
+      if( (mdf==0) && (tdf==0) && (ptr==0) && (ary==0) ){
 	ret->set_base_type( typ );
 	mdf = isSgModifierType(astchild);
 	tdf = isSgTypedefType(astchild);
+	ary = isSgArrayType(astchild);
 	ptr = isSgPointerType(astchild);
 	if( tdf )
 	  break;
@@ -333,6 +344,8 @@ Xml2AstVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 	  mdf->set_base_type( typ );
 	if( ptr )
 	  ptr->set_base_type( typ );
+	if( ary )
+	  ary->set_base_type( typ );
       }
     }
     child=child->getNextSibling();

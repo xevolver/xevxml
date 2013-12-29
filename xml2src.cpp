@@ -53,16 +53,14 @@ int main(int argc, char** argv)
   while(cin.get(c)){
     istr << c;
   }
-  //cerr << fn << ":" << sageProject->get_Fortran_only() << endl;
   xevxml::XmlInitialize();
   
   SgFile* file = xevxml::Xml2Ast(istr,sageProject);
   //AstPostProcessing(file);
-
   //cerr << "Writing to " << file->getFileName() << endl;
-  //file->unparse();
+  file->unparse();
   //std::cout << xmlString1.str();
-  ofs << file->unparseToCompleteString()  << endl;
+  //ofs << file->unparseToCompleteString()  << endl;
   xevxml::XmlFinalize();
   //cerr << "Creating " << sageProject->get_file(sageProject->numberOfFiles()-1).getFileName() << endl;
   //sageProject->get_file(sageProject->numberOfFiles()-1).unparse();

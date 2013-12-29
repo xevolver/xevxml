@@ -118,8 +118,9 @@ using namespace xevxml;
 
 Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
 {
-  _file = isSgSourceFile(&prj->get_file(0));
-  //_file = isSgSourceFile(sb::buildFile(ifn,ofn,prj));
+  //_file = isSgSourceFile(&prj->get_file(0));
+  _file = isSgSourceFile(sb::buildFile(prj->get_file(0).getFileName(),
+				       prj->get_file(0).getFileName(),prj));
   //_file = new SgSourceFile();
   if(_file==0){ ABORT(); }
   
@@ -127,22 +128,6 @@ Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
     = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
   _file->set_file_info(info);
   info->set_parent(_file);
-
-#if 0
-  if(ofn[ofn.size()-1] !='c'){
-    //_file->get_project()->set_Fortran_only(true);
-    _file->set_outputLanguage(SgFile::e_Fortran_output_language);
-    //file->set_outputFormat(SgFile::e_fixed_form_output_format);
-    _file->set_outputFormat(SgFile::e_free_form_output_format);
-    _file->set_sourceFileUsesFortran90FileExtension(true);
-    SageBuilder::symbol_table_case_insensitive_semantics = true;
-    cerr << "Output Language: Fortran" << endl;
-  }
-  else {
-    _file->set_outputLanguage(SgFile::e_C_output_language);
-    cerr << "Output Language: C" << endl;
-  }
-#endif
 }
 
 Xml2AstVisitor::
@@ -207,6 +192,7 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 
       VISIT(SgVarRefExp);
       VISIT(SgCastExp);
+      VISIT(SgColonShapeExp);
 
       VISIT(SgPlusPlusOp);
       VISIT(SgMinusOp);
@@ -411,9 +397,11 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
     SageBuilder::symbol_table_case_insensitive_semantics = true;
     if(fmtid=="1") // 0:unknown, 1:fixed, 2:free
       _file->set_outputFormat(SgFile::e_fixed_form_output_format);
-    else
+    else {
       _file->set_outputFormat(SgFile::e_free_form_output_format);
-  }
+      _file->set_backendCompileFormat(SgFile::e_free_form_output_format);
+    }
+  } // C++ is not supported for now 
   //cerr << _file->get_outputLanguage() << ":" << _file->get_outputFormat() << endl;
 
   while(child) {
@@ -433,8 +421,8 @@ Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
   _file->set_globalScope(ret);
   ret->set_parent(_file);
   //SgGlobal* ret = _file->get_globalScope();
-  //Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
-  //ret->set_file_info(info);
+  Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  ret->set_file_info(info);
   //SgGlobal* ret = si::getFirstGlobalScope(_file->get_project());
   sb::pushScopeStack(ret);
 
@@ -580,7 +568,7 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 					 name->get_initializer());
 
     if(ret==0) ABORT();
-    if( varList.size() > 1 )  
+    if( varList.size() > 0 )  
       ret->get_variables() = varList;
     for(size_t i(0);i<varList.size();i++)
       varList[i]->set_parent(ret);
@@ -1358,6 +1346,35 @@ Xml2AstVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     return sb::buildCastExp(exp,typ);
   else 
     ABORT();
+}
+
+SgNode* 
+Xml2AstVisitor::visitSgColonShapeExp(xe::DOMNode* node, SgNode* astParent)
+{
+
+#if 0
+  SgType*        typ   = 0;
+  SgExpression*  exp   = 0;
+  xe::DOMNode*   child = node->getFirstChild();
+
+  while(child) {
+    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      SgNode* astchild = this->visit(child);
+      if(exp==0)
+	exp = isSgExpression(astchild);
+      if(typ==0)
+	typ = isSgType(astchild);
+    }
+    child=child->getNextSibling();
+  } 
+  if(typ && exp)
+    return sb::buildCastExp(exp,typ);
+  else 
+    ABORT();
+#endif
+  SgExpression * ret = new SgColonShapeExp();
+  ret->set_parent(astParent);
+  return ret;
 }
 
 SgNode* 

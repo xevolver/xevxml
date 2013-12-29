@@ -157,6 +157,7 @@ public:
   SgNode* visitSgNullStatement(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgVarRefExp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgCastExp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgColonShapeExp(xercesc::DOMNode* node, SgNode* astParent=0);
 
 
   SgNode* visitSgReturnStmt(xercesc::DOMNode* node, SgNode* astParent=0);

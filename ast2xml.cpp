@@ -209,7 +209,7 @@ static void writeTypesRecursive(stringstream& sstr,
     att.level += 1;
     
     for(size_t i(0);i<types.size();++i){
-      writeTypesRecursive(sstr,types[i], att,false);
+      writeTypesRecursive(sstr,types[i], att,true);
     }
     
     if( s == "SgArrayType" ) { 

@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 
   fd = dup(1); 
   dup2(2,1); // printf messages are written to stderr  
-  ///SgProject::set_verbose(10);
+  //SgProject::set_verbose(10);
   sageProject = frontend(cmdopt(argc,argv,&opt));
   dup2(fd,1); // printf messages are written to stdout  
   file = &sageProject->get_file(sageProject->numberOfFiles()-1);
