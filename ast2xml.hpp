@@ -65,6 +65,7 @@ class Ast2XmlVisitorInternal: public AstTopDownProcessing <Ast2XmlInheritedAttri
 {
 protected:
   std::stringstream& sstr_;
+  int outLang_;
 
   Ast2XmlInheritedAttribute 
   evaluateInheritedAttribute(SgNode* node,
@@ -75,7 +76,7 @@ protected:
 			 Ast2XmlInheritedAttribute att);
   
 public:
-  Ast2XmlVisitorInternal(std::stringstream& s): sstr_(s) {}
+  Ast2XmlVisitorInternal(std::stringstream& s): sstr_(s),outLang_(0) {}
   ~Ast2XmlVisitorInternal() {}
 };
 

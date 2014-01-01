@@ -110,7 +110,55 @@ static bool hasInternalNode(SgNode* n)
   return false;
 }
 
+static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info)
+{
+  std::string str;
+  int idx;
+  if(info){
+    for(size_t i(0);i<(*info).size();i++) {
 
+      str = (*info)[i]->getString();
+      std::transform(str.begin(),str.end(),str.begin(),::tolower);
+      idx = str.find( XEV_PRAGMA_PREFIX );
+      if( idx >= 0 ) {
+	str = (*info)[i]->getString(); // read the string again
+	sstr_ << "<SgPragmaDeclaration >\n";
+	sstr_ << "  "; // indent
+	sstr_ << "<SgPragma pragma=\"";
+	// assuming Fortran directives start with !$
+	sstr_ << str.substr( idx+strlen("!$") ) << "\" />\n";
+	sstr_ << "</SgPragmaDeclaration >\n";
+      }
+    }
+  }
+}
+
+static AttachedPreprocessingInfoType* 
+writePreprocessingInfo(stringstream& sstr_,SgNode* n)
+{
+  SgLocatedNode* loc = isSgLocatedNode(n);
+  AttachedPreprocessingInfoType* info=0;
+  std::string str;
+
+  if(loc)
+    info = loc->getAttachedPreprocessingInfo();
+
+  if(info){
+    for(size_t i(0);i<(*info).size();i++) {
+      str = (*info)[i]->getString();
+      str = XmlStr2Entity( str );                     
+      sstr_ << "<PreprocessingInfo pos=\"";
+      sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
+      sstr_ << " type=\"";
+      sstr_ << (*info)[i]->getTypeOfDirective() << "\" >\n";
+      //sstr_ << (*info)[i]->getString() << "\n";
+      sstr_ << str << "\n";
+      sstr_ << "</PreprocessingInfo>\n";
+    }
+  }
+
+  return info;
+}
 
 static void writeModifierType(stringstream& istr,SgType* t)
 {
@@ -436,7 +484,13 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   Ast2XmlInheritedAttribute retatt(att.opt);
   SgLocatedNode* loc = isSgLocatedNode(node);
   AttachedPreprocessingInfoType* info=0; 
-  if(loc) info = loc->getAttachedPreprocessingInfo();
+
+  if(loc) 
+    info = loc->getAttachedPreprocessingInfo();
+  if(isSgSourceFile(node)) 
+    outLang_ = isSgSourceFile(node)->get_outputLanguage();
+  if(info && outLang_==SgFile::e_Fortran_output_language) 
+    writeFortranPragma(sstr_,info);
 
   for(int i(0);i<att.level;i++)
     sstr_ << "  "; // indent
@@ -468,46 +522,7 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
 void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
 						    Ast2XmlInheritedAttribute att)
 {
-  SgLocatedNode* loc = isSgLocatedNode(node);
-  AttachedPreprocessingInfoType* info=0; 
-  std::string str;
-  int    idx;
-
-  if(loc) {
-    info = loc->getAttachedPreprocessingInfo();
-    if(info) {
-      for(size_t i(0);i<(*info).size();i++) {
-       
-        str = (*info)[i]->getString();
-        //idx = str.find( "$PRAGMA" );
-	std::transform(str.begin(),str.end(),str.begin(),::tolower);
-        idx = str.find( XEV_PRAGMA_PREFIX );
-	/*
-        if( idx < 0 )
-            idx = str.find( "$pragma");
-	*/
-        if( idx >= 0 ) {
-          sstr_ << "<SgPragmaDeclaration >\n";
-          sstr_ << "  "; // indent
-          sstr_ << "<SgPragma pragma=\"";
-	  // assuming Fortran directives start with !$
-          sstr_ << str.substr( idx+strlen("!$") ) << "\" />\n";
-          sstr_ << "</SgPragmaDeclaration >\n";
-        }
-        else {
-          str = (*info)[i]->getString();
-          str = XmlStr2Entity( str );                     
-          sstr_ << "<PreprocessingInfo pos=\"";
-          sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
-          sstr_ << " type=\"";
-          sstr_ << (*info)[i]->getTypeOfDirective() << "\" >\n";
-          //sstr_ << (*info)[i]->getString() << "\n";
-          sstr_ << str << "\n";
-          sstr_ << "</PreprocessingInfo>\n";
-        }
-      }
-    }
-  }
+  AttachedPreprocessingInfoType* info=writePreprocessingInfo(sstr_,node); 
 
   if ( isLeafNode(node) == false || info != 0) {
     for(int i(0);i<att.level-1;i++)
@@ -515,6 +530,7 @@ void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
     sstr_ << "</";
     sstr_ << node->class_name() << '>' << endl;
   }
+
   return;
 }
 

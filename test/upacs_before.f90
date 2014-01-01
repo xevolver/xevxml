@@ -1,5 +1,6 @@
 program upacs_convention
   implicit none
+  !$xev test 
   type block 
      integer in,jn,kn
      double precision,pointer::dq(:,:,:,:)
@@ -30,6 +31,7 @@ program upacs_convention
         end do
      end do
   end do
+  !$xev end test
 
   ! kernel
   do n=1,bdtv_nFlowVar
