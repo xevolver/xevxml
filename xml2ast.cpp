@@ -49,7 +49,33 @@ using namespace std;
 
 //#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
 //#define VISIT(x) if(nname==#x) { cerr << #x << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
-#define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
+#define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  /*checkText(node,ret);*/ return ret;  }
+
+/*
+std::string text = ""; 
+
+static void checkText(xe::DOMNode* node, SgNode* n)
+{
+  SgStatement* s = isSgStatement(n);
+  if(s == 0) return; 
+  if(text.length()) {
+    si::attachArbitraryText(s,text,PreprocessingInfo::after);  
+    text="";
+  }
+  xe::DOMNode* child=node->getFirstChild();
+  int i=0;
+  while(child) {
+    if(child->getNodeType() == xe::DOMNode::TEXT_NODE){
+      std::string tmp = xe::XMLString::transcode(child->getNodeValue());
+      std::cerr << "(" << i++ << ") @" << tmp << "?";
+      if(tmp.length())
+	text +=  tmp;
+    }
+    child=child->getNextSibling();
+  } 
+  return; 
+}
+*/
 
 class TestAST : public AstSimpleProcessing 
 {
@@ -413,6 +439,44 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   
   return _file;
 }
+static 
+void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgLocatedNode* blk)
+{
+  xe::DOMNode* child=node->getFirstChild();
+  SgStatement* prev=NULL;
+  std::string remain ="";
+
+  while(child) {
+    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      SgStatement* astchild = isSgStatement(vis->visit(child,blk));
+      if(astchild) {
+	si::appendStatement (astchild,isSgScopeStatement(blk));
+	prev=isSgStatement(astchild);
+	if(remain.length()){ //the text is located before the 1st statement
+	  si::attachArbitraryText(prev,remain,PreprocessingInfo::before);  
+	  remain="";
+	}
+      }
+    }
+    else if (child->getNodeType() == xe::DOMNode::TEXT_NODE){
+      std::string tmp = xe::XMLString::transcode(child->getNodeValue());
+      std::string text = "";
+      // skip white spaces
+      for(size_t i(0);i<tmp.length();i++)
+	if(!isspace(tmp[i]))
+	  text += tmp[i];
+      if(text.length()){
+	if(prev) 
+	  si::attachArbitraryText(prev,text,PreprocessingInfo::after);  
+	else // the text is located before the 1st statement
+	  remain = text;
+      }
+    }
+    child=child->getNextSibling();
+  }
+  if(remain.length()) // for empty basic block
+    si::attachArbitraryText(blk,remain,PreprocessingInfo::inside);  
+}
 
 SgNode* 
 Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
@@ -427,17 +491,8 @@ Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
   sb::pushScopeStack(ret);
 
   //cerr << ret->get_numberOfTraversalSuccessors() << endl;
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgStatement* astchild = isSgStatement(this->visit(child,astParent));
-      if(astchild) {
-	si::appendStatement (astchild,isSgScopeStatement(ret));
+  traverseStatementsAndTexts(this,node,isSgLocatedNode(ret));
 
-      }
-    }
-    child=child->getNextSibling();
-  } 
   sb::popScopeStack();
   //cerr << ret->unparseToString() ;
   //cerr << ret->get_numberOfTraversalSuccessors() << endl;
@@ -801,18 +856,8 @@ Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock* ret = sb::buildBasicBlock();
   sb::pushScopeStack(ret);
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
-      if(isSgStatement(astchild)){
-	//SageInterface::appendStatement(isSgStatement(astchild));
-	ret->append_statement(isSgStatement(astchild));
-      }
-    }
-    child=child->getNextSibling();
-  }
-  sb::popScopeStack();
+
+  traverseStatementsAndTexts(this, node,isSgLocatedNode(ret));
 
   return ret;
 }
