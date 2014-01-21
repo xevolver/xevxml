@@ -47,10 +47,14 @@ namespace xa=xalanc;
 using namespace std;
 
 
-//#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
-//#define VISIT(x) if(nname==#x) { cerr << #x << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  return ret;  }
-#define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  /*checkText(node,ret);*/ return ret;  }
 
+//#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
+#ifdef XEVXML_DEBUG
+int g_count=0;
+#define VISIT(x) if(nname==#x) { cerr << #x << "(" << g_count++ << ")" << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret); return ret;  }
+#else
+#define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  /*checkText(node,ret);*/ return ret;  }
+#endif
 /*
 std::string text = ""; 
 
@@ -440,17 +444,19 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   return _file;
 }
 static 
-void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgLocatedNode* blk)
+void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgNode* blk)
 {
   xe::DOMNode* child=node->getFirstChild();
   SgStatement* prev=NULL;
   std::string remain ="";
+  SgBasicBlock* bb = isSgBasicBlock(blk);
 
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       SgStatement* astchild = isSgStatement(vis->visit(child,blk));
       if(astchild) {
-	si::appendStatement (astchild,isSgScopeStatement(blk));
+	if(bb) bb->append_statement(isSgStatement(astchild));
+	else si::appendStatement (astchild,isSgScopeStatement(blk));
 	prev=isSgStatement(astchild);
 	if(remain.length()){ //the text is located before the 1st statement
 	  si::attachArbitraryText(prev,remain,PreprocessingInfo::before);  
@@ -475,7 +481,7 @@ void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgLocate
     child=child->getNextSibling();
   }
   if(remain.length()) // for empty basic block
-    si::attachArbitraryText(blk,remain,PreprocessingInfo::inside);  
+    si::attachArbitraryText(isSgLocatedNode(blk),remain,PreprocessingInfo::inside);  
 }
 
 SgNode* 
@@ -488,15 +494,15 @@ Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
   Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
   ret->set_file_info(info);
   //SgGlobal* ret = si::getFirstGlobalScope(_file->get_project());
+
   sb::pushScopeStack(ret);
 
   //cerr << ret->get_numberOfTraversalSuccessors() << endl;
-  traverseStatementsAndTexts(this,node,isSgLocatedNode(ret));
+  traverseStatementsAndTexts(this,node,ret);
 
   sb::popScopeStack();
   //cerr << ret->unparseToString() ;
   //cerr << ret->get_numberOfTraversalSuccessors() << endl;
-
 
 #if 0
   for(int i(0);i<ret->get_numberOfTraversalSuccessors();i++){
@@ -733,6 +739,10 @@ Xml2AstVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 	= sb::buildNondefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
   }
   else ABORT();
+  ret->set_parent(astParent);
+  lst->set_parent(ret);
+  if(def) def->set_parent(ret);
+
 
   if(storage=="unknown")
     ((ret->get_declarationModifier()).get_storageModifier()).setUnknown();
@@ -856,18 +866,18 @@ Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock* ret = sb::buildBasicBlock();
   sb::pushScopeStack(ret);
-
-  traverseStatementsAndTexts(this, node,isSgLocatedNode(ret));
-
+  traverseStatementsAndTexts(this, node,ret);
+  sb::popScopeStack();
   return ret;
 }
 
 SgNode* 
 Xml2AstVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
 {
-  SgExprStatement* ret = 0;
-  
   SgExpression* exp = 0;
+  SgExprStatement* ret = sb::buildExprStatement(exp);
+  //SgExprStatement* ret = 0;
+
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -877,7 +887,8 @@ Xml2AstVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
     }
     child=child->getNextSibling();
   }
-  ret = sb::buildExprStatement(exp);
+  ret->set_expression(exp);
+  //ret = sb::buildExprStatement(exp);
   //checkPreprocInfo(node,ret);                     // delete (0717)
   
   xe::DOMNamedNodeMap*    amap = node->getAttributes();
@@ -1221,9 +1232,10 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
     SgExpression* lhs = 0;						\
     SgExpression* rhs = 0;						\
     xe::DOMNode* child=node->getFirstChild();				\
+    Sg##op* ret = sb::build##op(lhs,rhs);				\
     while(child) {							\
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){	\
-	SgNode* astchild = this->visit(child);				\
+	SgNode* astchild = this->visit(child,ret);			\
 	if(lhs==0)							\
 	  lhs = isSgExpression(astchild);				\
 	else if(rhs==0)							\
@@ -1231,10 +1243,15 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
       }									\
       child=child->getNextSibling();					\
     }									\
-    if( lhs && rhs )							\
-      return sb::build##op(lhs,rhs);					\
-    else								\
+    if( lhs && rhs ){							\
+      ret->set_parent(astParent);					\
+      ret->set_lhs_operand(lhs);					\
+      ret->set_rhs_operand(rhs);					\
+      return ret;							\
+    }									\
+    else {								\
       ABORT();								\
+    }									\
   }									
 
 
@@ -1779,6 +1796,9 @@ Xml2AstVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent
     child=child->getNextSibling();
   } 
   ret = sb::buildFunctionCallExp( exp, para );
+  ret->set_parent(astParent);
+  if(exp) exp->set_parent(ret);
+  if(para) para->set_parent(ret);
   return ret;
 }
 

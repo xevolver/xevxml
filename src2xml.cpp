@@ -48,7 +48,6 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
   
   args.push_back(argv[0]);
 #ifndef XEV_USE_ROSEHPCT
-#if 0
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
@@ -87,7 +86,7 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
       cerr << "?? getopt returned character code " << c << endl;
     }
   }
-#endif
+
   for(int i(optind);i<argc;i++)
     args.push_back(argv[i]);
 #else
