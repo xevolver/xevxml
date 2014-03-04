@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="dir-add-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev dir add(acc, kernels)">
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="add">
+                  <LI value="acc"/>
+                  <LI value="kernels"/>
+                </CLAUSE>
+	            </DIRECTIVE>
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="replace">
+			              <LI value="default replace-add 2130"/>
+		</CLAUSE>
+	</DIRECTIVE>            <DIRECTIVE name="dir">
+		              <CLAUSE name="del">
+			              <LI value="default del"/>
+		</CLAUSE>
+	</DIRECTIVE>          </SgPragma>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev dir add(acc, update, device(diff, dp, gg, cbar))">
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="add">
+                  <LI value="acc"/>
+                  <LI value="update"/>
+                  <LI value="device(diff"/>
+                  <LI value="dp"/>
+                  <LI value="gg"/>
+                  <LI value="cbar"/>
+                </CLAUSE>
+	            </DIRECTIVE>
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="replace">
+			              <LI value="default replace-add 2130"/>
+		</CLAUSE>
+	</DIRECTIVE>            <DIRECTIVE name="dir">
+		              <CLAUSE name="del">
+			              <LI value="default del"/>
+		</CLAUSE>
+	</DIRECTIVE>          </SgPragma>
+          </SgPragmaDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="I"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgIntVal value="15"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgPragmaDeclaration>
+                <SgPragma pragma="xev dir add(loop, vector(54))">
+                  <DIRECTIVE name="dir">
+		                  <CLAUSE name="add">
+                      <LI value="loop"/>
+                      <LI value="vector(54"/>
+                    </CLAUSE>
+	                </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+		                  <CLAUSE name="replace">
+			                  <LI value="default replace-add 2130"/>
+		</CLAUSE>
+	</DIRECTIVE>                <DIRECTIVE name="dir">
+		                  <CLAUSE name="del">
+			                  <LI value="default del"/>
+		</CLAUSE>
+	</DIRECTIVE>              </SgPragma>
+              </SgPragmaDeclaration>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="J"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgIntVal value="25"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="SUM"/>
+                      <SgAddOp>
+                        <SgVarRefExp name="SUM"/>
+                        <SgIntVal value="5"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+                <PreprocessingInfo pos="2" type="3">
+        !$xev dir add(loop, vector(54))
+</PreprocessingInfo>
+              </SgFortranDo>
+            </SgBasicBlock>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev dir add(acc, kernels)
+</PreprocessingInfo>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev dir add(acc, update, device(diff, dp, gg, cbar))
+</PreprocessingInfo>
+          </SgFortranDo>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev dir add(acc, end, kernels)">
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="add">
+                  <LI value="acc"/>
+                  <LI value="end"/>
+                  <LI value="kernels"/>
+                </CLAUSE>
+	            </DIRECTIVE>
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="replace">
+			              <LI value="default replace-add 2130"/>
+		</CLAUSE>
+	</DIRECTIVE>            <DIRECTIVE name="dir">
+		              <CLAUSE name="del">
+			              <LI value="default del"/>
+		</CLAUSE>
+	</DIRECTIVE>          </SgPragma>
+          </SgPragmaDeclaration>
+          <SgReturnStmt>
+            <SgNullExpression/>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev dir add(acc, end, kernels)
+</PreprocessingInfo>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

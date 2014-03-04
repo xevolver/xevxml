@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="f_04of11tips.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="TEST04" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList>
+        <SgInitializedName name="M">
+            <SgTypeInt/>
+        </SgInitializedName>
+        <SgInitializedName name="N">
+            <SgTypeInt/>
+        </SgInitializedName>
+      </SgFunctionParameterList>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration>
+            <SgInitializedName name="idx">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="A">
+                <SgArrayType index="" rank="1" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgMultiplyOp>
+                    <SgVarRefExp name="M"/>
+                    <SgVarRefExp name="N"/>
+                  </SgMultiplyOp>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="B">
+                <SgArrayType index="" rank="2" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgVarRefExp name="M"/>
+                  <SgVarRefExp name="N"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev dir replace(acc, kernels, loop)">
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="add">
+			              <LI value="default dir-add 2130"/>
+		</CLAUSE>
+	</DIRECTIVE>            <DIRECTIVE name="dir">
+		              <CLAUSE name="replace">
+                  <LI value="acc"/>
+                  <LI value="kernels"/>
+                  <LI value="loop"/>
+                </CLAUSE>
+	            </DIRECTIVE>
+              <DIRECTIVE name="dir">
+		              <CLAUSE name="del">
+			              <LI value="default del"/>
+		</CLAUSE>
+	</DIRECTIVE>          </SgPragma>
+          </SgPragmaDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="i"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgVarRefExp name="M"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgVarRefExp name="N"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgPragmaDeclaration>
+                    <SgPragma pragma="xev statement-del ptn-001">
+                      <DIRECTIVE name="statement-del">
+		                      <CLAUSE name="ptn-001">
+			                      <LI value="default statement-del"/>
+		</CLAUSE>
+	</DIRECTIVE>                  </SgPragma>
+                  </SgPragmaDeclaration>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="idx"/>
+                      <SgAddOp>
+                        <SgMultiplyOp>
+                          <SgSubtractOp>
+                            <SgVarRefExp name="i"/>
+                            <SgIntVal value="1"/>
+                          </SgSubtractOp>
+                          <SgVarRefExp name="M"/>
+                        </SgMultiplyOp>
+                        <SgVarRefExp name="j"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                    <PreprocessingInfo pos="2" type="3">
+            !$xev statement-del ptn-001
+</PreprocessingInfo>
+                  </SgExprStatement>
+                  <SgPragmaDeclaration>
+                    <SgPragma pragma="xev statement-rep ptn-001(A(i,j)=B(i,j))">
+                      <DIRECTIVE name="statement-rep">
+		                      <CLAUSE name="ptn-001">
+                          <LI value="A(i"/>
+                          <LI value="j"/>
+                        </CLAUSE>
+	                    </DIRECTIVE>
+                    </SgPragma>
+                  </SgPragmaDeclaration>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="A"/>
+                        <SgExprListExp>
+                          <SgVarRefExp name="idx"/>
+                        </SgExprListExp>
+                      </SgPntrArrRefExp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="B"/>
+                        <SgExprListExp>
+                          <SgVarRefExp name="i"/>
+                          <SgVarRefExp name="j"/>
+                        </SgExprListExp>
+                      </SgPntrArrRefExp>
+                    </SgAssignOp>
+                    <PreprocessingInfo pos="2" type="3">
+            !$xev statement-rep ptn-001(A(i,j)=B(i,j))
+</PreprocessingInfo>
+                  </SgExprStatement>
+                </SgBasicBlock>
+              </SgFortranDo>
+            </SgBasicBlock>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev dir replace(acc, kernels, loop)
+</PreprocessingInfo>
+            <PreprocessingInfo pos="2" type="3">
+    !$acc kernels loop
+</PreprocessingInfo>
+          </SgFortranDo>
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="TEST04">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

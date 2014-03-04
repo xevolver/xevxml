@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="loop-shape-opt4-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          
+          
+				DO IL=0,NNODE*2-1
+				i = mod(il,nnode)+1
+				l0 = il/nnode+1
+				<SgBasicBlock>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="SUM"/>
+                  <SgAddOp>
+                    <SgVarRefExp name="SUM"/>
+                    <SgIntVal value="5"/>
+                  </SgAddOp>
+                </SgAssignOp>
+              </SgExprStatement>
+            </SgBasicBlock>
+				end do
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

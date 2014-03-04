@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="conditional-simple1.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="simple_conditional1" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgPragmaDeclaration>
+          <SgPragma pragma="xev end conditional">
+            <DIRECTIVE name="end">
+		            <CLAUSE name="conditional"/>
+	</DIRECTIVE>        </SgPragma>
+        </SgPragmaDeclaration>
+        <SgBasicBlock>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev conditional001 if(SUM.eq.5)">
+              <DIRECTIVE name="conditional001">
+		              <CLAUSE name="if">
+                  <LI value="SUM.eq.5"/>
+                </CLAUSE>
+	            </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgExprStatement>
+            <SgAssignOp>
+              <SgVarRefExp name="SUM"/>
+              <SgAddOp>
+                <SgVarRefExp name="SUM"/>
+                <SgIntVal value="5"/>
+              </SgAddOp>
+            </SgAssignOp>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev conditional001 if(SUM.eq.5)
+</PreprocessingInfo>
+          </SgExprStatement>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev end conditional">
+              <DIRECTIVE name="end">
+		              <CLAUSE name="conditional"/>
+	</DIRECTIVE>          </SgPragma>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev conditional002 if((I+3).eq.J)">
+              <DIRECTIVE name="conditional002">
+		              <CLAUSE name="if">
+                  <LI value="(I+3"/>
+                </CLAUSE>
+	            </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgExprStatement>
+            <SgAssignOp>
+              <SgVarRefExp name="SUM"/>
+              <SgAddOp>
+                <SgVarRefExp name="SUM"/>
+                <SgIntVal value="5"/>
+              </SgAddOp>
+            </SgAssignOp>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev end conditional
+</PreprocessingInfo>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev conditional002 if((I+3).eq.J)
+</PreprocessingInfo>
+          </SgExprStatement>
+          <PreprocessingInfo pos="4" type="3">
+    !$xev end conditional
+</PreprocessingInfo>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="simple_conditional1">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

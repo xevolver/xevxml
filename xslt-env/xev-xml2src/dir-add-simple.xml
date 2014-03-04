@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="dir-add-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgPragmaDeclaration>
+            <!--
+			SgPragma 2222 SgPragma 2222
+		--><SgPragma pragma="acc kernels "/>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <!--
+			SgPragma 2222 SgPragma 2222
+		--><SgPragma pragma="acc update device(diff dp gg cbar "/>
+          </SgPragmaDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="I"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgIntVal value="15"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgPragmaDeclaration>
+                <!--
+			SgPragma 2222 SgPragma 2222
+		--><SgPragma pragma="loop vector(54 "/>
+              </SgPragmaDeclaration>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="J"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgIntVal value="25"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="SUM"/>
+                      <SgAddOp>
+                        <SgVarRefExp name="SUM"/>
+                        <SgIntVal value="5"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+                <!--
+			PreprocessingInfo
+		-->
+        !$xev dir add(loop, vector(54))
+
+              </SgFortranDo>
+            </SgBasicBlock>
+            <!--
+			PreprocessingInfo
+		-->
+    !$xev dir add(acc, kernels)
+
+            <!--
+			PreprocessingInfo
+		-->
+    !$xev dir add(acc, update, device(diff, dp, gg, cbar))
+
+          </SgFortranDo>
+          <SgPragmaDeclaration>
+            <!--
+			SgPragma 2222 SgPragma 2222
+		--><SgPragma pragma="acc end kernels "/>
+          </SgPragmaDeclaration>
+          <SgReturnStmt>
+            <SgNullExpression/>
+            <!--
+			PreprocessingInfo
+		-->
+    !$xev dir add(acc, end, kernels)
+
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

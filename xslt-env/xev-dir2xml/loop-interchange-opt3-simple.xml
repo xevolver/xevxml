@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="loop-interchange-opt3-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev loop interchange-opt3">
+              <DIRECTIVE name="loop">
+		              <CLAUSE name="fusion">
+		</CLAUSE>
+	</DIRECTIVE>            <DIRECTIVE name="loop">
+		              <CLAUSE name="interchange-opt3">
+		</CLAUSE>
+	</DIRECTIVE>            <DIRECTIVE name="loop">
+		              <CLAUSE name="shape-opt4">
+		</CLAUSE>
+	</DIRECTIVE>          </SgPragma>
+          </SgPragmaDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="J"/>
+              <SgIntVal value="2"/>
+            </SgAssignOp>
+            <SgVarRefExp name="NNODE"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgIfStmt>
+                <SgExprStatement>
+                  <SgGreaterOrEqualOp>
+                    <SgFunctionCallExp>
+                      <SgFunctionRefExp symbol="DNPOLD"/>
+                      <SgExprListExp>
+                        <SgVarRefExp name="J"/>
+                        <SgVarRefExp name="M"/>
+                      </SgExprListExp>
+                    </SgFunctionCallExp>
+                    <SgVarRefExp name="SMALL"/>
+                  </SgGreaterOrEqualOp>
+                </SgExprStatement>
+                <SgBasicBlock>
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="I"/>
+                      <SgIntVal value="2"/>
+                    </SgAssignOp>
+                    <SgVarRefExp name="NNODE"/>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgIfStmt>
+                        <SgExprStatement>
+                          <SgGreaterOrEqualOp>
+                            <SgFunctionCallExp>
+                              <SgFunctionRefExp symbol="DNPOLD"/>
+                              <SgExprListExp>
+                                <SgVarRefExp name="I"/>
+                                <SgVarRefExp name="L"/>
+                              </SgExprListExp>
+                            </SgFunctionCallExp>
+                            <SgVarRefExp name="SMALL"/>
+                          </SgGreaterOrEqualOp>
+                        </SgExprStatement>
+                        <SgBasicBlock>
+                          <SgExprStatement>
+                            <SgAssignOp>
+                              <SgVarRefExp name="SUM"/>
+                              <SgAddOp>
+                                <SgVarRefExp name="SUM"/>
+                                <SgIntVal value="5"/>
+                              </SgAddOp>
+                            </SgAssignOp>
+                          </SgExprStatement>
+                        </SgBasicBlock>
+                        <SgBasicBlock/>
+                      </SgIfStmt>
+                    </SgBasicBlock>
+                  </SgFortranDo>
+                </SgBasicBlock>
+                <SgBasicBlock/>
+              </SgIfStmt>
+            </SgBasicBlock>
+            <PreprocessingInfo pos="2" type="3">
+    !$xev loop interchange-opt3
+</PreprocessingInfo>
+          </SgFortranDo>
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

@@ -29,31 +29,27 @@
 		</xsl:comment>
 	</xsl:template>
 
-	<xsl:template match="SgExprStatement[1]">
-
+	<xsl:template match="SgExprStatement">
+		<xsl:choose>
+			<xsl:when
+				test="preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='conditional']/CLAUSE[@name='if']">
 				<xsl:text>if (</xsl:text>
 				<xsl:value-of
-					select="preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='conditional001']/CLAUSE/LI/@value" />
+					select="preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='conditional']/CLAUSE/LI/@value" />
 				<xsl:text> ) then</xsl:text>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates />
 				</xsl:copy>
 				<xsl:text>end if</xsl:text>
-	</xsl:template>
-
-	<xsl:template match="SgExprStatement[2]">
-
-				<xsl:text>if (</xsl:text>
-				<xsl:value-of
-					select="preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='conditional002']/CLAUSE/LI/@value" />
-				<xsl:text> ).eq.J) then</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
 				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates />
+					<xsl:copy-of select="@*"></xsl:copy-of>
+					<xsl:apply-templates></xsl:apply-templates>
 				</xsl:copy>
-				<xsl:text>end if</xsl:text>
-
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 </xsl:stylesheet>

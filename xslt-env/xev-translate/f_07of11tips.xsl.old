@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:output method="xml" encoding="UTF-8" />
+
+	<xsl:template match="/">
+		<xsl:apply-templates />
+	</xsl:template>
+
+	<xsl:template match="*">
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates />
+		</xsl:copy>
+	</xsl:template>
+
+	<!-- remove PreprocessingInfo -->
+	<xsl:template match="PreprocessingInfo">
+		<xsl:comment>
+			PreprocessingInfo
+		</xsl:comment>
+		<xsl:apply-templates />
+	</xsl:template>
+
+
+	<xsl:template match="SgExprStatement">
+		<xsl:choose>
+			<!-- statement delete
+			     !$xev statement-del ptn-001
+			-->
+			<!--直前に'statement-del'がある場合、この statement を削除する -->
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-del']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					remove statement
+				</xsl:comment>
+			</xsl:when>
+
+			<!-- statement replace
+			     !$xev statement-rep ptn-001
+			-->
+			<!--直前に'statement-rep'がある場合、この statement を置き換える -->
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					remove statement
+				</xsl:comment>
+                        	<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']/LI[1]/@value" /><xsl:text>,</xsl:text>
+                                <xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']/LI[2]/@value" /><xsl:text>)=B(i,j)</xsl:text>
+			</xsl:when>
+
+
+                	<xsl:otherwise>
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+                	</xsl:otherwise>
+        	</xsl:choose>
+        </xsl:template>
+	
+	<xsl:template match="SgPragmaDeclaration">
+		<xsl:choose>
+			<!-- directive replace
+			     !$xev dir replace(acc, kernels, loop)
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='replace']">
+				<xsl:element name="SgPragmaDeclaration">
+					<xsl:element name="SgPragma">
+						<xsl:attribute name="pragma">
+							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='replace']/LI">
+								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
+							</xsl:for-each>
+						</xsl:attribute>
+					</xsl:element>
+				</xsl:element>
+			</xsl:when>
+
+
+			<!-- remove SgPragmaDeclaration
+			     !$xev statement-del ptn-001
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='statement-del']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+			<!-- remove SgPragmaDeclaration
+			     !$xev statement-rep ptn-001
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+
+                	<xsl:otherwise>
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+                	</xsl:otherwise>
+        	</xsl:choose>
+        </xsl:template>
+
+</xsl:stylesheet>

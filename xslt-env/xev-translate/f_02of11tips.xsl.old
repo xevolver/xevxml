@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:output method="xml" encoding="UTF-8" />
+
+	<xsl:template match="/">
+		<xsl:apply-templates />
+	</xsl:template>
+
+	<xsl:template match="*">
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates />
+		</xsl:copy>
+	</xsl:template>
+
+	<!-- remove PreprocessingInfo -->
+	<xsl:template match="PreprocessingInfo">
+		<xsl:comment>
+			PreprocessingInfo
+		</xsl:comment>
+		<xsl:apply-templates />
+	</xsl:template>
+
+
+	<!-- SgPragmaDeclaration -->
+        <xsl:template match="SgPragmaDeclaration">
+                <xsl:choose>
+
+	               <!-- 
+	                    !$xev statement-add ptn-001(print,*,'Found_at',maxval(found) )
+
+                                PRINT *, 'Found at ',maxval(found)
+	               -->
+                        <xsl:when test="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']">
+		            <xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[1]/@value" /><xsl:text> </xsl:text>
+		            <xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[2]/@value" /><xsl:text>,</xsl:text>
+		            <xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[3]/@value" /><xsl:text>,</xsl:text>
+		            <xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[4]/@value" /><xsl:text>)</xsl:text>
+                        <!--
+			<xsl:element name="SgPrintStatement">
+			    <xsl:attribute name="fmt">SgTypeDefault</xsl:attribute>
+			    <xsl:element name="SgExprListExp">
+			        <xsl:element name="SgStringVal">
+			            <xsl:attribute name="SingleQuote">1</xsl:attribute>
+			            <xsl:attribute name="value">Found at </xsl:attribute>
+			        </xsl:element>
+
+			        <xsl:element name="SgFunctionCallExp">
+			            <xsl:element name="SgFunctionRefExp">
+			                <xsl:attribute name="symbol">maxval</xsl:attribute>
+			            </xsl:element>
+
+			            <xsl:element name="SgExprListExp">
+			                <xsl:element name="SgVarRefExp">
+			                    <xsl:attribute name="name">found</xsl:attribute>
+			                </xsl:element>
+			            </xsl:element>
+
+			        </xsl:element>
+
+			    </xsl:element>
+
+
+			    <xsl:element name="SgAsteriskShapeExp">
+			    </xsl:element>
+			</xsl:element>
+		        -->
+
+			</xsl:when>
+
+	               <!-- other SgPragmaDeclaration -->
+			<xsl:otherwise>
+                                <xsl:copy>
+                                    <xsl:copy-of select="@*"></xsl:copy-of>
+                                    <xsl:apply-templates></xsl:apply-templates>
+                                </xsl:copy>
+                        </xsl:otherwise>
+                </xsl:choose>
+
+	</xsl:template>
+
+
+
+
+	<xsl:template match="SgPragma">
+		<xsl:comment>
+			dir replace 2231
+		</xsl:comment>
+		<xsl:apply-templates select="DIRECTIVE/CLAUSE" />
+	</xsl:template>
+
+	<xsl:template match="CLAUSE">
+		<xsl:if test="@name='replace'">
+			<xsl:element name="SgPragma">
+				<xsl:attribute name="pragma"><xsl:for-each
+					select="LI">
+			<xsl:value-of select="@value" /><xsl:text> </xsl:text>
+			</xsl:for-each></xsl:attribute>
+			</xsl:element>
+		</xsl:if>
+	</xsl:template>
+
+</xsl:stylesheet>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="var-replace-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="I"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgIntVal value="15"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="J"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgIntVal value="25"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <!--
+			SgPragmaDeclaration
+		-->
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="TASU"/>
+                      <SgAddOp>
+                        <SgVarRefExp name="TASU"/>
+                        <SgIntVal value="5"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                    <!--
+			PreprocessingInfo
+		-->
+                  </SgExprStatement>
+                </SgBasicBlock>
+              </SgFortranDo>
+            </SgBasicBlock>
+          </SgFortranDo>
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

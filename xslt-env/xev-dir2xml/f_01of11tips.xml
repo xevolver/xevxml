@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="f_01of11tips.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="TEST01" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList>
+        <SgInitializedName name="M">
+            <SgTypeInt/>
+        </SgInitializedName>
+        <SgInitializedName name="N">
+            <SgTypeInt/>
+        </SgInitializedName>
+      </SgFunctionParameterList>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration>
+            <SgInitializedName name="tmp">
+                <SgArrayType index="" rank="1" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgIntVal value="10"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="A">
+                <SgArrayType index="" rank="2" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgVarRefExp name="M"/>
+                  <SgVarRefExp name="N"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="i"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgVarRefExp name="M"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgPragmaDeclaration>
+                <SgPragma pragma="xev dir add( acc, loop, private(tmp） )">
+                  <DIRECTIVE name="dir">
+		                  <CLAUSE name="add">
+                      <LI value="acc"/>
+                      <LI value="loop"/>
+                      <LI value="private(tmp）"/>
+                    </CLAUSE>
+	                </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+		                  <CLAUSE name="replace">
+			                  <LI value="default replace-add 2130"/>
+		</CLAUSE>
+	</DIRECTIVE>                <DIRECTIVE name="dir">
+		                  <CLAUSE name="del">
+			                  <LI value="default del"/>
+		</CLAUSE>
+	</DIRECTIVE>              </SgPragma>
+              </SgPragmaDeclaration>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgVarRefExp name="N"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="jj"/>
+                      <SgIntVal value="1"/>
+                    </SgAssignOp>
+                    <SgIntVal value="10"/>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="tmp"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="jj"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgVarRefExp name="jj"/>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                  </SgFortranDo>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="A"/>
+                        <SgExprListExp>
+                          <SgVarRefExp name="i"/>
+                          <SgVarRefExp name="j"/>
+                        </SgExprListExp>
+                      </SgPntrArrRefExp>
+                      <SgFunctionCallExp>
+                        <SgFunctionRefExp symbol="SUM"/>
+                        <SgExprListExp>
+                          <SgVarRefExp name="tmp"/>
+                        </SgExprListExp>
+                      </SgFunctionCallExp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+                <PreprocessingInfo pos="2" type="3">
+    !$xev dir add( acc, loop, private(tmp） )
+</PreprocessingInfo>
+              </SgFortranDo>
+            </SgBasicBlock>
+            <PreprocessingInfo pos="2" type="3">
+!$acc kernels loop
+</PreprocessingInfo>
+          </SgFortranDo>
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="TEST01">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

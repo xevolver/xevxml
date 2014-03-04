@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="f_02of11tips.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="TEST02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <!--
+					SgPragmaDeclaration
+				-->
+          <SgVariableDeclaration>
+            <SgInitializedName name="found"><SgArrayType index="" rank="1" type="SgTypeInt"><SgTypeInt/><SgIntVal value="300"/></SgArrayType></SgInitializedName>
+            <!--
+					PreprocessingInfo
+				-->
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="i">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="A">
+                <SgArrayType index="" rank="1" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgIntVal value="300"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration><SgPragma pragma="acc kernels loop "/></SgPragmaDeclaration>
+          <!--
+					SgPragmaDeclaration
+				-->
+          <!--
+					remove statement
+				-->
+          <!--
+					SgPragmaDeclaration
+				-->
+          
+				do i = 1, N
+				      if (A(i) .eq. 102) then
+				               found(i) = i
+				      else
+				               found(i) = 0
+				      endif
+				 enddo
+			
+          print *,'Found_at',maxval(found)
+          <SgReturnStmt>
+            <SgNullExpression/>
+            <PreprocessingInfo pos="2" type="3">
+    !$acc end region
+</PreprocessingInfo>
+            <!--
+					PreprocessingInfo
+				-->
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="TEST02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

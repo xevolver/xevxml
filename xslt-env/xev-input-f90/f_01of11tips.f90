@@ -4,7 +4,7 @@ SUBROUTINE TEST01( M,N )
     INTEGER, DIMENSION(10) :: tmp
     INTEGER, DIMENSION(M,N) :: A
 
-    !$acc kernels loop
+!$acc kernels loop
     DO i = 1, M
     !$xev dir add( acc, loop, private(tmp） )
         DO j = 1, N

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="loop-fusion-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          
+          
+				DO NK=0,NFRAC*(NNODE-1)-1				
+				n = nk/(nnode-1)+1
+				k = mod(nk,nnode-1)+2<SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="SUM"/>
+                      <SgAddOp>
+                        <SgVarRefExp name="SUM"/>
+                        <SgIntVal value="5"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+				end do
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

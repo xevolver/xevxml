@@ -1,0 +1,7 @@
+SUBROUTINE SAMPLE02()
+DOIL=0,NNODE*2-1i=mod(il,nnode)+1l0=il/nnode+1
+SUM = SUM + 5
+enddo
+RETURN
+END SUBROUTINE 
+

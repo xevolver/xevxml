@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="f_04of11tips.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="TEST04" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList>
+        <SgInitializedName name="M">
+            <SgTypeInt/>
+        </SgInitializedName>
+        <SgInitializedName name="N">
+            <SgTypeInt/>
+        </SgInitializedName>
+      </SgFunctionParameterList>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration>
+            <SgInitializedName name="idx">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="A">
+                <SgArrayType index="" rank="1" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgMultiplyOp>
+                    <SgVarRefExp name="M"/>
+                    <SgVarRefExp name="N"/>
+                  </SgMultiplyOp>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="B">
+                <SgArrayType index="" rank="2" type="SgTypeInt">
+                  <SgTypeInt/>
+                  <SgVarRefExp name="M"/>
+                  <SgVarRefExp name="N"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration><SgPragma pragma="acc kernels loop "/></SgPragmaDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="i"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgVarRefExp name="M"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgVarRefExp name="N"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <!--
+					SgPragmaDeclaration
+				-->
+                  <!--
+					remove statement
+				-->
+                  <!--
+					SgPragmaDeclaration
+				-->
+                  <!--
+					remove statement
+				-->A(i,j)=B(i,j)
+                </SgBasicBlock>
+              </SgFortranDo>
+            </SgBasicBlock>
+            <!--
+					PreprocessingInfo
+				-->
+            <!--
+					PreprocessingInfo
+				-->
+          </SgFortranDo>
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="TEST04">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>

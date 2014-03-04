@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="index-replace-simple.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProcedureHeaderStatement name="SAMPLE02" subprogram_kind="2">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration>
+            <SgInitializedName name="SOCO">
+                <SgArrayType index="" rank="3" type="SgTypeDouble">
+                  <SgTypeDouble/>
+                  <SgIntVal value="30"/>
+                  <SgIntVal value="30"/>
+                  <SgIntVal value="30"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="SUM">
+                <SgTypeDouble/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="I"/>
+              <SgIntVal value="1"/>
+            </SgAssignOp>
+            <SgIntVal value="10"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="J"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgIntVal value="20"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="K"/>
+                      <SgIntVal value="1"/>
+                    </SgAssignOp>
+                    <SgIntVal value="25"/>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgPragmaDeclaration>
+                        <SgPragma pragma="xev index replace(I, J)">
+                          <DIRECTIVE name="index">
+		                          <CLAUSE name="replace">
+                              <LI value="I"/>
+                              <LI value="J"/>
+                            </CLAUSE>
+	                        </DIRECTIVE>
+                        </SgPragma>
+                      </SgPragmaDeclaration>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="SOCO"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="I"/>
+                              <SgVarRefExp name="J"/>
+                              <SgVarRefExp name="K"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgAddOp>
+                            <SgVarRefExp name="SUM"/>
+                            <SgFloatVal value="3"/>
+                          </SgAddOp>
+                        </SgAssignOp>
+                        <PreprocessingInfo pos="2" type="3">
+                !$xev index replace(I, J)
+</PreprocessingInfo>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                  </SgFortranDo>
+                </SgBasicBlock>
+              </SgFortranDo>
+            </SgBasicBlock>
+          </SgFortranDo>
+          <SgReturnStmt>
+            <SgNullExpression/>
+          </SgReturnStmt>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+      <SgInitializedName name="SAMPLE02">
+          <SgTypeVoid/>
+      </SgInitializedName>
+    </SgProcedureHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>
