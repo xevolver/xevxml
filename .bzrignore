@@ -1,0 +1,5 @@
+**/expected-xml2src
+**/expected-xml2src/*
+**/xev-dir2xml/*
+**/xev-src2xml/*
+**/xev-xml2src/*
