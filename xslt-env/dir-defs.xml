@@ -9,6 +9,11 @@
 			<LI value="default replace-add 2130" />
 		</CLAUSE>
 	</DIRECTIVE>
+	<DIRECTIVE name="dir">
+		<CLAUSE name="append">
+			<LI value="default val" />
+		</CLAUSE>
+	</DIRECTIVE>
 	<DIRECTIVE name="var">
 		<CLAUSE name="replace">
 		</CLAUSE>
@@ -111,9 +116,19 @@
 			<LI value="default val" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="whilestmt-chg">
-		<CLAUSE name="ptn-001">
-			<LI value="default val" />
+	<DIRECTIVE name="while2do">
+		<CLAUSE name="replace">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array-type">
+		<CLAUSE name="1-2">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array-varref">
+		<CLAUSE name="1-2">
+			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 </DEFS>
