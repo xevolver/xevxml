@@ -17,6 +17,40 @@
 
 
 
+	<!-- SgExprListExp -->
+	<xsl:template match="SgExprListExp">
+		<xsl:choose>
+			<!--	!$xev array-varref 1-2(変数名,添字,添字)
+			
+				変数の参照を1次元配列から2次元配列に置き換える
+				2014.03.07
+			-->
+			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-varref']/CLAUSE[@name='1-2']/LI[1]/@value">
+
+				<xsl:copy>
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">
+								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-varref']/CLAUSE[@name='1-2']/LI[1][@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/following-sibling::*[1]/@value"/>
+							</xsl:attribute>
+						</xsl:element>
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">
+								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-varref']/CLAUSE[@name='1-2']/LI[1][@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/following-sibling::*[2]/@value"/>
+							</xsl:attribute>
+						</xsl:element>
+
+				</xsl:copy>
+			</xsl:when>
+
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*"/>
+					<xsl:apply-templates/>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
 	<!-- SgInitializedName -->
 	<xsl:template match="SgInitializedName">
 		<xsl:choose>
@@ -34,6 +68,43 @@
 						</SgArrayType>
 				</xsl:copy>
 			</xsl:when>
+
+			<!--	!$xev array-type 1-2(変数名,サイズ,サイズ)
+			
+				変数宣言の1次元配列を2次元配列に置き換える
+				2014.03.06
+			-->
+			<xsl:when test="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-type']/CLAUSE[@name='1-2']/LI[1]/@value=./@name">
+				<xsl:copy>
+					<xsl:copy-of select="@*"/>
+					<xsl:element name="SgArrayType">
+						<xsl:attribute name="index">
+							<xsl:value-of select="./SgArrayType/@index"/>
+						</xsl:attribute>
+						<xsl:attribute name="rank">2</xsl:attribute>
+						<xsl:attribute name="type">
+							<xsl:value-of select="./SgArrayType/@type"/>
+						</xsl:attribute>
+					
+						<xsl:copy-of select="./SgArrayType/*[1]"/>
+
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">
+							<!--
+								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-type']/CLAUSE[@name='1-2']/LI[1][@value=./@name]/following-sibling::*[1]/@value"/>
+							     -->
+								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-type']/CLAUSE[@name='1-2']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
+							</xsl:attribute>
+						</xsl:element>
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">
+								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array-type']/CLAUSE[@name='1-2']/LI[1][@value=current()/@name]/following-sibling::*[2]/@value"/>
+							</xsl:attribute>
+						</xsl:element>
+					</xsl:element>
+				</xsl:copy>
+			</xsl:when>
+
 
 			<xsl:otherwise>
 				<xsl:copy>
@@ -282,6 +353,25 @@
 	<!-- SgPragmaDeclaration -->
 	<xsl:template match="SgPragmaDeclaration">
 		<xsl:choose>
+			<!--	!$xev array-varref 1-2(変数名,添字,添字)
+
+				１次元配列を２次元配列に置き替える
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='array-varref']/CLAUSE[@name='1-2'] and not(contains(./SgPragma/DIRECTIVE[@name='array-varref']/CLAUSE[@name='1-2']/LI[1]/@value,'default'))">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+			<!--	!$xev array-type 1-2(変数名,サイズ,サイズ)
+
+				１次元配列を２次元配列に置き替える
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='array-type']/CLAUSE[@name='1-2'] and not(contains(./SgPragma/DIRECTIVE[@name='array-type']/CLAUSE[@name='1-2']/LI[1]/@value,'default'))">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
 			<!--	!$xev dir ,add
 
 				ディレクティブを追加する	
@@ -290,9 +380,12 @@
 				<xsl:element name="SgPragmaDeclaration">
 					<xsl:element name="SgPragma">
 						<xsl:attribute name="pragma">
+							<!--
 							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='add']/LI">
 								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
 							</xsl:for-each>
+							-->
+							<xsl:value-of select="substring( substring-after(./SgPragma/@pragma,'('), 1, string-length(substring-after(./SgPragma/@pragma,'('))-1 )"/>
 						</xsl:attribute>
 					</xsl:element>
 				</xsl:element>
@@ -306,9 +399,12 @@
 				<xsl:element name="SgPragmaDeclaration">
 					<xsl:element name="SgPragma">
 						<xsl:attribute name="pragma">
+							<!--
 							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='replace']/LI">
 								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
 							</xsl:for-each>
+							-->
+							<xsl:value-of select="substring( substring-after(./SgPragma/@pragma,'('), 1, string-length(substring-after(./SgPragma/@pragma,'('))-1 )"/>
 						</xsl:attribute>
 					</xsl:element>
 				</xsl:element>
@@ -323,6 +419,61 @@
 					SgPragmaDeclaration
 				</xsl:comment>
 			</xsl:when>
+
+
+			<!--	!$xev dir append( [文字列] )
+
+                                ディレクティブ行に[文字列]を追加する
+
+				2014.03.06
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='append'] and not(contains(./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='append']/LI[1]/@value,'default'))">
+				<xsl:element name="SgPragmaDeclaration">
+					<xsl:element name="SgPragma">
+						<xsl:attribute name="pragma">
+							<!--
+								追加するディレクティブ行の内容を取り出す
+
+								指示内容（!$xev dir append( 文字列 )と同じ【PreprocessingInfo]】ノードの
+								直下の【PreprocessingInfo]】を取り出す
+							-->
+							<!--
+							<xsl:for-each select="following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]">
+								<xsl:if test="contains( .,'!$xev dir append')" >
+									<xsl:value-of select="substring( substring-after(following-sibling::*[1],'!$'), 1, string-length(substring-after(following-sibling::*[1],'!$'))-1)"/>
+								</xsl:if>
+							</xsl:for-each>
+							-->
+							<xsl:value-of select="substring( substring-after(following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]/following-sibling::*[1],'!$'), 1, string-length(substring-after(following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]/following-sibling::*[1],'!$'))-1)"/>
+
+							<!--
+								接続時の半角スペースを挿入
+							-->
+							<xsl:text> </xsl:text>
+
+							<!-- 
+								追加する文字列を取り出
+							-->
+							<!--
+							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='append']/LI">
+								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
+							</xsl:for-each>
+							-->
+							<xsl:value-of select="substring( substring-after(./SgPragma/@pragma,'('), 1, string-length(substring-after(./SgPragma/@pragma,'('))-1 )"/>
+						</xsl:attribute>
+					</xsl:element>
+				</xsl:element>
+			</xsl:when>
+
+			<!--	!$xev dir append()
+                                ディレクティブを削除する
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='append']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+			-->
+
 
 			<!--	!$xev statement-add ptn-000( )
 
@@ -400,6 +551,7 @@
 				</xsl:comment>
 			</xsl:when>
 
+
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*"/>
@@ -413,6 +565,25 @@
 	<!-- PreprocessingInfo -->
 	<xsl:template match="PreprocessingInfo">
 		<xsl:choose>
+			<!--直前に'!$xev dir append'がある場合、この行を削除する -->
+			<xsl:when test="contains(preceding-sibling::PreprocessingInfo[1],'!$xev dir append')">
+				<xsl:comment>
+					PreprocessingInfo
+				</xsl:comment>
+			</xsl:when>
+
+			<!--	!$xev dir append( [文字列] )
+
+				直前に'!$xev dir append'がある場合
+                                ディレクティブ行に[文字列]を追加する
+			<xsl:when test="contains(preceding-sibling::PreprocessingInfo[1],'!$xev dir append')">
+				<xsl:copy>
+					<xsl:copy-of select="@*"/>
+					<xsl:value-of select="concat( substring(.,1,string-length(.)-1), ' ', substring( substring-after(preceding-sibling::PreprocessingInfo[1],'('), 1, string-length(substring-after(preceding-sibling::PreprocessingInfo[1],'('))-2) )"/>
+				</xsl:copy>
+			</xsl:when>
+			-->
+
 			<!--'!$xev'で始まる行を削除する -->
 			<xsl:when test="contains(.,'!$xev')" >
 				<xsl:comment>
