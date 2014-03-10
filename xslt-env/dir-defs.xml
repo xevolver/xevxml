@@ -111,23 +111,28 @@
 			<LI value="default val" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="var-type-chg">
-		<CLAUSE name="ptn-001">
-			<LI value="default val" />
-		</CLAUSE>
-	</DIRECTIVE>
 	<DIRECTIVE name="while2do">
 		<CLAUSE name="replace">
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="array-type">
-		<CLAUSE name="1-2">
+	<DIRECTIVE name="scalar2array1">
+		<CLAUSE name="type">
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="array-varref">
-		<CLAUSE name="1-2">
+	<DIRECTIVE name="scalar2array1">
+		<CLAUSE name="varref">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array1to2">
+		<CLAUSE name="type">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array1to2">
+		<CLAUSE name="varref">
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
