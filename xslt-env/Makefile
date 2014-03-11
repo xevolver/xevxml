@@ -1,13 +1,23 @@
-# Makefile.hagi
 
-#XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
-XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
 
+
+##############################################
 # user input
 INPUT_DIR	= xev-input-f90
-EXP_F90_DIR = expected-f90
+EXP_F90_DIR	= expected-f90
 XSLT_DIR	= xev-translate
 
+
+##############################################
+# set env
+
+ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
+XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
+else ifeq ($(HOSTNAME), hagi-a)
+XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+endif
+
+##############################################
 # xev generated
 SRC2XML_DIR = xev-src2xml
 DIR2XML_DIR = xev-dir2xml
@@ -32,7 +42,8 @@ EXP_SRCS	= ${SRCS:$(INPUT_DIR)/%.f90=$(EXP_XML_DIR)/%.f90}
 # targets
 
 all:
-	@echo "usage: make {}"
+	@echo "usage: make {var-replace-simple, *}.check}"
+	@echo "xevxml-env: $(XEVXML_ENV)"
 
 src2xml-files: $(SRC2XMLS)
 	@echo "TARGET: $(SRC2XMLS)"
