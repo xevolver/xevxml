@@ -50,7 +50,11 @@
 							<xsl:element name="SgExprListExp">
 								<xsl:element name="SgVarRefExp">
 									<xsl:attribute name="name">
+										<!--
 										<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
+										-->
+										<xsl:value-of select="preceding::DIRECTIVE[ @name='scalar2array1' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/@name ][1]/CLAUSE/LI[2]/@value"/>
+
 									</xsl:attribute>
 								</xsl:element>
 							</xsl:element>
