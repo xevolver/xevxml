@@ -26,24 +26,41 @@
 				2014.03.10
 			-->
 			<xsl:when test="./@name=//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1]/@value">
+				<xsl:choose>
+					<!-- 
+						現在ノードより文書順で前にある最も近いノードが、
+						範囲指定終了【!$xev scalar2array1 varref(スカラ変数,添字,end)】の場合
+						変換処理を行わない
+					-->
+					<xsl:when test="preceding::DIRECTIVE[ @name='scalar2array1' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/@name][1]/CLAUSE/LI[3]/@value='end'">
+						<xsl:copy>
+							<xsl:copy-of select="@*"/>
+							<xsl:apply-templates/>
+						</xsl:copy>
+					</xsl:when>
 
-				<xsl:element name="SgPntrArrRefExp">
-					<xsl:copy>
-					<xsl:copy-of select="@*"/>
-					</xsl:copy>
+					<xsl:otherwise>
+						<xsl:element name="SgPntrArrRefExp">
+							<xsl:element name="SgVarRefExp">
+								<xsl:attribute name="name">
+									<xsl:value-of select="concat(./@name,'_tmp')"/>
+								</xsl:attribute>
+							</xsl:element>
 
-					<xsl:element name="SgExprListExp">
-						<xsl:element name="SgVarRefExp">
-							<xsl:attribute name="name">
-								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
-							</xsl:attribute>
+							<xsl:element name="SgExprListExp">
+								<xsl:element name="SgVarRefExp">
+									<xsl:attribute name="name">
+										<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
+									</xsl:attribute>
+								</xsl:element>
+							</xsl:element>
+		
+
 						</xsl:element>
-					</xsl:element>
 
-
-				</xsl:element>
-
-				<xsl:apply-templates/>
+						<xsl:apply-templates/>
+					</xsl:otherwise>
+				</xsl:choose>
 			</xsl:when>
 
 			<xsl:otherwise>
@@ -64,21 +81,79 @@
 				変数の参照を1次元配列から2次元配列に置き換える
 				2014.03.07
 			-->
-			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref']/LI[1]/@value">
 
-				<xsl:copy>
-						<xsl:element name="SgVarRefExp">
-							<xsl:attribute name="name">
-								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref']/LI[1][@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/following-sibling::*[1]/@value"/>
-							</xsl:attribute>
-						</xsl:element>
-						<xsl:element name="SgVarRefExp">
-							<xsl:attribute name="name">
-								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref']/LI[1][@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/following-sibling::*[2]/@value"/>
-							</xsl:attribute>
-						</xsl:element>
+			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=preceding::DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref']/LI[1]/@value">
+				<xsl:choose>
+					<!-- 
+						現在ノードより文書順で前にある最も近いノードが、
+						範囲指定終了【!$xev array1to2 varref(変数名,添字,添字,end)】の場合
+						ディフォルト値を設定する
+					-->
+					<xsl:when test="preceding::DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[4]/@value='end'">
+						<xsl:choose>
+							<!--
+								ディフォルト値の指定【!$xev array1to2 varref(変数名,添字,添字,default)】がある場合、ディフォルト値を設定する
+							-->
+							<xsl:when test="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[4]/@value='default'">
+								<xsl:copy>
+									<xsl:element name="SgVarRefExp">
+										<xsl:attribute name="name">
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and ./CLAUSE/LI[4]/@value='default']/CLAUSE/LI[2]/@value"/>
 
-				</xsl:copy>
+										</xsl:attribute>
+									</xsl:element>
+									<xsl:element name="SgVarRefExp">
+										<xsl:attribute name="name">
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and ./CLAUSE/LI[4]/@value='default']/CLAUSE/LI[3]/@value"/>
+										</xsl:attribute>
+									</xsl:element>
+								</xsl:copy>
+
+							</xsl:when>
+
+							<!--
+								ディフォルト値の指定がない場合
+								はじめに見つかった【!$xev array1to2 varref(変数名,添字,添字)】の添字を設定する
+							-->
+							<xsl:otherwise>
+								<xsl:copy>
+									<xsl:element name="SgVarRefExp">
+										<xsl:attribute name="name">
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[2]/@value"/>
+
+										</xsl:attribute>
+									</xsl:element>
+									<xsl:element name="SgVarRefExp">
+										<xsl:attribute name="name">
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[3]/@value"/>
+										</xsl:attribute>
+									</xsl:element>
+								</xsl:copy>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:when>
+
+					<!-- 
+						現在ノードより文書順で前にある【!$xev array1to2 varref(変数名,添字,添字)】の
+						添字設定する
+					-->
+					<xsl:otherwise>
+						<xsl:copy>
+							<xsl:element name="SgVarRefExp">
+								<xsl:attribute name="name">
+									<xsl:value-of select="preceding::DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[2]/@value"/>
+
+								</xsl:attribute>
+							</xsl:element>
+							<xsl:element name="SgVarRefExp">
+								<xsl:attribute name="name">
+									<xsl:value-of select="preceding::DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[3]/@value"/>
+								</xsl:attribute>
+							</xsl:element>
+
+						</xsl:copy>
+					</xsl:otherwise>
+				</xsl:choose>
 			</xsl:when>
 
 			<xsl:otherwise>
@@ -95,12 +170,16 @@
 		<xsl:choose>
 			<!--	!$xev scalar2array1 type(スカラ変数,サイズ)
 			
-				スカラ変数の宣言を1次元配列に置き換える
-				2014.03.06
+				スカラ変数のワーク用１次元配列を追加する
+					Ex.  INTEGER hoge　→　INTEGER hoge,hoge_tmp(サイズ)
+				2014.03.12
 			-->
 			<xsl:when test="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='type']/LI[1]/@value=./@name">
+				<xsl:copy-of select="."/>
 				<xsl:copy>
-					<xsl:copy-of select="@*"/>
+					<xsl:attribute name="name">
+							<xsl:value-of select="concat(./@name,'_tmp')"/>
+					</xsl:attribute>
 					<xsl:element name="SgArrayType">
 						<xsl:attribute name="index">""</xsl:attribute>
 						<xsl:attribute name="rank">1</xsl:attribute>
@@ -493,12 +572,9 @@
 				<xsl:element name="SgPragmaDeclaration">
 					<xsl:element name="SgPragma">
 						<xsl:attribute name="pragma">
-							<!--
 							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='add']/LI">
 								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
 							</xsl:for-each>
-							-->
-							<xsl:value-of select="substring( substring-after(./SgPragma/@pragma,'('), 1, string-length(substring-after(./SgPragma/@pragma,'('))-1 )"/>
 						</xsl:attribute>
 					</xsl:element>
 				</xsl:element>
@@ -512,12 +588,9 @@
 				<xsl:element name="SgPragmaDeclaration">
 					<xsl:element name="SgPragma">
 						<xsl:attribute name="pragma">
-							<!--
 							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='replace']/LI">
 								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
 							</xsl:for-each>
-							-->
-							<xsl:value-of select="substring( substring-after(./SgPragma/@pragma,'('), 1, string-length(substring-after(./SgPragma/@pragma,'('))-1 )"/>
 						</xsl:attribute>
 					</xsl:element>
 				</xsl:element>
@@ -550,13 +623,6 @@
 								指示内容（!$xev dir append( 文字列 )と同じ【PreprocessingInfo]】ノードの
 								直下の【PreprocessingInfo]】を取り出す
 							-->
-							<!--
-							<xsl:for-each select="following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]">
-								<xsl:if test="contains( .,'!$xev dir append')" >
-									<xsl:value-of select="substring( substring-after(following-sibling::*[1],'!$'), 1, string-length(substring-after(following-sibling::*[1],'!$'))-1)"/>
-								</xsl:if>
-							</xsl:for-each>
-							-->
 							<xsl:value-of select="substring( substring-after(following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]/following-sibling::*[1],'!$'), 1, string-length(substring-after(following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]/following-sibling::*[1],'!$'))-1)"/>
 
 							<!--
@@ -567,12 +633,9 @@
 							<!-- 
 								追加する文字列を取り出
 							-->
-							<!--
 							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='append']/LI">
 								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
 							</xsl:for-each>
-							-->
-							<xsl:value-of select="substring( substring-after(./SgPragma/@pragma,'('), 1, string-length(substring-after(./SgPragma/@pragma,'('))-1 )"/>
 						</xsl:attribute>
 					</xsl:element>
 				</xsl:element>
