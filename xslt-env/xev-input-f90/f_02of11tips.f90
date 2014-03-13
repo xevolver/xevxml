@@ -23,6 +23,8 @@ SUBROUTINE TEST02()
     found = 10
     !$acc end region
     
+    !$xev scalar2array1 varref(found,j)
+    found = 20
     !print *,'Found at',maxval(found)
     return
 END

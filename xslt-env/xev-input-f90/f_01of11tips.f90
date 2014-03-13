@@ -6,7 +6,7 @@ SUBROUTINE TEST01( M,N )
 
 !$acc kernels loop
     DO i = 1, M
-    !$xev dir add( acc, loop, private(tmp） )
+    !$xev dir add(acc,loop,private(tmp))
         DO j = 1, N
             DO jj = 1, 10
                 tmp(jj) = jj
