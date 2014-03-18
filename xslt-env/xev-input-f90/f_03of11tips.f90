@@ -2,7 +2,7 @@
 SUBROUTINE TEST03( M,N )
     INTEGER, DIMENSION(M,N) :: A
 
-    !$xev dir replace(acc, kernels, copy(A))
+    !$xev dir append(copy(A))
     !$acc kernels loop
     do i = 1, M
         do j = i, N

@@ -1,25 +1,31 @@
 
 SUBROUTINE TEST02()
-    !$xev var-type-chg ptn-001(SgArrayType,1,SgTypeInt)
+    !$xev scalar2array1 type(found,N)
     INTEGER found
     INTEGER i
     INTEGER, DIMENSION(300) :: A
 
-    !$xev dir replace(acc, kernels, loop)
+    !$xev dir append(loop)
     !$acc kernels
 
     !$xev statement-del ptn-001
     i = 0
-    !$xev whilestmt-chg ptn-001(do)
-    do  while ( .not. found==300)
+    !$xev scalar2array1 varref(found,i)
+    !$xev while2do replace(I,1,N)
+    do  while ( .not. found==0)
+    !$xev statement-del ptn-001
         i = i + 1
         if (A(i) .eq. 102) then
            found = i
         end if
     end do
+    !$xev scalar2array1 varref(found,i,end)
+    found = 10
     !$acc end region
     
-    !$xev statement-add ptn-001(print,*,'Found_at',maxval(found) )
+    !$xev scalar2array1 varref(found,j)
+    found = 20
+    !print *,'Found at',maxval(found)
     return
 END
 

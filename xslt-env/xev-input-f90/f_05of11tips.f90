@@ -6,7 +6,7 @@ SUBROUTINE TEST05( M,N )
 !$acc kernels loop
 
     do i = 1, M
-!$xev dir replace(acc, loop, private(idx))
+!$xev dir add(acc, loop, private(idx))
         do j = 1, N
             idx = i+j
             A(i,j) = idx

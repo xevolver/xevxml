@@ -10,7 +10,7 @@ SUBROUTINE TEST09(m,n)
       do while ( change > tolerance )
          iters = iters + 1
          change = 0
-!$xev dir replace(acc, kernels, copy(a), create(newa))
+!$xev dir append(copy(a),create(newa))
 !$acc kernels
 !$acc loop reduction(max:change)
          do j = 2, n-1
