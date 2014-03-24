@@ -17,7 +17,9 @@ void TEST10( int m, int n )
 
 
 #pragma xev dir replace(acc,kernels)
+/*
 #pragma acc kernels loop
+*/
         for( i=1; i<n-1;i++ )
         {
             for( j=1; j<m-1; j++ )

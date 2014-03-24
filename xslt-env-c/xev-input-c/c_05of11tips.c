@@ -4,8 +4,9 @@ void TEST05( int M, int N )
     int  A[25][25];
     int i,j;
 
-
+/*
 #pragma acc kernels loop
+*/
 
     for( i=0; i<M; i++ )
     {

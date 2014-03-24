@@ -7,7 +7,9 @@ void TEST02()
     int A[300];
 
 #pragma xev dir append(loop)
+/*
 #pragma acc kernels
+*/
 
 #pragma xev statement-del ptn-001
     i = 0;
@@ -20,6 +22,8 @@ void TEST02()
            found = i;
         }
     } while ( found==0 );
+/*
 #pragma acc end region
+*/
     return;
 }
