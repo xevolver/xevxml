@@ -121,8 +121,13 @@
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="scalar2array1">
-		<CLAUSE name="varref">
+	<DIRECTIVE name="scalar2array1-varref">
+		<CLAUSE name="start">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="end">
+		<CLAUSE name="scalar2array1-varref">
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
@@ -131,8 +136,13 @@
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="array1to2">
-		<CLAUSE name="varref">
+	<DIRECTIVE name="array1to2-varref">
+		<CLAUSE name="start">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="one-loop-copy">
+		<CLAUSE name="flag">
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>

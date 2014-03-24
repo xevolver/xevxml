@@ -20,19 +20,21 @@
 	<xsl:template match="SgVarRefExp">
 		<xsl:choose>
 			
-			<!--	!$xev scalar2array1 varref(スカラ変数,添字)
+			<!--	!$xev scalar2array1-varref start(スカラ変数,添字)
 			
 				変数の参照をスカラ変数から1次元配列に置き換える
 				2014.03.10
+				2014.03.18
 			-->
-			<xsl:when test="./@name=//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1]/@value">
+			<xsl:when test="./@name=//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[1]/@value">
 				<xsl:choose>
 					<!-- 
 						現在ノードより文書順で前にある最も近いノードが、
-						範囲指定終了【!$xev scalar2array1 varref(スカラ変数,添字,end)】の場合
+						範囲指定終了【!$xev end scalar2array1-varref(スカラ変数,サイズ,添字)】の場合
 						変換処理を行わない
+					<xsl:when test="preceding::DIRECTIVE[ @name='end' and ./CLAUSE/@name='scalar2array1-varref' and ./CLAUSE/LI[1]/@value=current()/@name][1]/CLAUSE/LI[1]/@value='current()/@name'">
 					-->
-					<xsl:when test="preceding::DIRECTIVE[ @name='scalar2array1' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/@name][1]/CLAUSE/LI[3]/@value='end'">
+					<xsl:when test="preceding::DIRECTIVE[./CLAUSE/LI[1]/@value=current()/@name and @name='end' or @name='scalar2array1-varref'][1]/CLAUSE/@name='scalar2array1-varref'">
 						<xsl:copy>
 							<xsl:copy-of select="@*"/>
 							<xsl:apply-templates/>
@@ -52,8 +54,9 @@
 									<xsl:attribute name="name">
 										<!--
 										<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
-										-->
 										<xsl:value-of select="preceding::DIRECTIVE[ @name='scalar2array1' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/@name ][1]/CLAUSE/LI[2]/@value"/>
+										-->
+										<xsl:value-of select="preceding::DIRECTIVE[ @name='scalar2array1-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/@name ][1]/CLAUSE/LI[3]/@value"/>
 
 									</xsl:attribute>
 								</xsl:element>
@@ -80,35 +83,35 @@
 	<!-- SgExprListExp -->
 	<xsl:template match="SgExprListExp">
 		<xsl:choose>
-			<!--	!$xev array1to2 varref(変数名,添字,添字)
+			<!--	!$xev array1to2-varref start(変数名,添字,添字)
 			
 				変数の参照を1次元配列から2次元配列に置き換える
 				2014.03.07
 			-->
 
-			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=preceding::DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref']/LI[1]/@value">
+			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=preceding::DIRECTIVE[@name='array1to2-varref']/CLAUSE[@name='start']/LI[1]/@value">
 				<xsl:choose>
 					<!-- 
 						現在ノードより文書順で前にある最も近いノードが、
-						範囲指定終了【!$xev array1to2 varref(変数名,添字,添字,end)】の場合
+						範囲指定終了【!$xev end array1to2-varref(変数名,添字,添字)】の場合
 						ディフォルト値を設定する
 					-->
-					<xsl:when test="preceding::DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[4]/@value='end'">
+					<xsl:when test="preceding::DIRECTIVE[./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and @name='end' or @name='array1to2-varref'][1]/CLAUSE/@name='array1to2-varref'">
 						<xsl:choose>
 							<!--
-								ディフォルト値の指定【!$xev array1to2 varref(変数名,添字,添字,default)】がある場合、ディフォルト値を設定する
+								ディフォルト値の指定【!$xev array1to2-varref start(変数名,添字,添字,default)】がある場合、ディフォルト値を設定する
 							-->
-							<xsl:when test="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[4]/@value='default'">
+							<xsl:when test="//DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[4]/@value='default'">
 								<xsl:copy>
 									<xsl:element name="SgVarRefExp">
 										<xsl:attribute name="name">
-											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and ./CLAUSE/LI[4]/@value='default']/CLAUSE/LI[2]/@value"/>
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and ./CLAUSE/LI[4]/@value='default']/CLAUSE/LI[2]/@value"/>
 
 										</xsl:attribute>
 									</xsl:element>
 									<xsl:element name="SgVarRefExp">
 										<xsl:attribute name="name">
-											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and ./CLAUSE/LI[4]/@value='default']/CLAUSE/LI[3]/@value"/>
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and ./CLAUSE/LI[4]/@value='default']/CLAUSE/LI[3]/@value"/>
 										</xsl:attribute>
 									</xsl:element>
 								</xsl:copy>
@@ -117,41 +120,41 @@
 
 							<!--
 								ディフォルト値の指定がない場合
-								はじめに見つかった【!$xev array1to2 varref(変数名,添字,添字)】の添字を設定する
-							-->
+								はじめに見つかった【!$xev array1to2-varref start(変数名,添字,添字)】の添字を設定する
 							<xsl:otherwise>
 								<xsl:copy>
 									<xsl:element name="SgVarRefExp">
 										<xsl:attribute name="name">
-											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[2]/@value"/>
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[2]/@value"/>
 
 										</xsl:attribute>
 									</xsl:element>
 									<xsl:element name="SgVarRefExp">
 										<xsl:attribute name="name">
-											<xsl:value-of select="//DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[3]/@value"/>
+											<xsl:value-of select="//DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name]/CLAUSE/LI[3]/@value"/>
 										</xsl:attribute>
 									</xsl:element>
 								</xsl:copy>
 							</xsl:otherwise>
+							-->
 						</xsl:choose>
 					</xsl:when>
 
 					<!-- 
-						現在ノードより文書順で前にある【!$xev array1to2 varref(変数名,添字,添字)】の
+						現在ノードより文書順で前にある【!$xev array1to2-varref start(変数名,添字,添字)】の
 						添字設定する
 					-->
 					<xsl:otherwise>
 						<xsl:copy>
 							<xsl:element name="SgVarRefExp">
 								<xsl:attribute name="name">
-									<xsl:value-of select="preceding::DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[2]/@value"/>
+									<xsl:value-of select="preceding::DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[2]/@value"/>
 
 								</xsl:attribute>
 							</xsl:element>
 							<xsl:element name="SgVarRefExp">
 								<xsl:attribute name="name">
-									<xsl:value-of select="preceding::DIRECTIVE[ @name='array1to2' and ./CLAUSE/@name='varref' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[3]/@value"/>
+									<xsl:value-of select="preceding::DIRECTIVE[ @name='array1to2-varref' and ./CLAUSE/@name='start' and ./CLAUSE/LI[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name][1]/CLAUSE/LI[3]/@value"/>
 								</xsl:attribute>
 							</xsl:element>
 
@@ -172,13 +175,13 @@
 	<!-- SgInitializedName -->
 	<xsl:template match="SgInitializedName">
 		<xsl:choose>
-			<!--	!$xev scalar2array1 type(スカラ変数,サイズ)
+			<!--	!$xev scalar2array1-varref start(スカラ変数,サイズ,添字)
 			
 				スカラ変数のワーク用１次元配列を追加する
 					Ex.  INTEGER hoge　→　INTEGER hoge,hoge_tmp(サイズ)
 				2014.03.12
 			-->
-			<xsl:when test="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='type']/LI[1]/@value=./@name">
+			<xsl:when test="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[1]/@value=./@name">
 				<xsl:copy-of select="."/>
 				<xsl:copy>
 					<xsl:attribute name="name">
@@ -195,18 +198,18 @@
 
 						<xsl:element name="SgVarRefExp">
 							<xsl:attribute name="name">
-								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='type']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
+								<xsl:value-of select="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[1][@value=current()/@name]/following-sibling::*[1]/@value"/>
 							</xsl:attribute>
 						</xsl:element>
 					</xsl:element>
 				</xsl:copy>
 			</xsl:when>
 
+
 			<!--	!$xev array1to2 type(変数名,サイズ,サイズ)
 			
 				1次元配列の宣言を2次元配列に置き換える
 				2014.03.06
-			-->
 			<xsl:when test="//SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='type']/LI[1]/@value=./@name">
 				<xsl:copy>
 					<xsl:copy-of select="@*"/>
@@ -234,6 +237,7 @@
 					</xsl:element>
 				</xsl:copy>
 			</xsl:when>
+			-->
 
 
 			<xsl:otherwise>
@@ -528,31 +532,57 @@
 	<!-- SgPragmaDeclaration -->
 	<xsl:template match="SgPragmaDeclaration">
 		<xsl:choose>
-			<!--	!$xev scalar2array1 type(変数名,サイズ)
 
-				１次元配列を２次元配列に置き替える
+			<!--	!$xev scalar2array1-varref start(変数名,サイズ,添字)
+
+				追加した１次元配列を初期化する
 			-->
-			<xsl:when test="./SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='type'] and not(contains(./SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='type']/LI[1]/@value,'default'))">
-				<xsl:comment>
-					SgPragmaDeclaration
-				</xsl:comment>
-			</xsl:when>
-
-			<!--	!$xev scalar2array1 varref(変数名,添字)
-
-				１次元配列を２次元配列に置き替える
-			-->
-			<xsl:when test="./SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref'] and not(contains(./SgPragma/DIRECTIVE[@name='scalar2array1']/CLAUSE[@name='varref']/LI[1]/@value,'default'))">
-				<xsl:comment>
-					SgPragmaDeclaration
-				</xsl:comment>
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start'] and not(contains(./SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[1]/@value,'default'))">
+          
+				<SgFortranDo end="1" nlabel="" slabel="" style="0">
+					<SgAssignOp>
+						<SgVarRefExp>
+							<xsl:attribute name="name">
+								<xsl:value-of select="./SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[3]/@value"/>
+							</xsl:attribute>
+						</SgVarRefExp>
+						<SgIntVal value="1"/>
+					</SgAssignOp>
+					<SgVarRefExp>
+						<xsl:attribute name="name">
+							<xsl:value-of select="./SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[2]/@value"/>
+						</xsl:attribute>
+					</SgVarRefExp>
+					<SgNullExpression/>
+					<SgBasicBlock>
+						<SgExprStatement>
+							<SgAssignOp>
+								<SgPntrArrRefExp>
+									<SgVarRefExp>
+										<xsl:attribute name="name">
+											<xsl:value-of select="concat(./SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[1]/@value,'_tmp')"/>
+										</xsl:attribute>
+									</SgVarRefExp>
+									<SgExprListExp>
+										<SgVarRefExp>
+											<xsl:attribute name="name">
+												<xsl:value-of select="./SgPragma/DIRECTIVE[@name='scalar2array1-varref']/CLAUSE[@name='start']/LI[3]/@value"/>
+											</xsl:attribute>
+										</SgVarRefExp>
+									</SgExprListExp>
+								</SgPntrArrRefExp>
+								<SgIntVal value="0"/>
+							</SgAssignOp>
+						</SgExprStatement>
+					</SgBasicBlock>
+				</SgFortranDo>
 			</xsl:when>
 			<!--	!$xev array1to2 varref(変数名,添字,添字)
 
 				１次元配列を２次元配列に置き替える
 			-->
 
-			<xsl:when test="./SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref'] and not(contains(./SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='varref']/LI[1]/@value,'default'))">
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='array1to2-varref']/CLAUSE[@name='start'] and not(contains(./SgPragma/DIRECTIVE[@name='array1to2-varref']/CLAUSE[@name='start']/LI[1]/@value,'default'))">
 				<xsl:comment>
 					SgPragmaDeclaration
 				</xsl:comment>
@@ -730,6 +760,18 @@
 					SgPragmaDeclaration
 				</xsl:comment>
 			</xsl:when>
+
+			<!--	!$xev end array1to2-varref(変数名,添字,添字)
+
+				１次元配列を２次元配列に置き替える
+			-->
+
+			<xsl:when test="./SgPragma/DIRECTIVE/@name='end'">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
 
 
 			<xsl:otherwise>

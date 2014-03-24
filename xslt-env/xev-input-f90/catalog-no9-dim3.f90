@@ -5,6 +5,7 @@ program catalog_no9
 
   real*8 A(n, n, n), B(n, n, n)
 
+  !$xev one-loop-copy flag(l,m,n)
   do k=2,n-1
      do j=2,n-1
         do i=2,n-1
@@ -13,5 +14,6 @@ program catalog_no9
      end do
   end do
 
+  
 end program catalog_no9
 
