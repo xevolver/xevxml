@@ -320,6 +320,25 @@ static void attribSgFortranDo(stringstream& istr,SgNode* node)
   }
 }
 
+static void attribSgWhileStmt(stringstream& istr,SgNode* node)
+{
+  SgWhileStmt*      n = isSgWhileStmt(node);
+  SgLabelRefExp*    l = 0;
+
+  if(n) {
+    istr << " end=\"" << n->get_has_end_statement() << "\" ";
+    l = n->get_end_numeric_label();
+    if(l){
+      istr << " nlabel=\"" << l->get_numeric_label_value() << "\" ";
+      istr << " slabel=\"\" ";
+    }
+    else {
+      istr << " nlabel=\"\" ";
+      istr << " slabel=\"" << n->get_string_label() << "\" ";
+    }
+  }
+}
+
 static void attribSgFunctionRefExp(stringstream& istr,SgNode* node)
 {
   SgFunctionRefExp*      n = isSgFunctionRefExp(node);
@@ -679,7 +698,8 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgUseStatement(istr,node);                      
   attribSgFortranIncludeLine(istr,node);                
   attribSgAttributeSpecificationStatement(istr,node);   
-  attribSgFortranDo(istr,node);                         
+  attribSgFortranDo(istr,node);
+  attribSgWhileStmt(istr,node);
   attribSgFunctionRefExp(istr,node);                    
   attribSgPrintStatement(istr,node);                    
   attribSgSizeOfOp(istr,node);                          

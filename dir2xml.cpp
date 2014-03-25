@@ -13,8 +13,8 @@ namespace xa=xalanc;
 template<typename Iterator>
 struct ReadDir: qi::grammar<Iterator,DirAST()>
 {
-  qi::rule<Iterator,DirAST()> line,dirname,clause,lst,var;
-  qi::rule<Iterator,string()> commasep,claussep;
+  qi::rule<Iterator,DirAST()> line,dirname,clause,lst,arg;
+  qi::rule<Iterator,string()> commasep,claussep,var,exp;
 
   /* grammer definition of OpenMP-like directives */
   ReadDir() : ReadDir::base_type(line)
@@ -33,13 +33,20 @@ struct ReadDir: qi::grammar<Iterator,DirAST()>
 	     >> *qi::space >> qi::lit(')') );
 
     // clause separator
-    claussep = (+qi::lit(' ')) || commasep;
+    claussep = (+qi::lit(' ')) | commasep;
 
     // list
-    lst = var[_val += _1 << D_ARG ]  % commasep;
+    lst = (arg[_val += _1 << D_ARG ]  % commasep) ;
 
     // arguments of a clause
-    var = *qi::space >> qi::as_string[+(qi::char_-','-qi::space-')')][_val=_1];
+    arg = qi::as_string[exp] [_val=_1];
+    exp = var [_val=_1] 
+      >> *qi::space 
+      >> -(qi::lit('(') 
+	   >> qi::as_string[*(qi::char_-')')] [_val+="("+_1+")"]
+	   >> qi::lit(')')
+	   );
+    var = *qi::space >> as_string[+(qi::char_-','-'('-')'-qi::space)][_val=_1];
 
     // comma separator
     commasep = *qi::lit(' ') >> qi::lit(',') >> *qi::lit(' ');
@@ -55,9 +62,12 @@ DirAST ParsePragmaString( std::string& str)
     ReadDir<std::string::iterator> reader;
 
     if( qi::parse(str.begin(), str.end(), reader, retval) == 0 ){
-      ABORT();
+      std::cerr << "WARN @ " << __FUNCTION__ << " :";		
+      std::cerr << __FILE__ ;					
+      std::cerr << "(" << __LINE__ << "): \"" << str << "\" is ignored" << std::endl;		
     }
   }
+
   return retval;
 }
 
@@ -91,21 +101,24 @@ void ReplaceParams( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
       }
 
       DirAST* clause = FindClause(&dir,name);
-      if(clause && clause->succ.size()){
-	/* remove XML elements of default params*/
+      if(clause && clause->succ.size() > 0){
+	/* remove XML elements of default PLIST */
 	xe::DOMNode* child=node->getFirstChild();
 	while(child){
 	  xe::DOMNode* prev = child;
 	  child=child->getNextSibling();
+	  //if(xe::XMLString::transcode(prev->getNodeName()) == string(D_LIST)) {
+	  //if(prev->getNodeType()== xe::DOMNode::TEXT_NODE)
 	  node->removeChild(prev);
 	}
-
 	/* append LI elements with specified values */
+	xe::DOMElement *plst = doc-> createElement(xe::XMLString::transcode("PLIST"));
+	node->appendChild((xe::DOMNode*)plst);
 	for(size_t i(0);i<clause->succ[0].succ.size();i++){
 	  xe::DOMElement *li = doc-> createElement(xe::XMLString::transcode("LI"));
 	  li-> setAttribute(xe::XMLString::transcode("value"), 
 			    xe::XMLString::transcode(clause->succ[0].succ[i].str.c_str()));
-	  node->appendChild((xe::DOMNode*)li);
+	  plst->appendChild((xe::DOMNode*)li);
 	}
       }
     }
@@ -175,6 +188,18 @@ int main(int argc, char** argv)
   return 0;
 }
 
+static void RemoveTextNode(xercesc::DOMNode* node)
+{
+  xercesc::DOMNode* child = node->getFirstChild();
+  while(child) {
+    xercesc::DOMNode* prev = child;
+    if (prev->getNodeType() == xercesc::DOMNode::TEXT_NODE){
+      node->removeChild(prev);
+    }
+    else RemoveTextNode(prev);
+    child = child->getNextSibling();
+  } 
+}
 
 namespace xevxml {
 #define VISIT(x) if(nname==#x) {visit##x (node);return;}
@@ -214,16 +239,18 @@ namespace xevxml {
     }
     ast = ParsePragmaString(line);
     //ast.print();
-    
-    for(size_t i(0);i<dnames_.size();i++){
-      if(dnames_[i] == ast.str ) {
-	xe::DOMNode* newNode = defs_[i]->cloneNode(true);
-	ReplaceParams(doc_,newNode,ast);
-	node->appendChild(newNode);
-	//std::cerr << dnames_[i] << std::endl;
+    if(ast.str.size() > 0 ){
+      for(size_t i(0);i<dnames_.size();i++){
+	if(dnames_[i] == ast.str ) {
+	  xe::DOMNode* newNode = defs_[i]->cloneNode(true);
+	  ReplaceParams(doc_,newNode,ast);
+	  RemoveTextNode(newNode);
+	  node->appendChild(newNode);
+	  //std::cerr << dnames_[i] << std::endl;
+	}
       }
+      //ast.print();
     }
-    //ast.print();
   }
 
   void Dir2XmlVisitor::getDefs(xercesc::DOMNode* node)

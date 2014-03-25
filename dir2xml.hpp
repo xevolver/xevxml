@@ -75,6 +75,10 @@ public:
     succ.push_back(dir); 
     return *this;
   }
+  DirAST& operator+= (std::string& s) { 
+    str += s;
+    return *this;
+  }
   DirAST& operator= (const DirAST& dir) { 
     succ = dir.succ;
     str  = dir.str;

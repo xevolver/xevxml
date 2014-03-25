@@ -17,11 +17,14 @@
 
   <xsl:template match="SgForStatement">
     <xsl:if test=".//*=SgForStatement">
-    /* hoge */
+    startLoopNest(); /* inserted */
     </xsl:if>
     <xsl:copy>
       <xsl:copy-of select="@*"/>
       <xsl:apply-templates/>
     </xsl:copy>
+    <xsl:if test=".//*=SgForStatement">
+    endLoopNest(); /* inserted */
+    </xsl:if>
   </xsl:template>
 </xsl:stylesheet>
