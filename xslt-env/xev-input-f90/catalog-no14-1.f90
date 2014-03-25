@@ -5,6 +5,7 @@ program catalog_no14
 
   real*8 A(n, n, n), B(n, n, n)
 
+  !$xev loop-unroll step(2)
   do k=2,n-1
      do j=2,n-1
         do i=2,n-1

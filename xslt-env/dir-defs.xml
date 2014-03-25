@@ -146,4 +146,9 @@
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
+	<DIRECTIVE name="loop-unroll">
+		<CLAUSE name="step">
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
 </DEFS>
