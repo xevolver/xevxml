@@ -141,4 +141,12 @@
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
+	<DIRECTIVE name="loop-roll">
+		<CLAUSE name="dim">
+			<LI value="default" />
+			<LI value="default" />
+			<LI value="default" />
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
 </DEFS>
