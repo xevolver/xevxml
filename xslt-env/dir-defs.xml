@@ -76,11 +76,6 @@
 			<LI value="default statement-add" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="statement-add">
-		<CLAUSE name="ptn-001">
-			<LI value="default statement-add" />
-		</CLAUSE>
-	</DIRECTIVE>
 	<DIRECTIVE name="statement-rep">
 		<CLAUSE name="ptn-001">
 			<LI value="default statement-rep" />
@@ -94,11 +89,6 @@
 	<DIRECTIVE name="dir">
 		<CLAUSE name="del">
 			<LI value="default del" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="parameter">
-		<CLAUSE name="add">
-			<LI value="default val" />
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="function-call">

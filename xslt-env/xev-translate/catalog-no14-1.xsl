@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsl:stylesheet version="1.0"
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:exslt="http://exslt.org/common" >
+
 	<xsl:output method="xml" encoding="UTF-8" />
 
 	<xsl:template match="/">
@@ -250,42 +252,12 @@
 	</xsl:template>
 
 
-	<!-- SgFunctionParameterList -->
-	<xsl:template match="SgFunctionParameterList">
-		<xsl:choose>
-			<!--	!$xev parameter add
-
-				親ノードの直近の兄ノードが【!$xev parameter add】ならパラメータを追加する
-			-->
-			<xsl:when test="parent::node()/preceding-sibling::SgPragmaDeclaration[1]/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']">
-				<xsl:copy>
-					<!-- 既存のパラメータを出力する -->
-					<xsl:copy-of select="./SgInitializedName"></xsl:copy-of>
-					<!-- 追加するパラメータを出力する -->
-					<xsl:element name="SgInitializedName">
-						<xsl:attribute name="name">
-							<xsl:value-of select="parent::node()/preceding-sibling::SgPragmaDeclaration[1]/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']/LI/@value"/>
-						</xsl:attribute>
-						<xsl:element name="SgTypeFloat"/>
-					</xsl:element>
-				</xsl:copy>
-			</xsl:when>
-
-			<xsl:otherwise>
-				<xsl:copy>
-					<xsl:copy-of select="@*"/>
-					<xsl:apply-templates/>
-				</xsl:copy>
-			</xsl:otherwise>
-		</xsl:choose>
-
-	</xsl:template>
 
 
 	<!-- SgVariableDeclaration -->
 	<xsl:template match="SgVariableDeclaration">
 		<xsl:choose>
-			<!--	!$xev one-loop-copy flag( サイズ,サイズ)
+			<!--	!$xev one-loop-copy flag( サイズ,サイズ, ... )
 
 				子ノードに【!$xev one-loop-copy flag】が存在する場合、
 				コピー有無フラグを追加宣言する
@@ -329,23 +301,6 @@
 				</xsl:choose>
 			</xsl:when>
 
-			<!--	!$xev parameter add
-
-				子ノードに【!$xev parameter add】が存在する場合、パラメータを追加する
-			-->
-			<xsl:when test="./SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']" >
-				<xsl:copy>
-					<!-- 既存のパラメータを出力する -->
-					<xsl:copy-of select="./SgInitializedName"></xsl:copy-of>
-					<!-- 追加するパラメータを出力する -->
-					<xsl:element name="SgInitializedName">
-						<xsl:attribute name="name">
-							<xsl:value-of select="./SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']/LI/@value"/>
-						</xsl:attribute>
-						<xsl:element name="SgTypeFloat"/>
-					</xsl:element>
-				</xsl:copy>
-			</xsl:when>
 
 			<xsl:otherwise>
 				<xsl:copy>
@@ -382,37 +337,6 @@
                         	<xsl:text>,</xsl:text>
                                 <xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']/LI[2]/@value" />
                                 <xsl:text>)=B(i,j)</xsl:text>
-			</xsl:when>
-
-			<!--	!$xev function-call copy-001(zz) 
-
-				直前に'function-call copy-001'がある場合、この関数呼び出しをコピーし
-				指定したパラメータに書き換える			     　
-			-->
-			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='function-call']/CLAUSE[@name='copy-001']">
-				<!-- 既存の【function call】をそのままコピーする -->
-				<xsl:copy>
-					<xsl:copy-of select="@*"/>
-					<xsl:apply-templates/>
-				</xsl:copy>
-
-				<!-- 追加の【function call】を出力する -->
-				<xsl:copy>
-					<SgFunctionCallExp>
-						<!-- 関数名をそのままコピーする -->
-						<xsl:copy-of select="./SgFunctionCallExp/SgFunctionRefExp"/>
-						<!-- 関数の引数を、指定内容で作成する -->
-						<SgExprListExp>
-							<xsl:for-each select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='function-call']/CLAUSE[@name='copy-001']/LI">
- 								<SgVarRefExp>
-									<xsl:attribute name="name">
-										<xsl:value-of select="@value" />
-									</xsl:attribute>
-								</SgVarRefExp>
-							</xsl:for-each>
-						</SgExprListExp>
-					</SgFunctionCallExp>
-				</xsl:copy>
 			</xsl:when>
 
 			<xsl:otherwise>
@@ -500,7 +424,7 @@
 	<!-- SgFortranDo -->
 	<xsl:template match="SgFortranDo">
 		<xsl:choose>
-			<!--	!pragma xev loop-unroll step(刻み幅)
+			<!--	!$xev loop-unroll step(刻み幅)
 
 				直前に'loop-unroll step'がある場合、直下のDO文の刻み幅を変更する
 				実行行を刻み幅分実行する
@@ -521,11 +445,20 @@
 						</xsl:attribute>
 					</xsl:element>
 					
+  					<!-- multi-pass
+						変換した内容を(tmp)に格納し
+						その(tmp)内容を再変換する
+					-->
+					<!-- 変換内容を、tmp に格納する -->
+  					<xsl:variable name="tmp">
+						<xsl:apply-templates select="./SgBasicBlock" mode="loop-unroll">
+							<xsl:with-param name="max" select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='loop-unroll']/CLAUSE[@name='step']/LI[1]/@value"/>
+							<xsl:with-param name="var" select="./SgAssignOp/SgVarRefExp/@name"/>
+						</xsl:apply-templates>
+			  		</xsl:variable>
+					<!-- 変換内容(tmp)を、再変換して出力する -->
+			  		<xsl:apply-templates select="exslt:node-set($tmp)"/>
 
-					<xsl:apply-templates select="./SgBasicBlock" mode="loop-unroll">
-						<xsl:with-param name="max" select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='loop-unroll']/CLAUSE[@name='step']/LI[1]/@value"/>
-						<xsl:with-param name="var" select="./SgAssignOp/SgVarRefExp/@name"/>
-					</xsl:apply-templates>
 				</xsl:copy>
 
 			</xsl:when>
@@ -593,14 +526,22 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="SgExprStatement[1]" mode="loop-unroll">
-		<xsl:param name="max"/>
-		<xsl:param name="var"/>
-		<xsl:param name="self" select="."/>
+	<!--
+		最後の【SgExprStatement】行の場合
+	-->
+	<xsl:template match="SgExprStatement[last()]" mode="loop-unroll">
+		<xsl:param name="max"/>		<!-- STEP数 -->
+		<xsl:param name="var"/>		<!-- 置き換える変数 -->
 
+		<!-- 自分を出力する -->
 		<xsl:apply-templates select="."/>
+
+		<!-- コピーする【SgExprStatement】行を設定 -->
+		<xsl:param name="copy-stm" select="../SgExprStatement"/>
+
+		<!-- コピーする【SgExprStatement】行を設定 -->
 		<xsl:for-each select="(//*)[position()&lt;$max]">
-			<xsl:apply-templates select="$self" mode="loop-unroll-1">
+			<xsl:apply-templates select="$copy-stm" mode="loop-unroll-1">
 				<xsl:with-param name="max" select="$max"/>
 				<xsl:with-param name="var" select="$var"/>
 				<xsl:with-param name="cnt" select="position()"/>
@@ -622,9 +563,10 @@
 	<!-- remove PreprocessingInfo -->
 	<xsl:template match="PreprocessingInfo"  mode="loop-unroll">
 	</xsl:template>
-	<!-- remove SgPragmaDeclaration -->
-	<xsl:template match="SgPragmaDeclaration" mode="loop-unroll">
+	<!--
+	<xsl:template match="SgPragmaDeclaration[1]" mode="loop-unroll">
 	</xsl:template>
+	-->
 
 
 	<xsl:template match="SgVarRefExp" mode="loop-unroll-1">
@@ -957,6 +899,18 @@
 	<!-- SgPragmaDeclaration -->
 	<xsl:template match="SgPragmaDeclaration">
 		<xsl:choose>
+			<!--	!$xev loop-unroll step(刻み幅)
+
+				ディレクティブを削除する
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='loop-unroll'and ./CLAUSE/@name='step'][1]">
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='loop-unroll']/CLAUSE[@name='step'] and not(contains(./SgPragma/DIRECTIVE[@name='loop-unroll']/CLAUSE[@name='step']/LI[1]/@value,'default'))">
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='loop-unroll']/CLAUSE[@name='step'] and not(contains(./SgPragma/DIRECTIVE[@name='loop-unroll']/CLAUSE[@name='step']/LI[1]/@value,'default'))">
+				<xsl:comment>
+					SgPragmaDeclaration loop-unroll
+				</xsl:comment>
+			</xsl:when>
+
 			<!--	!$xev one-loop-copy flag(n,n,n)
 
 				ディレクティブを削除する
@@ -1132,35 +1086,7 @@
 				</xsl:for-each>
 			</xsl:when>
 
-			<!--	!$xev statement-add ptn-001(print,*,'Found_at',maxval(found) )
 
-				指定文字列[ print,*,'Found_at',maxval(found) ] をXMLに出力する
-				
-			-->
-			<xsl:when test="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001'] and not(contains(./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[1]/@value,'default'))">
-				<xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[1]/@value" /><xsl:text> </xsl:text>
-				<xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[2]/@value" /><xsl:text>,</xsl:text>
-				<xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[3]/@value" /><xsl:text>,</xsl:text>
-				<xsl:value-of select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-001']/LI[4]/@value" /><xsl:text>)</xsl:text>
-			</xsl:when>
-
-			<!--	!$xev function-call copy-001(zz)
-                                ディレクティブを削除する
-			-->
-			<xsl:when test="./SgPragma/DIRECTIVE[@name='function-call']/CLAUSE[@name='copy-001']">
-				<xsl:comment>
-					SgPragmaDeclaration
-				</xsl:comment>
-			</xsl:when>
-
-			<!--	!$xev parameter add(zz)
-                                ディレクティブを削除する
-			-->
-			<xsl:when test="./SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']">
-				<xsl:comment>
-					SgPragmaDeclaration
-				</xsl:comment>
-			</xsl:when>
 
 			<!--	!$xev statement-del ptn-001
                                 ディレクティブを削除する
