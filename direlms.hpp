@@ -36,7 +36,7 @@
 #define D_PREFIX "xev"
 #define D_DIRECTIVE "DIRECTIVE"
 #define D_CLAUSE "CLAUSE"
-#define D_LIST "PLIST"
-#define D_ARG "LI"
-
+//#define D_LIST "PLIST"
+#define D_ARG "ARG"
+#define D_VARARG "VARARG"
 #endif

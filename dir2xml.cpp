@@ -29,14 +29,14 @@ struct ReadDir: qi::grammar<Iterator,DirAST()>
     // clause can optionally take a list of arguments
     clause = (qi::as_string[+(qi::char_-','-qi::space-'(')]) [ _val = _1]
       >> - ( *qi::space >> qi::lit('(') 
-	     >> lst[_val += _1 << D_LIST ] 
+	     >> (arg[_val += _1 << D_ARG ]  % commasep) //lst [_val += _1]
 	     >> *qi::space >> qi::lit(')') );
 
     // clause separator
     claussep = (+qi::lit(' ')) | commasep;
 
     // list
-    lst = (arg[_val += _1 << D_ARG ]  % commasep) ;
+    //lst = (arg[_val += _1 << D_ARG ]  % commasep) ;
 
     // arguments of a clause
     arg = qi::as_string[exp] [_val=_1];
@@ -67,7 +67,7 @@ DirAST ParsePragmaString( std::string& str)
       std::cerr << "(" << __LINE__ << "): \"" << str << "\" is ignored" << std::endl;		
     }
   }
-
+  //retval.print();
   return retval;
 }
 
@@ -128,6 +128,68 @@ void ReplaceParams( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 	ReplaceParams(doc,child,dir);
 	child=child->getNextSibling();
       }
+    }
+  }
+}
+
+void ReplaceArgs( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
+{
+  if(node) {
+    xe::DOMElement* child=(static_cast<xe::DOMElement*>(node))->getFirstElementChild();
+    while(child){
+
+      if( xe::XMLString::transcode(child->getNodeName()) == string(D_CLAUSE) ) {
+
+	xe::DOMNamedNodeMap* amap = child->getAttributes();
+	xe::DOMNode* att = 0;
+	string name;
+
+	if(amap) {
+	  /* number of params should be checked here */
+	  att=amap->getNamedItem(xe::XMLString::transcode("name"));
+	  if(att)
+	    name = xe::XMLString::transcode(att->getNodeValue());
+
+	}
+    
+	//DirAST* clause = FindClause(&dir,name);
+	DirAST* clause = 0;
+	for(size_t cid=0;cid < dir.succ.size();cid++){
+	  if(name == dir.succ[cid].str){
+	    clause = &dir.succ[cid];
+	    break;
+	  }
+	}
+	if(clause)
+	  child->setAttribute(xe::XMLString::transcode("specified"), 
+			      xe::XMLString::transcode("true"));
+
+	if(clause && clause->succ.size() > 0){
+	  xe::DOMElement* arg = child->getFirstElementChild();
+	  for(size_t aid(0); aid < clause->succ.size(); aid++ ){
+	    if( xe::XMLString::transcode(arg->getNodeName()) == string(D_ARG) ) {
+	      arg->setAttribute(xe::XMLString::transcode("specified"), 
+				xe::XMLString::transcode("true"));
+	      arg->setAttribute(xe::XMLString::transcode("value"), 
+				xe::XMLString::transcode(clause->succ[aid].str.c_str()));
+	    }
+	    else if ( xe::XMLString::transcode(arg->getNodeName()) == string(D_VARARG) ){
+
+	      xe::DOMElement *newarg = doc-> createElement(xe::XMLString::transcode("ARG"));
+	      arg->setAttribute(xe::XMLString::transcode("specified"), 
+				xe::XMLString::transcode("true"));
+	      newarg-> setAttribute(xe::XMLString::transcode("value"), 
+				    xe::XMLString::transcode(clause->succ[aid].str.c_str()));
+	      newarg->setAttribute(xe::XMLString::transcode("specified"), 
+				   xe::XMLString::transcode("true"));
+	      arg->appendChild((xe::DOMNode*)newarg);
+	    }
+	    arg = arg->getNextElementSibling();
+	    if(arg==0) break;
+	  }
+	}
+      }
+      child = child->getNextElementSibling();
     }
   }
 }
@@ -193,12 +255,19 @@ static void RemoveTextNode(xercesc::DOMNode* node)
   xercesc::DOMNode* child = node->getFirstChild();
   while(child) {
     xercesc::DOMNode* prev = child;
-    if (prev->getNodeType() == xercesc::DOMNode::TEXT_NODE){
-      node->removeChild(prev);
-    }
-    else RemoveTextNode(prev);
     child = child->getNextSibling();
-  } 
+    if (prev->getNodeType() == xercesc::DOMNode::TEXT_NODE){
+      //node->removeChild(prev);
+      prev->setTextContent(xe::XMLString::transcode(""));
+    }
+    else if (prev->getNodeType() == xercesc::DOMNode::ELEMENT_NODE) {
+      (static_cast<xe::DOMElement*>(prev))
+	->setAttribute(xe::XMLString::transcode("specified"), 
+		       xe::XMLString::transcode("false"));
+    
+      RemoveTextNode(prev);
+    }
+  }
 }
 
 namespace xevxml {
@@ -243,8 +312,9 @@ namespace xevxml {
       for(size_t i(0);i<dnames_.size();i++){
 	if(dnames_[i] == ast.str ) {
 	  xe::DOMNode* newNode = defs_[i]->cloneNode(true);
-	  ReplaceParams(doc_,newNode,ast);
 	  RemoveTextNode(newNode);
+	  //ReplaceParams(doc_,newNode,ast);
+	  ReplaceArgs(doc_,newNode,ast);
 	  node->appendChild(newNode);
 	  //std::cerr << dnames_[i] << std::endl;
 	}
