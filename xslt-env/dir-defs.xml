@@ -149,4 +149,12 @@
 			<LI value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
+	<DIRECTIVE name="blocking">
+		<CLAUSE name="block">
+			<LI value="default" />
+			<LI value="default" />
+			<LI value="default" />
+			<LI value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
 </DEFS>

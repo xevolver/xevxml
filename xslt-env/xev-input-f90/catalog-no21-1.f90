@@ -4,7 +4,7 @@ program catalog_no21
   integer,parameter :: n=139
 
   real*8 a(n, n), b(n, n), c(n, n)
-
+  !$xev blocking block(k,8,i,8)
   do j=1,n,4
      do k=1,n,4
         do i=1,n
@@ -27,8 +27,6 @@ program catalog_no21
          end do
       end do
    end do
-   
-
 
 end program catalog_no21
 

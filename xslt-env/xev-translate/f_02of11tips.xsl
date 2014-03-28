@@ -191,7 +191,7 @@
 						<xsl:attribute name="index">""</xsl:attribute>
 						<xsl:attribute name="rank">1</xsl:attribute>
 						<xsl:attribute name="type">
-							<xsl:value-of select="./SgArrayType/@type"/>
+							<xsl:value-of select="local-name(./*[1])"/>
 						</xsl:attribute>
 					
 						<xsl:copy-of select="./*[1]"/>
