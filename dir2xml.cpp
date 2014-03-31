@@ -67,7 +67,7 @@ DirAST ParsePragmaString( std::string& str)
       std::cerr << "(" << __LINE__ << "): \"" << str << "\" is ignored" << std::endl;		
     }
   }
-  //retval.print();
+  retval.print();
   return retval;
 }
 
@@ -184,9 +184,9 @@ void ReplaceArgs( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 				   xe::XMLString::transcode("true"));
 	      arg->appendChild((xe::DOMNode*)newarg);
 	    }
-	    arg = arg->getNextElementSibling();
-	    if(arg==0) break;
 	  }
+	  arg = arg->getNextElementSibling();
+	  if(arg==0) break;
 	}
       }
       child = child->getNextElementSibling();
