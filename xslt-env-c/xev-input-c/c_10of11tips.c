@@ -14,12 +14,8 @@ void TEST10( int m, int n )
         change = 0;
 
 #pragma xev dir add(acc,data,copy(a(1:n,1:m)),create(b(2:n-1,2:m-1)),copyin(w(2:n-1)))
-
-
 #pragma xev dir replace(acc,kernels)
-/*
 #pragma acc kernels loop
-*/
         for( i=1; i<n-1;i++ )
         {
             for( j=1; j<m-1; j++ )
@@ -36,9 +32,10 @@ void TEST10( int m, int n )
                 a[i][j] = b[i][j];
             }
         }
-#pragma xev dir add(acc,end,kernels)
+#pragma acc end kernels
 
     }while ( change > tolerance );
 
+#pragma xev dir add(acc,end,data)
     return;
 }

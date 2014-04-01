@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="c_02of11tips.c" format="2" language="2">
+  <SgGlobal>
+    <SgFunctionDeclaration name="TEST02">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="found">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="B">
+                <SgArrayType index="300" rank="0" type="SgTypeInt">
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="i">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="A">
+                <SgArrayType index="300" rank="0" type="SgTypeInt">
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev dir append ( loop )">
+              <DIRECTIVE name="dir">
+                <CLAUSE name="add" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="dir">
+                <CLAUSE name="replace" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="dir">
+                <CLAUSE name="append" specified="true">
+                  <VARARG specified="true">
+                    <ARG specified="true" value="loop"/>
+                  </VARARG>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="dir">
+                <CLAUSE name="remove" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="acc kernels"/>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev statement remove">
+              <DIRECTIVE name="statement">
+                <CLAUSE name="add" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="statement">
+                <CLAUSE name="remove" specified="true"></CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgExprStatement>
+            <SgAssignOp>
+              <SgVarRefExp name="i"/>
+              <SgIntVal value="0"/>
+            </SgAssignOp>
+          </SgExprStatement>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev scalar2array1 - varref start ( found, 300, i )"/>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev while2for replace ( i, 0, 300 )">
+              <DIRECTIVE name="while2for">
+                <CLAUSE name="replace" specified="true">
+                  <ARG specified="true" value="i"/>
+                  <ARG specified="true" value="0"/>
+                  <ARG specified="true" value="300"/>
+                  <ARG specified="false" value="default"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgDoWhileStmt>
+            <SgBasicBlock>
+              <SgPragmaDeclaration>
+                <SgPragma pragma="xev statement remove">
+                  <DIRECTIVE name="statement">
+                    <CLAUSE name="add" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="statement">
+                    <CLAUSE name="remove" specified="true"></CLAUSE>
+                  </DIRECTIVE>
+                </SgPragma>
+              </SgPragmaDeclaration>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="i"/>
+                  <SgAddOp>
+                    <SgVarRefExp name="i"/>
+                    <SgIntVal value="1"/>
+                  </SgAddOp>
+                </SgAssignOp>
+              </SgExprStatement>
+              <SgIfStmt>
+                <SgExprStatement>
+                  <SgEqualityOp>
+                    <SgPntrArrRefExp>
+                      <SgVarRefExp name="A"/>
+                      <SgVarRefExp name="i"/>
+                    </SgPntrArrRefExp>
+                    <SgIntVal value="102"/>
+                  </SgEqualityOp>
+                </SgExprStatement>
+                <SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="found"/>
+                      <SgVarRefExp name="i"/>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+              </SgIfStmt>
+            </SgBasicBlock>
+            <SgExprStatement>
+              <SgEqualityOp>
+                <SgVarRefExp name="found"/>
+                <SgIntVal value="0"/>
+              </SgEqualityOp>
+            </SgExprStatement>
+          </SgDoWhileStmt>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev end scalar2array1 - varref ( found, 300, i )">
+              <DIRECTIVE name="end">
+                <CLAUSE name="scalar2array1-varref" specified="false">
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="end">
+                <CLAUSE name="array1to2-varref" specified="false">
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="acc end kernels"/>
+          </SgPragmaDeclaration>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+    </SgFunctionDeclaration>
+  </SgGlobal>
+
+</SgSourceFile>

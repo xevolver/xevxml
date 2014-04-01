@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="c_01of11tips.c" format="2" language="2">
+  <SgGlobal>
+    <SgFunctionDeclaration name="SUM">
+        <SgTypeInt/>
+      <SgFunctionParameterList/>
+    </SgFunctionDeclaration>
+    <SgFunctionDeclaration name="TEST01">
+        <SgTypeVoid/>
+      <SgFunctionParameterList>
+        <SgInitializedName name="M">
+            <SgTypeInt/>
+        </SgInitializedName>
+        <SgInitializedName name="N">
+            <SgTypeInt/>
+        </SgInitializedName>
+      </SgFunctionParameterList>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="i">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="j">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="jj">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="tmp">
+                <SgArrayType index="10" rank="0" type="SgTypeInt">
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="A">
+                <SgArrayType index="10" rank="0" type="SgArrayType">
+                  <SgArrayType index="10" rank="0" type="SgTypeInt">
+                    <SgTypeInt/>
+                  </SgArrayType>
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="acc kernels loop"/>
+          </SgPragmaDeclaration>
+          <SgForStatement>
+            <SgForInitStatement>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="i"/>
+                  <SgIntVal value="0"/>
+                </SgAssignOp>
+              </SgExprStatement>
+            </SgForInitStatement>
+            <SgExprStatement>
+              <SgLessThanOp>
+                <SgVarRefExp name="i"/>
+                <SgVarRefExp name="M"/>
+              </SgLessThanOp>
+            </SgExprStatement>
+            <SgPlusPlusOp mode="1">
+              <SgVarRefExp name="i"/>
+            </SgPlusPlusOp>
+            <SgBasicBlock>
+              <SgPragmaDeclaration>
+                <SgPragma pragma="xev dir add ( acc, loop, private ( tmp ) )">
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="add" specified="true">
+                      <VARARG specified="true">
+                        <ARG specified="true" value="acc"/>
+                      </VARARG>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="replace" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="append" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="remove" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                </SgPragma>
+              </SgPragmaDeclaration>
+              <SgForStatement>
+                <SgForInitStatement>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="j"/>
+                      <SgIntVal value="0"/>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgForInitStatement>
+                <SgExprStatement>
+                  <SgLessThanOp>
+                    <SgVarRefExp name="j"/>
+                    <SgVarRefExp name="N"/>
+                  </SgLessThanOp>
+                </SgExprStatement>
+                <SgPlusPlusOp mode="1">
+                  <SgVarRefExp name="j"/>
+                </SgPlusPlusOp>
+                <SgBasicBlock>
+                  <SgForStatement>
+                    <SgForInitStatement>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgVarRefExp name="jj"/>
+                          <SgIntVal value="0"/>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgForInitStatement>
+                    <SgExprStatement>
+                      <SgLessThanOp>
+                        <SgVarRefExp name="jj"/>
+                        <SgIntVal value="10"/>
+                      </SgLessThanOp>
+                    </SgExprStatement>
+                    <SgPlusPlusOp mode="1">
+                      <SgVarRefExp name="jj"/>
+                    </SgPlusPlusOp>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="tmp"/>
+                            <SgVarRefExp name="jj"/>
+                          </SgPntrArrRefExp>
+                          <SgVarRefExp name="jj"/>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                  </SgForStatement>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgPntrArrRefExp>
+                          <SgVarRefExp name="A"/>
+                          <SgVarRefExp name="i"/>
+                        </SgPntrArrRefExp>
+                        <SgVarRefExp name="j"/>
+                      </SgPntrArrRefExp>
+                      <SgFunctionCallExp>
+                        <SgFunctionRefExp symbol="SUM"/>
+                        <SgExprListExp>
+                          <SgVarRefExp name="tmp"/>
+                        </SgExprListExp>
+                      </SgFunctionCallExp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+              </SgForStatement>
+            </SgBasicBlock>
+          </SgForStatement>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+    </SgFunctionDeclaration>
+  </SgGlobal>
+
+</SgSourceFile>
