@@ -67,7 +67,7 @@ DirAST ParsePragmaString( std::string& str)
       std::cerr << "(" << __LINE__ << "): \"" << str << "\" is ignored" << std::endl;		
     }
   }
-  retval.print();
+  //retval.print();
   return retval;
 }
 
@@ -166,15 +166,17 @@ void ReplaceArgs( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 
 	if(clause && clause->succ.size() > 0){
 	  xe::DOMElement* arg = child->getFirstElementChild();
-	  for(size_t aid(0); aid < clause->succ.size(); aid++ ){
+	  size_t aid = 0;
+	  while(arg) {
 	    if( xe::XMLString::transcode(arg->getNodeName()) == string(D_ARG) ) {
 	      arg->setAttribute(xe::XMLString::transcode("specified"), 
 				xe::XMLString::transcode("true"));
 	      arg->setAttribute(xe::XMLString::transcode("value"), 
 				xe::XMLString::transcode(clause->succ[aid].str.c_str()));
+	      arg = arg->getNextElementSibling();
+	      if(++aid >= clause->succ.size()) break;
 	    }
 	    else if ( xe::XMLString::transcode(arg->getNodeName()) == string(D_VARARG) ){
-
 	      xe::DOMElement *newarg = doc-> createElement(xe::XMLString::transcode("ARG"));
 	      arg->setAttribute(xe::XMLString::transcode("specified"), 
 				xe::XMLString::transcode("true"));
@@ -183,10 +185,12 @@ void ReplaceArgs( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 	      newarg->setAttribute(xe::XMLString::transcode("specified"), 
 				   xe::XMLString::transcode("true"));
 	      arg->appendChild((xe::DOMNode*)newarg);
+	      if(++aid >= clause->succ.size()) break;
+	      //aid++;
 	    }
+	    else
+	      arg = arg->getNextElementSibling();
 	  }
-	  arg = arg->getNextElementSibling();
-	  if(arg==0) break;
 	}
       }
       child = child->getNextElementSibling();
