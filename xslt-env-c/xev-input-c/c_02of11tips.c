@@ -1,6 +1,6 @@
 void TEST02()
 {
-    int found,B[300];
+    int found;
     int i;
     int A[300];
 
@@ -9,9 +9,9 @@ void TEST02()
 
 #pragma xev statement remove
     i = 0;
-#pragma xev scalar2array1-varref start(found,300,i)
+#pragma xev scalar2array1_varref start(found,300,i)
 #pragma xev while2for replace(i,0,300)
-    do
+    while ( found==0 )
     {
 #pragma xev statement remove
         i = i + 1;
@@ -19,8 +19,8 @@ void TEST02()
         {
            found = i;
         }
-    } while ( found==0 );
-#pragma xev end scalar2array1-varref(found,300,i)  
+    }
+#pragma xev end scalar2array1_varref(found,300,i)  
 #pragma acc end kernels
     return;
 }

@@ -14,7 +14,9 @@ XSLT_DIR	= xev-translate
 ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
 XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
 else ifeq ($(HOSTNAME), hagi-a)
+#XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
 XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+#XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
 endif
 
 ##############################################

@@ -4,9 +4,9 @@
          subroutine sub( y )
          real, dimension(:) :: y
 !$xev dir add(acc,kernels,present_or_copy(y),present_or_copyin(x))
-!$xev dir del(delete)
+!$xev dir remove
 !$acc declare present(y,x)
-!$xev dir del(delete)
+!$xev dir remove
 !$acc kernels
          do i = 1, ubound(y,1)
             y(i) = y(i) + x(i)
@@ -22,3 +22,4 @@
       call sub( z )
 !$acc end data region
       end subroutine
+

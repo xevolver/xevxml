@@ -1,160 +1,128 @@
 <DEFS>
 	<DIRECTIVE name="dir">
 		<CLAUSE name="add">
-			<LI value="default dir-add 2130" />
+			<VARARG/>
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="dir">
 		<CLAUSE name="replace">
-			<LI value="default replace-add 2130" />
+			<VARARG/>
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="dir">
 		<CLAUSE name="append">
-			<LI value="default val" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="var">
-		<CLAUSE name="replace">
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="loop">
-		<CLAUSE name="fusion">
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="loop">
-		<CLAUSE name="interchange-opt3">
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="loop">
-		<CLAUSE name="shape-opt4">
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="index">
-		<CLAUSE name="replace">
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="conditional">
-		<CLAUSE name="if">
-			<LI value="true"></LI>
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="end">
-		<CLAUSE name="conditional"></CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="test">
-		<CLAUSE name="param">
-			<LI value="1" />
-		</CLAUSE>
-		<CLAUSE name="param2">
-			<LI value="1" />
-		</CLAUSE>
-		<CLAUSE name="param3">
-			<LI value="abcde" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="test2">
-		<CLAUSE name="param">
-			<LI value="1" />
-		</CLAUSE>
-		<CLAUSE name="param2">
-			<LI value="1" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="conditional001">
-		<CLAUSE name="if">
-			<LI value="true"></LI>
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="conditional002">
-		<CLAUSE name="if">
-			<LI value="true"></LI>
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="statement-add">
-		<CLAUSE name="ptn-000">
-			<LI value="default statement-add" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="statement-rep">
-		<CLAUSE name="ptn-001">
-			<LI value="default statement-rep" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="statement-del">
-		<CLAUSE name="ptn-001">
-			<LI value="default statement-del" />
+			<VARARG/>
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="dir">
-		<CLAUSE name="del">
-			<LI value="default del" />
+		<CLAUSE name="remove">
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="function-call">
-		<CLAUSE name="copy-001">
-			<LI value="default val" />
+	<DIRECTIVE name="statement">
+		<CLAUSE name="add">
+			<VARARG/>
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="fortran-do">
-		<CLAUSE name="copy-001">
-			<LI value="default val" />
+	<DIRECTIVE name="statement">
+		<CLAUSE name="remove">
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="while2do">
 		<CLAUSE name="replace">
-			<LI value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="scalar2array1">
-		<CLAUSE name="type">
-			<LI value="default" />
-		</CLAUSE>
-	</DIRECTIVE>
-	<DIRECTIVE name="scalar2array1-varref">
+	<DIRECTIVE name="scalar2array1_varref">
 		<CLAUSE name="start">
-			<LI value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="end">
-		<CLAUSE name="scalar2array1-varref">
-			<LI value="default" />
+		<CLAUSE name="scalar2array1_varref">
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="array1to2">
 		<CLAUSE name="type">
-			<LI value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="array1to2-varref">
+	<DIRECTIVE name="array1to2_varref">
 		<CLAUSE name="start">
-			<LI value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="one-loop-copy">
+	<DIRECTIVE name="end">
+		<CLAUSE name="array1to2_varref">
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="one_loop_copy">
 		<CLAUSE name="flag">
-			<LI value="default" />
+			<VARARG/>
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="loop-unroll">
+	<DIRECTIVE name="loop_unroll">
 		<CLAUSE name="step">
-			<LI value="default" />
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
-	<DIRECTIVE name="loop-roll">
+	<DIRECTIVE name="loop_roll">
 		<CLAUSE name="dim">
-			<LI value="default" />
-			<LI value="default" />
-			<LI value="default" />
-			<LI value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="blocking">
 		<CLAUSE name="block">
-			<LI value="default" />
-			<LI value="default" />
-			<LI value="default" />
-			<LI value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="fortrando">
+		<CLAUSE name="replace">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="var_replace">
+		<CLAUSE name="var">
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="end">
+		<CLAUSE name="var_replace">
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array_dim_chg">
+		<CLAUSE name="start">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="end">
+		<CLAUSE name="array_dim_chg">
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 </DEFS>

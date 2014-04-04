@@ -11,7 +11,7 @@ void TEST09( int m, int n )
     {
         iters = iters + 1;
         change = 0;
-#pragma xev dir append(copy(a)  create(newa))
+#pragma xev dir append(copy(a),create(newa))
 #pragma acc kernels
 #pragma acc loop reduction(max:change)
         for( i=1; i<n-1; i++ )
