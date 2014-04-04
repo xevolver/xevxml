@@ -84,7 +84,7 @@ static DirAST* FindClause(DirAST* dir,std::string& str)
     return ret;
   }
 }
-
+#if 0
 void ReplaceParams( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 {
   if(node) {
@@ -131,6 +131,7 @@ void ReplaceParams( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
     }
   }
 }
+#endif
 
 void ReplaceArgs( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 {
@@ -185,8 +186,8 @@ void ReplaceArgs( xe::DOMDocument* doc, xe::DOMNode* node, DirAST& dir)
 	      newarg->setAttribute(xe::XMLString::transcode("specified"), 
 				   xe::XMLString::transcode("true"));
 	      arg->appendChild((xe::DOMNode*)newarg);
+	      //arg = arg->getNextElementSibling(); // don't do this
 	      if(++aid >= clause->succ.size()) break;
-	      //aid++;
 	    }
 	    else
 	      arg = arg->getNextElementSibling();
