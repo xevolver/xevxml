@@ -431,8 +431,8 @@
 								<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2do']/CLAUSE[@name='replace']/ARG[1]/@value"/>
 							</xsl:attribute>
 						</xsl:element>
-						<xsl:element name="SgIntVal">
-							<xsl:attribute name="value">
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">
 								<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2do']/CLAUSE[@name='replace']/ARG[2]/@value"/>
 							</xsl:attribute>
 						</xsl:element>
@@ -449,8 +449,8 @@
 					<xsl:choose>
 						<!-- 【刻み幅】の指定があるとき -->
 						<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2do']/CLAUSE[@name='replace']/ARG[4]/@specified='true'">
-							<xsl:element name="SgIntVal">
-								<xsl:attribute name="value">
+							<xsl:element name="SgVarRefExp">
+								<xsl:attribute name="name">
 									<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2do']/CLAUSE[@name='replace']/ARG[4]/@value"/>
 								</xsl:attribute>
 							</xsl:element>
