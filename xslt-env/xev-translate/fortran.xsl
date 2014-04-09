@@ -115,21 +115,20 @@
 	<!-- SgExprListExp -->
 	<xsl:template match="SgExprListExp">
 		<xsl:choose>
-			<!--	!$xev array_dim_chg strat(変数名,次元番号,次元番号,次元番号)
+			<!--	!$xev array_dim_chg strat(配列名,次元番号,次元番号,...)
 			
-				多次元配列の参照をを指定次元番号順にする
+				多次元配列の参照を指定次元番号順にする
 
 				次元の入れ替えは指定範囲内を行う
 					!$xev array_dim_chg strat
 				 	      ～この間次元入れ替えする～
 					!$xev end array_dim_chg
-				※ディレクティブ引数の参照は VARARG/ARG[] で参照すること。
 			-->
 			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=preceding::DIRECTIVE[@name='array_dim_chg']/CLAUSE[@name='start' and @specified='true']/ARG[1]/@value">
 				<xsl:choose>
 					<!-- 
 						現在ノードより文書順で前にある最も近いノードが、
-						範囲指定終了【!$xev end array_dim_chg(変数名)】の場合
+						範囲指定終了【!$xev end array_dim_chg(配列名)】の場合
 						変換しない
 					-->
 					<xsl:when test="preceding::DIRECTIVE[./CLAUSE/ARG[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and @name='end' or @name='array_dim_chg'][1]/CLAUSE/@name='array_dim_chg'">
@@ -140,7 +139,7 @@
 					</xsl:when>
 
 					<!-- 
-						現在ノードより文書順で前にある【!$xev array_dim_chg start(変数名,次元番号,次元番号,次元番号)】がある場合
+						現在ノードより文書順で前にある【!$xev array_dim_chg start(配列名,次元番号,次元番号,次元番号)】がある場合
 						次元入れ替えする
 					-->
 					<xsl:otherwise>
@@ -149,14 +148,11 @@
 						<!-- 指定された次元番号のノードを取り出す -->
 						<xsl:copy>
 							<!-- ディレクティブ【array_dim_chg】の VARARG/ARG 分、次元の並び変えを行う -->
-							<xsl:for-each select="preceding::DIRECTIVE[ @name='array_dim_chg' and ./CLAUSE/@name='start' and ./CLAUSE/ARG[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name ][1]/CLAUSE/ARG">
-								<!-- ARG[2]より処理する。（ARG[1]は配列名なので処理しない） -->
-								<xsl:if test="position()&gt;1">
-									<!-- 次元番号を取り出す -->
-									<xsl:variable name="idx" select="number(@value)"/>
-									<!-- テンプレートを使用して、指定された次元番号のノードを取り出す -->
-									<xsl:apply-templates select="$expr-list/*[ $idx ]"/>
-								</xsl:if>
+							<xsl:for-each select="preceding::DIRECTIVE[ @name='array_dim_chg' and ./CLAUSE/@name='start' and ./CLAUSE/ARG[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name ][1]/CLAUSE/VARARG/ARG">
+								<!-- 次元番号を取り出す -->
+								<xsl:variable name="idx" select="number(@value)"/>
+								<!-- テンプレートを使用して、指定された次元番号のノードを取り出す -->
+								<xsl:apply-templates select="$expr-list/*[ $idx ]"/>
 							</xsl:for-each>
 
 						</xsl:copy>

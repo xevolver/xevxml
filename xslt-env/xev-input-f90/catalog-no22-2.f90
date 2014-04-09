@@ -26,8 +26,9 @@ program catalog_no22
         a1(i,j,8)=b1(i,j,8)*c1(i,j,8)+d1(i,j,8)*e1(i,j,8)
       end do
    end do
-!$xev end var_replace(i,k)
+!$xev end var_replace(i)
 !$xev end array_dim_chg(a1)
+        a1(i,j,8)=b1(i,j,8)*c1(i,j,8)+d1(i,j,8)*e1(i,j,8)
 
 end program catalog_no22
 

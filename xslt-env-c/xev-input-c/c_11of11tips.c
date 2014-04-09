@@ -2,8 +2,7 @@ float x[];
 void sub( float *y )
 {
     int   i;
-#pragma xev dir add(acc,kernels,present_or_copy(y),present_or_copyin(x))
-#pragma xev dir remove
+#pragma xev dir replace(acc,kernels,present_or_copy(y),present_or_copyin(x))
 #pragma acc declare present(y,x)
 #pragma xev dir remove
 #pragma acc kernels

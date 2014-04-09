@@ -33,6 +33,7 @@
 			<ARG value="default" />
 			<ARG value="default" />
 			<ARG value="default" />
+			<ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="scalar2array1_varref">

@@ -50,7 +50,7 @@
 				</xsl:choose>
 			</xsl:when>
 
-			<!--	!$xev scalar2array1_varref start(スカラ変数,添字)
+			<!--	!$xev scalar2array1_varref start(スカラ変数名,配列サイズ,添字)
 			
 				変数の参照をスカラ変数から1次元配列に置き換える
 				
@@ -115,21 +115,20 @@
 	<!-- SgExprListExp -->
 	<xsl:template match="SgExprListExp">
 		<xsl:choose>
-			<!--	!$xev array_dim_chg strat(変数名,次元番号,次元番号,次元番号)
+			<!--	!$xev array_dim_chg strat(配列名,次元番号,次元番号,...)
 			
-				多次元配列の参照をを指定次元番号順にする
+				多次元配列の参照を指定次元番号順にする
 
 				次元の入れ替えは指定範囲内を行う
 					!$xev array_dim_chg strat
 				 	      ～この間次元入れ替えする～
 					!$xev end array_dim_chg
-				※ディレクティブ引数の参照は VARARG/ARG[] で参照すること。
 			-->
 			<xsl:when test="preceding-sibling::SgVarRefExp[1]/@name=preceding::DIRECTIVE[@name='array_dim_chg']/CLAUSE[@name='start' and @specified='true']/ARG[1]/@value">
 				<xsl:choose>
 					<!-- 
 						現在ノードより文書順で前にある最も近いノードが、
-						範囲指定終了【!$xev end array_dim_chg(変数名)】の場合
+						範囲指定終了【!$xev end array_dim_chg(配列名)】の場合
 						変換しない
 					-->
 					<xsl:when test="preceding::DIRECTIVE[./CLAUSE/ARG[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name and @name='end' or @name='array_dim_chg'][1]/CLAUSE/@name='array_dim_chg'">
@@ -140,7 +139,7 @@
 					</xsl:when>
 
 					<!-- 
-						現在ノードより文書順で前にある【!$xev array_dim_chg start(変数名,次元番号,次元番号,次元番号)】がある場合
+						現在ノードより文書順で前にある【!$xev array_dim_chg start(配列名,次元番号,次元番号,次元番号)】がある場合
 						次元入れ替えする
 					-->
 					<xsl:otherwise>
@@ -149,14 +148,11 @@
 						<!-- 指定された次元番号のノードを取り出す -->
 						<xsl:copy>
 							<!-- ディレクティブ【array_dim_chg】の VARARG/ARG 分、次元の並び変えを行う -->
-							<xsl:for-each select="preceding::DIRECTIVE[ @name='array_dim_chg' and ./CLAUSE/@name='start' and ./CLAUSE/ARG[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name ][1]/CLAUSE/ARG">
-								<!-- ARG[2]より処理する。（ARG[1]は配列名なので処理しない） -->
-								<xsl:if test="position()&gt;1">
-									<!-- 次元番号を取り出す -->
-									<xsl:variable name="idx" select="number(@value)"/>
-									<!-- テンプレートを使用して、指定された次元番号のノードを取り出す -->
-									<xsl:apply-templates select="$expr-list/*[ $idx ]"/>
-								</xsl:if>
+							<xsl:for-each select="preceding::DIRECTIVE[ @name='array_dim_chg' and ./CLAUSE/@name='start' and ./CLAUSE/ARG[1]/@value=current()/preceding-sibling::SgVarRefExp[1]/@name ][1]/CLAUSE/VARARG/ARG">
+								<!-- 次元番号を取り出す -->
+								<xsl:variable name="idx" select="number(@value)"/>
+								<!-- テンプレートを使用して、指定された次元番号のノードを取り出す -->
+								<xsl:apply-templates select="$expr-list/*[ $idx ]"/>
 							</xsl:for-each>
 
 						</xsl:copy>
@@ -168,7 +164,7 @@
 
 			<!--	!$xev array1to2_varref start(変数名,添字,添字)
 			
-				1次元配列の参照をから2次元配列に置き換える
+				1次元配列の参照を2次元配列に置き換える
 
 				変数の変換は指定範囲内を行う
 					!$xev array1to2_varref start
@@ -285,7 +281,7 @@
 			</xsl:when>
 
 
-			<!--	!$xev array1to2 type(変数名,サイズ,サイズ)
+			<!--	!$xev array1to2 type(1次元配列名,サイズ,サイズ)
 			
 				1次元配列の宣言を2次元配列に置き換える
 			-->
@@ -885,7 +881,7 @@
 				</SgFortranDo>
 			</xsl:when>
 
-			<!--	!$xev array1to2 varref(変数名,添字,添字)
+			<!--	!$xev array1to2 varref(1次元配列名,添字,添字)
                                 ディレクティブを削除する
 			-->
 			<xsl:when test="./SgPragma/DIRECTIVE[@name='array1to2_varref']/CLAUSE[@name='start' and @specified='true']">
@@ -894,7 +890,7 @@
 				</xsl:comment>
 			</xsl:when>
 
-			<!--	!$xev array1to2 type(変数名,サイズ,サイズ)
+			<!--	!$xev array1to2 type(1次元配列名,サイズ,サイズ)
                                 ディレクティブを削除する
 			-->
 			<xsl:when test="./SgPragma/DIRECTIVE[@name='array1to2']/CLAUSE[@name='type' and @specified='true']">
@@ -950,10 +946,10 @@
 					<xsl:element name="SgPragma">
 						<xsl:attribute name="pragma">
 							<!--
-								追加するディレクティブ行の内容を取り出す
+								追加するもとのディレクティブ行の内容を取り出す
 
-								指示内容（!$xev dir append( 文字列 )と同じ【PreprocessingInfo]】ノードの
-								直下の【PreprocessingInfo]】を取り出す
+								　指示内容（!$xev dir append( 文字列 )と同じ【PreprocessingInfo]】ノードの
+								　直下の【PreprocessingInfo]】を取り出す
 							-->
 							<xsl:value-of select="substring( substring-after(following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]/following-sibling::*[1],'!$'), 1, string-length(substring-after(following-sibling::*/PreprocessingInfo[contains(text(),current()/SgPragma/@pragma)]/following-sibling::*[1],'!$'))-1)"/>
 

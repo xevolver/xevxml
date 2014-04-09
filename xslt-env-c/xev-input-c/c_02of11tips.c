@@ -1,16 +1,17 @@
+#define N	300
 void TEST02()
 {
     int found;
     int i;
-    int A[300];
+    int A[N];
 
 #pragma xev dir append(loop)
 #pragma acc kernels
 
 #pragma xev statement remove
     i = 0;
-#pragma xev scalar2array1_varref start(found,300,i)
-#pragma xev while2for replace(i,0,300)
+#pragma xev scalar2array1_varref start(found,N,i)
+#pragma xev while2for replace(i,0,N)
     while ( found==0 )
     {
 #pragma xev statement remove
@@ -20,7 +21,8 @@ void TEST02()
            found = i;
         }
     }
-#pragma xev end scalar2array1_varref(found,300,i)  
+#pragma xev end scalar2array1_varref(found)  
 #pragma acc end kernels
+
     return;
 }

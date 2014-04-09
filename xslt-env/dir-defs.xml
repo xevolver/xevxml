@@ -115,9 +115,7 @@
 	<DIRECTIVE name="array_dim_chg">
 		<CLAUSE name="start">
 			<ARG value="default" />
-			<ARG value="default" />
-			<ARG value="default" />
-			<ARG value="default" />
+			<VARARG/>
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="end">

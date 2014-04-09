@@ -3,8 +3,7 @@
       contains
          subroutine sub( y )
          real, dimension(:) :: y
-!$xev dir add(acc,kernels,present_or_copy(y),present_or_copyin(x))
-!$xev dir remove
+!$xev dir replace(acc,kernels,present_or_copy(y),present_or_copyin(x))
 !$acc declare present(y,x)
 !$xev dir remove
 !$acc kernels

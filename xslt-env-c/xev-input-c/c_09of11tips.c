@@ -1,3 +1,6 @@
+extern int abs();
+extern int max();
+
 void TEST09( int m, int n )
 {
     float  a[100][199], newa[100][100];
@@ -7,7 +10,7 @@ void TEST09( int m, int n )
 
     change = tolerance + 1;
     iters = 0;
-    do
+    while (change > tolerance)
     {
         iters = iters + 1;
         change = 0;
@@ -33,6 +36,6 @@ void TEST09( int m, int n )
             }
         }
 #pragma acc end kernels
-    }while ( change > tolerance );
+    }
  
 }

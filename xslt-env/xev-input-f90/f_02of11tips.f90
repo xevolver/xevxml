@@ -19,7 +19,6 @@ SUBROUTINE TEST02()
         end if
     end do
     !$xev end scalar2array1_varref(found)
-    found = 10
     !$acc end kernels
     
     !print *,'Found at',maxval(found)

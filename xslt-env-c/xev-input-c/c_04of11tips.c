@@ -7,7 +7,6 @@ void TEST04( int M, int N )
     int i,j;
 
 #pragma acc kernels loop
-#pragma xev array1to2_varref start(A,0,0,default)
 #pragma xev array1to2_varref start(A,i,j)
     for( i=0; i<M; i++ )
     {
@@ -20,8 +19,7 @@ void TEST04( int M, int N )
         }
     }
 
-#pragma xev end array1to2_varref(A,i,j)
-            A[idx] = B[i][j];
+#pragma xev end array1to2_varref(A)
     return;
 }
 

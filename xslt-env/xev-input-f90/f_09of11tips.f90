@@ -5,7 +5,7 @@ SUBROUTINE TEST09(m,n)
     INTEGER i,j,iters
 
 
-      change = tolerance + 1 ! get into the while loop
+      change = tolerance + 1 
       iters = 0
       do while ( change > tolerance )
          iters = iters + 1

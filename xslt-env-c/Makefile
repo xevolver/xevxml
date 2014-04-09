@@ -1,8 +1,8 @@
 # Makefile.hagi
 
 #XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
-XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
+XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+#XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
 
 # user input
 INPUT_DIR	= xev-input-c
