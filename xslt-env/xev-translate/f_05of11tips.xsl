@@ -246,6 +246,60 @@
 	<!-- SgInitializedName -->
 	<xsl:template match="SgInitializedName">
 		<xsl:choose>
+			<!--	!$xev array_dim_chg strat(配列名,次元番号,次元番号,...)
+			
+				多次元配列の参照を指定次元番号順にする
+
+				次元の入れ替えは指定範囲内を行う
+					!$xev array_dim_chg strat
+				 	      ～この間次元入れ替えする～
+					!$xev end array_dim_chg
+			-->
+			<xsl:when test="@name=preceding::DIRECTIVE[@name='array_dim_chg']/CLAUSE[@name='start' and @specified='true']/ARG[1]/@value">
+				<xsl:choose>
+					<!-- 
+						現在ノードより文書順で前にある最も近いノードが、
+						範囲指定終了【!$xev end array_dim_chg(配列名)】の場合
+						変換しない
+					-->
+					<xsl:when test="preceding::DIRECTIVE[./CLAUSE/ARG[1]/@value=current()/@name and @name='end' or @name='array_dim_chg'][1]/CLAUSE/@name='array_dim_chg'">
+						<xsl:copy>
+							<xsl:copy-of select="@*"/>
+							<xsl:apply-templates/>
+						</xsl:copy>
+					</xsl:when>
+
+					<!-- 
+						現在ノードより文書順で前にある【!$xev array_dim_chg start(配列名,次元番号,次元番号,次元番号)】がある場合
+						次元入れ替えする
+					-->
+					<xsl:otherwise>
+						<!-- カレントノード【SgExprListExp】を退避 -->
+						<xsl:param name="expr-list" select="./SgArrayType"/>
+						<!-- 指定された次元番号のノードを取り出す -->
+						<xsl:copy>
+							<!-- 属性 -->
+							<xsl:copy-of select="@*"/>
+							<SgArrayType>
+								<xsl:copy-of select="./SgArrayType/@*"/>
+								<!-- 型宣言を出力する -->
+								<xsl:copy-of select="./SgArrayType/*[1]"/>
+
+								<!-- ディレクティブ【array_dim_chg】の VARARG/ARG 分、次元の並び変えを行う -->
+								<xsl:for-each select="preceding::DIRECTIVE[ @name='array_dim_chg' and ./CLAUSE/@name='start' and ./CLAUSE/ARG[1]/@value=current()/@name ][1]/CLAUSE/VARARG/ARG">
+									<!-- 次元番号を取り出す（型宣言分１個づらす為＋１） -->
+									<xsl:variable name="idx" select="number(@value) + 1"/>
+									<!-- テンプレートを使用して、指定された次元番号のノードを取り出す -->
+									<xsl:apply-templates select="$expr-list/*[ $idx ]"/>
+								</xsl:for-each>
+							</SgArrayType>
+
+						</xsl:copy>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:when>
+
+
 			<!--	!$xev scalar2array1_varref start(スカラ変数,サイズ,添字)
 			
 				スカラ変数のワーク用１次元配列を追加する
