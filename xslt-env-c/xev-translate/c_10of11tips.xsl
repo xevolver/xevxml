@@ -318,30 +318,15 @@
 										<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
 									</xsl:attribute>
 								</SgVarRefExp>
-								<SgIntVal>
-									<xsl:attribute name="value">
+								<SgVarRefExp>
+									<xsl:attribute name="name">
 										<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[2]/@value"/>
 									</xsl:attribute>
-								</SgIntVal>
+								</SgVarRefExp>
 							</SgAssignOp>
 						</SgExprStatement>
 					</SgForInitStatement>
 
-					<!-- 条件式（変数!=最終値） -->
-					<SgExprStatement>
-						<SgNotEqualOp>
-							<SgVarRefExp>
-								<xsl:attribute name="name">
-									<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
-								</xsl:attribute>
-							</SgVarRefExp>
-							<SgVarRefExp>
-								<xsl:attribute name="name">
-									<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[3]/@value"/>
-								</xsl:attribute>
-							</SgVarRefExp>
-						</SgNotEqualOp>
-					</SgExprStatement>
 
 					<!-- 【刻み幅】 -->
 					<xsl:choose>
@@ -351,40 +336,113 @@
 							<xsl:choose>
 								<!-- 刻み幅がマイナスの場合 -->
 								<xsl:when test=" $step &lt; 0" >
-									<SgMinusAssignOp>
-										<SgVarRefExp>
-											<xsl:attribute name="name">
-												<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
-											</xsl:attribute>
-										</SgVarRefExp>
-										<SgIntVal>
-											<xsl:attribute name="value">
-												<xsl:value-of select="$step * (-1)"/>
-											</xsl:attribute>
-										</SgIntVal>
-									</SgMinusAssignOp>
+									<!-- 条件式（変数<最終値） -->
+									<SgExprStatement>
+										<SgGreaterThanOp>
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[3]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+										</SgGreaterThanOp>
+									</SgExprStatement>
+
+									<xsl:if test="$step = (-1)" >
+										<SgMinusMinusOp mode="1">
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+										</SgMinusMinusOp>
+									</xsl:if>
+
+
+									<xsl:if test="$step != (-1)" >
+										<SgMinusAssignOp>
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+											<SgIntVal>
+												<xsl:attribute name="value">
+													<xsl:value-of select="$step * (-1)"/>
+												</xsl:attribute>
+											</SgIntVal>
+										</SgMinusAssignOp>
+									</xsl:if>
 								</xsl:when>
+
 								<!-- 刻み幅がプラスの場合 -->
 								<xsl:otherwise>
-									<SgPlusAssignOp>
-										<SgVarRefExp>
-											<xsl:attribute name="name">
-												<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
-											</xsl:attribute>
-										</SgVarRefExp>
-										<SgIntVal>
-											<xsl:attribute name="value">
-												<xsl:value-of select="$step"/>
-											</xsl:attribute>
-										</SgIntVal>
-									</SgPlusAssignOp>
+									<!-- 条件式（変数<最終値） -->
+									<SgExprStatement>
+										<SgLessThanOp>
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[3]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+										</SgLessThanOp>
+									</SgExprStatement>
+
+									<xsl:if test="$step = 1" >
+										<SgPlusPlusOp mode="1">
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+										</SgPlusPlusOp>
+									</xsl:if>
+									<xsl:if test="$step != 1" >
+										<SgPlusAssignOp>
+											<SgVarRefExp>
+												<xsl:attribute name="name">
+													<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+												</xsl:attribute>
+											</SgVarRefExp>
+											<SgIntVal>
+												<xsl:attribute name="value">
+													<xsl:value-of select="$step"/>
+												</xsl:attribute>
+											</SgIntVal>
+										</SgPlusAssignOp>
+									</xsl:if>
 								</xsl:otherwise>
 							</xsl:choose>
 						</xsl:when>
 
 						<!-- 【刻み幅】の指定がないとき、ディフォルト値(1)を設定する -->
 						<xsl:otherwise>
-							<!-- 刻み幅はインクリメント固定【Ex.i++】 -->
+							<!-- 条件式（変数<最終値） -->
+							<SgExprStatement>
+								<SgLessThanOp>
+									<SgVarRefExp>
+										<xsl:attribute name="name">
+											<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[1]/@value"/>
+										</xsl:attribute>
+									</SgVarRefExp>
+									<SgVarRefExp>
+										<xsl:attribute name="name">
+											<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='while2for']/CLAUSE[@name='replace']/ARG[3]/@value"/>
+										</xsl:attribute>
+									</SgVarRefExp>
+								</SgLessThanOp>
+							</SgExprStatement>
+
+							<!-- 刻み幅はインクリメント固定【i++】 -->
 							<SgPlusPlusOp mode="1">
 								<SgVarRefExp>
 									<xsl:attribute name="name">

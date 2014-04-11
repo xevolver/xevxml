@@ -1,3 +1,4 @@
+#include <stdio.h>
 void TEST05( int M, int N )
 {
     int  idx;

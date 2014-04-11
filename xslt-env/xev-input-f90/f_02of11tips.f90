@@ -9,8 +9,8 @@ SUBROUTINE TEST02()
 
     !$xev statement remove
     i = 0
-    !$xev scalar2array1_varref start(found,N,i)
-    !$xev while2do replace(I,1,N)
+    !$xev scalar2array1_varref start(found,300,i)
+    !$xev while2do replace(i,1,300)
     do  while ( .not. found==0)
     !$xev statement remove
         i = i + 1

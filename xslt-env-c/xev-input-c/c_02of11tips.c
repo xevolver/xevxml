@@ -10,8 +10,8 @@ void TEST02()
 
 #pragma xev statement remove
     i = 0;
-#pragma xev scalar2array1_varref start(found,N,i)
-#pragma xev while2for replace(i,0,N)
+#pragma xev scalar2array1_varref start(found,300,i)
+#pragma xev while2for replace(i,0,300,3)
     while ( found==0 )
     {
 #pragma xev statement remove

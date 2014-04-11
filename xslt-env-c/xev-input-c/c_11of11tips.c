@@ -1,4 +1,4 @@
-float x[];
+float x[100];
 void sub( float *y )
 {
     int   i;
