@@ -345,6 +345,11 @@ static void attribSgFunctionRefExp(stringstream& istr,SgNode* node)
 
   if(n) {
     istr << " symbol=" << n->get_symbol()->get_name() << " ";
+    SgProcedureHeaderStatement* h =
+      isSgProcedureHeaderStatement( n->get_symbol()->get_declaration() );
+    if(h){
+      istr << " subprogram_kind=\"" << h->get_subprogram_kind () << "\" ";
+    }
   }
 }
 

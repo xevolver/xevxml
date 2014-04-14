@@ -1818,18 +1818,37 @@ Xml2AstVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
   SgFunctionRefExp* ret = 0;
 
   xe::DOMNamedNodeMap* amap = node->getAttributes();
-  xe::DOMNode* nameatt = 0;
-  string name;
+  xe::DOMNode*         satt = 0;
+  string               name;
+  stringstream         val;
+  int                  kind;
   
   if(amap) {
-    nameatt=amap->getNamedItem(xe::XMLString::transcode("symbol"));
-    if(nameatt)
-      name = xe::XMLString::transcode(nameatt->getNodeValue());
+    satt=amap->getNamedItem(xe::XMLString::transcode("symbol"));
+    if(satt)
+      name = xe::XMLString::transcode(satt->getNodeValue());
+
+    satt=amap->getNamedItem(xe::XMLString::transcode("subprogram_kind"));
+    if(satt) {
+      val << xe::XMLString::transcode(satt->getNodeValue());
+      val >> kind;
+    }      
   }
   if( name.size() )
     ret = sb::buildFunctionRefExp( SgName(name) );
   else
     ABORT();
+  
+  // set subprogram_kind (2014.04.14)
+  SgFunctionRefExp* functionRefExp = ret;
+  SgFunctionSymbol* functionSymbol = functionRefExp->get_symbol();
+  SgFunctionDeclaration* functionDeclaration =
+    functionSymbol->get_declaration();
+  SgProcedureHeaderStatement* procedureHeaderStatement =
+    isSgProcedureHeaderStatement(functionDeclaration);
+  procedureHeaderStatement
+    ->set_subprogram_kind((SgProcedureHeaderStatement::subprogram_kind_enum)kind );
+	
   return ret;
 }
 
