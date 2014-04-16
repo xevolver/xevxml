@@ -29,11 +29,11 @@
                   <SgVarRefExp name="n"/>
                 </SgArrayType>
             </SgInitializedName>
-          </SgVariableDeclaration><SgVariableDeclaration><SgInitializedName name="xev_flg"><SgArrayType index="&quot;&quot;" rank="2" type="&quot;SgTypeInt&quot;"><SgTypeInt/><SgVarRefExp name="n"/><SgVarRefExp name="m"/></SgArrayType></SgInitializedName></SgVariableDeclaration>
+          </SgVariableDeclaration><SgVariableDeclaration><SgInitializedName xmlns:exslt="http://exslt.org/common" name="xev_flg"><SgArrayType index="&quot;&quot;" rank="2" type="&quot;SgTypeInt&quot;"><SgTypeInt/><SgVarRefExp name="n"/><SgVarRefExp name="n"/></SgArrayType></SgInitializedName></SgVariableDeclaration>
           <!--
-					SgPragmaDeclaration one-loop-copy
+					SgPragmaDeclaration one_loop_copy
 				-->
-          <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp name="n"/><SgNullExpression/>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp xmlns:exslt="http://exslt.org/common" name="n"/><SgNullExpression xmlns:exslt="http://exslt.org/common"/>
             <SgAssignOp>
               <SgVarRefExp name="j"/>
               <SgIntVal value="2"/>
@@ -44,7 +44,7 @@
             </SgSubtractOp>
             <SgNullExpression/>
             <SgBasicBlock>
-              <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp name="m"/><SgNullExpression/>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp xmlns:exslt="http://exslt.org/common" name="n"/><SgNullExpression xmlns:exslt="http://exslt.org/common"/>
                 <SgAssignOp>
                   <SgVarRefExp name="i"/>
                   <SgIntVal value="2"/>
@@ -55,7 +55,7 @@
                 </SgSubtractOp>
                 <SgNullExpression/>
                 <SgBasicBlock>
-                  <SgExprStatement><SgAssignOp><SgPntrArrRefExp><SgVarRefExp name="xev_flg"/><SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="0"/></SgAssignOp></SgExprStatement>
+                  <SgExprStatement><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgPntrArrRefExp><SgVarRefExp name="xev_flg"/><SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="0"/></SgAssignOp></SgExprStatement>
                 </SgBasicBlock>
               </SgFortranDo>
             </SgBasicBlock>
@@ -82,14 +82,14 @@
                 </SgSubtractOp>
                 <SgNullExpression/>
                 <SgBasicBlock>
-                  <SgExprStatement><SgAssignOp><SgPntrArrRefExp><SgVarRefExp name="xev_flg"/><SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="1"/></SgAssignOp></SgExprStatement>
+                  <SgExprStatement><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgPntrArrRefExp><SgVarRefExp name="xev_flg"/><SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="1"/></SgAssignOp></SgExprStatement>
                 </SgBasicBlock>
               </SgFortranDo>
             </SgBasicBlock>
             
           </SgFortranDo><SgBasicBlock>
-              <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAssignOp><SgMultiplyOp><SgVarRefExp name="n"/><SgVarRefExp name="m"/></SgMultiplyOp><SgNullExpression/><SgBasicBlock>
-                  <SgIfStmt><SgExprStatement><SgEqualityOp><SgPntrArrRefExp><SgVarRefExp name="xev_ifg"/><SgExprListExp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgExprListExp><SgExprListExp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="1"/></SgEqualityOp></SgExprStatement><SgBasicBlock><SgExprStatement>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAssignOp><SgMultiplyOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="n"/><SgVarRefExp name="n"/></SgMultiplyOp><SgNullExpression xmlns:exslt="http://exslt.org/common"/><SgBasicBlock>
+                  <SgIfStmt xmlns:exslt="http://exslt.org/common"><SgExprStatement><SgEqualityOp><SgPntrArrRefExp><SgVarRefExp name="xev_ifg"/><SgExprListExp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgExprListExp><SgExprListExp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="1"/></SgEqualityOp></SgExprStatement><SgBasicBlock><SgExprStatement>
                     <SgAssignOp>
                       <SgPntrArrRefExp>
                         <SgVarRefExp name="B"/>

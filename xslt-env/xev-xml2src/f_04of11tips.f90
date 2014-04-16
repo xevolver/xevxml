@@ -1,11 +1,11 @@
 SUBROUTINE TEST04(M,N)
 INTEGER :: idx
-INTEGER, DIMENSION(M * N) :: A
+INTEGER, DIMENSION(M,N) :: A
 INTEGER, DIMENSION(M,N) :: B
-!pragma acc kernels loop 
+!$acc kernels loop
 DO i = 1, M
 DO j = 1, N
-A(i,j)=B(i,j)
+A(i,j) = B(i,j)
 END DO
 END DO
 RETURN

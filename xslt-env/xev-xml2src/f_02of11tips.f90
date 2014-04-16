@@ -1,10 +1,18 @@
 SUBROUTINE TEST02()
-INTEGER, DIMENSION(300) :: found
+INTEGER :: found, found_tmp(300)
 INTEGER :: i
 INTEGER, DIMENSION(300) :: A
 !pragma acc kernels loop 
-doi=1,Nif(A(i).eq.102)thenfound(i)=ielsefound(i)=0endifenddoprint*,'Found_at',maxval(found)
-    !$acc end region
+DO i = 1, 300
+found_tmp(i) = 0
+END DO
+DO i = 1, 300
+IF (A(i) .EQ. 102) THEN
+found_tmp(i) = i
+END IF
+END DO
+    !$acc end kernels
+    !print *,'Found at',maxval(found)
 RETURN
 END SUBROUTINE 
 

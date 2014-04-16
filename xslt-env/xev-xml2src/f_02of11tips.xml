@@ -5,14 +5,10 @@
       <SgFunctionParameterList/>
       <SgFunctionDefinition>
         <SgBasicBlock>
-          <!--
-					SgPragmaDeclaration
-				-->
           <SgVariableDeclaration>
-            <SgInitializedName name="found"><SgArrayType index="" rank="1" type="SgTypeInt"><SgTypeInt/><SgIntVal value="300"/></SgArrayType></SgInitializedName>
-            <!--
-					PreprocessingInfo
-				-->
+            <SgInitializedName name="found">
+                <SgTypeInt/>
+            </SgInitializedName><SgInitializedName name="found_tmp"><SgArrayType index="&quot;&quot;" rank="1" type="SgTypeInt"><SgTypeInt/><SgVarRefExp name="300"/></SgArrayType></SgInitializedName>
           </SgVariableDeclaration>
           <SgVariableDeclaration>
             <SgInitializedName name="i">
@@ -29,32 +25,59 @@
           </SgVariableDeclaration>
           <SgPragmaDeclaration><SgPragma pragma="acc kernels loop "/></SgPragmaDeclaration>
           <!--
-					SgPragmaDeclaration
+					SgPragmaDeclaration statement remove
 				-->
           <!--
 					remove statement
 				-->
+          <SgFortranDo xmlns:exslt="http://exslt.org/common" end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp name="300"/><SgNullExpression/><SgBasicBlock><SgExprStatement><SgAssignOp><SgPntrArrRefExp><SgVarRefExp name="found_tmp"/><SgExprListExp><SgVarRefExp name="i"/></SgExprListExp></SgPntrArrRefExp><SgIntVal value="0"/></SgAssignOp></SgExprStatement></SgBasicBlock></SgFortranDo>
           <!--
-					SgPragmaDeclaration
+					SgPragmaDeclaration while2do replace
 				-->
-          
-				do i = 1, N
-				      if (A(i) .eq. 102) then
-				               found(i) = i
-				      else
-				               found(i) = 0
-				      endif
-				 enddo
-			
-          print *,'Found_at',maxval(found)
+          <SgFortranDo end="1" nlabel="" slabel=""><SgAssignOp><SgVarRefExp name="i"/><SgVarRefExp name="1"/></SgAssignOp><SgVarRefExp name="300"/><SgNullExpression xmlns:exslt="http://exslt.org/common"/><SgBasicBlock>
+              <!--
+					SgPragmaDeclaration statement remove
+				-->
+              <!--
+					remove statement
+				-->
+              <SgIfStmt>
+                <SgExprStatement>
+                  <SgEqualityOp>
+                    <SgPntrArrRefExp>
+                      <SgVarRefExp name="A"/>
+                      <SgExprListExp>
+                        <SgVarRefExp name="i"/>
+                      </SgExprListExp>
+                    </SgPntrArrRefExp>
+                    <SgIntVal value="102"/>
+                  </SgEqualityOp>
+                </SgExprStatement>
+                <SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp><SgVarRefExp name="found_tmp"/><SgExprListExp><SgVarRefExp name="i"/></SgExprListExp></SgPntrArrRefExp>
+                      <SgVarRefExp name="i"/>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+                <SgBasicBlock/>
+              </SgIfStmt>
+            </SgBasicBlock></SgFortranDo>
+          <!--
+					SgPragmaDeclaration end xxxx
+				-->
           <SgReturnStmt>
             <SgNullExpression/>
-            <PreprocessingInfo pos="2" type="3">
-    !$acc end region
-</PreprocessingInfo>
             <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
+            <PreprocessingInfo pos="2" type="3">
+    !$acc end kernels
+</PreprocessingInfo>
+            <PreprocessingInfo pos="2" type="3">
+    !print *,'Found at',maxval(found)
+</PreprocessingInfo>
           </SgReturnStmt>
         </SgBasicBlock>
       </SgFunctionDefinition>

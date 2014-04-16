@@ -3,7 +3,7 @@ INTEGER, DIMENSION(10) :: tmp
 INTEGER, DIMENSION(M,N) :: A
 !$acc kernels loop
 DO i = 1, M
-!pragma acc loop private(tmp） 
+!pragma acc loop private(tmp) 
 DO j = 1, N
 DO jj = 1, 10
 tmp(jj) = jj

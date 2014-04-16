@@ -33,7 +33,7 @@
             </SgInitializedName>
           </SgVariableDeclaration>
           <!--
-					SgPragmaDeclaration loop-unroll
+					SgPragmaDeclaration loop_unroll
 				-->
           <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp>
               <SgVarRefExp name="k"/>
@@ -43,7 +43,7 @@
               <SgIntVal value="1"/>
             </SgSubtractOp><SgIntVal value="3"/><SgBasicBlock>
               <!--
-					SgPragmaDeclaration loop-unroll
+					SgPragmaDeclaration loop_unroll
 				-->
               <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp>
                   <SgVarRefExp name="j"/>
@@ -53,7 +53,7 @@
                   <SgIntVal value="1"/>
                 </SgSubtractOp><SgIntVal value="3"/><SgBasicBlock>
                   <!--
-					SgPragmaDeclaration loop-unroll
+					SgPragmaDeclaration loop_unroll
 				-->
                   <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp>
                       <SgVarRefExp name="i"/>
@@ -576,8 +576,333 @@
                           </SgPntrArrRefExp>
                         </SgAssignOp>
                       </SgExprStatement>
+                    </SgBasicBlock></SgFortranDo><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="i"/><SgSubtractOp><SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp><SgFunctionCallExp><SgFunctionRefExp symbol="mod"/><SgExprListExp><SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp><SgIntVal value="3"/></SgExprListExp></SgFunctionCallExp></SgSubtractOp></SgAssignOp><SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp><SgNullExpression/><SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAddOp>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAddOp>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="1"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="2"/></SgAddOp>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="2"/></SgAddOp>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="2"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="2"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="2"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgIntVal value="2"/></SgAddOp>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement>
                     </SgBasicBlock></SgFortranDo>
+                </SgBasicBlock></SgFortranDo><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="j"/><SgSubtractOp><SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp><SgFunctionCallExp><SgFunctionRefExp symbol="mod"/><SgExprListExp><SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp><SgIntVal value="3"/></SgExprListExp></SgFunctionCallExp></SgSubtractOp></SgAssignOp><SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp><SgNullExpression/><SgBasicBlock>
+                  
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="i"/>
+                      <SgIntVal value="2"/>
+                    </SgAssignOp>
+                    <SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                    
+                  </SgFortranDo>
                 </SgBasicBlock></SgFortranDo>
+            </SgBasicBlock></SgFortranDo><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp xmlns:exslt="http://exslt.org/common"><SgVarRefExp name="k"/><SgSubtractOp><SgSubtractOp>
+              <SgVarRefExp name="n"/>
+              <SgIntVal value="1"/>
+            </SgSubtractOp><SgFunctionCallExp><SgFunctionRefExp symbol="mod"/><SgExprListExp><SgSubtractOp>
+              <SgVarRefExp name="n"/>
+              <SgIntVal value="1"/>
+            </SgSubtractOp><SgIntVal value="3"/></SgExprListExp></SgFunctionCallExp></SgSubtractOp></SgAssignOp><SgSubtractOp>
+              <SgVarRefExp name="n"/>
+              <SgIntVal value="1"/>
+            </SgSubtractOp><SgNullExpression/><SgBasicBlock>
+              
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="2"/>
+                </SgAssignOp>
+                <SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="i"/>
+                      <SgIntVal value="2"/>
+                    </SgAssignOp>
+                    <SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                    
+                  </SgFortranDo>
+                </SgBasicBlock>
+                
+              </SgFortranDo>
             </SgBasicBlock></SgFortranDo>
         </SgBasicBlock>
       </SgFunctionDefinition>

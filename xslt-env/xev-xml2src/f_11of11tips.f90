@@ -3,7 +3,7 @@ REAL, DIMENSION(:), ALLOCATABLE, PUBLIC :: x
 CONTAINS
 SUBROUTINE sub(y)
 REAL, DIMENSION(:), PUBLIC :: y
-!pragma acc present_or_copy(y 
+!pragma acc kernels present_or_copy(y) present_or_copyin(x) 
 DO i = 1, ubound(y,1)
 y(i) = y(i) + x(i)
 END DO
@@ -12,12 +12,11 @@ END SUBROUTINE
 
 END MODULE glob
 
-SUBROUTINE roo(z,zz)
+SUBROUTINE roo(z)
 USE glob
-REAL :: z(:), zz
+REAL, DIMENSION(:) :: z
 !$acc data copy(z) copyin(x)
-sub(z)
-sub(zz)
+CALL sub(z)
 !$acc end data region
 END SUBROUTINE 
 

@@ -90,118 +90,178 @@
               <SgIntVal value="0"/>
             </SgAssignOp>
           </SgExprStatement>
-          <SgPragmaDeclaration><SgPragma pragma="acc data copy(a(1:n 1:m "/></SgPragmaDeclaration>
-          do while(change &gt; tolerance 
-          <SgPragmaDeclaration><SgPragma pragma="acc kernels "/></SgPragmaDeclaration>
-          <SgPragmaDeclaration>
-            <SgPragma pragma="xev fortran-do copy-001(a(i,j) = b(i,j))">
-              <DIRECTIVE name="fortran-do">
-		              <CLAUSE name="copy-001">
-                  <LI value="a(i"/>
-                  <LI value="j"/>
-                </CLAUSE>
-	            </DIRECTIVE>
-            </SgPragma>
-          </SgPragmaDeclaration>
-          <SgFortranDo end="1" nlabel="" slabel="" style="0">
-            <SgAssignOp>
-              <SgVarRefExp name="j"/>
-              <SgIntVal value="2"/>
-            </SgAssignOp>
-            <SgSubtractOp>
-              <SgVarRefExp name="n"/>
-              <SgIntVal value="1"/>
-            </SgSubtractOp>
-            <SgNullExpression/>
+          <SgWhileStmt end="1" nlabel="" slabel="">
+            <SgExprStatement>
+              <SgGreaterThanOp>
+                <SgVarRefExp name="change"/>
+                <SgVarRefExp name="tolerance"/>
+              </SgGreaterThanOp>
+            </SgExprStatement>
             <SgBasicBlock>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="iters"/>
+                  <SgAddOp>
+                    <SgVarRefExp name="iters"/>
+                    <SgIntVal value="1"/>
+                  </SgAddOp>
+                </SgAssignOp>
+              </SgExprStatement>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="change"/>
+                  <SgIntVal value="0"/>
+                </SgAssignOp>
+              </SgExprStatement>
+              <SgPragmaDeclaration><SgPragma pragma="acc data copy(a(1:n,1:m) "/></SgPragmaDeclaration>
+              <SgPragmaDeclaration><SgPragma pragma="acc kernels "/></SgPragmaDeclaration>
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
-                  <SgVarRefExp name="i"/>
+                  <SgVarRefExp name="j"/>
                   <SgIntVal value="2"/>
                 </SgAssignOp>
                 <SgSubtractOp>
-                  <SgVarRefExp name="m"/>
+                  <SgVarRefExp name="n"/>
                   <SgIntVal value="1"/>
                 </SgSubtractOp>
                 <SgNullExpression/>
                 <SgBasicBlock>
-                  <SgExprStatement>
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
                     <SgAssignOp>
-                      <SgPntrArrRefExp>
-                        <SgVarRefExp name="b"/>
-                        <SgExprListExp>
-                          <SgVarRefExp name="i"/>
-                          <SgVarRefExp name="j"/>
-                        </SgExprListExp>
-                      </SgPntrArrRefExp>
-                      <SgAddOp>
-                        <SgMultiplyOp>
-                          <SgMultiplyOp>
-                            <SgFloatVal value="0.25"/>
-                            <SgPntrArrRefExp>
-                              <SgVarRefExp name="w"/>
-                              <SgExprListExp>
-                                <SgVarRefExp name="i"/>
-                              </SgExprListExp>
-                            </SgPntrArrRefExp>
-                          </SgMultiplyOp>
+                      <SgVarRefExp name="i"/>
+                      <SgIntVal value="2"/>
+                    </SgAssignOp>
+                    <SgSubtractOp>
+                      <SgVarRefExp name="m"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="b"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
                           <SgAddOp>
-                            <SgAddOp>
-                              <SgAddOp>
+                            <SgMultiplyOp>
+                              <SgMultiplyOp>
+                                <SgFloatVal value="0.25"/>
                                 <SgPntrArrRefExp>
-                                  <SgVarRefExp name="a"/>
+                                  <SgVarRefExp name="w"/>
                                   <SgExprListExp>
-                                    <SgSubtractOp>
-                                      <SgVarRefExp name="i"/>
-                                      <SgIntVal value="1"/>
-                                    </SgSubtractOp>
-                                    <SgVarRefExp name="j"/>
+                                    <SgVarRefExp name="i"/>
                                   </SgExprListExp>
                                 </SgPntrArrRefExp>
+                              </SgMultiplyOp>
+                              <SgAddOp>
+                                <SgAddOp>
+                                  <SgAddOp>
+                                    <SgPntrArrRefExp>
+                                      <SgVarRefExp name="a"/>
+                                      <SgExprListExp>
+                                        <SgSubtractOp>
+                                          <SgVarRefExp name="i"/>
+                                          <SgIntVal value="1"/>
+                                        </SgSubtractOp>
+                                        <SgVarRefExp name="j"/>
+                                      </SgExprListExp>
+                                    </SgPntrArrRefExp>
+                                    <SgPntrArrRefExp>
+                                      <SgVarRefExp name="a"/>
+                                      <SgExprListExp>
+                                        <SgVarRefExp name="i"/>
+                                        <SgSubtractOp>
+                                          <SgVarRefExp name="j"/>
+                                          <SgIntVal value="1"/>
+                                        </SgSubtractOp>
+                                      </SgExprListExp>
+                                    </SgPntrArrRefExp>
+                                  </SgAddOp>
+                                  <SgPntrArrRefExp>
+                                    <SgVarRefExp name="a"/>
+                                    <SgExprListExp>
+                                      <SgAddOp>
+                                        <SgVarRefExp name="i"/>
+                                        <SgIntVal value="1"/>
+                                      </SgAddOp>
+                                      <SgVarRefExp name="j"/>
+                                    </SgExprListExp>
+                                  </SgPntrArrRefExp>
+                                </SgAddOp>
                                 <SgPntrArrRefExp>
                                   <SgVarRefExp name="a"/>
                                   <SgExprListExp>
                                     <SgVarRefExp name="i"/>
-                                    <SgSubtractOp>
+                                    <SgAddOp>
                                       <SgVarRefExp name="j"/>
                                       <SgIntVal value="1"/>
-                                    </SgSubtractOp>
+                                    </SgAddOp>
                                   </SgExprListExp>
                                 </SgPntrArrRefExp>
                               </SgAddOp>
+                            </SgMultiplyOp>
+                            <SgMultiplyOp>
+                              <SgSubtractOp>
+                                <SgFloatVal value="1"/>
+                                <SgPntrArrRefExp>
+                                  <SgVarRefExp name="w"/>
+                                  <SgExprListExp>
+                                    <SgVarRefExp name="i"/>
+                                  </SgExprListExp>
+                                </SgPntrArrRefExp>
+                              </SgSubtractOp>
                               <SgPntrArrRefExp>
                                 <SgVarRefExp name="a"/>
                                 <SgExprListExp>
-                                  <SgAddOp>
-                                    <SgVarRefExp name="i"/>
-                                    <SgIntVal value="1"/>
-                                  </SgAddOp>
+                                  <SgVarRefExp name="&amp;&#10;i"/>
                                   <SgVarRefExp name="j"/>
                                 </SgExprListExp>
                               </SgPntrArrRefExp>
-                            </SgAddOp>
-                            <SgPntrArrRefExp>
-                              <SgVarRefExp name="a"/>
-                              <SgExprListExp>
-                                <SgVarRefExp name="i"/>
-                                <SgAddOp>
-                                  <SgVarRefExp name="j"/>
-                                  <SgIntVal value="1"/>
-                                </SgAddOp>
-                              </SgExprListExp>
-                            </SgPntrArrRefExp>
+                            </SgMultiplyOp>
                           </SgAddOp>
-                        </SgMultiplyOp>
-                        <SgMultiplyOp>
-                          <SgSubtractOp>
-                            <SgFloatVal value="1"/>
-                            <SgPntrArrRefExp>
-                              <SgVarRefExp name="w"/>
-                              <SgExprListExp>
-                                <SgVarRefExp name="i"/>
-                              </SgExprListExp>
-                            </SgPntrArrRefExp>
-                          </SgSubtractOp>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                  </SgFortranDo>
+                </SgBasicBlock>
+                <!--
+					remove PreprocessingInfo
+				-->
+                <!--
+					remove PreprocessingInfo
+				-->
+                <!--
+					remove PreprocessingInfo
+				-->
+              </SgFortranDo>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="2"/>
+                </SgAssignOp>
+                <SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="i"/>
+                      <SgIntVal value="2"/>
+                    </SgAssignOp>
+                    <SgSubtractOp>
+                      <SgVarRefExp name="m"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
                           <SgPntrArrRefExp>
                             <SgVarRefExp name="a"/>
                             <SgExprListExp>
@@ -209,63 +269,26 @@
                               <SgVarRefExp name="j"/>
                             </SgExprListExp>
                           </SgPntrArrRefExp>
-                        </SgMultiplyOp>
-                      </SgAddOp>
-                    </SgAssignOp>
-                  </SgExprStatement>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="b"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                  </SgFortranDo>
                 </SgBasicBlock>
               </SgFortranDo>
             </SgBasicBlock>
-            <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
-				-->
-          </SgFortranDo><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp>
-              <SgVarRefExp name="j"/>
-              <SgIntVal value="2"/>
-            </SgAssignOp><SgSubtractOp>
-              <SgVarRefExp name="n"/>
-              <SgIntVal value="1"/>
-            </SgSubtractOp><SgNullExpression/><SgBasicBlock>
-              <SgFortranDo end="1" nlabel="" slabel="" style="0">
-                <SgAssignOp>
-                  <SgVarRefExp name="i"/>
-                  <SgIntVal value="2"/>
-                </SgAssignOp>
-                <SgSubtractOp>
-                  <SgVarRefExp name="m"/>
-                  <SgIntVal value="1"/>
-                </SgSubtractOp>
-                <SgNullExpression/>
-                <SgBasicBlock>
-                  <SgExprStatement><SgAssignOp><SgPntrArrRefExp><SgVarRefExp name="a"/><SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp></SgPntrArrRefExp><SgPntrArrRefExp><SgVarRefExp name="b"/><SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp></SgPntrArrRefExp></SgAssignOp></SgExprStatement>
-                </SgBasicBlock>
-              </SgFortranDo>
-            </SgBasicBlock></SgFortranDo>
+          </SgWhileStmt>
           <SgPragmaDeclaration><SgPragma pragma="acc end kernels "/></SgPragmaDeclaration>
-          end do 
-          <SgPragmaDeclaration><SgPragma pragma="acc end data "/></SgPragmaDeclaration>
           <SgReturnStmt>
             <SgNullExpression/>
             <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
           </SgReturnStmt>
         </SgBasicBlock>

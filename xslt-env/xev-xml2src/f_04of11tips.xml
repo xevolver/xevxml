@@ -12,21 +12,19 @@
       </SgFunctionParameterList>
       <SgFunctionDefinition>
         <SgBasicBlock>
+          <!--
+					SgPragmaDeclaration
+				-->
           <SgVariableDeclaration>
             <SgInitializedName name="idx">
                 <SgTypeInt/>
             </SgInitializedName>
+            <!--
+					remove PreprocessingInfo
+				-->
           </SgVariableDeclaration>
           <SgVariableDeclaration>
-            <SgInitializedName name="A">
-                <SgArrayType index="" rank="1" type="SgTypeInt">
-                  <SgTypeInt/>
-                  <SgMultiplyOp>
-                    <SgVarRefExp name="M"/>
-                    <SgVarRefExp name="N"/>
-                  </SgMultiplyOp>
-                </SgArrayType>
-            </SgInitializedName>
+            <SgInitializedName name="A"><SgArrayType index="" rank="2" type="SgTypeInt"><SgTypeInt/><SgVarRefExp name="M"/><SgVarRefExp name="N"/></SgArrayType></SgInitializedName>
           </SgVariableDeclaration>
           <SgVariableDeclaration>
             <SgInitializedName name="B">
@@ -37,7 +35,9 @@
                 </SgArrayType>
             </SgInitializedName>
           </SgVariableDeclaration>
-          <SgPragmaDeclaration><SgPragma pragma="acc kernels loop "/></SgPragmaDeclaration>
+          <!--
+					SgPragmaDeclaration
+				-->
           <SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
               <SgVarRefExp name="i"/>
@@ -55,29 +55,44 @@
                 <SgNullExpression/>
                 <SgBasicBlock>
                   <!--
-					SgPragmaDeclaration
+					SgPragmaDeclaration statement remove
 				-->
                   <!--
 					remove statement
 				-->
-                  <!--
-					SgPragmaDeclaration
-				-->
-                  <!--
-					remove statement
-				-->A(i,j)=B(i,j)
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="A"/>
+                        <SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/></SgExprListExp>
+                      </SgPntrArrRefExp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="B"/>
+                        <SgExprListExp>
+                          <SgVarRefExp name="i"/>
+                          <SgVarRefExp name="j"/>
+                        </SgExprListExp>
+                      </SgPntrArrRefExp>
+                    </SgAssignOp>
+                  </SgExprStatement>
                 </SgBasicBlock>
               </SgFortranDo>
             </SgBasicBlock>
+            <PreprocessingInfo pos="2" type="3">
+!$acc kernels loop
+</PreprocessingInfo>
             <!--
-					PreprocessingInfo
-				-->
-            <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
           </SgFortranDo>
+          <!--
+					SgPragmaDeclaration end xxxx
+				-->
           <SgReturnStmt>
             <SgNullExpression/>
+            <!--
+					remove PreprocessingInfo
+				-->
           </SgReturnStmt>
         </SgBasicBlock>
       </SgFunctionDefinition>

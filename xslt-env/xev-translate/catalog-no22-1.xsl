@@ -441,10 +441,24 @@
 				直前に'statement remove'がある場合、この statement を削除する
 			-->
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement']/CLAUSE[@name='remove' and @specified='true']">
-
 				<xsl:comment>
 					remove statement
 				</xsl:comment>
+			</xsl:when>
+
+			<!--
+			     	１行が長すぎる場合、改行する
+			-->
+			<xsl:when test="count(.//SgVarRefExp) > 20">
+  				<xsl:variable name="stm">
+					<xsl:copy>
+						<xsl:copy-of select="@*"/>
+						<xsl:apply-templates/>
+					</xsl:copy>
+				</xsl:variable>
+
+				<!-- 改行する -->
+				<xsl:apply-templates select="exslt:node-set($stm)" mode="new_line"/>
 			</xsl:when>
 
 			<xsl:otherwise>
@@ -454,8 +468,8 @@
 				</xsl:copy>
 			</xsl:otherwise>
 		</xsl:choose>
-	</xsl:template>
 
+	</xsl:template>
 	
 	<!-- SgWhileStmt -->
 	<xsl:template match="SgWhileStmt">
@@ -1135,6 +1149,39 @@
 
 <!-- これ以降は個別 XSL +++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 
+<!-- [new_line] +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+	<!-- 	SgVarRefExp
+	     	１行に変数が２０こ現れたら改行する
+	-->
+	<xsl:template match="SgVarRefExp" mode="new_line">
+		<xsl:choose>
+			<!-- 祖先ノードとドキュメント順で自ノードより前にあるすべてのノードの
+			     変数(SgVarRefExp)の個数が、２０個の場合、改行をする
+			-->
+			<xsl:when test="((1 + count(ancestor::SgVarRefExp) + count(preceding::SgVarRefExp)) mod 21) = 0">
+				<xsl:copy>
+					<xsl:attribute name="name">
+						<xsl:value-of select="concat('&amp;&#10;',@name)"/>
+					</xsl:attribute>
+				</xsl:copy>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*"/>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="*" mode="new_line">
+
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates mode="new_line"/>
+		</xsl:copy>
+	</xsl:template>
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
 <!-- [blocking] +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
 	<!--	SgFortranDo
 		既存ＤＯ文の【初期値】，【最終値】を変換する
@@ -1296,6 +1343,63 @@
 				</xsl:copy>
 			</xsl:otherwise>
 		</xsl:choose>
+	</xsl:template>
+	<!-- SgExprStatement -->
+	<xsl:template match="SgExprStatement" mode="blocking">
+		<xsl:param name="var1_nam"/>
+		<xsl:param name="var1_lop"/>
+		<xsl:param name="var1_siz"/>
+		<xsl:param name="var2_nam"/>
+		<xsl:param name="var2_lop"/>
+		<xsl:param name="var2_siz"/>
+		<xsl:choose>
+			<!--	!$xev statement remove
+
+				直前に'statement remove'がある場合、この statement を削除する
+			-->
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement']/CLAUSE[@name='remove' and @specified='true']">
+				<xsl:comment>
+					remove statement
+				</xsl:comment>
+			</xsl:when>
+
+			<!--
+			     	１行が長すぎる場合、改行する
+			-->
+			<xsl:when test="count(.//SgVarRefExp) > 20">
+  				<xsl:variable name="stm">
+					<xsl:copy>
+						<xsl:copy-of select="@*"/>
+						<xsl:apply-templates mode="blocking">
+							<xsl:with-param name="var1_nam" select="$var1_nam"/>
+							<xsl:with-param name="var1_lop" select="$var1_lop"/>
+							<xsl:with-param name="var1_siz" select="$var1_siz"/>
+							<xsl:with-param name="var2_nam" select="$var2_nam"/>
+							<xsl:with-param name="var2_lop" select="$var2_lop"/>
+							<xsl:with-param name="var2_siz" select="$var2_siz"/>
+						</xsl:apply-templates>
+					</xsl:copy>
+				</xsl:variable>
+
+				<!-- 改行する -->
+				<xsl:apply-templates select="exslt:node-set($stm)" mode="new_line"/>
+			</xsl:when>
+
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*"/>
+					<xsl:apply-templates mode="blocking">
+						<xsl:with-param name="var1_nam" select="$var1_nam"/>
+						<xsl:with-param name="var1_lop" select="$var1_lop"/>
+						<xsl:with-param name="var1_siz" select="$var1_siz"/>
+						<xsl:with-param name="var2_nam" select="$var2_nam"/>
+						<xsl:with-param name="var2_lop" select="$var2_lop"/>
+						<xsl:with-param name="var2_siz" select="$var2_siz"/>
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+
 	</xsl:template>
 	<!--
 		上記以外はパラメータを引き継ぎ、blockingモードのテンプレートで設定する

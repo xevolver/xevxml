@@ -21,7 +21,7 @@
                 </SgArrayType>
             </SgInitializedName>
           </SgVariableDeclaration>
-          <SgPragmaDeclaration><SgPragma pragma="acc kernels copy(A "/></SgPragmaDeclaration>
+          <SgPragmaDeclaration><SgPragma pragma="acc kernels loop copy(A) "/></SgPragmaDeclaration>
           <SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
               <SgVarRefExp name="i"/>
@@ -57,10 +57,10 @@
               </SgFortranDo>
             </SgBasicBlock>
             <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
             <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
           </SgFortranDo>
           <SgReturnStmt>

@@ -38,7 +38,7 @@
             </SgInitializedName>
           </SgVariableDeclaration>
           <!--
-					SgPragmaDeclaration loop-roll
+					SgPragmaDeclaration blocking
 				-->
           <SgFortranDo xmlns:exslt="http://exslt.org/common" end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="kk"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp name="n"/><SgIntVal value="8"/><SgBasicBlock><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="ii"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp name="n"/><SgIntVal value="8"/><SgBasicBlock><SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
@@ -116,7 +116,7 @@
                                   <SgExprListExp>
                                     <SgVarRefExp name="i"/>
                                     <SgAddOp>
-                                      <SgVarRefExp name="k"/>
+                                      <SgVarRefExp name="&amp;&#10;k"/>
                                       <SgIntVal value="2"/>
                                     </SgAddOp>
                                   </SgExprListExp>
@@ -236,7 +236,7 @@
                                   <SgExprListExp>
                                     <SgVarRefExp name="i"/>
                                     <SgAddOp>
-                                      <SgVarRefExp name="k"/>
+                                      <SgVarRefExp name="&amp;&#10;k"/>
                                       <SgIntVal value="2"/>
                                     </SgAddOp>
                                   </SgExprListExp>
@@ -362,7 +362,7 @@
                                   <SgExprListExp>
                                     <SgVarRefExp name="i"/>
                                     <SgAddOp>
-                                      <SgVarRefExp name="k"/>
+                                      <SgVarRefExp name="&amp;&#10;k"/>
                                       <SgIntVal value="2"/>
                                     </SgAddOp>
                                   </SgExprListExp>
@@ -488,7 +488,7 @@
                                   <SgExprListExp>
                                     <SgVarRefExp name="i"/>
                                     <SgAddOp>
-                                      <SgVarRefExp name="k"/>
+                                      <SgVarRefExp name="&amp;&#10;k"/>
                                       <SgIntVal value="2"/>
                                     </SgAddOp>
                                   </SgExprListExp>
@@ -539,9 +539,9 @@
                     </SgBasicBlock></SgFortranDo>
                 </SgBasicBlock></SgFortranDo>
             </SgBasicBlock>
-            <PreprocessingInfo pos="2" type="3">
-  !$xev blocking block(k,8,i,8)
-</PreprocessingInfo>
+            <!--
+					remove PreprocessingInfo
+				-->
           </SgFortranDo></SgBasicBlock></SgFortranDo></SgBasicBlock></SgFortranDo>
         </SgBasicBlock>
       </SgFunctionDefinition>

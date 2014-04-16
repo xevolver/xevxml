@@ -57,7 +57,7 @@
             </SgInitializedName>
           </SgVariableDeclaration>
           <!--
-					SgPragmaDeclaration loop-roll
+					SgPragmaDeclaration loop_roll
 				-->
           <SgFortranDo xmlns:exslt="http://exslt.org/common" end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAssignOp><SgVarRefExp name="n3"/><SgNullExpression/><SgBasicBlock><SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
@@ -68,7 +68,7 @@
             <SgNullExpression/>
             <SgBasicBlock>
               <!--
-					SgPragmaDeclaration loop-unroll
+					SgPragmaDeclaration loop_unroll
 				-->
               <SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp>
                   <SgVarRefExp name="i"/>
@@ -314,10 +314,48 @@
                   
                   
                   
+                </SgBasicBlock></SgFortranDo><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp><SgVarRefExp name="i"/><SgSubtractOp><SgVarRefExp name="n1"/><SgFunctionCallExp><SgFunctionRefExp symbol="mod"/><SgExprListExp><SgVarRefExp name="n1"/><SgIntVal value="8"/></SgExprListExp></SgFunctionCallExp></SgSubtractOp></SgAssignOp><SgVarRefExp name="n1"/><SgNullExpression/><SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="a1"/>
+                        <SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/><SgVarRefExp name="k"/></SgExprListExp>
+                      </SgPntrArrRefExp>
+                      <SgAddOp>
+                        <SgMultiplyOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="b1"/>
+                            <SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/><SgVarRefExp name="k"/></SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="c1"/>
+                            <SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/><SgVarRefExp name="k"/></SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgMultiplyOp>
+                        <SgMultiplyOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="d1"/>
+                            <SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/><SgVarRefExp name="k"/></SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="e1"/>
+                            <SgExprListExp><SgVarRefExp name="i"/><SgVarRefExp name="j"/><SgVarRefExp name="k"/></SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgMultiplyOp>
+                      </SgAddOp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                  
+                  
+                  
+                  
+                  
+                  
+                  
                 </SgBasicBlock></SgFortranDo>
             </SgBasicBlock>
             <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
           </SgFortranDo></SgBasicBlock></SgFortranDo>
         </SgBasicBlock>

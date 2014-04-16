@@ -13,6 +13,9 @@ a1(i + 5,j,k) = b1(i + 5,j,k) * c1(i + 5,j,k) + d1(i + 5,j,k) * e1(i + 5,j,k)
 a1(i + 6,j,k) = b1(i + 6,j,k) * c1(i + 6,j,k) + d1(i + 6,j,k) * e1(i + 6,j,k)
 a1(i + 7,j,k) = b1(i + 7,j,k) * c1(i + 7,j,k) + d1(i + 7,j,k) * e1(i + 7,j,k)
 END DO
+DO i = n1 - mod(n1,8), n1
+a1(i,j,k) = b1(i,j,k) * c1(i,j,k) + d1(i,j,k) * e1(i,j,k)
+END DO
 END DO
 END DO
 END PROGRAM 

@@ -87,7 +87,7 @@
               <SgIntVal value="0"/>
             </SgAssignOp>
           </SgExprStatement>
-          <SgWhileStmt>
+          <SgWhileStmt end="1" nlabel="" slabel="">
             <SgExprStatement>
               <SgGreaterThanOp>
                 <SgVarRefExp name="change"/>
@@ -110,7 +110,7 @@
                   <SgIntVal value="0"/>
                 </SgAssignOp>
               </SgExprStatement>
-              <SgPragmaDeclaration><SgPragma pragma="acc kernels copy(a "/></SgPragmaDeclaration>
+              <SgPragmaDeclaration><SgPragma pragma="acc kernels copy(a) create(newa) "/></SgPragmaDeclaration>
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
                   <SgVarRefExp name="j"/>
@@ -205,7 +205,7 @@
                               </SgMultiplyOp>
                             </SgAddOp>
                             <SgMultiplyOp>
-                              <SgVarRefExp name="w2"/>
+                              <SgVarRefExp name="&amp;&#10;w2"/>
                               <SgAddOp>
                                 <SgAddOp>
                                   <SgAddOp>
@@ -304,10 +304,10 @@
                   </SgFortranDo>
                 </SgBasicBlock>
                 <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
                 <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
                 <PreprocessingInfo pos="2" type="3">
 !$acc loop reduction(max:change)

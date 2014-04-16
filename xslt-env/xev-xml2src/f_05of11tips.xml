@@ -34,7 +34,7 @@
             <SgVarRefExp name="M"/>
             <SgNullExpression/>
             <SgBasicBlock>
-              <SgPragmaDeclaration><SgPragma pragma="acc loop private(idx "/></SgPragmaDeclaration>
+              <SgPragmaDeclaration><SgPragma pragma="acc loop private(idx) "/></SgPragmaDeclaration>
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
                   <SgVarRefExp name="j"/>
@@ -66,7 +66,7 @@
                   </SgExprStatement>
                 </SgBasicBlock>
                 <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
               </SgFortranDo>
             </SgBasicBlock>

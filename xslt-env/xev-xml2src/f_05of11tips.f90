@@ -3,7 +3,7 @@ INTEGER :: idx
 INTEGER, DIMENSION(M,N) :: A
 !$acc kernels loop
 DO i = 1, M
-!pragma acc loop private(idx 
+!pragma acc loop private(idx) 
 DO j = 1, N
 idx = i + j
 A(i,j) = idx

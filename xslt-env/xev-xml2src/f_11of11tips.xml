@@ -43,10 +43,7 @@
                     </SgArrayType>
                 </SgInitializedName>
               </SgVariableDeclaration>
-              <SgPragmaDeclaration><SgPragma pragma="acc present_or_copy(y "/></SgPragmaDeclaration>
-              <!--
-					SgPragmaDeclaration
-				-->
+              <SgPragmaDeclaration><SgPragma pragma="acc kernels present_or_copy(y) present_or_copyin(x) "/></SgPragmaDeclaration>
               <!--
 					SgPragmaDeclaration
 				-->
@@ -56,7 +53,7 @@
                   <SgIntVal value="1"/>
                 </SgAssignOp>
                 <SgFunctionCallExp>
-                  <SgFunctionRefExp symbol="ubound"/>
+                  <SgFunctionRefExp subprogram_kind="1" symbol="ubound"/>
                   <SgExprListExp>
                     <SgVarRefExp name="y"/>
                     <SgIntVal value="1"/>
@@ -90,19 +87,16 @@
                   </SgExprStatement>
                 </SgBasicBlock>
                 <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
                 <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
                 <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
                 <!--
-					PreprocessingInfo
-				-->
-                <!--
-					PreprocessingInfo
+					remove PreprocessingInfo
 				-->
               </SgFortranDo>
               <PreprocessingInfo pos="4" type="3">
@@ -116,12 +110,10 @@
         </SgProcedureHeaderStatement>
       </SgClassDefinition>
     </SgModuleStatement>
-    <!--
-					SgPragmaDeclaration
-				-->
     <SgProcedureHeaderStatement name="roo" subprogram_kind="2">
         <SgTypeVoid/>
-      <SgFunctionParameterList><SgInitializedName name="z">
+      <SgFunctionParameterList>
+        <SgInitializedName name="z">
             <SgArrayType index="" rank="1" type="SgTypeFloat">
               <SgTypeFloat/>
               <SgSubscriptExpression>
@@ -130,14 +122,13 @@
                 <SgIntVal value="1"/>
               </SgSubscriptExpression>
             </SgArrayType>
-          <PreprocessingInfo pos="2" type="3">
-!$xev parameter add(zz)
-</PreprocessingInfo>
-        </SgInitializedName><SgInitializedName name="zz"><SgTypeFloat/></SgInitializedName></SgFunctionParameterList>
+        </SgInitializedName>
+      </SgFunctionParameterList>
       <SgFunctionDefinition>
         <SgBasicBlock>
           <SgUseStatement name="glob"/>
-          <SgVariableDeclaration><SgInitializedName name="z">
+          <SgVariableDeclaration>
+            <SgInitializedName name="z">
                 <SgArrayType index="" rank="1" type="SgTypeFloat">
                   <SgTypeFloat/>
                   <SgSubscriptExpression>
@@ -146,16 +137,11 @@
                     <SgIntVal value="1"/>
                   </SgSubscriptExpression>
                 </SgArrayType>
-              <PreprocessingInfo pos="2" type="3">
-!$xev parameter add(zz)
-</PreprocessingInfo>
-            </SgInitializedName><SgInitializedName name="zz"><SgTypeFloat/></SgInitializedName></SgVariableDeclaration>
-          <!--
-					SgPragmaDeclaration
-				-->
+            </SgInitializedName>
+          </SgVariableDeclaration>
           <SgExprStatement>
             <SgFunctionCallExp>
-              <SgFunctionRefExp symbol="sub"/>
+              <SgFunctionRefExp subprogram_kind="2" symbol="sub"/>
               <SgExprListExp>
                 <SgVarRefExp name="z"/>
               </SgExprListExp>
@@ -163,10 +149,7 @@
             <PreprocessingInfo pos="2" type="3">
 !$acc data copy(z) copyin(x)
 </PreprocessingInfo>
-            <!--
-					PreprocessingInfo
-				-->
-          </SgExprStatement><SgExprStatement><SgFunctionCallExp><SgFunctionRefExp symbol="sub"/><SgExprListExp><SgVarRefExp name="zz"/></SgExprListExp></SgFunctionCallExp></SgExprStatement>
+          </SgExprStatement>
           <PreprocessingInfo pos="4" type="3">
 !$acc end data region
 </PreprocessingInfo>
@@ -175,9 +158,6 @@
       <SgInitializedName name="roo">
           <SgTypeVoid/>
       </SgInitializedName>
-      <!--
-					PreprocessingInfo
-				-->
     </SgProcedureHeaderStatement>
   </SgGlobal>
 
