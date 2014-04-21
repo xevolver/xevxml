@@ -11,6 +11,8 @@
 	</DIRECTIVE>
 	<DIRECTIVE name="var">
 		<CLAUSE name="replace">
+                  <ARG value="default" />
+                  <ARG value="default" />
 		</CLAUSE>
 	</DIRECTIVE>
 	<DIRECTIVE name="loop">
