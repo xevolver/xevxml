@@ -625,7 +625,7 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       ret = sb::buildVariableDeclaration(name->get_name(), 
 					 namedType,
 					 name->get_initializer());
-
+      
       ret->set_baseTypeDefiningDeclaration( cls );
     }
     else
@@ -640,7 +640,8 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       varList[i]->set_parent(ret);
   }
   else ABORT();
-
+  // Initialize SgAccessModifier (2014.04.16)
+  ret->get_declarationModifier().get_accessModifier().setUndefined();
 
   if(storage=="unknown")
     ((ret->get_declarationModifier()).get_storageModifier()).setUnknown();
@@ -791,7 +792,7 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
   xe::DOMNode*                    satt = 0;
   string                          name;
   stringstream                    val;
-  int                             kind;
+  int                             kind=0;
   
   if(amap) {
     satt=amap->getNamedItem(xe::XMLString::transcode("name"));
@@ -1846,8 +1847,9 @@ Xml2AstVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     functionSymbol->get_declaration();
   SgProcedureHeaderStatement* procedureHeaderStatement =
     isSgProcedureHeaderStatement(functionDeclaration);
-  procedureHeaderStatement
-    ->set_subprogram_kind((SgProcedureHeaderStatement::subprogram_kind_enum)kind );
+  if(procedureHeaderStatement)
+    procedureHeaderStatement
+      ->set_subprogram_kind((SgProcedureHeaderStatement::subprogram_kind_enum)kind );
 	
   return ret;
 }
