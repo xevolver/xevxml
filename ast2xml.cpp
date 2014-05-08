@@ -110,24 +110,26 @@ static bool hasInternalNode(SgNode* n)
   return false;
 }
 
-static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info)
+static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info, PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
 {
   std::string str;
   int idx;
+
   if(info){
     for(size_t i(0);i<(*info).size();i++) {
-
-      str = (*info)[i]->getString();
-      std::transform(str.begin(),str.end(),str.begin(),::tolower);
-      idx = str.find( XEV_PRAGMA_PREFIX );
-      if( idx >= 0 ) {
-	str = (*info)[i]->getString(); // read the string again
-	sstr_ << "<SgPragmaDeclaration >\n";
-	sstr_ << "  "; // indent
-	sstr_ << "<SgPragma pragma=\"";
-	// assuming Fortran directives start with !$
-	sstr_ << str.substr( idx+strlen("!$") ) << "\" />\n";
-	sstr_ << "</SgPragmaDeclaration >\n";
+      if((*info)[i]->getRelativePosition()==pos){
+	str = (*info)[i]->getString();
+	std::transform(str.begin(),str.end(),str.begin(),::tolower);
+	idx = str.find( XEV_PRAGMA_PREFIX );
+	if( idx >= 0 ) {
+	  str = (*info)[i]->getString(); // read the string again
+	  sstr_ << "<SgPragmaDeclaration >\n";
+	  sstr_ << "  "; // indent
+	  sstr_ << "<SgPragma pragma=\"";
+	  // assuming Fortran directives start with !$
+	  sstr_ << str.substr( idx+strlen("!$") ) << "\" />\n";
+	  sstr_ << "</SgPragmaDeclaration >\n";
+	}
       }
     }
   }
@@ -523,6 +525,8 @@ void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
 						    Ast2XmlInheritedAttribute att)
 {
   AttachedPreprocessingInfoType* info=writePreprocessingInfo(sstr_,node); 
+  if(info && outLang_==SgFile::e_Fortran_output_language) 
+    writeFortranPragma(sstr_,info,PreprocessingInfo::inside);
 
   if ( isLeafNode(node) == false || info != 0) {
     for(int i(0);i<att.level-1;i++)
@@ -530,6 +534,9 @@ void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
     sstr_ << "</";
     sstr_ << node->class_name() << '>' << endl;
   }
+
+  if(info && outLang_==SgFile::e_Fortran_output_language) 
+    writeFortranPragma(sstr_,info,PreprocessingInfo::after);
 
   return;
 }
