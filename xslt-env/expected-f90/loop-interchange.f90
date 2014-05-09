@@ -10,7 +10,7 @@ SUBROUTINE SAMPLE_INTERCHANGE
   DO K = 3, 35
      DO J = 2, 25
         DO I = 1, 15
-           SUM = SUM + 5
+           SUM = SUM + 6
         END DO
      END DO
   END DO
