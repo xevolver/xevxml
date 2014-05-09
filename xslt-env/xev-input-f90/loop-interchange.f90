@@ -3,7 +3,7 @@ SUBROUTINE SAMPLE_INTERCHANGE
   
   !$xev loop interchange(1)
   DO I = 1, 15
-     DO J = 1, 25
+     DO J = 2, 25
         SUM = SUM + 5
      END DO
   END DO
