@@ -4,3 +4,5 @@
 **/xev-src2xml/*
 **/xev-xml2src/*
 **/a.out
+**/.gitignore
+**/.ptp-sync

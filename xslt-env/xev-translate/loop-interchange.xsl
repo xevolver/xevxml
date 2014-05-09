@@ -22,7 +22,7 @@
   
   <xsl:template match="SgFortranDo">
     <xsl:choose>
-      <xsl:when test="preceding::SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='loop']/CLAUSE/@name='interchange'">
+      <xsl:when test="preceding::SgPragma/DIRECTIVE[@name='loop']/CLAUSE/@name='interchange'">
 	<xsl:element name="SgFortranDo">
 	  <xsl:copy-of select="SgBasicBlock/SgFortranDo/@*" />
 	  <xsl:copy-of select="SgBasicBlock/SgFortranDo/SgAssignOp" />

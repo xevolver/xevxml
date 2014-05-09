@@ -23,8 +23,15 @@
                 <SgNullExpression/>
                 <SgBasicBlock>
                   <SgPragmaDeclaration>
-                    <SgPragma pragma="xev var replace(SUM, TASU)"/>
-</SgPragmaDeclaration>
+                    <SgPragma pragma="xev var replace(SUM, TASU)">
+                      <DIRECTIVE name="var">
+                        <CLAUSE name="replace" specified="true">
+                          <ARG specified="true" value="SUM"/>
+                          <ARG specified="true" value="TASU"/>
+                        </CLAUSE>
+                      </DIRECTIVE>
+                    </SgPragma>
+                  </SgPragmaDeclaration>
                   <SgExprStatement>
                     <SgAssignOp>
                       <SgVarRefExp name="SUM"/>
@@ -51,4 +58,5 @@
       </SgInitializedName>
     </SgProcedureHeaderStatement>
   </SgGlobal>
+
 </SgSourceFile>

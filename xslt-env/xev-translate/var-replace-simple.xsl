@@ -37,7 +37,7 @@
 				<xsl:copy> <!-- SgVarRefExp -->
 					<xsl:attribute name="name">
 					<xsl:value-of
-						select="ancestor::SgExprStatement/preceding::SgPragma/DIRECTIVE[@name='var']/CLAUSE[@name='replace']/LI[2]/@value" />
+						select="ancestor::SgExprStatement/preceding::SgPragma/DIRECTIVE[@name='var']/CLAUSE[@name='replace']/ARG[2]/@value" />
 					</xsl:attribute>
 					<xsl:apply-templates></xsl:apply-templates>
 				</xsl:copy>

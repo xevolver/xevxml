@@ -46,6 +46,7 @@ EXP_SRCS	= ${SRCS:$(INPUT_DIR)/%.f90=$(EXP_XML_DIR)/%.f90}
 all:
 	@echo "usage: make {var-replace-simple, *}.check}"
 	@echo "xevxml-env: $(XEVXML_ENV)"
+	@hostname -a
 
 src2xml-files: $(SRC2XMLS)
 	@echo "TARGET: $(SRC2XMLS)"

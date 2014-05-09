@@ -26,9 +26,9 @@
 		-->
                   <SgExprStatement>
                     <SgAssignOp>
-                      <SgVarRefExp name="SUM"/>
+                      <SgVarRefExp name="TASU"/>
                       <SgAddOp>
-                        <SgVarRefExp name="SUM"/>
+                        <SgVarRefExp name="TASU"/>
                         <SgIntVal value="5"/>
                       </SgAddOp>
                     </SgAssignOp>
@@ -50,4 +50,5 @@
       </SgInitializedName>
     </SgProcedureHeaderStatement>
   </SgGlobal>
+
 </SgSourceFile>
