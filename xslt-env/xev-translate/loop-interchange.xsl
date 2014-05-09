@@ -8,6 +8,10 @@
 		<xsl:apply-templates />
 	</xsl:template>
 
+	<!-- remove SgPragmaDeclaration -->
+	<xsl:template match="SgPragmaDeclaration">
+	</xsl:template>
+
 	<xsl:template match="*">
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
