@@ -1,4 +1,9 @@
 <DEFS>
+	<DIRECTIVE name="loop">
+		<CLAUSE name="interchange">
+			<ARG value="1" />
+		</CLAUSE>
+	</DIRECTIVE>
 	<DIRECTIVE name="dir">
 		<CLAUSE name="add">
 			<VARARG/>
