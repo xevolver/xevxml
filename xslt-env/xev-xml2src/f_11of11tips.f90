@@ -1,8 +1,8 @@
 MODULE glob
-REAL, DIMENSION(:), ALLOCATABLE, PUBLIC :: x
+REAL, DIMENSION(:), ALLOCATABLE :: x
 CONTAINS
 SUBROUTINE sub(y)
-REAL, DIMENSION(:), PUBLIC :: y
+REAL, DIMENSION(:) :: y
 !pragma acc kernels present_or_copy(y) present_or_copyin(x) 
 DO i = 1, ubound(y,1)
 y(i) = y(i) + x(i)

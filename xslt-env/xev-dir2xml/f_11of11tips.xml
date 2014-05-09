@@ -45,55 +45,52 @@
                 </SgInitializedName>
               </SgVariableDeclaration>
               <SgPragmaDeclaration>
-                <SgPragma pragma="xev dir add(acc, present_or_copy(y) present_or_copyin(x)">
+                <SgPragma pragma="xev dir replace(acc,kernels,present_or_copy(y),present_or_copyin(x))">
                   <DIRECTIVE name="dir">
-		                  <CLAUSE name="add">
-                      <LI value="acc"/>
-                      <LI value="present_or_copy(y"/>
+                    <CLAUSE name="add" specified="false">
+                      <VARARG specified="false"/>
                     </CLAUSE>
-	                </DIRECTIVE>
+                  </DIRECTIVE>
                   <DIRECTIVE name="dir">
-		                  <CLAUSE name="replace">
-			                  <LI value="default replace-add 2130"/>
-		</CLAUSE>
-	</DIRECTIVE>                <DIRECTIVE name="dir">
-		                  <CLAUSE name="del">
-			                  <LI value="default del"/>
-		</CLAUSE>
-	</DIRECTIVE>              </SgPragma>
-              </SgPragmaDeclaration>
-              <SgPragmaDeclaration>
-                <SgPragma pragma="xev dir del(delete)">
-                  <DIRECTIVE name="dir">
-		                  <CLAUSE name="add">
-			                  <LI value="default dir-add 2130"/>
-		</CLAUSE>
-	</DIRECTIVE>                <DIRECTIVE name="dir">
-		                  <CLAUSE name="replace">
-			                  <LI value="default replace-add 2130"/>
-		</CLAUSE>
-	</DIRECTIVE>                <DIRECTIVE name="dir">
-		                  <CLAUSE name="del">
-                      <LI value="delete"/>
+                    <CLAUSE name="replace" specified="true">
+                      <VARARG specified="true">
+                        <ARG specified="true" value="acc"/>
+                        <ARG specified="true" value="kernels"/>
+                        <ARG specified="true" value="present_or_copy(y)"/>
+                        <ARG specified="true" value="present_or_copyin(x)"/>
+                      </VARARG>
                     </CLAUSE>
-	                </DIRECTIVE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="append" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="remove" specified="false"></CLAUSE>
+                  </DIRECTIVE>
                 </SgPragma>
               </SgPragmaDeclaration>
               <SgPragmaDeclaration>
-                <SgPragma pragma="xev dir del(delete)">
+                <SgPragma pragma="xev dir remove">
                   <DIRECTIVE name="dir">
-		                  <CLAUSE name="add">
-			                  <LI value="default dir-add 2130"/>
-		</CLAUSE>
-	</DIRECTIVE>                <DIRECTIVE name="dir">
-		                  <CLAUSE name="replace">
-			                  <LI value="default replace-add 2130"/>
-		</CLAUSE>
-	</DIRECTIVE>                <DIRECTIVE name="dir">
-		                  <CLAUSE name="del">
-                      <LI value="delete"/>
+                    <CLAUSE name="add" specified="false">
+                      <VARARG specified="false"/>
                     </CLAUSE>
-	                </DIRECTIVE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="replace" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="append" specified="false">
+                      <VARARG specified="false"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                  <DIRECTIVE name="dir">
+                    <CLAUSE name="remove" specified="true"></CLAUSE>
+                  </DIRECTIVE>
                 </SgPragma>
               </SgPragmaDeclaration>
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
@@ -102,7 +99,7 @@
                   <SgIntVal value="1"/>
                 </SgAssignOp>
                 <SgFunctionCallExp>
-                  <SgFunctionRefExp symbol="ubound"/>
+                  <SgFunctionRefExp subprogram_kind="1" symbol="ubound"/>
                   <SgExprListExp>
                     <SgVarRefExp name="y"/>
                     <SgIntVal value="1"/>
@@ -136,16 +133,13 @@
                   </SgExprStatement>
                 </SgBasicBlock>
                 <PreprocessingInfo pos="2" type="3">
-!$xev dir add(acc, present_or_copy(y) present_or_copyin(x)
-</PreprocessingInfo>
-                <PreprocessingInfo pos="2" type="3">
-!$xev dir del(delete)
+!$xev dir replace(acc,kernels,present_or_copy(y),present_or_copyin(x))
 </PreprocessingInfo>
                 <PreprocessingInfo pos="2" type="3">
 !$acc declare present(y,x)
 </PreprocessingInfo>
                 <PreprocessingInfo pos="2" type="3">
-!$xev dir del(delete)
+!$xev dir remove
 </PreprocessingInfo>
                 <PreprocessingInfo pos="2" type="3">
 !$acc kernels
@@ -162,27 +156,9 @@
         </SgProcedureHeaderStatement>
       </SgClassDefinition>
     </SgModuleStatement>
-    <SgPragmaDeclaration>
-      <SgPragma pragma="xev parameter add(zz)">
-        <DIRECTIVE name="parameter">
-		        <CLAUSE name="add">
-            <LI value="zz"/>
-          </CLAUSE>
-	      </DIRECTIVE>
-      </SgPragma>
-    </SgPragmaDeclaration>
     <SgProcedureHeaderStatement name="roo" subprogram_kind="2">
         <SgTypeVoid/>
       <SgFunctionParameterList>
-        <SgPragmaDeclaration>
-          <SgPragma pragma="xev parameter add(zz)">
-            <DIRECTIVE name="parameter">
-		            <CLAUSE name="add">
-                <LI value="zz"/>
-              </CLAUSE>
-	          </DIRECTIVE>
-          </SgPragma>
-        </SgPragmaDeclaration>
         <SgInitializedName name="z">
             <SgArrayType index="" rank="1" type="SgTypeFloat">
               <SgTypeFloat/>
@@ -192,24 +168,12 @@
                 <SgIntVal value="1"/>
               </SgSubscriptExpression>
             </SgArrayType>
-          <PreprocessingInfo pos="2" type="3">
-!$xev parameter add(zz)
-</PreprocessingInfo>
         </SgInitializedName>
       </SgFunctionParameterList>
       <SgFunctionDefinition>
         <SgBasicBlock>
           <SgUseStatement name="glob"/>
           <SgVariableDeclaration>
-            <SgPragmaDeclaration>
-              <SgPragma pragma="xev parameter add(zz)">
-                <DIRECTIVE name="parameter">
-		                <CLAUSE name="add">
-                    <LI value="zz"/>
-                  </CLAUSE>
-	              </DIRECTIVE>
-              </SgPragma>
-            </SgPragmaDeclaration>
             <SgInitializedName name="z">
                 <SgArrayType index="" rank="1" type="SgTypeFloat">
                   <SgTypeFloat/>
@@ -219,32 +183,17 @@
                     <SgIntVal value="1"/>
                   </SgSubscriptExpression>
                 </SgArrayType>
-              <PreprocessingInfo pos="2" type="3">
-!$xev parameter add(zz)
-</PreprocessingInfo>
             </SgInitializedName>
           </SgVariableDeclaration>
-          <SgPragmaDeclaration>
-            <SgPragma pragma="xev function-call copy-001(zz)">
-              <DIRECTIVE name="function-call">
-		              <CLAUSE name="copy-001">
-                  <LI value="zz"/>
-                </CLAUSE>
-	            </DIRECTIVE>
-            </SgPragma>
-          </SgPragmaDeclaration>
           <SgExprStatement>
             <SgFunctionCallExp>
-              <SgFunctionRefExp symbol="sub"/>
+              <SgFunctionRefExp subprogram_kind="2" symbol="sub"/>
               <SgExprListExp>
                 <SgVarRefExp name="z"/>
               </SgExprListExp>
             </SgFunctionCallExp>
             <PreprocessingInfo pos="2" type="3">
 !$acc data copy(z) copyin(x)
-</PreprocessingInfo>
-            <PreprocessingInfo pos="2" type="3">
-!$xev function-call copy-001(zz)
 </PreprocessingInfo>
           </SgExprStatement>
           <PreprocessingInfo pos="4" type="3">
@@ -255,9 +204,6 @@
       <SgInitializedName name="roo">
           <SgTypeVoid/>
       </SgInitializedName>
-      <PreprocessingInfo pos="2" type="3">
-!$xev parameter add(zz)
-</PreprocessingInfo>
     </SgProcedureHeaderStatement>
   </SgGlobal>
 
