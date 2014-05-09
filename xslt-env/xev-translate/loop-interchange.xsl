@@ -18,11 +18,13 @@
       <xsl:apply-templates />
     </xsl:copy>
   </xsl:template>
-<!--      <xsl:when test="count(child::PreprocessingInfo)=1"> -->a
+<!--      <xsl:when test="count(child::PreprocessingInfo)=1"> -->
+<!--      <xsl:when test="preceding::SgPragma/DIRECTIVE[@name='loop']/CLAUSE/@name='interchange'"> -->
+<!-- OK     <xsl:when test="preceding::SgPragma/DIRECTIVE/@name='loop'"> -->
   
   <xsl:template match="SgFortranDo">
     <xsl:choose>
-      <xsl:when test="preceding::SgPragma/DIRECTIVE[@name='loop']/CLAUSE/@name='interchange'">
+     <xsl:when test="preceding::SgPragma/DIRECTIVE[@name='loop']/CLAUSE/@name='interchange'">
 	<xsl:element name="SgFortranDo">
 	  <xsl:copy-of select="SgBasicBlock/SgFortranDo/@*" />
 	  <xsl:copy-of select="SgBasicBlock/SgFortranDo/SgAssignOp" />
