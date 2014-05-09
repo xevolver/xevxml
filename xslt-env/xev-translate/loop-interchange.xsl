@@ -79,6 +79,55 @@
 				</xsl:element>
 			</xsl:when>
 
+			<xsl:when
+				test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='loop']/CLAUSE[@name='interchange']/ARG/@value='3'">
+				<xsl:element name="SgFortranDo">
+					<xsl:copy-of
+						select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/@*" />
+					<xsl:copy-of
+						select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgAssignOp" />
+					<xsl:copy-of
+						select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgIntVal" />
+					<xsl:copy-of
+						select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgNullExpression" />
+					<xsl:element name="SgBasicBlock">
+						<xsl:copy-of select="SgBasicBlock/@*" />
+						<xsl:element name="SgFortranDo">
+							<xsl:copy-of select="SgBasicBlock/SgFortranDo/@*" />
+							<xsl:copy-of select="SgBasicBlock/SgFortranDo/SgAssignOp" />
+							<xsl:copy-of select="SgBasicBlock/SgFortranDo/SgIntVal" />
+							<xsl:copy-of select="SgBasicBlock/SgFortranDo/SgNullExpression" />
+							<xsl:element name="SgBasicBlock">
+								<xsl:copy-of select="SgBasicBlock/@*" />
+								<xsl:element name="SgFortranDo">
+									<xsl:copy-of
+										select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/@*" />
+									<xsl:copy-of
+										select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgAssignOp" />
+									<xsl:copy-of
+										select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgIntVal" />
+									<xsl:copy-of
+										select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgNullExpression" />
+									<xsl:element name="SgBasicBlock">
+										<xsl:copy-of
+											select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock/@*" />
+
+										<xsl:copy>
+											<xsl:copy-of select="@*" />
+											<xsl:copy-of select="./SgAssignOp" />
+											<xsl:copy-of select="./SgIntVal" />
+											<xsl:copy-of select="./SgNullExpression" />
+											<xsl:copy-of
+												select="SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock/SgFortranDo/SgBasicBlock" />
+										</xsl:copy>
+									</xsl:element>
+								</xsl:element>
+							</xsl:element>
+						</xsl:element>
+					</xsl:element>
+				</xsl:element>
+			</xsl:when>
+
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
