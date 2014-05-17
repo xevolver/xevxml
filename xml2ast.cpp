@@ -564,7 +564,15 @@ Xml2AstVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
   }
 
   if(line.size()) {
-    ret = sb::buildPragma(line);
+    std::string tmp;
+    for(size_t i(0);i<line.size();i++){
+      if( line[i] != '\\')
+	tmp+=line[i];
+      else if(line[i+1] !='"')
+	tmp+=line[i];
+    }
+
+    ret = sb::buildPragma(tmp);
   }
   else ABORT();
   
@@ -1691,10 +1699,14 @@ Xml2AstVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
     SgLabelRefExp*  l = new SgLabelRefExp( s );
     ret->set_numeric_label( l );
   }
+  /*
   else if( slabel.size() ){
     ret = sb::buildLabelStatement( slabel.c_str(), body, scope );
   }
   else ABORT();
+  */
+  else // slabel is allowed to be empty
+    ret = sb::buildLabelStatement( slabel.c_str(), body, scope );
 
   return ret;
 }

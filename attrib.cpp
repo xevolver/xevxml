@@ -158,7 +158,7 @@ static void attribSgPragma(stringstream& istr,SgNode* node)
   SgPragma* n = isSgPragma(node);
   /* todo: the line should be split into tokens, and written as attriutes */
   if(n) {
-    istr << " pragma=\"" << n->get_pragma() << "\" ";
+    istr << " pragma=\"" << XmlStr2Entity(n->get_pragma()) << "\" ";
   }
 }
 
