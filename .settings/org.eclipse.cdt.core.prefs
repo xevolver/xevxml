@@ -1,11 +1,11 @@
 eclipse.preferences.version=1
 environment/project/0.1732558509/LANG/delimiter=;
-environment/project/0.1732558509/LANG/operation=append
+environment/project/0.1732558509/LANG/operation=replace
 environment/project/0.1732558509/LANG/value=C
 environment/project/0.1732558509/append=true
-environment/project/0.1732558509/appendContributed=true
+environment/project/0.1732558509/appendContributed=false
 environment/project/photran.managedbuild.toolchain.gnu.fortran.exe.debug.379372832/LANG/delimiter=;
-environment/project/photran.managedbuild.toolchain.gnu.fortran.exe.debug.379372832/LANG/operation=append
+environment/project/photran.managedbuild.toolchain.gnu.fortran.exe.debug.379372832/LANG/operation=replace
 environment/project/photran.managedbuild.toolchain.gnu.fortran.exe.debug.379372832/LANG/value=C
 environment/project/photran.managedbuild.toolchain.gnu.fortran.exe.debug.379372832/append=true
 environment/project/photran.managedbuild.toolchain.gnu.fortran.exe.debug.379372832/appendContributed=false
