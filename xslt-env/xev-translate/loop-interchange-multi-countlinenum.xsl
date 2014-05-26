@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsl:stylesheet version="1.0"
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:exslt="http://xml.apache.org/xalan">
 	<xsl:output method="xml" encoding="UTF-8" />
-	<!-- nodeset() http://xml.apache.org/xalan xmlns:exslt="http://xml.apache.org/xalan -->
+	<!-- nodeset() http://xml.apache.org/xalan -->
 	<!-- node-set() http://exslt.org/common -->
 
 	<xsl:template match="/">
@@ -29,9 +29,8 @@
 		</xsl:comment>
 		<xsl:variable name="target_loop"
 			select="ancestor::SgBasicBlock/SgFortranDo[1]" />
-
-		<xsl:apply-templates select="$target_loop" mode="interchange" />
-
+		<xsl:apply-templates select="exslt:nodeset($target_loop)"
+			mode="interchange" />
 	</xsl:template>
 
 	<xsl:template match="SgFortranDo" mode="interchange">
@@ -55,16 +54,13 @@
 					</xsl:element>
 				</xsl:element>
 			</xsl:when>
-
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates />
 				</xsl:copy>
-
 			</xsl:otherwise>
 		</xsl:choose>
-
 	</xsl:template>
 
 </xsl:stylesheet>

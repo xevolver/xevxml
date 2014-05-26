@@ -1,9 +1,0 @@
-SUBROUTINE simple_conditional1()
-IF (SUM .EQ. 5) THEN
-SUM = SUM + 5
-END IF
-IF (I + 3 .EQ. J) THEN
-SUM = SUM + 5
-END IF
-END SUBROUTINE 
-
