@@ -16,7 +16,107 @@
 		</xsl:copy>
 	</xsl:template>
 
-	<xsl:template match="SgFortranDo">
+	<xsl:template match="PreprocessingInfo">
+	</xsl:template>
+
+	<xsl:template match="SgBasicBlock">
+		<xsl:choose>
+			<xsl:when test="SgPragmaDeclaration[1]/SgPragma/DIRECTIVE/@name='nt_opt'">
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates select="SgFortranDo" mode="nt_opt" />
+				</xsl:copy>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates />
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="SgFortranDo" mode="nt_opt">
+		<xsl:comment>
+			nt_opt
+		</xsl:comment>
+		<xsl:copy> <!-- SgFortranDo -->
+			<xsl:copy-of select="@*" />
+			<xsl:element name="SgAssignOp">
+				<xsl:copy-of select="SgAssignOp/@*" />
+				<xsl:copy-of select="SgAssignOp/SgVarRefExp[1]" />
+				<xsl:element name="SgIntVal">
+					<xsl:attribute name="value">1</xsl:attribute>
+				</xsl:element>
+			</xsl:element>
+			<xsl:element name="SgVarRefExp">
+				<xsl:attribute name="name">inum</xsl:attribute>
+			</xsl:element>
+			<xsl:copy-of select="SgNullExpression" />
+			<xsl:element name="SgBasicBlock">
+				<xsl:element name="SgFortranDo">
+					<xsl:element name="SgAssignOp">
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">L</xsl:attribute>
+						</xsl:element>
+						<xsl:element name="SgVarRefExp">
+							<xsl:attribute name="name">lstart</xsl:attribute>
+						</xsl:element>
+					</xsl:element>
+					<xsl:element name="SgVarRefExp">
+						<xsl:attribute name="name">lend</xsl:attribute>
+					</xsl:element>
+					<xsl:element name="SgNullExpression"></xsl:element>
+					<xsl:element name="SgBasicBlock">
+						<xsl:element name="SgIfStmt">
+							<xsl:element name="SgExprStatement">
+								<xsl:element name="SgAndOp">
+									<xsl:element name="SgGreaterOrEqualOp">
+										<xsl:element name="SgVarRefExp">
+											<xsl:attribute name="name">I</xsl:attribute>
+										</xsl:element>
+										<xsl:element name="SgFunctionCallExp">
+											<xsl:element name="SgFunctionRefExp">
+												<xsl:attribute name="symbol">IS</xsl:attribute>
+											</xsl:element>
+											<xsl:element name="SgExprListExp">
+												<xsl:element name="SgVarRefExp">
+													<xsl:attribute name="name">L</xsl:attribute>
+												</xsl:element>
+											</xsl:element>
+										</xsl:element>
+									</xsl:element>
+									<xsl:element name="SgLessOrEqualOp">
+										<xsl:element name="SgVarRefExp">
+											<xsl:attribute name="name">I</xsl:attribute>
+										</xsl:element>
+										<xsl:element name="SgFunctionCallExp">
+											<xsl:element name="SgFunctionRefExp">
+												<xsl:attribute name="symbol">IT</xsl:attribute>
+											</xsl:element>
+											<xsl:element name="SgExprListExp">
+												<xsl:element name="SgVarRefExp">
+													<xsl:attribute name="name">L</xsl:attribute>
+												</xsl:element>
+											</xsl:element>
+										</xsl:element>
+									</xsl:element>
+								</xsl:element>
+							</xsl:element>
+							<xsl:element name="SgBasicBlock">
+								<xsl:element name="SgBreakStmt">
+								</xsl:element>
+							</xsl:element>
+						</xsl:element>
+
+						<xsl:apply-templates select="SgBasicBlock/SgExprStatement" />
+					</xsl:element>
+				</xsl:element>
+			</xsl:element>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="SgFortranDo2">
 		<xsl:choose>
 			<xsl:when test="contains(string(child::PreprocessingInfo), 'remove')">
 				<xsl:comment>
