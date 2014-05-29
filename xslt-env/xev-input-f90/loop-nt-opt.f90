@@ -1,18 +1,14 @@
-C test for remove and flatten
 
-      SUBROUTINE SAMPLE03
+SUBROUTINE NT_OPT
 
-!$xev remove
-      DO L = lstart, lend
+    !$xev nt-opt 1, inum
+    DO L = lstart, lend
         IS = AS(L)
         IE = AE(L)
-        DO K = 1, 10
-!$xev flatten 1, inum
-          DO I = IS, IE
+        DO I = IS, IE
             SUM = SUM + 3
-          END DO
         END DO
-      END DO
+    END DO
 
-      RETURN
-      END
+    RETURN
+END SUBROUTINE

@@ -9,6 +9,7 @@
 	</xsl:template>
 
 	<xsl:template match="*">
+		<xsl:variable name="currentNode" select="self::node()" />
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
 			<xsl:apply-templates />
