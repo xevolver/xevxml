@@ -1,4 +1,10 @@
 <DEFS>
+	<DIRECTIVE name="nt_opt">
+		<CLAUSE name="param">
+			<ARG value="1" />
+			<ARG value="inum" />
+		</CLAUSE>
+	</DIRECTIVE>
 	<DIRECTIVE name="loop">
 		<CLAUSE name="interchange">
 			<ARG value="1" />
