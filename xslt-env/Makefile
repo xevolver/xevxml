@@ -14,7 +14,8 @@ XSLT_DIR	= xev-translate
 ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
 XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
 else ifeq ($(HOSTNAME), hagi-a)
-XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+#XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
 endif
@@ -38,7 +39,9 @@ XML2SRCS	= ${SRCS:$(INPUT_DIR)/%.f90=$(XML2SRC_DIR)/%.f90}
 EXP_XMLS	= ${SRCS:$(INPUT_DIR)/%.f90=$(EXP_XML_DIR)/%.xml}
 EXP_SRCS	= ${SRCS:$(INPUT_DIR)/%.f90=$(EXP_XML_DIR)/%.f90}
 
-.PRECIOUS: $(SRC2XMLS) $(DIR2XMLS) $(TRANS_XMLS) $(XML2SRCS) $(EXP_XMLS) $(EXP_SRCS)
+XML_DIFFS	= ${SRCS:$(INPUT_DIR)/%.f90=$(XML2SRC_DIR)/%.xmldiff}
+
+.PRECIOUS: $(SRC2XMLS) $(DIR2XMLS) $(TRANS_XMLS) $(XML2SRCS) $(EXP_XMLS) $(EXP_SRCS) $(XML_DIFFS)
 
 ##############################################
 # targets
@@ -62,11 +65,12 @@ expected-f90-files: $(EXP_SRCS)
 ##############################################
 # rules
 
-#.SUFFIXES: .f90 .xml .check
+#.SUFFIXES: .f90 .xml .check .xmldiff
 
 
 # test translation
-%.check: $(EXP_XML_DIR)/%.f90 $(XML2SRC_DIR)/%.f90 $(XSLT_DIR)/%.xsl
+#%.check: $(XML2SRC_DIR)/%.xmldiff $(EXP_XML_DIR)/%.f90 $(XML2SRC_DIR)/%.f90
+%.check: $(EXP_XML_DIR)/%.f90 $(XML2SRC_DIR)/%.f90
 	diff $(EXP_XML_DIR)/$*.f90 $(XML2SRC_DIR)/$*.f90
 
 # src2xml translation
@@ -76,6 +80,9 @@ $(SRC2XML_DIR)/%.xml: $(INPUT_DIR)/%.f90
 # dir2xml translation
 $(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
 	$(XEVXML_ENV) ; dir2xml ./dir-defs.xml < $< > $@
+
+$(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
+	diff $(XML2SRC_DIR)/$*.xml $(EXP_XML_DIR)/$*.xml > $@ 
 
 # translation
 $(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml $(XSLT_DIR)/%.xsl
@@ -129,7 +136,10 @@ sync:
 	@sync
 	@echo "sync sync sync"
 
-clean-generated:
-	-rm -f $(SRC2XML_DIR)/*.xml $(DIR2XML_DIR)/*.xml $(XML2SRC_DIR)/*.xml $(XML2SRC_DIR)/*.f90 
+clean-translated:
+	-rm -f $(XML2SRC_DIR)/*.xml $(XML2SRC_DIR)/*.f90
+
+clean-generated: clean-translated
+	-rm -f $(SRC2XML_DIR)/*.xml $(DIR2XML_DIR)/*.xml
 	-rm -f $(EXP_XML_DIR)/*.xml $(EXP_XML_DIR)/*.f90
 
