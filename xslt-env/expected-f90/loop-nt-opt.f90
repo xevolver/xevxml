@@ -1,4 +1,5 @@
 SUBROUTINE NT_OPT
+    integer AS(10), AE(10)
 
     DO I = 1, inum
         DO L = lstart, lend
