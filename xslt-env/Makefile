@@ -14,8 +14,8 @@ XSLT_DIR	= xev-translate
 ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
 XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
 else ifeq ($(HOSTNAME), hagi-a)
-XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
+#XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
 endif
@@ -137,9 +137,8 @@ sync:
 	@echo "sync sync sync"
 
 clean-translated:
-	-rm -f $(XML2SRC_DIR)/*.xml $(XML2SRC_DIR)/*.f90
+	-rm -f $(XML2SRC_DIR)/*.xml $(XML2SRC_DIR)/*.f90 $(XML2SRC_DIR)/*.xmldiff
 
 clean-generated: clean-translated
 	-rm -f $(SRC2XML_DIR)/*.xml $(DIR2XML_DIR)/*.xml
 	-rm -f $(EXP_XML_DIR)/*.xml $(EXP_XML_DIR)/*.f90
-
