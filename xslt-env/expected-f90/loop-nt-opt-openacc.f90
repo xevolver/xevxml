@@ -1,10 +1,15 @@
 SUBROUTINE NT_OPT
     integer IS(10), IT(10)
 
+    !$acc loop private(L)
     DO  M=1,MF
+        !$acc loop gang
         DO  K=1,KF
+            !$acc loop gang,vector
             DO  J=1,JF
+                !$acc loop vector
                 DO I=1,inum
+                    !$acc loop seq
                     DO L = lstart, lend
                         IF (I .GE. IS(L) .AND. I .LE. IT(L)) THEN
                             EXIT
