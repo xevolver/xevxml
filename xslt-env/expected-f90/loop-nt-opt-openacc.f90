@@ -26,6 +26,7 @@ SUBROUTINE NT_OPT
         END DO
     END DO
 
+
     DO  M=1,MF
         DO  J=2,JF
             IF (J.LE.JJ2+1.OR.J.GE.JJE) THEN

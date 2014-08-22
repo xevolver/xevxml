@@ -2,10 +2,10 @@
 SUBROUTINE NT_OPT
     integer IS(10), IT(10)
 
+    !$xev nt_opt200
     DO  M=1,MF
         DO  K=1,KF
             DO  J=1,JF
-                !$xev nt_opt param(I, 1, inum)
                 DO  L=lstart,lend
                     II1 = IS(L)
                     II2 = II1+1
@@ -27,7 +27,7 @@ SUBROUTINE NT_OPT
     END DO
 
 
-    !$xev nt_opt param(I, 1, inum)
+    !$xev nt_opt2
     DO  L=lstart,lend
         II1 = IS(L)
         II2 = II1+1
