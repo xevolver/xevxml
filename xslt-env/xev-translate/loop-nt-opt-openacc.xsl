@@ -9,7 +9,7 @@
 	</xsl:template>
 
 	<xsl:template match="*">
-		<xsl:variable name="currentNode" select="self::node()" />
+		<xsl:variable name="normal" select="self::node()" />
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
 			<xsl:apply-templates />
@@ -19,23 +19,24 @@
 	<xsl:template match="PreprocessingInfo">
 	</xsl:template>
 
-	<xsl:template match="SgBasicBlock">
+	<xsl:template match="PreprocessingInfo" mode="nt_opt">
+	</xsl:template>
+
+	<xsl:template match="SgFortranDo">
 		<xsl:choose>
 			<xsl:when
-				test="self::node()/SgPragmaDeclaration/SgPragma/DIRECTIVE/@name  = 'nt_opt'">
-				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates select="./SgFortranDo"
-						mode="nt_opt">
-						<xsl:with-param name="label"
-							select='self::node()/SgPragmaDeclaration/SgPragma/DIRECTIVE/CLAUSE/ARG/@value' />
-						<xsl:with-param name="depth" select='1' />
-					</xsl:apply-templates>
-					<xsl:copy-of select="SgReturnStmt" />
-				</xsl:copy>
+				test="preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE/@name  = 'nt_opt'">
+				<xsl:variable name="tmp"
+					select='preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE/CLAUSE/ARG/@value' />
+				<xsl:apply-templates select="self::SgFortranDo"
+					mode="nt_opt">
+					<xsl:with-param name="label"
+						select='preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE/CLAUSE/ARG/@value' />
+					<xsl:with-param name="depth" select='1' />
+				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:when
-				test="self::node()/SgPragmaDeclaration/SgPragma/DIRECTIVE/@name  = 'nt_opt2'">
+				test="preceding-sibling::SgPragmaDeclaration/SgPragma/DIRECTIVE/@name  = 'nt_opt2'">
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates select="./SgFortranDo/SgBasicBlock/SgFortranDo"
@@ -54,43 +55,12 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="PreprocessingInfo" mode="nt_opt">
-	</xsl:template>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	<xsl:template match="*" mode="add-openacc" />
-
-	<xsl:template match="SgFortranDo" mode="add-openacc">
-		<xsl:param name="nlabel" />
+	<xsl:template name="add-openacc">
+		<xsl:param name="label" />
 		<xsl:param name="depth" />
 		<xsl:choose>
-			<xsl:when test="$nlabel = 200">
+			<xsl:when test="$label = 200">
 				<xsl:choose>
 					<xsl:when test="$depth = 1">
 						<xsl:text>!$acc loop private(L)</xsl:text>
@@ -106,39 +76,45 @@
 					</xsl:when>
 				</xsl:choose>
 			</xsl:when>
-			<xsl:when test="$nlabel = 300">
+			<xsl:when test="$label = 300">
 			</xsl:when>
 		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="*" mode="nt_opt">
+		<xsl:param name="label" />
+		<xsl:param name="depth" />
+		<xsl:variable name="nt_opt" select="self::node()" />
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates mode="nt_opt">
+				<xsl:with-param name="label" select="$label" />
+				<xsl:with-param name="depth" select="$depth" />
+			</xsl:apply-templates>
+		</xsl:copy>
 	</xsl:template>
 
 
 
 
 
-
-
-
-
-	<xsl:template match="*" mode="nt_opt">
-		<xsl:param name="nlabel" />
+	<xsl:template match="SgFortranDo" mode="nt_opt">
+		<xsl:param name="label" />
 		<xsl:param name="depth" />
-		<xsl:apply-templates match="self::SgFortranDo"
-			mode="add-openacc">
-			<xsl:with-param name="nlabel" select="$nlabel" />
+		<xsl:call-template name="add-openacc">
+			<xsl:with-param name="label" select="$label" />
 			<xsl:with-param name="depth" select="$depth" />
-		</xsl:apply-templates>
+		</xsl:call-template>
 		<xsl:choose>
-			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name='L'">
+			<xsl:when test="SgAssignOp/SgVarRefExp/@name='L'">
 				<xsl:apply-templates select="SgBasicBlock/SgFortranDo"
 					mode="nt_opt">
-					<xsl:with-param name="nlabel" select="$nlabel" />
-					<xsl:with-param name="depth" select="$depth" />
+					<xsl:with-param name="label" select="$label" />
+					<xsl:with-param name="depth" select="$depth+1" />
 				</xsl:apply-templates>
 			</xsl:when>
-			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name='I'">
-				DO
-				<xsl:value-of select="$nlabel" />
-				I=1,inum
+			<xsl:when test="SgAssignOp/SgVarRefExp/@name='I'">
+				DO	<xsl:value-of select="$label" />	I=1,inum
 				!$acc loop seq
 				DO L=lstart,lend
 				IF (I.ge.IS(L) .and.
@@ -151,8 +127,8 @@
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates mode="nt_opt">
-						<xsl:with-param name="nlabel" select="$nlabel" />
-						<xsl:with-param name="depth" select="$depth" />
+						<xsl:with-param name="label" select="$label" />
+						<xsl:with-param name="depth" select="$depth+1" />
 					</xsl:apply-templates>
 				</xsl:copy>
 			</xsl:otherwise>
