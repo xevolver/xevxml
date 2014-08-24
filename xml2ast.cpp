@@ -393,6 +393,8 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgImpliedDo);                           // 0827
       VISIT(SgDataStatementGroup);                  // 0827
 
+      VISIT(SgRenamePair);                          // 20140824
+
 
       if( nname != "PreprocessingInfo" ) {
         cerr << "unknown AST node found " << nname << endl;
@@ -1910,32 +1912,36 @@ Xml2AstVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent
 SgNode* 
 Xml2AstVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
 {
+  SgUseStatement* ret = 0;
   xe::DOMNamedNodeMap* amap = node->getAttributes();
   xe::DOMNode* nameatt = 0;
   string name;
+  int only=0;
 
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("name"));
     if(nameatt)
       name = xe::XMLString::transcode(nameatt->getNodeValue());
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("only"));
+    if(nameatt){
+      string sonly = xe::XMLString::transcode(nameatt->getNodeValue());
+      only = atoi(sonly.c_str());
+    }
   }
+  if(name.size()) 
+    ret = new SgUseStatement(astParent->get_file_info(),name,only);
+  else 
+    ABORT();
 
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       //SgNode* astchild = this->visit(child);
-      this->visit(child);
+      this->visit(child,ret);
     }
     child=child->getNextSibling();
   } 
-
-  if(name.size()) {
-    SgUseStatement* useStmt = new SgUseStatement(astParent->get_file_info(),name,false);
-    return useStmt;
-  }
-  else 
-    ABORT();
-
+  return ret;
 }
 
 SgNode* 
@@ -2137,7 +2143,7 @@ Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
   int                       style = 0;
   int                       enddo = 0;
   int                       ino   = 0;
-  string                    slabel,nlabel;
+  string                    slabel,nlabel,s_nlabel;
   
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("style"));
@@ -2162,6 +2168,11 @@ Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
     nameatt=amap->getNamedItem(xe::XMLString::transcode("nlabel"));
     if(nameatt) {
       nlabel = xe::XMLString::transcode(nameatt->getNodeValue());
+    }
+
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("s_nlabel"));
+    if(nameatt) {
+      s_nlabel = xe::XMLString::transcode(nameatt->getNodeValue());
     }
 
   }
@@ -2193,14 +2204,17 @@ Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 
   if( slabel.size() )
     ret->set_string_label( slabel );
-  else if( nlabel.size() ) {
+  else if( nlabel.size() || s_nlabel.size() ) {
     SgLabelSymbol*  s = new SgLabelSymbol();
     //s->set_label_type( SgLabelSymbol::label_type_enum.e_non_numeric_label_type );
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
     s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
     val.str("");
     val.clear(stringstream::goodbit);
-    val << nlabel;
+    if(nlabel.size())
+      val << nlabel;
+    else
+      val << s_nlabel;
     val >> ino;
     s->set_numeric_label_value( ino );
     SgLabelRefExp*  l = new SgLabelRefExp( s );
@@ -2664,6 +2678,7 @@ Xml2AstVisitor::visitSgAsteriskShapeExp(xe::DOMNode* node, SgNode* astParent)
 {
   //SgAsteriskShapeExp* ret = new SgAsteriskShapeExp(astParent->get_file_info());
   SgAsteriskShapeExp* ret = new SgAsteriskShapeExp(Sg_File_Info::generateDefaultFileInfoForTransformationNode());   // 0822
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -2673,14 +2688,23 @@ Xml2AstVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
   xe::DOMNamedNodeMap*  amap = node->getAttributes();
   xe::DOMNode*          nameatt = 0;
   int                   ino   = 0;
-  string                nlabel;
-  
+  int                   type  = 0;
+  string                tmp;
+
+
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("nlabel"));
     if(nameatt) {
-      nlabel = xe::XMLString::transcode(nameatt->getNodeValue());
-      if( nlabel.size() ){
-        ino = atoi( nlabel.c_str() );
+      tmp = xe::XMLString::transcode(nameatt->getNodeValue());
+      if( tmp.size() ){
+        ino = atoi( tmp.c_str() );
+      }
+    }
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("type"));
+    if(nameatt) {
+      tmp = xe::XMLString::transcode(nameatt->getNodeValue());
+      if( tmp.size() ){
+        type = atoi( tmp.c_str() );
       }
     }
   }
@@ -2688,9 +2712,10 @@ Xml2AstVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
   SgLabelSymbol*  s = new SgLabelSymbol();
   //s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
   s->set_fortran_statement( new SgStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode()) );
-  s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+  s->set_label_type( (SgLabelSymbol::label_type_enum)type );
   s->set_numeric_label_value( ino );
-  SgLabelRefExp*  ret = new SgLabelRefExp( s );
+  //SgLabelRefExp*  ret = new SgLabelRefExp( s );
+  SgLabelRefExp*  ret = sb::buildLabelRefExp( s );
   s->set_parent(ret);
   //ret->set_startOfConstruct(astParent->get_file_info());
   ret->set_startOfConstruct(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -2792,13 +2817,20 @@ Xml2AstVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   SgWriteStatement*     ret = new SgWriteStatement(astParent->get_file_info());
   SgExprListExp*        exp = 0;
   SgExpression*         fmt = 0;
+  SgExpression*         iost = 0;
+  SgExpression*         rec = 0;
+  SgExpression*         err = 0;
   SgExpression*         unt = 0;
   
   xe::DOMNamedNodeMap*  amap = node->getAttributes();
   xe::DOMNode*          nameatt = 0;
   string                nlabel;
   int                   ino   = 0;
-  
+  bool f_fmt = false;
+  bool f_ios = false;
+  bool f_rec = false;
+  bool f_err = false;
+
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("s_nlabel"));
     if(nameatt) {
@@ -2816,6 +2848,14 @@ Xml2AstVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 	l->set_parent(ret);
       }
     }
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("fmt"));
+    if(nameatt)f_fmt = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("iostat"));
+    if(nameatt)f_ios = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("rec"));
+    if(nameatt)f_rec = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("err"));
+    if(nameatt)f_err = true;
   }
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
@@ -2826,18 +2866,29 @@ Xml2AstVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 	exp = isSgExprListExp(astchild);
       else if( unt==0 )
 	unt = isSgExpression(astchild);
-      else if( fmt==0 )
+      else if( f_fmt && fmt==0 )
 	fmt = isSgExpression(astchild);
+      else if( f_ios && iost==0 )
+	iost = isSgExpression(astchild);
+      else if( f_rec && rec==0 )
+	rec = isSgExpression(astchild);
+      else if( f_err && err==0 )
+	err = isSgExpression(astchild);
     }
     child=child->getNextSibling();
   }
   ret->set_io_stmt_list(exp);
   ret->set_format( fmt );
+  ret->set_iostat( iost );
+  ret->set_rec( rec );
+  ret->set_err( err );
   ret->set_io_statement(SgIOStatement::e_write);
   ret->set_unit(unt);
-  exp->set_parent(ret);
-  fmt->set_parent(ret);
-  
+  if(exp)exp->set_parent(ret);
+  if(fmt)fmt->set_parent(ret);
+  if(iost)iost->set_parent(ret);
+  if(rec)rec->set_parent(ret);
+  if(err)err->set_parent(ret);
   return ret;
 }
 
@@ -4801,3 +4852,35 @@ Xml2AstVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astPar
 }
 
 
+SgNode* 
+Xml2AstVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgRenamePair*     ret = 0;
+  xe::DOMNamedNodeMap*        amap = node->getAttributes();
+  xe::DOMNode*                nameatt=0;
+  string                      lname;
+  string                      uname;
+
+  if(amap) {
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("lname"));
+    if(nameatt)
+      lname = xe::XMLString::transcode(nameatt->getNodeValue());
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("uname"));
+    if(nameatt){
+      uname = xe::XMLString::transcode(nameatt->getNodeValue());
+    }
+  }
+  else ABORT();
+
+  ret = new SgRenamePair(lname,uname);
+  if(ret) {
+    ret->set_parent(astParent);
+    // add this SgRenamePair object to its parent node
+    SgUseStatement* useStmt = isSgUseStatement(astParent);
+    if(useStmt){ // this should be true
+      useStmt->get_rename_list().push_back(ret);
+    }
+  }
+  else ABORT();
+  return ret;
+}

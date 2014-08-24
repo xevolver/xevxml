@@ -275,6 +275,7 @@ static void attribSgUseStatement(stringstream& istr,SgNode* node)
   SgUseStatement* n = isSgUseStatement(node);
   if(n) {
     istr << " name=" << n->get_name() << " ";
+    istr << " only=\"" << n->get_only_option() << "\"";
   }
 }
 
@@ -428,12 +429,28 @@ static void attribSgPrintStatement(stringstream& istr,SgNode* node)
   }
 }
 
+static void attribSgWriteStatement(stringstream& istr,SgNode* node)
+{
+  SgWriteStatement* n = isSgWriteStatement(node);
+  if(n) {
+    if( n->get_format() )
+      istr << " fmt=\"true\"";
+    if( n->get_iostat() )
+      istr << " iostat=\"true\"";
+    if( n->get_rec() )
+      istr << " rec=\"true\"";
+    if( n->get_err() )
+      istr << " err=\"true\"";
+  }
+}
+
 static void attribSgLabelRefExp(stringstream& istr,SgNode* node)
 {
   SgLabelRefExp*      n = isSgLabelRefExp(node);
 
   if(n) {
     istr << " nlabel=\"" << n->get_symbol()->get_numeric_label_value() << "\" ";
+    istr << " type=\"" << n->get_symbol()->get_label_type() << "\" ";
   }
 }
 
@@ -682,6 +699,15 @@ void attribSgSourceFile(stringstream& istr,SgNode* node)
   }
 }
 
+void attribSgRenamePair(stringstream& istr,SgNode* node)
+{
+  SgRenamePair*  n = isSgRenamePair(node);  
+  if(n) {
+    istr << " lname=" << n->get_local_name() << "";
+    istr << " uname=" << n->get_use_name() << "";
+  }
+}
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     xevxml::Ast2XmlOpt* opt)
 {
@@ -707,6 +733,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgWhileStmt(istr,node);
   attribSgFunctionRefExp(istr,node);                    
   attribSgPrintStatement(istr,node);                    
+  attribSgWriteStatement(istr,node);                    
   attribSgSizeOfOp(istr,node);                          
   attribSgClassDeclaration(istr,node);                  
   attribSgClassDefinition(istr,node);                   
@@ -724,6 +751,6 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgAsmStmt(istr,node);                           
   attribSgOpenStatement(istr,node);                     
   attribSgInquireStatement(istr,node);                  
-
+  attribSgRenamePair(istr,node);
   return;
 }

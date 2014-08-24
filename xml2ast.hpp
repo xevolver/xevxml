@@ -332,7 +332,7 @@ public:
   SgNode* visitSgRshiftAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent=0);
-
+  SgNode* visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent=0);
     
 
   SgFile* getSgFile() {return _file;}

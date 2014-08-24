@@ -127,7 +127,7 @@ static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoTy
 	  sstr_ << "  "; // indent
 	  sstr_ << "<SgPragma pragma=\"";
 	  // assuming Fortran directives start with !$
-	  sstr_ << str.substr( idx+strlen("!$") ) << "\" />\n";
+	  sstr_ << XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
 	  sstr_ << "</SgPragmaDeclaration >\n";
 	}
       }
