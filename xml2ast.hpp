@@ -137,6 +137,8 @@ public:
   SgNode* visitSgBitComplementOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgLshiftOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgRshiftOp(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgConcatenationOp(xercesc::DOMNode* node, SgNode* astParent=0);
+
   SgNode* visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgSubtractOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgDivAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);

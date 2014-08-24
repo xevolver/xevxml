@@ -236,6 +236,7 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgMultAssignOp);
       VISIT(SgAddOp);
       VISIT(SgLessThanOp);
+      VISIT(SgConcatenationOp);
 
       VISIT(SgTypeChar);                            // 0701
       VISIT(SgTypeUnsignedChar);                    // 0701
@@ -1485,6 +1486,7 @@ VISIT_BINARY_OP(PntrArrRefExp);
 VISIT_BINARY_OP(ExponentiationOp);
 VISIT_BINARY_OP(LshiftAssignOp);
 VISIT_BINARY_OP(RshiftAssignOp);
+VISIT_BINARY_OP(ConcatenationOp);
 
 SgNode* 
 Xml2AstVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)
