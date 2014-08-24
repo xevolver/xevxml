@@ -813,10 +813,13 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
   
   xe::DOMNamedNodeMap*            amap = node->getAttributes();
   xe::DOMNode*                    satt = 0;
-  string                          name;
+  string                          name,rname;
   stringstream                    val;
   int                             kind=0;
-  
+  bool                            f_pure  = false;
+  bool                            f_elem  = false;
+  bool                            f_recur = false;
+
   if(amap) {
     satt=amap->getNamedItem(xe::XMLString::transcode("name"));
     if(satt)
@@ -827,6 +830,18 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
       val << xe::XMLString::transcode(satt->getNodeValue());
       val >> kind;
     }
+    satt=amap->getNamedItem(xe::XMLString::transcode("result_name"));
+    if(satt) 
+      rname = xe::XMLString::transcode(satt->getNodeValue());
+    satt=amap->getNamedItem(xe::XMLString::transcode("recursive"));
+    if(satt) 
+      f_recur = true;
+    satt=amap->getNamedItem(xe::XMLString::transcode("pure"));
+    if(satt) 
+      f_pure = true;
+    satt=amap->getNamedItem(xe::XMLString::transcode("elemental"));
+    if(satt) 
+      f_elem = true;
   }
 
   xe::DOMNode* child=node->getFirstChild();
@@ -863,12 +878,22 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
       }
   }
   else ABORT();
-  
+
   if(def)
     si::replaceStatement( ret->get_definition()->get_body(),def,true );
+  if(rname.size()){
+    SgInitializedName* in = sb::buildInitializedName(rname,typ);
+    in->set_parent(ret);
+    ret->set_result_name(in);
+  }
+  if(f_pure)
+    ret->get_functionModifier().setPure();
+  if(f_elem)
+    ret->get_functionModifier().setElemental();
+  if(f_recur)
+    ret->get_functionModifier().setRecursive();
 
   return ret;
-
 }
 
 SgNode* 
@@ -3432,12 +3457,21 @@ Xml2AstVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   SgReadStatement*        ret = new SgReadStatement(astParent->get_file_info());
   SgExprListExp*          exp = 0;
   SgExpression*           fmt = 0;
+  SgExpression*           iost = 0;
+  SgExpression*           rec = 0;
+  SgExpression*           end = 0;
+  SgExpression*           err = 0;
   SgExpression*           unt = 0;
   
   xe::DOMNamedNodeMap*    amap = node->getAttributes();
   xe::DOMNode*            nameatt = 0;
   string                  nlabel;
   int                     ino   = 0;
+  bool f_fmt = false;
+  bool f_ios = false;
+  bool f_rec = false;
+  bool f_end = false;
+  bool f_err = false;
   
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("s_nlabel"));
@@ -3456,6 +3490,17 @@ Xml2AstVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
 	l->set_parent(ret);
       }
     }
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("fmt"));
+    if(nameatt)f_fmt = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("iostat"));
+    if(nameatt)f_ios = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("rec"));
+    if(nameatt)f_rec = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("end"));
+    if(nameatt)f_end = true;
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("err"));
+    if(nameatt)f_err = true;
+
   }
   
   xe::DOMNode* child=node->getFirstChild();
@@ -3467,8 +3512,16 @@ Xml2AstVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
 	exp = isSgExprListExp(astchild);
       else if( unt==0 )
 	unt = isSgExpression(astchild);
-      else if( fmt==0 )
+      else if( f_fmt && fmt==0 )
 	fmt = isSgExpression(astchild);
+      else if( f_ios && iost==0 )
+	iost = isSgExpression(astchild);
+      else if( f_rec && rec==0 )
+	rec = isSgExpression(astchild);
+      else if( f_end && end==0 )
+	end = isSgExpression(astchild);
+      else if( f_err && err==0 )
+	err = isSgExpression(astchild);
     }
     child=child->getNextSibling();
   }
@@ -3476,9 +3529,12 @@ Xml2AstVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   ret->set_io_stmt_list(exp);
   ret->set_format( fmt );
   ret->set_unit(unt);
-  exp->set_parent(ret);
-  fmt->set_parent(ret);
-
+  if(exp)exp->set_parent(ret);
+  if(fmt)fmt->set_parent(ret);
+  if(iost)iost->set_parent(ret);
+  if(rec)rec->set_parent(ret);
+  if(end)end->set_parent(ret);
+  if(err)err->set_parent(ret);
   return ret;
 }
 

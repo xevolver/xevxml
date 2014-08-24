@@ -267,6 +267,14 @@ static void attribSgProcedureHeaderStatement(stringstream& istr,SgNode* node)
   SgProcedureHeaderStatement* n = isSgProcedureHeaderStatement(node);
   if(n) {
     istr << " subprogram_kind=\"" << n->get_subprogram_kind () << "\" ";
+    if(n->get_result_name())
+      istr << " result_name=\"" << n->get_result_name()->get_name().getString() << "\" ";
+    if(n->get_functionModifier().isPure())
+      istr << " pure=\"true\"";
+    if(n->get_functionModifier().isElemental())
+      istr << " elemental=\"true\"";
+    if(n->get_functionModifier().isRecursive())
+      istr << " recursive=\"true\"";
   }
 }
 
@@ -439,6 +447,23 @@ static void attribSgWriteStatement(stringstream& istr,SgNode* node)
       istr << " iostat=\"true\"";
     if( n->get_rec() )
       istr << " rec=\"true\"";
+    if( n->get_err() )
+      istr << " err=\"true\"";
+  }
+}
+
+static void attribSgReadStatement(stringstream& istr,SgNode* node)
+{
+  SgReadStatement* n = isSgReadStatement(node);
+  if(n) {
+    if( n->get_format() )
+      istr << " fmt=\"true\"";
+    if( n->get_iostat() )
+      istr << " iostat=\"true\"";
+    if( n->get_rec() )
+      istr << " rec=\"true\"";
+    if( n->get_end() )
+      istr << " end=\"true\"";
     if( n->get_err() )
       istr << " err=\"true\"";
   }
