@@ -472,10 +472,23 @@ void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgNode* 
     else if (child->getNodeType() == xe::DOMNode::TEXT_NODE){
       std::string tmp = xe::XMLString::transcode(child->getNodeValue());
       std::string text = "";
+      std::string line = "";
+      size_t i(0);
+      bool flag = false;
+      //std::cerr << "DEBUG:" << tmp << ": " << tmp.length() << std::endl;
       // skip white spaces
-      for(size_t i(0);i<tmp.length();i++)
-	if(!isspace(tmp[i]))
-	  text += tmp[i];
+      for(i=0;i<tmp.length();i++) {
+	if(!isspace(tmp[i])) flag = true;
+	line += tmp[i];
+	if(tmp[i]=='\n') {
+	  if(flag)
+	    text += line;
+	  line = "";
+	  flag = false;
+	}
+      }
+      if(flag)
+	text += line;
       if(text.length()){
 	if(prev) 
 	  si::attachArbitraryText(prev,text,PreprocessingInfo::after);  

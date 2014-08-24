@@ -13,6 +13,9 @@
       <xsl:copy-of select="@*"/>
       <xsl:apply-templates/>
     </xsl:copy>
+    /* hoge */
+
+    /* muho */
   </xsl:template>
 
   <xsl:template match="SgForStatement">
