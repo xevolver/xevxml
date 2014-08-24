@@ -1296,6 +1296,18 @@ Xml2AstVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
   SgBreakStmt* ret = 0;
   ret = sb::buildBreakStmt();
 
+  xe::DOMNamedNodeMap*  amap = node->getAttributes();
+  xe::DOMNode*          nameatt = 0;
+  string                do_label;
+
+  if(amap) {
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("label"));
+    if(nameatt) {
+      do_label = xe::XMLString::transcode(nameatt->getNodeValue());
+      ret->set_do_string_label(do_label);
+    }
+  }
+  
   return ret;
 }
 
@@ -1303,6 +1315,18 @@ SgNode*
 Xml2AstVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgContinueStmt* ret = sb::buildContinueStmt();
+
+  xe::DOMNamedNodeMap*  amap = node->getAttributes();
+  xe::DOMNode*          nameatt = 0;
+  string                do_label;
+
+  if(amap) {
+    nameatt=amap->getNamedItem(xe::XMLString::transcode("label"));
+    if(nameatt) {
+      do_label = xe::XMLString::transcode(nameatt->getNodeValue());
+      ret->set_do_string_label(do_label);
+    }
+  }
   
   return ret;
 }

@@ -733,6 +733,24 @@ void attribSgRenamePair(stringstream& istr,SgNode* node)
   }
 }
 
+void attribSgBreakStmt(stringstream& istr,SgNode* node)
+{
+  SgBreakStmt*  n = isSgBreakStmt(node);  
+  if(n) {
+    if(n->get_do_string_label().size())
+      istr << " label=\"" << n->get_do_string_label() << "\"";
+  }
+}
+
+void attribSgContinueStmt(stringstream& istr,SgNode* node)
+{
+  SgContinueStmt*  n = isSgContinueStmt(node);  
+  if(n) {
+    if(n->get_do_string_label().size())
+      istr << " label=\"" << n->get_do_string_label() << "\"";
+  }
+}
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     xevxml::Ast2XmlOpt* opt)
 {
@@ -747,7 +765,6 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgVariableDeclaration(istr,node);
   attribSgFunctionDeclaration(istr,node);
   attribSgUnaryOp(istr,node);
-
   attribSgGotoStatement(istr,node);                     
   attribSgLabelStatement(istr,node);                    
   attribSgProcedureHeaderStatement(istr,node);          
@@ -759,6 +776,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgFunctionRefExp(istr,node);                    
   attribSgPrintStatement(istr,node);                    
   attribSgWriteStatement(istr,node);                    
+  attribSgReadStatement(istr,node);                    
   attribSgSizeOfOp(istr,node);                          
   attribSgClassDeclaration(istr,node);                  
   attribSgClassDefinition(istr,node);                   
@@ -777,5 +795,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgOpenStatement(istr,node);                     
   attribSgInquireStatement(istr,node);                  
   attribSgRenamePair(istr,node);
+  attribSgBreakStmt(istr,node);
+  attribSgContinueStmt(istr,node);
   return;
 }
