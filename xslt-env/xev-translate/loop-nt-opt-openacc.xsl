@@ -22,12 +22,13 @@
 	<xsl:template match="SgBasicBlock">
 		<xsl:choose>
 			<xsl:when
-				test="self::node()/SgPragmaDeclaration/SgPragma/DIRECTIVE/@name  = 'nt_opt200'">
+				test="self::node()/SgPragmaDeclaration/SgPragma/DIRECTIVE/@name  = 'nt_opt'">
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates select="./SgFortranDo"
-						mode="nt_opt200">
-						<xsl:with-param name="label" select='200' />
+						mode="nt_opt">
+						<xsl:with-param name="label"
+							select='self::node()/SgPragmaDeclaration/SgPragma/DIRECTIVE/CLAUSE/ARG/@value' />
 						<xsl:with-param name="depth" select='1' />
 					</xsl:apply-templates>
 					<xsl:copy-of select="SgReturnStmt" />
@@ -53,7 +54,7 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="PreprocessingInfo" mode="nt_opt200">
+	<xsl:template match="PreprocessingInfo" mode="nt_opt">
 	</xsl:template>
 
 
@@ -83,34 +84,58 @@
 
 
 
+	<xsl:template match="*" mode="add-openacc" />
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	<xsl:template match="*" mode="nt_opt200">
+	<xsl:template match="SgFortranDo" mode="add-openacc">
 		<xsl:param name="nlabel" />
 		<xsl:param name="depth" />
 		<xsl:choose>
+			<xsl:when test="$nlabel = 200">
+				<xsl:choose>
+					<xsl:when test="$depth = 1">
+						<xsl:text>!$acc loop private(L)</xsl:text>
+					</xsl:when>
+					<xsl:when test="$depth = 2">
+						<xsl:text>!$acc loop gang</xsl:text>
+					</xsl:when>
+					<xsl:when test="$depth = 3">
+						<xsl:text>!$acc loop gang,vector</xsl:text>
+					</xsl:when>
+					<xsl:when test="$depth = 4">
+						<xsl:text>!$acc loop vector</xsl:text>
+					</xsl:when>
+				</xsl:choose>
+			</xsl:when>
+			<xsl:when test="$nlabel = 300">
+			</xsl:when>
+		</xsl:choose>
+	</xsl:template>
+
+
+
+
+
+
+
+
+
+	<xsl:template match="*" mode="nt_opt">
+		<xsl:param name="nlabel" />
+		<xsl:param name="depth" />
+		<xsl:apply-templates match="self::SgFortranDo"
+			mode="add-openacc">
+			<xsl:with-param name="nlabel" select="$nlabel" />
+			<xsl:with-param name="depth" select="$depth" />
+		</xsl:apply-templates>
+		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name='L'">
 				<xsl:apply-templates select="SgBasicBlock/SgFortranDo"
-					mode="nt_opt200">
+					mode="nt_opt">
 					<xsl:with-param name="nlabel" select="$nlabel" />
 					<xsl:with-param name="depth" select="$depth" />
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name='I'">
-				<xsl:text>!$acc loop vector</xsl:text>
 				DO
 				<xsl:value-of select="$nlabel" />
 				I=1,inum
@@ -122,31 +147,10 @@
 				END DO
 				<xsl:apply-templates select="SgBasicBlock" />
 			</xsl:when>
-			<xsl:when test="self::SgFortranDo">
-				<xsl:choose>
-					<xsl:when test="$depth = 1">
-						<xsl:text>!$acc loop private(L)</xsl:text>
-					</xsl:when>
-					<xsl:when test="$depth = 2">
-						<xsl:text>!$acc loop gang</xsl:text>
-					</xsl:when>
-					<xsl:when test="$depth = 3">
-						<xsl:text>!$acc loop gang,vector</xsl:text>
-					</xsl:when>
-					<xsl:otherwise></xsl:otherwise>
-				</xsl:choose>
-				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="nt_opt200">
-						<xsl:with-param name="nlabel" select="$nlabel" />
-						<xsl:with-param name="depth" select="$depth + 1" />
-					</xsl:apply-templates>
-				</xsl:copy>
-			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="nt_opt200">
+					<xsl:apply-templates mode="nt_opt">
 						<xsl:with-param name="nlabel" select="$nlabel" />
 						<xsl:with-param name="depth" select="$depth" />
 					</xsl:apply-templates>

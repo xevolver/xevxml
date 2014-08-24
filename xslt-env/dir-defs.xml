@@ -1,9 +1,7 @@
 <DEFS>
-  <DIRECTIVE name="nt_opt200">
-    <CLAUSE name="param">
-      <ARG value="ArrayNum" />
-      <ARG value="StartIndex" />
-      <ARG value="EndIndex" />
+  <DIRECTIVE name="nt_opt">
+    <CLAUSE name="label">
+      <ARG value="defLabel" />
     </CLAUSE>
   </DIRECTIVE>
   <DIRECTIVE name="nt_opt2">
