@@ -47,7 +47,7 @@ namespace xa=xalanc;
 using namespace std;
 
 
-
+#define XEVXML_DEBUG
 //#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
 #ifdef XEVXML_DEBUG
 int g_count=0;
@@ -158,7 +158,6 @@ Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
 				       prj->get_file(0).getFileName(),prj));
   //_file = new SgSourceFile();
   if(_file==0){ ABORT(); }
-  
   Sg_File_Info* info 
     = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
   _file->set_file_info(info);
@@ -865,6 +864,7 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
       ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
 		       (SgProcedureHeaderStatement::subprogram_kind_enum)kind , scope);
+
     }
     else
       {
@@ -920,7 +920,9 @@ SgNode*
 Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock* ret = sb::buildBasicBlock();
-  sb::pushScopeStack(ret);
+  SgScopeStatement* scope = sb::topScopeStack();
+  ret->set_parent(astParent);
+  sb::pushScopeStack(scope);
   traverseStatementsAndTexts(this, node,ret);
   sb::popScopeStack();
   return ret;
@@ -1363,6 +1365,7 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
     SgExpression* rhs = 0;						\
     xe::DOMNode* child=node->getFirstChild();				\
     Sg##op* ret = sb::build##op(lhs,rhs);				\
+    ret->set_parent(astParent);						\
     while(child) {							\
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){	\
 	SgNode* astchild = this->visit(child,ret);			\
@@ -1374,7 +1377,6 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
       child=child->getNextSibling();					\
     }									\
     if( lhs && rhs ){							\
-      ret->set_parent(astParent);					\
       ret->set_lhs_operand(lhs);					\
       ret->set_rhs_operand(rhs);					\
       return ret;							\
@@ -1880,18 +1882,17 @@ Xml2AstVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
   std::vector< SgExpression * > exprs;
 
   ret = sb::buildExprListExp( exprs );
+
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       SgNode* astchild = this->visit(child,ret);
         if((exp = isSgExpression(astchild))!=0) {
 	  ret->append_expression(exp);
-          //exprs.push_back(exp);
         }
     }
     child=child->getNextSibling();
   } 
-  //exprs could be empty
   ret->set_parent(astParent);
   return ret;
 }
@@ -2064,8 +2065,6 @@ Xml2AstVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode
     case SgAttributeSpecificationStatement::e_externalStatement:
     case SgAttributeSpecificationStatement::e_dimensionStatement:
     case SgAttributeSpecificationStatement::e_allocatableStatement:
-    case SgAttributeSpecificationStatement::e_accessStatement_private:
-    case SgAttributeSpecificationStatement::e_accessStatement_public:
       
       while(child) {
 	if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -2151,6 +2150,12 @@ Xml2AstVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode
       ret->get_name_list() = slst;
       break;
 
+    case SgAttributeSpecificationStatement::e_accessStatement_private:
+    case SgAttributeSpecificationStatement::e_accessStatement_public:
+      ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
+      ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
+      
+      break;
     default:
       ABORT();
       break;
@@ -2360,9 +2365,7 @@ Xml2AstVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent
   SgClassDeclaration*       dec = isSgClassDeclaration( astParent );
   SgDeclarationStatement*   fld = 0;
   
-  
   ret = sb::buildClassDefinition( dec );
-  
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -2375,7 +2378,6 @@ Xml2AstVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent
     }
     child=child->getNextSibling();
   }
-
   return ret;
 }
 
@@ -2413,7 +2415,7 @@ Xml2AstVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   ds->setForward();
   ret = new SgClassType( ds );
 //ds->set_parent(ret);
-
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -2726,8 +2728,8 @@ Xml2AstVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
   
   ret->set_io_stmt_list(exp);
   ret->set_format( fmt );
-  exp->set_parent(ret);
-  fmt->set_parent(ret);
+  if(exp)exp->set_parent(ret);
+  if(fmt)fmt->set_parent(ret);
   return ret;
 }
 
@@ -3765,7 +3767,7 @@ Xml2AstVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPar
   } 
   ret->set_condition( cond );
   ret->set_body( body );
-  
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -3797,7 +3799,7 @@ Xml2AstVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_body( body );
   ret->set_elsewhere( elsw );
   ret->set_has_end_statement(true);
-
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -3820,6 +3822,7 @@ Xml2AstVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParen
     }
     child=child->getNextSibling();
   } 
+  ret->set_parent(astParent);
   ret->set_pointer_list( plst );
   ret->set_parent(astParent);
   return ret;
@@ -4015,6 +4018,7 @@ Xml2AstVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
   int                     ino = 0;
   int                     flg[33];
   
+  ret->set_parent(astParent);
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("s_nlabel"));
     if(nameatt) {
@@ -4974,3 +4978,4 @@ Xml2AstVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
   else ABORT();
   return ret;
 }
+
