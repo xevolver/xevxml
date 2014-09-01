@@ -95,7 +95,7 @@ public:
       //cerr << p <<endl;
       if(p==0) {
 	cerr << n->class_name() << ": ";
-	cerr << n->unparseToString();	
+	cerr << n->unparseToString()	<< " \n";
 	ABORT();
       }
       //cerr << n->unparseToString();
@@ -1491,13 +1491,17 @@ VISIT_BINARY_OP(ConcatenationOp);
 SgNode* 
 Xml2AstVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)
 {
-  return sb::buildNullExpression();
+  SgNullExpression* ret = sb::buildNullExpression();
+  ret->set_parent(astParent);
+  return ret;
 }
 
 SgNode* 
 Xml2AstVisitor::visitSgNullStatement(xe::DOMNode* node, SgNode* astParent)
 {
-  return sb::buildNullStatement();
+  SgNullStatement* ret = sb::buildNullStatement();
+  ret->set_parent(astParent);
+  return ret;
 }
 
 SgNode* 
@@ -1875,19 +1879,20 @@ Xml2AstVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*                 exp  = 0;
   std::vector< SgExpression * > exprs;
 
+  ret = sb::buildExprListExp( exprs );
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+      SgNode* astchild = this->visit(child,ret);
         if((exp = isSgExpression(astchild))!=0) {
-          exprs.push_back(exp);
+	  ret->append_expression(exp);
+          //exprs.push_back(exp);
         }
     }
     child=child->getNextSibling();
   } 
   //exprs could be empty
-  ret = sb::buildExprListExp( exprs );
-
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -2059,6 +2064,8 @@ Xml2AstVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode
     case SgAttributeSpecificationStatement::e_externalStatement:
     case SgAttributeSpecificationStatement::e_dimensionStatement:
     case SgAttributeSpecificationStatement::e_allocatableStatement:
+    case SgAttributeSpecificationStatement::e_accessStatement_private:
+    case SgAttributeSpecificationStatement::e_accessStatement_public:
       
       while(child) {
 	if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -3807,13 +3814,14 @@ Xml2AstVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParen
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+      SgNode* astchild = this->visit(child,ret);
       if( plst==0 )
         plst = isSgExprListExp(astchild);
     }
     child=child->getNextSibling();
   } 
   ret->set_pointer_list( plst );
+  ret->set_parent(astParent);
   return ret;
 }
 
