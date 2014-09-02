@@ -107,6 +107,10 @@ static bool hasInternalNode(SgNode* n)
   if(isSgDataStatementGroup(n)) 
     return true;
 
+  if(isSgInquireStatement(n))
+    return true;
+
+
   return false;
 }
 
@@ -337,6 +341,7 @@ static bool isLeafNode(SgNode* node)
   return true;
 }
 
+#define TRAVERSE_IF_EXISTS(x) if(x){visitor.traverse(x,att);}
 
 /*!
 * @brief        writeInternalNode
@@ -468,7 +473,39 @@ static void writeInternalNode(stringstream& sstr,
   }
 
   else if(isSgInquireStatement(n)){ 
-      visitor.traverse(isSgInquireStatement(n)->get_iolengthExp(),att);
+    SgInquireStatement* inq = isSgInquireStatement(n);
+    TRAVERSE_IF_EXISTS(inq->get_iolengthExp());
+    TRAVERSE_IF_EXISTS(inq->get_unit());
+    TRAVERSE_IF_EXISTS(inq->get_iostat());
+    TRAVERSE_IF_EXISTS(inq->get_err());
+    TRAVERSE_IF_EXISTS(inq->get_iomsg());
+    TRAVERSE_IF_EXISTS(inq->get_file());
+    TRAVERSE_IF_EXISTS(inq->get_access());
+    TRAVERSE_IF_EXISTS(inq->get_form());
+    TRAVERSE_IF_EXISTS(inq->get_recl());
+    TRAVERSE_IF_EXISTS(inq->get_blank());
+    TRAVERSE_IF_EXISTS(inq->get_exist());
+    TRAVERSE_IF_EXISTS(inq->get_opened());
+    TRAVERSE_IF_EXISTS(inq->get_number());
+    TRAVERSE_IF_EXISTS(inq->get_named());
+    TRAVERSE_IF_EXISTS(inq->get_name());
+    TRAVERSE_IF_EXISTS(inq->get_sequential());
+    TRAVERSE_IF_EXISTS(inq->get_direct());
+    TRAVERSE_IF_EXISTS(inq->get_formatted());
+    TRAVERSE_IF_EXISTS(inq->get_unformatted());
+    TRAVERSE_IF_EXISTS(inq->get_nextrec());
+    TRAVERSE_IF_EXISTS(inq->get_position());
+    TRAVERSE_IF_EXISTS(inq->get_action());
+    TRAVERSE_IF_EXISTS(inq->get_read());
+    TRAVERSE_IF_EXISTS(inq->get_write());
+    TRAVERSE_IF_EXISTS(inq->get_readwrite());
+    TRAVERSE_IF_EXISTS(inq->get_delim());
+    TRAVERSE_IF_EXISTS(inq->get_pad());
+    TRAVERSE_IF_EXISTS(inq->get_asynchronous());
+    TRAVERSE_IF_EXISTS(inq->get_decimal());
+    TRAVERSE_IF_EXISTS(inq->get_stream());
+    TRAVERSE_IF_EXISTS(inq->get_size());
+    TRAVERSE_IF_EXISTS(inq->get_pending());
   }
   else if(isSgTypedefDeclaration(n)){
       writeTypesRecursive(sstr,isSgTypedefDeclaration(n)->get_base_type(), att,false);

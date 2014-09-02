@@ -444,7 +444,7 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
     }
   } // C++ is not supported for now 
 
-  cerr << _file->get_outputLanguage() << ":" << _file->get_outputFormat() << endl;
+  //cerr << _file->get_outputLanguage() << ":" << _file->get_outputFormat() << endl;
 
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -1691,6 +1691,35 @@ Xml2AstVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
     xe::DOMNamedNodeMap* amap = node->getAttributes();			\
     xe::DOMNode* valatt = 0;						\
     stringstream val;							\
+    std::string vstr;							\
+    if(amap) {								\
+      valatt=amap->getNamedItem(xe::XMLString::transcode("value"));	\
+      if(valatt)							\
+	val << xe::XMLString::transcode(valatt->getNodeValue());	\
+      valatt=amap->getNamedItem(xe::XMLString::transcode("string"));	\
+      if(valatt)							\
+	vstr = xe::XMLString::transcode(valatt->getNodeValue());	\
+    }									\
+    if(val.str().size()){						\
+      baseType ival;							\
+      val >> ival;							\
+      ret = sb::build##buildVal(ival);					\
+	ret->set_parent(astParent);					\
+	if(vstr.size())							\
+	  ret->set_valueString(vstr);					\
+    }									\
+    else ABORT();							\
+    return ret;								\
+  }
+
+#define VISIT_VAL_NO_STRING(valType,baseType,buildVal)			\
+  SgNode* Xml2AstVisitor::						\
+  visit##valType(xe::DOMNode* node, SgNode* astParent)			\
+  {									\
+    valType* ret = 0;							\
+    xe::DOMNamedNodeMap* amap = node->getAttributes();			\
+    xe::DOMNode* valatt = 0;						\
+    stringstream val;							\
     if(amap) {								\
       valatt=amap->getNamedItem(xe::XMLString::transcode("value"));	\
       if(valatt)							\
@@ -1707,7 +1736,7 @@ Xml2AstVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   }
 
 
-VISIT_VAL(SgBoolValExp,bool,BoolValExp);
+VISIT_VAL_NO_STRING(SgBoolValExp,bool,BoolValExp);
 VISIT_VAL(SgCharVal,char,CharVal);
 VISIT_VAL(SgWcharVal,unsigned short,WcharVal);
 //VISIT_VAL(SgComplexVal);

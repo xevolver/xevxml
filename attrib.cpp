@@ -52,9 +52,21 @@ using namespace xevxml;
     }								\
   }
 
+#define DEFINE_VALUE_AND_STRING(ty)				\
+  static void attrib##ty(stringstream& istr,SgNode* node)	\
+  {								\
+    ty* n = is##ty(node);					\
+    if(n) {							\
+      istr << " value=\"" << n->get_value() << "\" ";		\
+      if(n->get_valueString().size())				\
+	istr << " string=\"" << n->get_valueString() << "\" ";	\
+    }								\
+  }
+
 DEFINE_VALUE_EXP(SgBoolValExp);
-DEFINE_VALUE_EXP(SgCharVal);
-DEFINE_VALUE_EXP(SgWcharVal);
+DEFINE_VALUE_EXP(SgEnumVal);
+DEFINE_VALUE_AND_STRING(SgCharVal);
+DEFINE_VALUE_AND_STRING(SgWcharVal);
 //DEFINE_VALUE_EXP(SgComplexVal);
 static void attribSgComplexVal(stringstream& istr,SgNode* node)	
 {
@@ -67,20 +79,19 @@ static void attribSgComplexVal(stringstream& istr,SgNode* node)
     istr << " imaginary=\"" << f->get_value() << "\" ";
   }
 }
-DEFINE_VALUE_EXP(SgDoubleVal);
-DEFINE_VALUE_EXP(SgFloatVal);
-DEFINE_VALUE_EXP(SgIntVal);
-DEFINE_VALUE_EXP(SgLongIntVal);
-DEFINE_VALUE_EXP(SgLongLongIntVal);
-DEFINE_VALUE_EXP(SgEnumVal);
-DEFINE_VALUE_EXP(SgLongDoubleVal);
-DEFINE_VALUE_EXP(SgShortVal);
+DEFINE_VALUE_AND_STRING(SgDoubleVal);
+DEFINE_VALUE_AND_STRING(SgFloatVal);
+DEFINE_VALUE_AND_STRING(SgIntVal);
+DEFINE_VALUE_AND_STRING(SgLongIntVal);
+DEFINE_VALUE_AND_STRING(SgLongLongIntVal);
+DEFINE_VALUE_AND_STRING(SgLongDoubleVal);
+DEFINE_VALUE_AND_STRING(SgShortVal);
 //DEFINE_VALUE_EXP(SgStringVal);
-DEFINE_VALUE_EXP(SgUnsignedCharVal);
-DEFINE_VALUE_EXP(SgUnsignedShortVal);
-DEFINE_VALUE_EXP(SgUnsignedIntVal);
-DEFINE_VALUE_EXP(SgUnsignedLongVal);
-DEFINE_VALUE_EXP(SgUnsignedLongLongIntVal);
+DEFINE_VALUE_AND_STRING(SgUnsignedCharVal);
+DEFINE_VALUE_AND_STRING(SgUnsignedShortVal);
+DEFINE_VALUE_AND_STRING(SgUnsignedIntVal);
+DEFINE_VALUE_AND_STRING(SgUnsignedLongVal);
+DEFINE_VALUE_AND_STRING(SgUnsignedLongLongIntVal);
 static void attribSgUnaryOp(stringstream& istr,SgNode* node)	
 {								
   SgUnaryOp* n = isSgUnaryOp(node);					

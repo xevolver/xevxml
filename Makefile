@@ -3,12 +3,12 @@ LD	= $(CXX)
 
 ROSEROOT	= /home/tacky/local
 
-LIBXML2=/usr/include/libxml2
-INCLUDE	= -I$(ROSEROOT)/include  -I$(LIBXML2)
+#LIBXML2=/usr/include/libxml2
+INCLUDE	= -I$(ROSEROOT)/include  #-I$(LIBXML2)
 CXXFLAGS= -g -Wall -Wno-deprecated $(INCLUDE) 
 
 #ROSELIB = -L$(ROSEROOT)/lib -lrosehpct -lxml2 -lrose -lxalan-c -lxerces-c
-ROSELIB	= -L$(ROSEROOT)/lib -lrose -L$(ROSEROOT) -lxalan-c -L$(ROSEROOT) -lxerces-c
+ROSELIB	= -L$(ROSEROOT)/lib -lrose -lxalan-c -lxerces-c
 
 LIBS	= $(ROSELIB) $(JVMLIB)
 SRCS    =  ast2xml.cpp xml2ast.cpp attrib.cpp \
