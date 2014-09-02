@@ -46,8 +46,6 @@ namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
 
-
-#define XEVXML_DEBUG
 //#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
 #ifdef XEVXML_DEBUG
 int g_count=0;
@@ -104,9 +102,9 @@ public:
 };
 
 
-static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj)
+static SgProject* Xml2AstDOMVisit(stringstream& tr)
 {
-  SgFile* ret = 0;
+  SgProject* ret = 0;
   try {
     xe::DOMDocument* doc = 0;
     xe::XercesDOMParser parser;
@@ -118,13 +116,13 @@ static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj)
 
     //class Xml2AstVisitor visit(prj->get_file(0).getFileName(),ofn.c_str(),prj);
     //unlink(ofn.c_str());
-    class xevxml::Xml2AstVisitor visit(prj);
+    class xevxml::Xml2AstVisitor visit;
     //class xevxml::Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
     visit.visit(doc,0);
-    ret = visit.getSgFile();
+    ret = visit.getSgProject();
     
     TestAST test;
-    test.traverse(ret,preorder);
+    test.traverse(&ret->get_file(0),preorder);
 
     //AstTests::runAllTests(prj);
   }
@@ -135,10 +133,10 @@ static SgFile* Xml2AstDOMVisit(stringstream& tr, SgProject* prj)
 }
 
 namespace xevxml {
-SgFile* Xml2Ast(stringstream& str, SgProject* prj)
+SgProject* Xml2Ast(stringstream& str)
 {
-  SgFile* ret = 0;
-  if((ret=Xml2AstDOMVisit(str,prj))==0){
+  SgProject* ret = 0;
+  if((ret=Xml2AstDOMVisit(str))==0){
     cerr << "Error: XML parsing failed" << endl;
     ABORT();
   }
@@ -153,10 +151,16 @@ using namespace xevxml;
 
 Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
 {
-  //_file = isSgSourceFile(&prj->get_file(0));
-  _file = isSgSourceFile(sb::buildFile(prj->get_file(0).getFileName(),
-				       prj->get_file(0).getFileName(),prj));
-  //_file = new SgSourceFile();
+  if(prj) {
+    _prj = prj;
+    _file = isSgSourceFile(&(prj->get_file(0)));
+  }
+  else {
+    _prj = new SgProject();
+    _file = new SgSourceFile();
+    _prj->set_file(*_file);
+    _file->set_parent(_prj);
+  }
   if(_file==0){ ABORT(); }
   Sg_File_Info* info 
     = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
@@ -431,7 +435,7 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   else if(langid=="4"){
     _file->set_Fortran_only(true);
     _file->set_outputLanguage(SgFile::e_Fortran_output_language);
-    SageBuilder::symbol_table_case_insensitive_semantics = true;
+    sb::symbol_table_case_insensitive_semantics = true;
     if(fmtid=="1") // 0:unknown, 1:fixed, 2:free
       _file->set_outputFormat(SgFile::e_fixed_form_output_format);
     else {
@@ -439,7 +443,8 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
       _file->set_backendCompileFormat(SgFile::e_free_form_output_format);
     }
   } // C++ is not supported for now 
-  //cerr << _file->get_outputLanguage() << ":" << _file->get_outputFormat() << endl;
+
+  cerr << _file->get_outputLanguage() << ":" << _file->get_outputFormat() << endl;
 
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
@@ -2267,21 +2272,28 @@ Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 
   if( slabel.size() )
     ret->set_string_label( slabel );
-  else if( nlabel.size() || s_nlabel.size() ) {
+  else if( nlabel.size() ) {
     SgLabelSymbol*  s = new SgLabelSymbol();
     //s->set_label_type( SgLabelSymbol::label_type_enum.e_non_numeric_label_type );
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
     s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
     val.str("");
     val.clear(stringstream::goodbit);
-    if(nlabel.size())
-      val << nlabel;
-    else
-      val << s_nlabel;
+    val << nlabel;
     val >> ino;
     s->set_numeric_label_value( ino );
-    SgLabelRefExp*  l = new SgLabelRefExp( s );
-    ret->set_end_numeric_label( l );
+    ret->set_end_numeric_label( new SgLabelRefExp( s ) );
+  }
+  else if( s_nlabel.size() ) {
+    SgLabelSymbol*  s = new SgLabelSymbol();
+    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+    val.str("");
+    val.clear(stringstream::goodbit);
+    val << s_nlabel;
+    val >> ino;
+    s->set_numeric_label_value( ino );
+    ret->set_numeric_label(new SgLabelRefExp( s ));
   }
 
   return ret;

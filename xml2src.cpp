@@ -37,17 +37,15 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  ofstream ofs(argv[1]);
-  SgProject* sageProject=frontend(argc,argv);
+  SgProject* prj = 0;
+  //SgProject* sageProject=frontend(argc,argv);
   //SgProject* sageProject=frontend(argc,argv);
   char c;
-  /*
   if( argc < 2 ) {
     cerr << "USAGE:" << argv[0] << " [output file name] " << endl;
     return -1;
   }
-  */
-  string fn(argv[1]);
+  //string fn(argv[1]);
   stringstream istr;
 
   while(cin.get(c)){
@@ -55,15 +53,38 @@ int main(int argc, char** argv)
   }
   xevxml::XmlInitialize();
   
-  SgFile* file = xevxml::Xml2Ast(istr,sageProject);
   //AstPostProcessing(file);
   //cerr << "Writing to " << file->getFileName() << endl;
-  file->unparse();
+  //file->unparse();
   //std::cout << xmlString1.str();
-  //ofs << file->unparseToCompleteString()  << endl;
+
+  prj = xevxml::Xml2Ast(istr);
+  prj->get_file(0).set_unparse_output_filename(argv[1]);
+  prj->unparse();
+  //unparseFile(&file);
+
+  /*
+  SgFile& file = prj->get_file(0);
+  ofstream ofs(argv[1],std::ios::app);
+  if(ofs.fail()){
+    cerr << "ERROR: cannot open file \"" << argv[1] << "\"" << endl;
+    return -1;
+  }
+  SgUnparse_Info* uinfo = new SgUnparse_Info();
+  uinfo->unset_SkipComments();
+  uinfo->unset_SkipWhitespaces();
+  file.set_Fortran_only(true);
+  file.set_outputFormat(SgFile::e_fixed_form_output_format);
+  file.set_outputLanguage(SgFile::e_Fortran_output_language);
+  ofs << file.unparseToString(uinfo)  << endl;
+
+  file.set_outputFormat(SgFile::e_free_form_output_format);
+  file.set_outputLanguage(SgFile::e_Fortran_output_language);
+  ofs << file.unparseToString(uinfo)  << endl;
+
+  ofs.close();
+  */
+
   xevxml::XmlFinalize();
-  //cerr << "Creating " << sageProject->get_file(sageProject->numberOfFiles()-1).getFileName() << endl;
-  //sageProject->get_file(sageProject->numberOfFiles()-1).unparse();
-  //sageProject->unparse();
   return 0;
 }

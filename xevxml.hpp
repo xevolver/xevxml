@@ -36,14 +36,25 @@
 #include <vector>
 #include <rose.h>
 
+//#define XEVXML_DEBUG
+
 #include <xercesc/dom/DOMDocument.hpp>
 
+#ifdef XEVXML_DEBUG
 #define ABORT()			 {				\
     std::cerr << "ERROR @ " << __func__ << " :";		\
     std::cerr << __FILE__ ;					\
     std::cerr << "(" << __LINE__ << "): " << std::endl;		\
     abort();							\
   }
+#else
+#define ABORT()			 {				\
+    std::cerr << "ERROR @ " << __func__ << " :";		\
+    std::cerr << __FILE__ ;					\
+    std::cerr << "(" << __LINE__ << "): " << std::endl;		\
+    std::exit(1);						\
+  }
+#endif
 
 namespace xevxml {
   extern void XmlInitialize(void);

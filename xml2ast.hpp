@@ -58,8 +58,9 @@ namespace xevxml {
 class Xml2AstVisitor
 {
   SgSourceFile*      _file;
+  SgProject*         _prj;
 public:
-  Xml2AstVisitor(SgProject* prj);
+  Xml2AstVisitor(SgProject* =0);
   ~Xml2AstVisitor();
 
   void visit2(xercesc::DOMNode* node,int depth=0)
@@ -337,10 +338,11 @@ public:
   SgNode* visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent=0);
     
 
-  SgFile* getSgFile() {return _file;}
+  //SgFile* getSgFile() {return _file;}
+  SgProject* getSgProject() {return _prj;}
 };
 
-extern SgFile* Xml2Ast(std::stringstream& str,SgProject* prj);
+extern SgProject* Xml2Ast(std::stringstream& str);
 }
 
 #endif
