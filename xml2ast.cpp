@@ -633,8 +633,8 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       tmp = isSgInitializedName(astchild);
 
       if( tmp ) {
-        name = tmp;
-        varList.push_back( name );
+        varList.push_back( tmp );
+        if(name==0) name = tmp;
       }
 
       if( cls==0 ) {
@@ -662,12 +662,43 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 					 name->get_initializer());
 
     if(ret==0) ABORT();
-    if( varList.size() > 0 )  
+    if( varList.size() > 0 )  // this must be true
       ret->get_variables() = varList;
-    for(size_t i(0);i<varList.size();i++)
+    for(size_t i(0);i<varList.size();i++){
+      //cerr << varList[i]->get_name() << ":" << varList[i]->get_type()->class_name() <<endl;
       varList[i]->set_parent(ret);
+    }
   }
   else ABORT();
+
+  bool isFortranParameter = false;
+  // See buildVariableDeclaration
+  if (ret->get_scope() && si::is_Fortran_language()){
+    SgFunctionDefinition * f_def = si::getEnclosingProcedure (ret->get_scope());
+    if (f_def != NULL){
+      SgSymbolTable * st = f_def->get_symbol_table();
+      SgVariableSymbol * v_symbol = st->find_variable(name->get_name());
+      if (v_symbol != NULL){
+	SgInitializedName *default_initName = ret->get_decl_item (name->get_name());
+	SgInitializedName * new_initName = v_symbol->get_declaration();
+	SgInitializedNamePtrList&  n_list= ret->get_variables();
+	std::replace (n_list.begin(), n_list.end(),default_initName, new_initName );
+	    
+	SgNode * old_parent = new_initName->get_parent();
+	if(old_parent==0 || isSgFunctionParameterList(old_parent)==0) ABORT();
+	new_initName->set_parent(ret); 
+	SgVariableDefinition * var_def = isSgVariableDefinition(default_initName->get_declptr()) ;
+	var_def->set_parent(new_initName);
+	var_def->set_vardefn(new_initName);
+	new_initName->set_declptr(var_def);
+	delete (default_initName);
+	isFortranParameter = true;
+      }
+    }
+  }
+  if (! isFortranParameter)
+    si::fixVariableDeclaration(ret,ret->get_scope());
+
   // Initialize SgAccessModifier (2014.04.16)
   ret->get_declarationModifier().get_accessModifier().setUndefined();
 
@@ -1517,7 +1548,7 @@ Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
   xe::DOMNamedNodeMap*   amap    = node->getAttributes();
   xe::DOMNode*           nameatt = 0;
   string                 name;
-  SgNode* ret=0;
+  SgVarRefExp* ret=0;
 
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("name"));
@@ -1529,6 +1560,7 @@ Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
   else 
     ABORT();
   ret->set_parent(astParent);
+  //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() << endl;
   return ret;
 }
 
@@ -1642,7 +1674,7 @@ Xml2AstVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+      SgNode* astchild = this->visit(child);
       if(ini==0)
 	ini = isSgInitializer(astchild);
       if(typ==0)
@@ -1653,6 +1685,7 @@ Xml2AstVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
 
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
   if(typ) typ->set_parent(ret); // this must be true
+  if(ini) ini->set_parent(ret);
   return ret;
 }
 
