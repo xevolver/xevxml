@@ -12,7 +12,7 @@ ROSELIB	= -L$(ROSEROOT)/lib -lrose -lxalan-c -lxerces-c
 
 LIBS	= $(ROSELIB) $(JVMLIB)
 SRCS    =  ast2xml.cpp xml2ast.cpp attrib.cpp \
-	 xmlutils.cpp type.cpp preproc.cpp
+	 xmlutils.cpp type.cpp preproc.cpp unparse.cpp
 OBJS	= ${SRCS:.cpp=.o}
 DEPS	= ${SRCS:.cpp=.d}
 

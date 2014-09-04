@@ -1,6 +1,4 @@
 /**
- * @file     xml2src.cpp
- * @brief    A command to convert an XML document to a code.
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
@@ -30,53 +28,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "xevxml.hpp"
-#include "xml2ast.hpp"
-#include "unparse.hpp"
+#ifndef ___XEVXML_UNPARSE_H___
+#define ___XEVXML_UNPARSE_H___
 
-using namespace std;
+#include <fstream>
+#include <unparser.h>
 
-int main(int argc, char** argv)
-{
-  SgProject* prj = 0;
-  char c;
-  string fn;
-  if( argc < 2 )  fn = "-";
-  else fn = argv[1];
+extern bool UnparseSgFile(SgFile*, UnparseFormatHelp* =NULL, UnparseDelegate* =NULL, SgScopeStatement* =NULL);
 
-  stringstream istr;
-
-  while(cin.get(c)){
-    istr << c;
-  }
-  xevxml::XmlInitialize();
-  prj = xevxml::Xml2Ast(istr);
-  prj->get_file(0).set_unparse_output_filename(fn);
-
-  UnparseSgFile(&prj->get_file(0)); // defined in unparse.cpp
-
-  /*
-  SgFile& file = prj->get_file(0);
-  ofstream ofs(argv[1],std::ios::app);
-  if(ofs.fail()){
-    cerr << "ERROR: cannot open file \"" << argv[1] << "\"" << endl;
-    return -1;
-  }
-  SgUnparse_Info* uinfo = new SgUnparse_Info();
-  uinfo->unset_SkipComments();
-  uinfo->unset_SkipWhitespaces();
-  file.set_Fortran_only(true);
-  file.set_outputFormat(SgFile::e_fixed_form_output_format);
-  file.set_outputLanguage(SgFile::e_Fortran_output_language);
-  ofs << file.unparseToString(uinfo)  << endl;
-
-  file.set_outputFormat(SgFile::e_free_form_output_format);
-  file.set_outputLanguage(SgFile::e_Fortran_output_language);
-  ofs << file.unparseToString(uinfo)  << endl;
-
-  ofs.close();
-  */
-
-  xevxml::XmlFinalize();
-  return 0;
-}
+#endif
