@@ -1,16 +1,13 @@
-CXX	= g++
 LD	= $(CXX)
 
-ROSEROOT	= /home/tacky/local
+ROSEROOT = /home/tacky/local
+XEROOT = 
+XAROOT = 
+CXXFLAGS= -g -Wall -Wno-deprecated -I../include 
+CXXFLAGS += -I../include -I/home/tacky/local/include  
+#LIBS	= -L/home/tacky/local/lib -lrose -lxalan-c -lxerces-c
+LIBS	 += -L/home/tacky/local/lib -lrose -lxalan-c -lxerces-c
 
-#LIBXML2=/usr/include/libxml2
-INCLUDE	= -I$(ROSEROOT)/include  #-I$(LIBXML2)
-CXXFLAGS= -g -Wall -Wno-deprecated $(INCLUDE) 
-
-#ROSELIB = -L$(ROSEROOT)/lib -lrosehpct -lxml2 -lrose -lxalan-c -lxerces-c
-ROSELIB	= -L$(ROSEROOT)/lib -lrose -lxalan-c -lxerces-c
-
-LIBS	= $(ROSELIB) $(JVMLIB)
 SRCS    =  ast2xml.cpp xml2ast.cpp attrib.cpp \
 	 xmlutils.cpp type.cpp preproc.cpp unparse.cpp
 OBJS	= ${SRCS:.cpp=.o}
@@ -40,5 +37,5 @@ dir2xml: $(OBJS) dir2xml.o
 -include $(DEPS)
 
 clean:
-	-rm -fr *~ $(OBJS) src2xml.o xslt.o xml2src.o $(DEPS) $(TARGET) rose_* a.out
+	-@rm -fr *~ $(OBJS) src2xml.o xslt.o xml2src.o dir2xml.o $(DEPS) $(TARGET) rose_* a.out
 

@@ -33,7 +33,7 @@
 #ifndef ___XSLT_H___
 #define ___XSLT_H___
 
-#include "xevxml.hpp"
+#include "common.hpp"
 
 extern void XsltTransform(std::stringstream& istr, 
 			  std::stringstream& ostr, 

@@ -33,7 +33,7 @@
 #ifndef ___XML2AST_H___
 #define ___XML2AST_H___
 
-#include "xevxml.hpp"
+#include "common.hpp"
 //#include <string>
 
 #include <xercesc/framework/MemBufInputSource.hpp>

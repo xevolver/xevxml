@@ -39,7 +39,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
-#include "xevxml.hpp"
+#include "common.hpp"
 #include <xercesc/framework/MemBufInputSource.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>

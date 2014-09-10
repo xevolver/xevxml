@@ -30,7 +30,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "xevxml.hpp"
+#include "common.hpp"
 #include "xml2ast.hpp"
 
 namespace sb=SageBuilder;

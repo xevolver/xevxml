@@ -31,7 +31,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <rose.h>
-#include "xevxml.hpp"
+#include "common.hpp"
 #include "ast2xml.hpp"
 #include "attrib.hpp"
 
