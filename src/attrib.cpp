@@ -706,8 +706,8 @@ static void attribSgInquireStatement(stringstream& istr,SgNode* node)
   }
 }
 
-void writeFlopsAttribs(stringstream& istr,SgNode* node,
-		       xevxml::Ast2XmlOpt* opt)
+static void writeFlopsAttribs(stringstream& istr,SgNode* node,
+			      xevxml::Ast2XmlOpt* opt)
 {
 #ifdef XEV_USE_ROSEHPCT
   if(opt->rosehpct==0) return;
@@ -725,7 +725,7 @@ void writeFlopsAttribs(stringstream& istr,SgNode* node,
 #endif
 }
 
-void attribSgSourceFile(stringstream& istr,SgNode* node)
+static void attribSgSourceFile(stringstream& istr,SgNode* node)
 {
   SgSourceFile*  n = isSgSourceFile(node);  
   if(n) {
@@ -735,7 +735,7 @@ void attribSgSourceFile(stringstream& istr,SgNode* node)
   }
 }
 
-void attribSgRenamePair(stringstream& istr,SgNode* node)
+static void attribSgRenamePair(stringstream& istr,SgNode* node)
 {
   SgRenamePair*  n = isSgRenamePair(node);  
   if(n) {
@@ -744,7 +744,7 @@ void attribSgRenamePair(stringstream& istr,SgNode* node)
   }
 }
 
-void attribSgBreakStmt(stringstream& istr,SgNode* node)
+static void attribSgBreakStmt(stringstream& istr,SgNode* node)
 {
   SgBreakStmt*  n = isSgBreakStmt(node);  
   if(n) {
@@ -753,13 +753,20 @@ void attribSgBreakStmt(stringstream& istr,SgNode* node)
   }
 }
 
-void attribSgContinueStmt(stringstream& istr,SgNode* node)
+static void attribSgContinueStmt(stringstream& istr,SgNode* node)
 {
   SgContinueStmt*  n = isSgContinueStmt(node);  
   if(n) {
     if(n->get_do_string_label().size())
       istr << " label=\"" << n->get_do_string_label() << "\"";
   }
+}
+
+static void attribSgExpression(stringstream& istr,SgNode* node)
+{
+  SgExpression*  n = isSgExpression(node);  
+  if(n && n->get_need_paren())
+    istr << " paren=\"" << n->get_need_paren() << "\"";
 }
 
 void writeXmlAttribs(stringstream& istr,SgNode* node,
@@ -808,5 +815,8 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgRenamePair(istr,node);
   attribSgBreakStmt(istr,node);
   attribSgContinueStmt(istr,node);
+
+
+  attribSgExpression(istr,node);
   return;
 }

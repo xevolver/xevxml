@@ -256,7 +256,7 @@ public:
   SgNode* visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent=0);
 
 
-  void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
+
   SgNode* visitPreprocessingInfo(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgNode* visitSgUseStatement(xercesc::DOMNode* node, SgNode* astParent=0);
@@ -337,6 +337,8 @@ public:
   SgNode* visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent=0);
     
+  void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
+  void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
 
   //SgFile* getSgFile() {return _file;}
   SgProject* getSgProject() {return _prj;}

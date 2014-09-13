@@ -550,7 +550,9 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   else
     sstr_ << '>' << endl;
 
-  writeTypes(sstr_,node,retatt);
+  if(loc && loc->get_file_info()->isCompilerGenerated()==false)
+    writeTypes(sstr_,node,retatt);
+
   writeInternalNode(sstr_,node,retatt);
 
   return retatt;

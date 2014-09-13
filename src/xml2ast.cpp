@@ -45,38 +45,12 @@ namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
 
-//#define VISIT(x) if(nname==#x) { return visit##x (node,astParent);}
 #ifdef XEVXML_DEBUG
 int g_count=0;
-#define VISIT(x) if(nname==#x) { cerr << #x << "(" << g_count++ << ")" << endl; SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret); return ret;  }
+#define VISIT(x) if(nname==#x) { cerr << #x << "(" << g_count++ << ")" << endl; ret = visit##x (node,astParent);}
 #else
-#define VISIT(x) if(nname==#x) {SgNode* ret = visit##x (node,astParent);   checkPreprocInfo(node,ret);  /*checkText(node,ret);*/ return ret;  }
+#define VISIT(x) if(nname==#x) { ret = visit##x (node,astParent);}
 #endif
-/*
-std::string text = ""; 
-
-static void checkText(xe::DOMNode* node, SgNode* n)
-{
-  SgStatement* s = isSgStatement(n);
-  if(s == 0) return; 
-  if(text.length()) {
-    si::attachArbitraryText(s,text,PreprocessingInfo::after);  
-    text="";
-  }
-  xe::DOMNode* child=node->getFirstChild();
-  int i=0;
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::TEXT_NODE){
-      std::string tmp = xe::XMLString::transcode(child->getNodeValue());
-      std::cerr << "(" << i++ << ") @" << tmp << "?";
-      if(tmp.length())
-	text +=  tmp;
-    }
-    child=child->getNextSibling();
-  } 
-  return; 
-}
-*/
 
 class TestAST : public AstSimpleProcessing 
 {
@@ -119,10 +93,11 @@ static SgProject* Xml2AstDOMVisit(stringstream& tr)
     //class xevxml::Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
     visit.visit(doc,0);
     ret = visit.getSgProject();
-    
+
+#ifdef XEVXML_DEBUG    
     TestAST test;
     test.traverse(&ret->get_file(0),preorder);
-
+#endif
     //AstTests::runAllTests(prj);
   }
   catch(...) {
@@ -130,6 +105,8 @@ static SgProject* Xml2AstDOMVisit(stringstream& tr)
   }
   return ret;
 }
+
+
 
 namespace xevxml {
 SgProject* Xml2Ast(stringstream& str)
@@ -141,13 +118,9 @@ SgProject* Xml2Ast(stringstream& str)
   }
   // Other terminations and cleanup.
   return ret;
-}
-}
-
-
+}}
 
 using namespace xevxml;
-
 Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
 {
   if(prj) {
@@ -170,9 +143,12 @@ Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
 Xml2AstVisitor::
 ~Xml2AstVisitor() {}
 
+
 SgNode* 
 Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 {
+  SgNode* ret = 0;
+
   if(node) {
     if (node->getNodeType() == xe::DOMNode::DOCUMENT_NODE){
       xe::DOMNode* child=node->getFirstChild();
@@ -399,13 +375,44 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgRenamePair);                          // 20140824
 
 
-      if( nname != "PreprocessingInfo" ) {
+      if( ret == 0 && nname != "PreprocessingInfo" ) {
         cerr << "unknown AST node found " << nname << endl;
         ABORT();
       }
+
+      checkPreprocInfo(node,ret);
+      checkExpression(node,ret);
+
+      return ret;
     }
   }
   return 0;
+}
+
+void 
+Xml2AstVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
+{
+  SgExpression* e = isSgExpression(astNode);
+
+  if(e) {
+    xe::DOMNamedNodeMap* amap = node->getAttributes();
+    xe::DOMNode*         att  = 0;
+
+    if(amap) 
+      att=amap->getNamedItem(xe::XMLString::transcode("paren"));
+
+    if(att) // assuming paren="1"
+      e->set_need_paren(true);
+    else 
+      e->set_need_paren(false);
+  }
+  /*
+  SgCastExp* ce = isSgCastExp(astNode);
+  if(ce){
+    SgType* cast_type = ce->get_type();
+    std::cerr << "HOE" << cast_type->get_mangled().getString() << std::endl;
+  }
+  */
 }
 
 SgNode* 
@@ -1566,6 +1573,7 @@ Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
 SgNode* 
 Xml2AstVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
 {
+  SgCastExp*     ret   = 0;
   SgType*        typ   = 0;
   SgExpression*  exp   = 0;
   xe::DOMNode*   child = node->getFirstChild();
@@ -1580,10 +1588,19 @@ Xml2AstVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     }
     child=child->getNextSibling();
   } 
-  if(typ && exp)
-    return sb::buildCastExp(exp,typ);
+  if(typ && exp){
+    ret = sb::buildCastExp(exp,typ);
+    ret->set_parent(astParent);
+  }
+  else if(exp){
+    // ignore implicit type conversions
+    exp->set_parent(astParent);
+    return exp;
+  }
   else 
     ABORT();
+
+  return ret;
 }
 
 SgNode* 
