@@ -246,6 +246,7 @@ static void attribSgFunctionDeclaration(stringstream& istr,SgNode* node)
       istr << " modifier=\"register\" ";
     else if(m.isTypedef())
       istr << " modifier=\"typedef\" ";
+    istr << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
   }
 }
 
@@ -281,11 +282,11 @@ static void attribSgProcedureHeaderStatement(stringstream& istr,SgNode* node)
     if(n->get_result_name())
       istr << " result_name=\"" << n->get_result_name()->get_name().getString() << "\" ";
     if(n->get_functionModifier().isPure())
-      istr << " pure=\"true\"";
+      istr << " pure=\"1\"";
     if(n->get_functionModifier().isElemental())
-      istr << " elemental=\"true\"";
+      istr << " elemental=\"1\"";
     if(n->get_functionModifier().isRecursive())
-      istr << " recursive=\"true\"";
+      istr << " recursive=\"1\"";
   }
 }
 
@@ -453,13 +454,13 @@ static void attribSgWriteStatement(stringstream& istr,SgNode* node)
   SgWriteStatement* n = isSgWriteStatement(node);
   if(n) {
     if( n->get_format() )
-      istr << " fmt=\"true\"";
+      istr << " fmt=\"1\"";
     if( n->get_iostat() )
-      istr << " iostat=\"true\"";
+      istr << " iostat=\"1\"";
     if( n->get_rec() )
-      istr << " rec=\"true\"";
+      istr << " rec=\"1\"";
     if( n->get_err() )
-      istr << " err=\"true\"";
+      istr << " err=\"1\"";
   }
 }
 
@@ -468,15 +469,15 @@ static void attribSgReadStatement(stringstream& istr,SgNode* node)
   SgReadStatement* n = isSgReadStatement(node);
   if(n) {
     if( n->get_format() )
-      istr << " fmt=\"true\"";
+      istr << " fmt=\"1\"";
     if( n->get_iostat() )
-      istr << " iostat=\"true\"";
+      istr << " iostat=\"1\"";
     if( n->get_rec() )
-      istr << " rec=\"true\"";
+      istr << " rec=\"1\"";
     if( n->get_end() )
-      istr << " end=\"true\"";
+      istr << " end=\"1\"";
     if( n->get_err() )
-      istr << " err=\"true\"";
+      istr << " err=\"1\"";
   }
 }
 
@@ -769,6 +770,15 @@ static void attribSgExpression(stringstream& istr,SgNode* node)
     istr << " paren=\"" << n->get_need_paren() << "\"";
 }
 
+static void attribSgIfStmt(stringstream& istr,SgNode* node)
+{
+  SgIfStmt*  n = isSgIfStmt(node);  
+  if(n) {
+    istr << " end=\"" << n->get_has_end_statement() << "\" ";
+    istr << " use=\"" << n->get_use_then_keyword() << "\" ";
+  }
+}
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     XevXML::XevConversionHelper* help)
 {
@@ -815,8 +825,9 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgRenamePair(istr,node);
   attribSgBreakStmt(istr,node);
   attribSgContinueStmt(istr,node);
-
+  attribSgIfStmt(istr,node);
 
   attribSgExpression(istr,node);
+
   return;
 }

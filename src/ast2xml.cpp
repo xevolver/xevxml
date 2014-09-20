@@ -55,7 +55,8 @@ namespace XevXML {
     }
     SgProject* p = *prj;
     if(p->numberOfFiles() > 1 ){
-      WARN("Multiple source files are given, so only the last one is converted.");
+      // NOTE: only the last file is converted.
+      // In the case of using Fortran mod files, this could happen.
     }
     SgFile* file = &p->get_file(p->numberOfFiles()-1);
 

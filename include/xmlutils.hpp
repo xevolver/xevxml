@@ -32,6 +32,9 @@
 #define ___XEV_XMLUTILS_H___
 #include <xevxml.hpp>
 #include <xercesc/dom/DOMDocument.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/dom/DOM.hpp>
+
 
 namespace XevXML {
 // --- XML utility functions ---
@@ -41,11 +44,44 @@ extern std::string XmlStr2Entity( std::string);
 extern std::string XmlEntity2Str( std::string);
 extern bool XmlWriteToString( xercesc::DOMNode* node, std::stringstream& str );
 
-template <typename Tp_>
-bool XmlGetAttributeValue( xercesc::DOMNode* node, std::string& name, Tp_* val);
+//extern bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, std::string* val);
 
 template <typename Tp_>
-bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, Tp_* val);
+bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, Tp_* val)
+{
+  xercesc::DOMNamedNodeMap* amap = node->getAttributes();
+  xercesc::DOMNode*         att  = 0;
+  XMLCh* xbuf;
+  char* cbuf;
+  std::stringstream str;
+  Tp_ tmp;
+
+  if(amap) {
+    xbuf = xercesc::XMLString::transcode(name);
+    att=amap->getNamedItem(xbuf);
+    xercesc::XMLString::release(&xbuf);
+  }
+  if(att && val) {
+    cbuf = xercesc::XMLString::transcode(att->getNodeValue());
+    str << cbuf;
+    xercesc::XMLString::release(&cbuf);
+    str >> tmp;
+    *val = tmp;
+    return true;
+  }
+  return false;
+}
+
+template <>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, std::string* val);
+
+template <typename Tp_>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, std::string& name, Tp_* val)
+{
+  return XmlGetAttributeValue(node,name.c_str(),val);
+}
+
+
 }
 
 #endif

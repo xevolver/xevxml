@@ -32,8 +32,10 @@
  */
 #ifndef ___XML2AST_H___
 #define ___XML2AST_H___
-#include <xevxml.hpp>
 #include "common.hpp"
+#include <xevxml.hpp>
+#include <xmlutils.hpp>
+
 //#include <string>
 
 #include <xercesc/framework/MemBufInputSource.hpp>
@@ -84,7 +86,6 @@ public:
 #endif
 
   SgNode* visit(xercesc::DOMNode* node, SgNode* astParent=0);
-
 
   SgNode* visitSgSourceFile(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgGlobal(xercesc::DOMNode* node, SgNode* astParent=0);
@@ -344,6 +345,8 @@ public:
     
   void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
   void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
+  void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);
+  void checkFunctDecl  (xercesc::DOMNode* node, SgNode* astNode);
 
   //SgFile* getSgFile() {return _file;}
   SgProject* getSgProject() {return _prj;}

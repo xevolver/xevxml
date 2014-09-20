@@ -31,6 +31,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "common.hpp"
+#include <xmlutils.hpp>
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLString.hpp>
@@ -122,29 +123,26 @@ bool XmlWriteToString( xe::DOMNode* node, std::stringstream& str )
   return true;
 } 
 
-template <typename Tp_>
-bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, Tp_* val)
+template <>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, std::string* val)
 {
-  xe::DOMNamedNodeMap* amap = node->getAttributes();
-  xe::DOMNode*         att  = 0;
-  std::stringstream str;
-  Tp_ tmp;
+  xercesc::DOMNamedNodeMap* amap = node->getAttributes();
+  xercesc::DOMNode*         att  = 0;
+  XMLCh* xbuf;
+  char* cbuf;
 
-  if(amap) 
-    att=amap->getNamedItem(xe::XMLString::transcode(name));
+  if(amap) {
+    xbuf = xercesc::XMLString::transcode(name);
+    att=amap->getNamedItem(xbuf);
+    xercesc::XMLString::release(&xbuf);
+  }
   if(att && val) {
-    str << xe::XMLString::transcode(att->getNodeValue());    
-    str >> tmp;
-    *val = tmp;
+    cbuf = xercesc::XMLString::transcode(att->getNodeValue());
+    *val =  cbuf;
+    xercesc::XMLString::release(&cbuf);
     return true;
   }
   return false;
-}
-
-template <typename Tp_>
-bool XmlGetAttributeValue( xercesc::DOMNode* node, std::string& name, Tp_* val)
-{
-  return XmlGetAttributeValue(node,name.c_str(),val);
 }
 
 }
