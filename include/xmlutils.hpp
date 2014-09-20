@@ -1,6 +1,4 @@
 /**
- * @file     xslt.cpp
- * @brief    A command to apply XSLT rules to XML documents.
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
@@ -30,55 +28,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "xslt.hpp"
-//#include "xml2ast.hpp"
-#include <xalanc/XalanTransformer/XalanTransformer.hpp>
+#ifndef ___XEV_XMLUTILS_H___
+#define ___XEV_XMLUTILS_H___
+#include <xevxml.hpp>
+#include <xercesc/dom/DOMDocument.hpp>
 
-using namespace std;
-//namespace xe=xercesc;
-namespace xa=xalanc;
+namespace XevXML {
+// --- XML utility functions ---
+extern void XmlInitialize(void);
+extern void XmlFinalize(void);
+extern std::string XmlStr2Entity( std::string);
+extern std::string XmlEntity2Str( std::string);
+extern bool XmlWriteToString( xercesc::DOMNode* node, std::stringstream& str );
 
-void XsltTransform(stringstream& istr, stringstream& ostr, string xsltfn) 
-{
-  // work with Xalan-C++ 
-  try {
-    //xalanc::XSLTInputSource xmlIn(str);
-    xa::XalanTransformer transformer;
-    if( 0 != transformer.transform(istr,xsltfn.c_str(),ostr)){
-      cerr << "Error: XalanTransformer::transform() failed" << endl;
-      ABORT();
-    }
-  }
-  catch(...){
-    cerr << "Error: XalanTransformer::transform() failed" << endl;
-    ABORT();
-  }
+template <typename Tp_>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, std::string& name, Tp_* val);
+
+template <typename Tp_>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, Tp_* val);
 }
 
-
-int main(int argc,char** argv)
-{
-  stringstream istr;
-  stringstream ostr;
-  char c;
-  if( argc < 2 ) {
-    cerr << "USAGE:" << argv[0] << " [xslt_file_name] " << endl;
-    return -1;
-  }
-  string fn(argv[1]);
-
-  XevXML::XmlInitialize();
-
-  //while((c=cin.get()) != cin.eof()){
-  while(cin.get(c)){
-    istr << c;
-  }
-
-  XsltTransform(istr,ostr,fn);
-
-  cout << ostr.str() << flush;
-
-  XevXML::XmlFinalize();  
-  return 0;
-}
-
+#endif

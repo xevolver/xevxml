@@ -30,6 +30,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "common.hpp"
 #include "xml2ast.hpp"
 #include "unparse.hpp"
 
@@ -48,12 +49,15 @@ int main(int argc, char** argv)
   while(cin.get(c)){
     istr << c;
   }
-  xevxml::XmlInitialize();
-  prj = xevxml::Xml2Ast(istr);
-  prj->get_file(0).set_unparse_output_filename(fn);
+  XevXML::XevInitialize();
+  if( XevXML::XevConvertXmlToAst(istr,&prj, NULL) == false ){
+    ABORT();
+  }
+  else {
+    prj->get_file(0).set_unparse_output_filename(fn);
 
-  UnparseSgFile(&prj->get_file(0)); // defined in unparse.cpp
-
+    UnparseSgFile(&prj->get_file(0)); // defined in unparse.cpp
+  }
   /*
   SgFile& file = prj->get_file(0);
   ofstream ofs(argv[1],std::ios::app);
@@ -76,6 +80,6 @@ int main(int argc, char** argv)
   ofs.close();
   */
 
-  xevxml::XmlFinalize();
+  XevXML::XevFinalize();
   return 0;
 }

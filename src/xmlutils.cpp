@@ -43,7 +43,7 @@ namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
 
-namespace xevxml {
+namespace XevXML {
 
 static string REPLACE( string str1, string str2, string str3 )
 {
@@ -121,5 +121,30 @@ bool XmlWriteToString( xe::DOMNode* node, std::stringstream& str )
   output->release();
   return true;
 } 
+
+template <typename Tp_>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, Tp_* val)
+{
+  xe::DOMNamedNodeMap* amap = node->getAttributes();
+  xe::DOMNode*         att  = 0;
+  std::stringstream str;
+  Tp_ tmp;
+
+  if(amap) 
+    att=amap->getNamedItem(xe::XMLString::transcode(name));
+  if(att && val) {
+    str << xe::XMLString::transcode(att->getNodeValue());    
+    str >> tmp;
+    *val = tmp;
+    return true;
+  }
+  return false;
+}
+
+template <typename Tp_>
+bool XmlGetAttributeValue( xercesc::DOMNode* node, std::string& name, Tp_* val)
+{
+  return XmlGetAttributeValue(node,name.c_str(),val);
+}
 
 }

@@ -30,6 +30,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include <xevxml.hpp>
 #include "common.hpp"
 #include "ast2xml.hpp"
 #include "attrib.hpp"
@@ -39,22 +40,39 @@
 using namespace std;
 
 
-namespace xevxml {
-  //void Ast2Xml(stringstream& sstr, SgProject* prj, int fileid)
-  void Ast2Xml(stringstream& sstr, SgFile* file, Ast2XmlOpt* opt)
+namespace XevXML {
+
+  void XevInitialize(void) { XmlInitialize(); }
+
+  void XevFinalize(void)   { XmlFinalize(); }
+  
+  bool XevConvertAstToXml(stringstream& sstr, SgProject** prj, XevConversionHelper* help)
   {
-    Ast2XmlVisitor visitor(sstr);
-    Ast2XmlInheritedAttribute att(opt);
-    visitor.traverseWithinFile(file,att);
+    XevAstVisitor visitor(sstr);
+    if(prj == 0 || *prj == 0 ){
+      WARN("Invalid SgProject object. Conversion failed.");
+      return false;
+    }
+    SgProject* p = *prj;
+    if(p->numberOfFiles() > 1 ){
+      WARN("Multiple source files are given, so only the last one is converted.");
+    }
+    SgFile* file = &p->get_file(p->numberOfFiles()-1);
+
+    if(help==NULL) 
+      // set default transformation
+      help = new XevConversionHelper();
+
+    visitor.traverseWithinFile(file,help);
     
-    return;
+    return true; // success
   }
 }
 
-using namespace xevxml;
-/*!
-* @brief        hasInternalNode
-*/
+using namespace XevXML;
+/* 
+ * returns true if the node has internal node(s).not printed by just traversing an AST.
+ */
 static bool hasInternalNode(SgNode* n)
 {
   if(isSgArrayType(n)){
@@ -114,7 +132,12 @@ static bool hasInternalNode(SgNode* n)
   return false;
 }
 
-static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info, PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
+/*
+ * creates a SgPramgaDeclaration node if a pragma prefix (!$) is found in the Fortran comment.
+ */
+static void 
+writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info, 
+		   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
 {
   std::string str;
   int idx;
@@ -131,7 +154,7 @@ static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoTy
 	  sstr_ << "  "; // indent
 	  sstr_ << "<SgPragma pragma=\"";
 	  // assuming Fortran directives start with !$
-	  sstr_ << XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
+	  sstr_ << XevXML::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
 	  sstr_ << "</SgPragmaDeclaration >\n";
 	}
       }
@@ -139,6 +162,10 @@ static void writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoTy
   }
 }
 
+
+/*
+ * writes Preprocessing Info of a SgNode as a text element in XML.
+ */
 static AttachedPreprocessingInfoType* 
 writePreprocessingInfo(stringstream& sstr_,SgNode* n)
 {
@@ -166,6 +193,7 @@ writePreprocessingInfo(stringstream& sstr_,SgNode* n)
   return info;
 }
 
+/* --- writes type modifiers --- */
 static void writeModifierType(stringstream& istr,SgType* t)
 {
   SgModifierType* n = isSgModifierType(t);
@@ -182,17 +210,18 @@ static void writeModifierType(stringstream& istr,SgType* t)
   }
 }
 
+/* --- write types --- */
 static void writeTypesRecursive(stringstream& sstr,
 				SgType* t, 
-				Ast2XmlInheritedAttribute att,bool f=true)
+				XevConversionHelper* help,bool f=true)
 {
   if(t==0) return;
-  for(int j(0);j<att.level;j++)
+  for(int j(0);j<help->getLevel();j++)
     sstr << "  ";
   
   sstr << '<';
   sstr << t->class_name();
-  if(att.opt->address){
+  if(help->getAddressFlag()){
     sstr << " address=\"";
     sstr.setf(ios::hex,ios::basefield);
     sstr << t << "\"";
@@ -260,19 +289,19 @@ static void writeTypesRecursive(stringstream& sstr,
   if(t->containsInternalTypes()==true && f){
     sstr << ">" << endl;
     Rose_STL_Container<SgType*> types = t->getInternalTypes();
-    att.level += 1;
+    help->setLevel(help->getLevel()+1);
     
     for(size_t i(0);i<types.size();++i){
-      writeTypesRecursive(sstr,types[i], att,true);
+      writeTypesRecursive(sstr,types[i],help,true);
     }
     
     if( s == "SgArrayType" ) { 
       SgExprListExp* lste = isSgArrayType(t)->get_dim_info();
       if( lste ) {
-        Ast2XmlVisitorInternal visitor(sstr);
+        XevAstVisitorInternal visitor(sstr);
         SgExpressionPtrList& lst = lste->get_expressions();
         for(size_t i=0;i<lst.size();i++){
-          visitor.traverse(lst[i],att);
+          visitor.traverse(lst[i],help);
           //writeTypesRecursive(sstr,isSgType(lst[i]), att,true);
         }
       }
@@ -281,14 +310,14 @@ static void writeTypesRecursive(stringstream& sstr,
     if( s == "SgFunctionType" ) { 
       SgFunctionParameterTypeList* lst = isSgFunctionType(t)->get_argument_list();
       if( lst ) {
-          Ast2XmlVisitorInternal visitor(sstr);
-          writeTypesRecursive(sstr,isSgFunctionType(t)->get_return_type(), att,true);
-          visitor.traverse(lst,att);
+	  XevAstVisitorInternal visitor(sstr);
+          writeTypesRecursive(sstr,isSgFunctionType(t)->get_return_type(),help,true);
+          visitor.traverse(lst,help);
       }
     }
 
-    att.level -= 1;
-    for(int j(0);j<att.level;j++)
+    help->setLevel(help->getLevel()- 1);
+    for(int j(0);j<help->getLevel();j++)
       sstr << "  ";
     sstr << "</";
     sstr << t->class_name();
@@ -316,14 +345,14 @@ static SgType* hasType(SgNode* node)
 /* --- write SgType elements of a node --- */
 static bool writeTypes(stringstream& sstr,
 		       SgNode* node, 
-		       Ast2XmlInheritedAttribute att)
+		       XevConversionHelper* help)
 {
   SgType* t=hasType(node);
   if(t==0) return false;
 
-  att.level += 1;
-  writeTypesRecursive(sstr,t,att);
-  att.level -= 1;
+  help->setLevel(help->getLevel()+1);
+  writeTypesRecursive(sstr,t,help);
+  help->setLevel(help->getLevel()-1);
 
   return true;
 }
@@ -341,20 +370,20 @@ static bool isLeafNode(SgNode* node)
   return true;
 }
 
-#define TRAVERSE_IF_EXISTS(x) if(x){visitor.traverse(x,att);}
+#define TRAVERSE_IF_EXISTS(x) if(x){visitor.traverse(x,help);}
 
-/*!
-* @brief        writeInternalNode
-*/
+/*
+ *  write internal nodes that are not written by simple AST traversal
+ */
 static void writeInternalNode(stringstream& sstr,
 			      SgNode* n, 
-			      Ast2XmlInheritedAttribute att)
+			      XevConversionHelper* help)
 {
   if(hasInternalNode(n)==false) return;
 
-  Ast2XmlVisitorInternal visitor(sstr);
+  XevAstVisitorInternal visitor(sstr);
   if(isSgArrayType(n)) {
-    visitor.traverse(isSgArrayType(n)->get_dim_info(),att);
+    visitor.traverse(isSgArrayType(n)->get_dim_info(),help);
   }
   else if(isSgFunctionParameterList(n)){
     SgFunctionParameterList* plst = isSgFunctionParameterList(n);
@@ -362,7 +391,7 @@ static void writeInternalNode(stringstream& sstr,
     // args.size() must be divided by sizeof(void*) ???
     //for(size_t i(0);i<args.size()/sizeof(void*);i++)
     for(size_t i(0);i<args.size();i++)
-      visitor.traverse(args[i],att);
+      visitor.traverse(args[i],help);
   }
 
   else if(isSgAttributeSpecificationStatement(n)) {
@@ -372,7 +401,7 @@ static void writeInternalNode(stringstream& sstr,
       SgExpressionPtrList& lst = lste->get_expressions();
       
       for(size_t i=0;i<lst.size();i++){
-        visitor.traverse(lst[i],att);
+        visitor.traverse(lst[i],help);
       }
     }
 
@@ -381,14 +410,14 @@ static void writeInternalNode(stringstream& sstr,
       SgExpressionPtrList& lst = lste->get_expressions();
       
       for(size_t i=0;i<lst.size();i++){
-        visitor.traverse(lst[i],att);
+        visitor.traverse(lst[i],help);
       }
     }
 
     SgDataStatementGroupPtrList & lst 
       = isSgAttributeSpecificationStatement(n)->get_data_statement_group_list();
     for(size_t i=0;i<lst.size();i++){
-        visitor.traverse(lst[i],att);
+        visitor.traverse(lst[i],help);
     }
 
 
@@ -397,7 +426,7 @@ static void writeInternalNode(stringstream& sstr,
     for(size_t i=0;i<slst.size();i++){
       s = slst[i];
       SgStringVal *sv = SageBuilder::buildStringVal(s);
-      visitor.traverse(sv,att);
+      visitor.traverse(sv,help);
     }
   }
 
@@ -405,12 +434,12 @@ static void writeInternalNode(stringstream& sstr,
     SgDataStatementObjectPtrList & lst =
       isSgDataStatementGroup(n)->get_object_list();
     for(size_t i=0;i<lst.size();i++)
-      visitor.traverse(lst[i]->get_variableReference_list(),att);
+      visitor.traverse(lst[i]->get_variableReference_list(),help);
 
     SgDataStatementValuePtrList & val =
       isSgDataStatementGroup(n)->get_value_list();
     for(size_t i=0;i<val.size();i++)
-      visitor.traverse(val[i]->get_initializer_list(),att);
+      visitor.traverse(val[i]->get_initializer_list(),help);
   }
 
   else if(isSgSizeOfOp(n)){ 
@@ -418,7 +447,7 @@ static void writeInternalNode(stringstream& sstr,
     if( s == "SgSizeOfOp" ){
       SgType* typ = isSgSizeOfOp(n)->get_operand_type();
       if( typ )
-        writeTypesRecursive( sstr,typ,att,true );
+        writeTypesRecursive( sstr,typ,help,true );
     }
   }
 
@@ -426,17 +455,17 @@ static void writeInternalNode(stringstream& sstr,
     SgFormatItemPtrList & lst =
       isSgFormatStatement(n)->get_format_item_list()->get_format_item_list();
     for(size_t i=0;i<lst.size();i++)
-      visitor.traverse(lst[i],att);
+      visitor.traverse(lst[i],help);
   }
 
   else if(isSgInterfaceBody(n)){  
-    visitor.traverse(isSgInterfaceBody(n)->get_functionDeclaration(),att);
+    visitor.traverse(isSgInterfaceBody(n)->get_functionDeclaration(),help);
   }
 
   else if(isSgArithmeticIfStatement(n)){ 
-    visitor.traverse(isSgArithmeticIfStatement(n)->get_less_label(),att);
-    visitor.traverse(isSgArithmeticIfStatement(n)->get_equal_label(),att);
-    visitor.traverse(isSgArithmeticIfStatement(n)->get_greater_label(),att);
+    visitor.traverse(isSgArithmeticIfStatement(n)->get_less_label(),help);
+    visitor.traverse(isSgArithmeticIfStatement(n)->get_equal_label(),help);
+    visitor.traverse(isSgArithmeticIfStatement(n)->get_greater_label(),help);
   }
 
   else if(isSgNamelistStatement(n)){ 
@@ -449,27 +478,27 @@ static void writeInternalNode(stringstream& sstr,
           s = nl[j];
           //printf( "i=%d (%s)\n", j,s.c_str());
           SgStringVal *sv = SageBuilder::buildStringVal(s);
-        visitor.traverse(sv,att);
+        visitor.traverse(sv,help);
       }
     }
   }
 
   else if(isSgPointerDerefExp(n)){ 
-    writeTypesRecursive( sstr,isSgPointerDerefExp(n)->get_type(),att,false );
+    writeTypesRecursive( sstr,isSgPointerDerefExp(n)->get_type(),help,false );
   }
 
   else if(isSgVarArgOp(n)){ 
-    writeTypesRecursive( sstr,isSgVarArgOp(n)->get_expression_type(),att,false );
+    writeTypesRecursive( sstr,isSgVarArgOp(n)->get_expression_type(),help,false );
   }
 
   else if(isSgEquivalenceStatement(n)){ 
-    visitor.traverse(isSgEquivalenceStatement(n)->get_equivalence_set_list(),att);
+    visitor.traverse(isSgEquivalenceStatement(n)->get_equivalence_set_list(),help);
   }
 
   else if(isSgFunctionParameterTypeList(n)){ 
     SgTypePtrList & lst = isSgFunctionParameterTypeList(n)->get_arguments();
     for(size_t i=0;i<lst.size();i++)
-      visitor.traverse(lst[i],att);
+      visitor.traverse(lst[i],help);
   }
 
   else if(isSgInquireStatement(n)){ 
@@ -508,7 +537,7 @@ static void writeInternalNode(stringstream& sstr,
     TRAVERSE_IF_EXISTS(inq->get_pending());
   }
   else if(isSgTypedefDeclaration(n)){
-      writeTypesRecursive(sstr,isSgTypedefDeclaration(n)->get_base_type(), att,false);
+      writeTypesRecursive(sstr,isSgTypedefDeclaration(n)->get_base_type(), help,false);
   }
 
   return;
@@ -516,13 +545,15 @@ static void writeInternalNode(stringstream& sstr,
 
 
 /* --- AST preprocessing (called before going down to the child nodes) --- */
-Ast2XmlInheritedAttribute 
-Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node, 
-						   Ast2XmlInheritedAttribute att)
+XevConversionHelper*
+XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node, 
+						  XevConversionHelper* help)
 {
-  Ast2XmlInheritedAttribute retatt(att.opt);
   SgLocatedNode* loc = isSgLocatedNode(node);
   AttachedPreprocessingInfoType* info=0; 
+
+  /* user-defined callback function call */
+  help->beforeXmlElement(node);
 
   if(loc) 
     info = loc->getAttachedPreprocessingInfo();
@@ -531,44 +562,58 @@ Ast2XmlVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   if(info && outLang_==SgFile::e_Fortran_output_language) 
     writeFortranPragma(sstr_,info);
 
-  for(int i(0);i<att.level;i++)
+  for(int i(0);i<help->getLevel();i++)
     sstr_ << "  "; // indent
-  retatt.level = att.level+1;
+  help->setLevel(help->getLevel()+1);
   sstr_ << '<';
   sstr_ << node->class_name();  
-  if(att.opt->address){
+
+  /* user-defined callback function call */
+  help->beforeXmlAttribute(node);
+
+  if(help->getAddressFlag()){
     sstr_ << " address=\"";
     sstr_.setf(ios::hex,ios::basefield);
     sstr_ << node << "\"";
     sstr_.unsetf(ios::hex);
   }
   /* write attributes of this element */
-  writeXmlAttribs(sstr_,node,att.opt);
+  writeXmlAttribs(sstr_,node,help);
+
+  /* user-defined callback function call */
+  help->afterXmlAttribute(node);
 
   if (isLeafNode(node) && info == 0)
     sstr_ << "/>" << endl;
   else
     sstr_ << '>' << endl;
 
+  /* user-defined callback function call */
+  help->afterXmlElement(node);
+
   if(loc && loc->get_file_info()->isCompilerGenerated()==false)
-    writeTypes(sstr_,node,retatt);
+    writeTypes(sstr_,node,help);
 
-  writeInternalNode(sstr_,node,retatt);
+  /* write internal nodes as child nodes */
+  writeInternalNode(sstr_,node,help);
 
-  return retatt;
+  return help;
 }
 
 
 /* --- AST postprocessing (called after coming back from the child nodes) --- */
-void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
-						    Ast2XmlInheritedAttribute att)
+void XevAstVisitorInternal::destroyInheritedValue (SgNode* node,
+						   XevConversionHelper* help)
 {
+  /* user-defined callback function call */
+  help->beforeXmlClosingElement(node);
+
   AttachedPreprocessingInfoType* info=writePreprocessingInfo(sstr_,node); 
   if(info && outLang_==SgFile::e_Fortran_output_language) 
     writeFortranPragma(sstr_,info,PreprocessingInfo::inside);
 
   if ( isLeafNode(node) == false || info != 0) {
-    for(int i(0);i<att.level-1;i++)
+    for(int i(0);i<help->getLevel()-1;i++)
       sstr_ << ' ' << ' '; // indent
     sstr_ << "</";
     sstr_ << node->class_name() << '>' << endl;
@@ -577,6 +622,10 @@ void Ast2XmlVisitorInternal::destroyInheritedValue (SgNode* node,
   if(info && outLang_==SgFile::e_Fortran_output_language) 
     writeFortranPragma(sstr_,info,PreprocessingInfo::after);
 
+  help->setLevel(help->getLevel()-1);
+
+  /* user-defined callback function call */
+  help->afterXmlClosingElement(node);
   return;
 }
 

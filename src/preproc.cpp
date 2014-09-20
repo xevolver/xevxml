@@ -38,10 +38,10 @@ namespace si=SageInterface;
 namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
-using namespace xevxml;
+using namespace XevXML;
 
 void 
-Xml2AstVisitor::checkPreprocInfo(xe::DOMNode* node, SgNode* astNode)
+XevXmlVisitor::checkPreprocInfo(xe::DOMNode* node, SgNode* astNode)
 {
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
@@ -53,7 +53,7 @@ Xml2AstVisitor::checkPreprocInfo(xe::DOMNode* node, SgNode* astNode)
 }
 
 SgNode* 
-Xml2AstVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
 {
   std::string nname = xe::XMLString::transcode(node->getNodeName());
   if(nname != "PreprocessingInfo") return 0;
@@ -79,7 +79,7 @@ Xml2AstVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
     //cerr << "#####################" << content;
     pos >> pval;
     typ >> tval;
-    content = XmlEntity2Str(content);
+    content = XevXML::XmlEntity2Str(content);
     si::attachArbitraryText(isSgLocatedNode(astParent),content,
 				       (PreprocessingInfo::RelativePositionType)pval);
   }

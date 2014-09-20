@@ -50,4 +50,11 @@
   }
 #endif
 
+#define WARN(x)			 {					\
+    std::cerr << "WARN @ " << __func__ << " :";				\
+    std::cerr << __FILE__ ;						\
+    std::cerr << "(" << __LINE__ << "): "				\
+	      << x << std::endl;					\
+  }
+
 #endif /* ___COMMON_HPP___ */

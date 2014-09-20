@@ -5,7 +5,7 @@ using namespace std;
 using namespace boost;
 using namespace boost::spirit;
 
-using namespace xevxml;
+using namespace XevXML;
 namespace xe=xercesc;
 namespace xa=xalanc;
 
@@ -216,12 +216,12 @@ static std::string DirVisit(stringstream& itr, stringstream& dtr)
   parser.parse(dmembuf);
   ddoc = parser.getDocument();
 
-  xevxml::Dir2XmlVisitor visit(idoc);
+  XevXML::Dir2XmlVisitor visit(idoc);
   visit.getDefs(ddoc);
   visit.visit();
   stringstream ost;
 
-  xevxml::XmlWriteToString(idoc,ost);
+  XevXML::XmlWriteToString(idoc,ost);
   ret = ost.str();
   return ret;
 }
@@ -247,11 +247,11 @@ int main(int argc, char** argv)
     dstr << c;
   }
 
-  xevxml::XmlInitialize();
+  XevXML::XmlInitialize();
   
   cout << DirVisit(istr,dstr);
 
-  xevxml::XmlFinalize();
+  XevXML::XmlFinalize();
   return 0;
 }
 
@@ -275,7 +275,7 @@ static void RemoveTextNode(xercesc::DOMNode* node)
   }
 }
 
-namespace xevxml {
+namespace XevXML {
 #define VISIT(x) if(nname==#x) {visit##x (node);return;}
 
   void Dir2XmlVisitor::visit(xercesc::DOMNode* node) {

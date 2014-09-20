@@ -33,60 +33,49 @@
 #ifndef ___AST2XML_HPP___
 #define ___AST2XML_HPP___
 
-//#define XEV_USE_ROSEHPCT // experimental
-#include <rose.h>
-#ifdef XEV_USE_ROSEHPCT
-#include <rosehpct/rosehpct.hh>
-#endif
 
 #define XEV_PRAGMA_PREFIX "!$xev"
 
-namespace xevxml {
-class Ast2XmlOpt {
-public:
-  bool address;
-  bool rosehpct;
-#ifdef XEV_USE_ROSEHPCT
-  RoseHPCT::ProgramTreeList_t profiles;
-#endif
-  Ast2XmlOpt() {address=false;rosehpct=false;}
-  ~Ast2XmlOpt() {}
-};
+namespace XevXML {
 
-class Ast2XmlInheritedAttribute
+#if 0
+class XevAstTraversalAttribute
 {
-public:
   int level;
-  Ast2XmlOpt* opt;
-  Ast2XmlInheritedAttribute (Ast2XmlOpt* o):level(0),opt(o){};
+  XevConversionHelper* help_;
+public:
+  XevAstTraversalAttribute (XevConversionHelper* h):level_(0),help_(h){};
+  ~XevAstTraversalAttribute(){}
+  
+  XevConversionHelper*  getTransformHelper() {return help_; }
+  int&                 getIndentLevel()     {return level_;}
 };
+#endif
 
-class Ast2XmlVisitorInternal: public AstTopDownProcessing <Ast2XmlInheritedAttribute>
+class XevAstVisitorInternal: public AstTopDownProcessing <XevConversionHelper*>
 {
 protected:
   std::stringstream& sstr_;
   int outLang_;
-
-  Ast2XmlInheritedAttribute 
-  evaluateInheritedAttribute(SgNode* node,
-			     Ast2XmlInheritedAttribute att);
+  
+  XevConversionHelper*
+  evaluateInheritedAttribute(SgNode* node, XevConversionHelper* att);
   
   void 
-  destroyInheritedValue (SgNode* node,
-			 Ast2XmlInheritedAttribute att);
+  destroyInheritedValue (SgNode* node, XevConversionHelper* att);
   
 public:
-  Ast2XmlVisitorInternal(std::stringstream& s): sstr_(s),outLang_(0) {}
-  ~Ast2XmlVisitorInternal() {}
+  XevAstVisitorInternal(std::stringstream& s): sstr_(s),outLang_(0) {}
+  ~XevAstVisitorInternal() {}
 };
 
-class Ast2XmlVisitor:public Ast2XmlVisitorInternal
+class XevAstVisitor:public XevAstVisitorInternal
 {
 public:
-  Ast2XmlVisitor(std::stringstream& s): Ast2XmlVisitorInternal(s){
+  XevAstVisitor(std::stringstream& s): XevAstVisitorInternal(s){
     sstr_ << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
   }
-  ~Ast2XmlVisitor() {}
+  ~XevAstVisitor() {}
 protected:
   void atTraversalStart() {/* do nothing */}
   void atTraversalEnd() 
@@ -96,10 +85,8 @@ protected:
 };
 
 
-extern void Ast2Xml(std::stringstream& str, SgFile* file, Ast2XmlOpt* opt = NULL);
+
 }
 
 
 #endif
-
-

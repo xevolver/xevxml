@@ -38,10 +38,10 @@ namespace si=SageInterface;
 namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
-using namespace xevxml;
+using namespace XevXML;
 
 SgType* 
-Xml2AstVisitor::buildModifierType(xe::DOMNode* node, SgType* itype)
+XevXmlVisitor::buildModifierType(xe::DOMNode* node, SgType* itype)
 {
   xe::DOMNamedNodeMap* amap = node->getAttributes();
   xe::DOMNode* typatt = 0;
@@ -68,7 +68,7 @@ Xml2AstVisitor::buildModifierType(xe::DOMNode* node, SgType* itype)
 }
 
 SgType* 
-Xml2AstVisitor::buildType(xe::DOMNode* node, SgExpression* ex)
+XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex)
 {
   SgType* itype = 0;
   SgType* ret = 0;
@@ -174,7 +174,7 @@ Xml2AstVisitor::buildType(xe::DOMNode* node, SgExpression* ex)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeString* ret = 0;
   
@@ -208,7 +208,7 @@ Xml2AstVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 {
   SgArrayType*            ret = new SgArrayType();
   SgArrayType*            ary = 0; 
@@ -315,7 +315,7 @@ Xml2AstVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 {
   SgPointerType*      ret = new SgPointerType();
   SgType*             typ = 0;
@@ -357,7 +357,7 @@ Xml2AstVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeComplex*    ret = 0;
   SgType*           typ = 0;
@@ -400,7 +400,7 @@ Xml2AstVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeImaginary*  ret = 0;
   SgType*           typ = 0;

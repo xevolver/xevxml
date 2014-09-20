@@ -39,7 +39,7 @@
 #include <string>
 
 using namespace std;
-
+#if 0
 static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
 {
   int c;
@@ -98,6 +98,7 @@ static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
 #endif
   return args;
 }
+#endif
 
 
 int main(int argc, char** argv)
@@ -105,24 +106,24 @@ int main(int argc, char** argv)
   int             fd=0;
   stringstream    xmlString1;
   SgProject*      sageProject=0;
-  SgFile*         file=0;
-  xevxml::Ast2XmlOpt opt;
+  //xevxml::Ast2XmlOpt opt;
 
   fd = dup(1); 
   dup2(2,1); // printf messages are written to stderr  
   //SgProject::set_verbose(10);
-  sageProject = frontend(cmdopt(argc,argv,&opt));
+  //sageProject = frontend(cmdopt(argc,argv,&opt));
+  sageProject = frontend(argc,argv);
   dup2(fd,1); // printf messages are written to stdout  
-  file = &sageProject->get_file(sageProject->numberOfFiles()-1);
+
 
 #ifdef XEV_USE_ROSEHPCT
   if(opt.rosehpct)
     RoseHPCT::attachMetrics (opt.profiles, 
 			     sageProject, sageProject->get_verbose () > 0);
 #endif
-  xevxml::XmlInitialize();
-  xevxml::Ast2Xml(xmlString1,file,&opt);
-
+  XevXML::XmlInitialize();
+  //xevxml::Ast2Xml(xmlString1,file,&opt);
+  XevXML::XevConvertAstToXml(xmlString1,&sageProject, new XevXML::XevConversionHelper());
   cout << xmlString1.str();
 
   /*
@@ -134,6 +135,6 @@ int main(int argc, char** argv)
   xevxml::Xml2Ast(xmlString1,sageProject,"dummy.c");
   sageProject->unparse();
   */
-  xevxml::XmlFinalize();
+  XevXML::XmlFinalize();
   return 0;
 }

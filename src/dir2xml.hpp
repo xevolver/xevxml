@@ -32,6 +32,10 @@
  */
 #ifndef ___DIR2XML_H___
 #define ___DIR2XML_H___
+#include "common.hpp"
+#include <xevxml.hpp>
+#include <xmlutils.hpp>
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -39,7 +43,6 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
-#include "common.hpp"
 #include <xercesc/framework/MemBufInputSource.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
@@ -57,8 +60,7 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/framework/Wrapper4InputSource.hpp>
 
-
-namespace xevxml {
+namespace XevXML {
 
 struct DirAST {
 public:

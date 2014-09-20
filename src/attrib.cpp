@@ -30,13 +30,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <rose.h>
+#include <xevxml.hpp>
 #include "common.hpp"
 #include "ast2xml.hpp"
 #include "attrib.hpp"
 
 using namespace std;
-using namespace xevxml;
+using namespace XevXML;
 
 #define CALL_ATTRIB(ty) attrib##ty(istr,node)
 /*
@@ -506,7 +506,7 @@ static void attribSgFormatItem(stringstream& istr,SgNode* node)
   if(n) {
     SgStringVal* v = isSgStringVal(n->get_data());
     if(v)
-      istr << " fmt=\"" << xevxml::XmlStr2Entity(v->get_value()) << "\" ";
+      istr << " fmt=\"" << XevXML::XmlStr2Entity(v->get_value()) << "\" ";
     if( v->get_usesSingleQuotes() == true )
       istr << " SingleQuote=\"1\" ";
     else
@@ -707,10 +707,10 @@ static void attribSgInquireStatement(stringstream& istr,SgNode* node)
 }
 
 static void writeFlopsAttribs(stringstream& istr,SgNode* node,
-			      xevxml::Ast2XmlOpt* opt)
+			      XevXML::XevConversionHelper* help)
 {
 #ifdef XEV_USE_ROSEHPCT
-  if(opt->rosehpct==0) return;
+  if(help->rosehpct==0) return;
   SgLocatedNode * loc = isSgLocatedNode(node);
   if(loc && loc->attributeExists ("PAPI_FP_OPS") ){
     const RoseHPCT::MetricAttr* flops_attr =
@@ -770,11 +770,11 @@ static void attribSgExpression(stringstream& istr,SgNode* node)
 }
 
 void writeXmlAttribs(stringstream& istr,SgNode* node,
-		     xevxml::Ast2XmlOpt* opt)
+		     XevXML::XevConversionHelper* help)
 {
 
   writeValueAttribs(istr,node);
-  writeFlopsAttribs(istr,node,opt);
+  writeFlopsAttribs(istr,node,help);
 
   attribSgSourceFile(istr,node);
   attribSgInitializedName(istr,node);

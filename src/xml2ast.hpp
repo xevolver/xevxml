@@ -32,7 +32,7 @@
  */
 #ifndef ___XML2AST_H___
 #define ___XML2AST_H___
-
+#include <xevxml.hpp>
 #include "common.hpp"
 //#include <string>
 
@@ -54,15 +54,19 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/framework/Wrapper4InputSource.hpp>
 
-namespace xevxml {
-class Xml2AstVisitor
-{
-  SgSourceFile*      _file;
-  SgProject*         _prj;
-public:
-  Xml2AstVisitor(SgProject* =0);
-  ~Xml2AstVisitor();
+namespace XevXML {
 
+class XevXmlVisitor
+{
+  XevConversionHelper* _help;
+  SgSourceFile*        _file;
+  SgProject*           _prj;
+
+public:
+  XevXmlVisitor(SgProject* =0, XevConversionHelper* =0);
+  ~XevXmlVisitor();
+
+#if 0
   void visit2(xercesc::DOMNode* node,int depth=0)
   {
     if(node) {
@@ -77,6 +81,7 @@ public:
       }
     }
   }
+#endif
 
   SgNode* visit(xercesc::DOMNode* node, SgNode* astParent=0);
 
@@ -344,7 +349,29 @@ public:
   SgProject* getSgProject() {return _prj;}
 };
 
-extern SgProject* Xml2Ast(std::stringstream& str);
+
+class OrphanTest : public AstSimpleProcessing 
+{
+public:
+  OrphanTest() {}
+  ~OrphanTest() {}
+
+  void visit(SgNode* n){
+    if(n){
+      //cerr << n->class_name() << ": ";
+      void* p = n->get_parent();
+      //cerr << n->unparseToString();
+      //cerr << p <<endl;
+      if(p==0) {
+	std::cerr << n->class_name() << ": ";
+	std::cerr << n->unparseToString()	<< " \n";
+	ABORT();
+      }
+      //cerr << n->unparseToString();
+    }
+  }
+};
+
 }
 
 #endif

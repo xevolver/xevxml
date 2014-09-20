@@ -30,13 +30,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "xml2ast.hpp"
-
-#include "Cxx_Grammar.h"
 
 #include <iostream>
-#include "StorageClasses.h"
+#include "common.hpp"
+#include "xml2ast.hpp"
 
+//* ROSE headers */
+#include "Cxx_Grammar.h"
+#include "StorageClasses.h"
 #include "fortran_support.h"
 
 namespace sb=SageBuilder;
@@ -52,32 +53,11 @@ int g_count=0;
 #define VISIT(x) if(nname==#x) { ret = visit##x (node,astParent);}
 #endif
 
-class TestAST : public AstSimpleProcessing 
+
+
+static bool
+TraverseXercesDOMDocument(stringstream& tr, SgProject** prj, XevXML::XevConversionHelper* help)
 {
-public:
-  TestAST() {}
-  ~TestAST() {}
-
-  void visit(SgNode* n){
-    if(n){
-      //cerr << n->class_name() << ": ";
-      void* p = n->get_parent();
-      //cerr << n->unparseToString();
-      //cerr << p <<endl;
-      if(p==0) {
-	cerr << n->class_name() << ": ";
-	cerr << n->unparseToString()	<< " \n";
-	ABORT();
-      }
-      //cerr << n->unparseToString();
-    }
-  }
-};
-
-
-static SgProject* Xml2AstDOMVisit(stringstream& tr)
-{
-  SgProject* ret = 0;
   try {
     xe::DOMDocument* doc = 0;
     xe::XercesDOMParser parser;
@@ -87,12 +67,9 @@ static SgProject* Xml2AstDOMVisit(stringstream& tr)
     parser.parse(membuf);
     doc = parser.getDocument();
 
-    //class Xml2AstVisitor visit(prj->get_file(0).getFileName(),ofn.c_str(),prj);
-    //unlink(ofn.c_str());
-    class xevxml::Xml2AstVisitor visit;
-    //class xevxml::Xml2AstVisitor visit("dummy.c",ofn.c_str(),prj);
+    class XevXML::XevXmlVisitor visit(*prj,help);
     visit.visit(doc,0);
-    ret = visit.getSgProject();
+    *prj = visit.getSgProject();
 
 #ifdef XEVXML_DEBUG    
     TestAST test;
@@ -101,28 +78,37 @@ static SgProject* Xml2AstDOMVisit(stringstream& tr)
     //AstTests::runAllTests(prj);
   }
   catch(...) {
-    return 0;
+    return false;
   }
-  return ret;
+  return true;
 }
 
 
 
-namespace xevxml {
-SgProject* Xml2Ast(stringstream& str)
+namespace XevXML {
+
+bool XevConvertXmlToAst(stringstream& str, SgProject** prj, XevConversionHelper* help)
 {
-  SgProject* ret = 0;
-  if((ret=Xml2AstDOMVisit(str))==0){
-    cerr << "Error: XML parsing failed" << endl;
-    ABORT();
+  if(prj == 0){ // if (*prj == 0) then *prj is set later.
+    WARN("Invalid SgProject pointer. Conversion failed.");
+    return false;
   }
-  // Other terminations and cleanup.
-  return ret;
+  // set default configuration
+  if(help==0) help = new XevConversionHelper();
+  
+  if(TraverseXercesDOMDocument(str,prj,help)==false){
+    WARN("XML document parsing failed.");
+    return false;
+  }
+  return true;
 }}
 
-using namespace xevxml;
-Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
+using namespace XevXML;
+XevXmlVisitor::XevXmlVisitor(SgProject* prj, XevConversionHelper* help)
 {
+  if(help==0) ABORT();
+  _help = help;
+
   if(prj) {
     _prj = prj;
     _file = isSgSourceFile(&(prj->get_file(0)));
@@ -140,12 +126,12 @@ Xml2AstVisitor::Xml2AstVisitor(SgProject* prj)
   info->set_parent(_file);
 }
 
-Xml2AstVisitor::
-~Xml2AstVisitor() {}
+XevXmlVisitor::
+~XevXmlVisitor() {}
 
 
 SgNode* 
-Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 {
   SgNode* ret = 0;
 
@@ -390,7 +376,7 @@ Xml2AstVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 }
 
 void 
-Xml2AstVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
+XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
 {
   SgExpression* e = isSgExpression(astNode);
 
@@ -416,7 +402,7 @@ Xml2AstVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
 {
   xe::DOMNode* child=node->getFirstChild();
   xe::DOMNamedNodeMap* amap = node->getAttributes();
@@ -462,7 +448,7 @@ Xml2AstVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   return _file;
 }
 static 
-void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgNode* blk)
+void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* blk)
 {
   xe::DOMNode* child=node->getFirstChild();
   SgStatement* prev=NULL;
@@ -516,7 +502,7 @@ void traverseStatementsAndTexts(Xml2AstVisitor* vis, xe::DOMNode* node, SgNode* 
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 {
   SgGlobal* ret = new SgGlobal(_file->get_file_info());
   _file->set_globalScope(ret);
@@ -553,7 +539,7 @@ Xml2AstVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 }
   
 SgNode* 
-Xml2AstVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgPragmaDeclaration* ret = 0;
   SgPragma* pr = 0;
@@ -576,7 +562,7 @@ Xml2AstVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
 {
   SgPragma* ret = 0;
   xe::DOMNamedNodeMap* amap = node->getAttributes();
@@ -606,7 +592,7 @@ Xml2AstVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgVariableDeclaration*                    ret  = 0;
   SgInitializedName*                        name = 0;
@@ -767,7 +753,7 @@ Xml2AstVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgFunctionDeclaration*   ret = 0;
   SgFunctionParameterList* lst = 0;
@@ -775,10 +761,11 @@ Xml2AstVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgBasicBlock*            def = 0;
   SgType*                  typ = 0;
 
+  string storage,name;
   xe::DOMNamedNodeMap* amap = node->getAttributes();
   xe::DOMNode* satt = 0;
-  string storage,name;
-  
+
+
   if(amap) {
     satt=amap->getNamedItem(xe::XMLString::transcode("modifier"));
     if(satt)
@@ -844,7 +831,7 @@ Xml2AstVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgProcedureHeaderStatement*     ret = 0;
   SgType*                         typ = 0;
@@ -940,7 +927,7 @@ Xml2AstVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPa
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgFunctionParameterList* ret = sb::buildFunctionParameterList();
   SgInitializedName* ini=0;
@@ -959,7 +946,7 @@ Xml2AstVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* ast
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock* ret = sb::buildBasicBlock();
   SgScopeStatement* scope = sb::topScopeStack();
@@ -971,7 +958,7 @@ Xml2AstVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgExpression* exp = 0;
   SgExprStatement* ret = sb::buildExprStatement(exp);
@@ -1018,7 +1005,7 @@ Xml2AstVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgForStatement* ret = 0;
   SgStatement*    ini = 0;
@@ -1048,7 +1035,7 @@ Xml2AstVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgForInitStatement* ret = 0;
   SgStatement* stmt  = 0;
@@ -1070,7 +1057,7 @@ Xml2AstVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParen
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgIfStmt* ret = 0;
   SgStatement* tstmt  = 0;
@@ -1121,7 +1108,7 @@ Xml2AstVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgWhileStmt*          ret   = 0;
   SgExprStatement*      cond  = 0;
@@ -1197,7 +1184,7 @@ Xml2AstVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgDoWhileStmt*        ret  = 0;
   SgStatement*          body = 0;
@@ -1222,7 +1209,7 @@ Xml2AstVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgConditionalExp*     ret   = 0;
   SgExpression*         cond  = 0;
@@ -1249,7 +1236,7 @@ Xml2AstVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgSizeOfOp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgSizeOfOp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgSizeOfOp*           ret = 0;
   SgExpression*         exp = 0;
@@ -1286,7 +1273,7 @@ Xml2AstVisitor::visitSgSizeOfOp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgSwitchStatement*    ret  = 0;
   SgStatement*          item = 0;
@@ -1311,7 +1298,7 @@ Xml2AstVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgCaseOptionStmt*     ret  = 0;
   SgExpression*         key  = 0;
@@ -1336,7 +1323,7 @@ Xml2AstVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgBreakStmt* ret = 0;
   ret = sb::buildBreakStmt();
@@ -1357,7 +1344,7 @@ Xml2AstVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgContinueStmt* ret = sb::buildContinueStmt();
 
@@ -1377,7 +1364,7 @@ Xml2AstVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgDefaultOptionStmt*      ret  = 0;
   SgStatement*              body = 0;
@@ -1401,7 +1388,7 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
 
 #define VISIT_BINARY_OP(op)						\
   SgNode*								\
-  Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
+  XevXmlVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
   {									\
     SgExpression* lhs = 0;						\
     SgExpression* rhs = 0;						\
@@ -1432,7 +1419,7 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
 
 #define VISIT_UNARY_OP(op)						\
   SgNode*								\
-  Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
+  XevXmlVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
   {									\
     SgExpression* exp = 0;						\
     xe::DOMNamedNodeMap* amap = node->getAttributes();			\
@@ -1468,7 +1455,7 @@ Xml2AstVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astPare
   
 #define VISIT_UNARY_P1_OP(op)						\
   SgNode*								\
-  Xml2AstVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
+  XevXmlVisitor::visitSg##op(xercesc::DOMNode* node, SgNode* astParent) \
   {									\
     SgExpression* exp = 0;						\
     xe::DOMNode* child=node->getFirstChild();				\
@@ -1533,7 +1520,7 @@ VISIT_BINARY_OP(RshiftAssignOp);
 VISIT_BINARY_OP(ConcatenationOp);
 
 SgNode* 
-Xml2AstVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)
 {
   SgNullExpression* ret = sb::buildNullExpression();
   ret->set_parent(astParent);
@@ -1541,7 +1528,7 @@ Xml2AstVisitor::visitSgNullExpression(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgNullStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgNullStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgNullStatement* ret = sb::buildNullStatement();
   ret->set_parent(astParent);
@@ -1549,7 +1536,7 @@ Xml2AstVisitor::visitSgNullStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
 {
   xe::DOMNamedNodeMap*   amap    = node->getAttributes();
   xe::DOMNode*           nameatt = 0;
@@ -1571,7 +1558,7 @@ Xml2AstVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
 {
   SgCastExp*     ret   = 0;
   SgType*        typ   = 0;
@@ -1604,7 +1591,7 @@ Xml2AstVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgColonShapeExp(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgColonShapeExp(xe::DOMNode* node, SgNode* astParent)
 {
 
 #if 0
@@ -1633,7 +1620,7 @@ Xml2AstVisitor::visitSgColonShapeExp(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 {
   SgReturnStmt*        ret   = 0;
   SgExpression*        exp   = 0;
@@ -1653,7 +1640,7 @@ Xml2AstVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 
 /* NOTE: this function returns SgBasicBlock */
 SgNode* 
-Xml2AstVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock*   ret   = 0;
   xe::DOMNode*    child = node->getFirstChild();
@@ -1672,7 +1659,7 @@ Xml2AstVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
 {
   SgInitializedName* ret = 0;
   SgInitializer*     ini = 0;
@@ -1706,7 +1693,7 @@ Xml2AstVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgAssignInitializer* ret = 0;
   SgExpression*        exp = 0;
@@ -1733,7 +1720,7 @@ Xml2AstVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
 }
 
 #define VISIT_VAL(valType,baseType,buildVal)				\
-  SgNode* Xml2AstVisitor::						\
+  SgNode* XevXmlVisitor::						\
   visit##valType(xe::DOMNode* node, SgNode* astParent)			\
   {									\
     valType* ret = 0;							\
@@ -1762,7 +1749,7 @@ Xml2AstVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   }
 
 #define VISIT_VAL_NO_STRING(valType,baseType,buildVal)			\
-  SgNode* Xml2AstVisitor::						\
+  SgNode* XevXmlVisitor::						\
   visit##valType(xe::DOMNode* node, SgNode* astParent)			\
   {									\
     valType* ret = 0;							\
@@ -1805,7 +1792,7 @@ VISIT_VAL(SgUnsignedLongVal,unsigned long, UnsignedLongVal);
 VISIT_VAL(SgUnsignedLongLongIntVal,unsigned long long,UnsignedLongLongIntVal);
 
 SgNode* 
-Xml2AstVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgLabelStatement*         ret   = 0;
   SgStatement*              body  = 0;
@@ -1867,7 +1854,7 @@ Xml2AstVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgGotoStatement*      ret   = 0;
   SgLabelStatement*     label = 0;
@@ -1933,7 +1920,7 @@ Xml2AstVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
 {
   SgType* ret = 0;
   SgScopeStatement* scope = sb::topScopeStack();    //?
@@ -1958,7 +1945,7 @@ Xml2AstVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgExprListExp*                ret = 0;
   SgExpression*                 exp  = 0;
@@ -1981,7 +1968,7 @@ Xml2AstVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgFunctionRefExp* ret = 0;
 
@@ -2022,7 +2009,7 @@ Xml2AstVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgFunctionCallExp*        ret  = 0;
   SgExpression*             exp  = 0;
@@ -2050,7 +2037,7 @@ Xml2AstVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgUseStatement* ret = 0;
   xe::DOMNamedNodeMap* amap = node->getAttributes();
@@ -2085,7 +2072,7 @@ Xml2AstVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFortranIncludeLine(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFortranIncludeLine(xe::DOMNode* node, SgNode* astParent)
 {
   SgFortranIncludeLine* ret = 0;
   xe::DOMNamedNodeMap* amap = node->getAttributes();
@@ -2107,7 +2094,7 @@ Xml2AstVisitor::visitSgFortranIncludeLine(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode* astParent)
 {
     SgAttributeSpecificationStatement*  ret = 0;
     SgExpression*                       exp = 0;
@@ -2248,7 +2235,7 @@ Xml2AstVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgImplicitStatement*      ret   = new SgImplicitStatement( astParent->get_file_info() , true );
   SgInitializedName*        inam  = 0;
@@ -2275,7 +2262,7 @@ Xml2AstVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgFortranDo*              ret;
   SgExpression*             ini  = 0;
@@ -2378,7 +2365,7 @@ Xml2AstVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgComplexVal* ret = 0;
     
@@ -2406,7 +2393,7 @@ Xml2AstVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgClassDeclaration*   ret;
   SgClassDefinition*    exp=0;
@@ -2449,7 +2436,7 @@ Xml2AstVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParen
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgClassDefinition*        ret = 0;
   SgClassDeclaration*       dec = isSgClassDeclaration( astParent );
@@ -2472,7 +2459,7 @@ Xml2AstVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
 {
   SgClassType*          ret = 0;
   SgScopeStatement*     scope = sb::topScopeStack();    //?
@@ -2510,7 +2497,7 @@ Xml2AstVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypedefDeclaration*     ret = 0;
   SgClassDeclaration*       cls = 0;
@@ -2565,7 +2552,7 @@ Xml2AstVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgEnumDeclaration*    ret = 0;
   SgScopeStatement*     scope = sb::topScopeStack();    //?
@@ -2623,14 +2610,14 @@ Xml2AstVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
 {
   SgEnumType* ret =  new SgEnumType(0);
   return ret;
 }
 
 SgNode*
-Xml2AstVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
 {
   SgIntVal* ret = 0;
     
@@ -2654,7 +2641,7 @@ Xml2AstVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgDotExp*     ret = 0;
   SgExpression* lhs = 0;
@@ -2679,7 +2666,7 @@ Xml2AstVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgArrowExp*     ret = 0;
   SgExpression* lhs = 0;
@@ -2704,7 +2691,7 @@ Xml2AstVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgType*               typ = 0;
   SgFunctionDefinition* blk = 0;
@@ -2776,7 +2763,7 @@ Xml2AstVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astPare
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgPrintStatement*     ret = new SgPrintStatement(astParent->get_file_info());
   SgExprListExp*        exp = 0;
@@ -2824,7 +2811,7 @@ Xml2AstVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAsteriskShapeExp(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgAsteriskShapeExp(xe::DOMNode* node, SgNode* astParent)
 {
   //SgAsteriskShapeExp* ret = new SgAsteriskShapeExp(astParent->get_file_info());
   SgAsteriskShapeExp* ret = new SgAsteriskShapeExp(Sg_File_Info::generateDefaultFileInfoForTransformationNode());   // 0822
@@ -2833,7 +2820,7 @@ Xml2AstVisitor::visitSgAsteriskShapeExp(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
 {
   xe::DOMNamedNodeMap*  amap = node->getAttributes();
   xe::DOMNode*          nameatt = 0;
@@ -2873,7 +2860,7 @@ Xml2AstVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgFormatItem*           itm = 0;
   SgFormatItemList*       lst = new SgFormatItemList();
@@ -2922,7 +2909,7 @@ Xml2AstVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
 {
   SgStringVal*          val;
   //SgExpression*         val;
@@ -2962,7 +2949,7 @@ Xml2AstVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgWriteStatement*     ret = new SgWriteStatement(astParent->get_file_info());
   SgExprListExp*        exp = 0;
@@ -3043,7 +3030,7 @@ Xml2AstVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgOpenStatement*        ret = new SgOpenStatement(astParent->get_file_info());
   SgExpression*           exp = 0;
@@ -3234,7 +3221,7 @@ Xml2AstVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgCloseStatement*     ret = new SgCloseStatement(astParent->get_file_info());
   SgExpression*         unt = 0;
@@ -3278,14 +3265,14 @@ Xml2AstVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgContainsStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgContainsStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgContainsStatement*     ret = new SgContainsStatement(astParent->get_file_info());
   return ret;
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
 {
   xe::DOMNamedNodeMap*  amap = node->getAttributes();
   xe::DOMNode*          nameatt=0;
@@ -3331,7 +3318,7 @@ Xml2AstVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgCommonBlockObject*  ret = 0;
   SgExprListExp*        para = 0;
@@ -3364,7 +3351,7 @@ Xml2AstVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astPare
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgCommonBlock*        ret=0;
   SgCommonBlockObject*  obj=0;
@@ -3386,7 +3373,7 @@ Xml2AstVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgStringVal*            ret = 0;
   xe::DOMNamedNodeMap*    amap = node->getAttributes();
@@ -3415,7 +3402,7 @@ Xml2AstVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgSubscriptExpression*      ret=0;
   SgExpression*               low=0;
@@ -3447,7 +3434,7 @@ Xml2AstVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astPa
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgForAllStatement*      ret 
     = new SgForAllStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -3483,7 +3470,7 @@ Xml2AstVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgInterfaceStatement*      ret=0;
   SgInterfaceBody*           bdy=0;
@@ -3529,7 +3516,7 @@ Xml2AstVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astPar
 
 
 SgNode* 
-Xml2AstVisitor::visitSgInterfaceBody(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgInterfaceBody(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgInterfaceBody*                ret=0;
   SgFunctionDeclaration*          bdy=0;
@@ -3577,7 +3564,7 @@ Xml2AstVisitor::visitSgInterfaceBody(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgReadStatement*        ret = new SgReadStatement(astParent->get_file_info());
   SgExprListExp*          exp = 0;
@@ -3664,7 +3651,7 @@ Xml2AstVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEntryStatement*       ret = 0;
   SgFunctionType*         typ = 0;
@@ -3703,7 +3690,7 @@ Xml2AstVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgAllocateStatement*    ret=0;
   SgExprListExp*          exp=0;
@@ -3728,7 +3715,7 @@ Xml2AstVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astPare
 
 
 SgNode* 
-Xml2AstVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgDeallocateStatement*    ret=0;
   SgExprListExp*          exp=0;
@@ -3754,7 +3741,7 @@ Xml2AstVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astPa
 
 
 SgNode* 
-Xml2AstVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgArithmeticIfStatement*    ret = new SgArithmeticIfStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExpression*               cnd = 0;
@@ -3795,7 +3782,7 @@ Xml2AstVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParen
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgStopOrPauseStatement*     ret=0;
   SgExpression*               cod=0;
@@ -3837,7 +3824,7 @@ Xml2AstVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astP
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgElseWhereStatement* ret =  
     new SgElseWhereStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
@@ -3862,7 +3849,7 @@ Xml2AstVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPar
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgWhereStatement* ret =  
     new SgWhereStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
@@ -3894,7 +3881,7 @@ Xml2AstVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgNullifyStatement*   ret = 
     new SgNullifyStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
@@ -3920,7 +3907,7 @@ Xml2AstVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParen
 
 
 SgNode* 
-Xml2AstVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgBackspaceStatement*   ret = 
     new SgBackspaceStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -3980,7 +3967,7 @@ Xml2AstVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEndfileStatement*     ret = 
     new SgEndfileStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -4041,7 +4028,7 @@ Xml2AstVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgRewindStatement*      ret = 
     new SgRewindStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -4094,7 +4081,7 @@ Xml2AstVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgInquireStatement*     ret = 
     new SgInquireStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -4426,7 +4413,7 @@ Xml2AstVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgFlushStatement*      ret =
     new SgFlushStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -4477,7 +4464,7 @@ Xml2AstVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgNamelistStatement*    ret = 
     new SgNamelistStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -4536,7 +4523,7 @@ Xml2AstVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgDerivedTypeStatement*     ret = 0;
   SgClassDefinition*          exp = 0;
@@ -4611,7 +4598,7 @@ Xml2AstVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent
 
 
 SgNode* 
-Xml2AstVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgExprListExp*          exp = 0;
   SgExpression*           var = 0;
@@ -4662,7 +4649,7 @@ Xml2AstVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParen
 
 
 SgNode* 
-Xml2AstVisitor::visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgPointerDerefExp*    ret = 0;
   SgExpression*         exp = 0;
@@ -4687,7 +4674,7 @@ Xml2AstVisitor::visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgVarArgStartOp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgVarArgStartOp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgVarArgStartOp*  ret = 0;
   SgExpression*     lhs = 0;
@@ -4710,7 +4697,7 @@ Xml2AstVisitor::visitSgVarArgStartOp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgVarArgOp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgVarArgOp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgVarArgOp*       ret = 0;
   SgExpression*     lhs = 0;
@@ -4734,7 +4721,7 @@ Xml2AstVisitor::visitSgVarArgOp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgVarArgEndOp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgVarArgEndOp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgVarArgEndOp*  ret = 0;
   SgExpression*     lhs = 0;
@@ -4754,7 +4741,7 @@ Xml2AstVisitor::visitSgVarArgEndOp(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEquivalenceStatement* ret = new SgEquivalenceStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExprListExp*          lst = 0;
@@ -4802,7 +4789,7 @@ Xml2AstVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 {
   SgAsmStmt*     ret = 0;
   
@@ -4834,7 +4821,7 @@ Xml2AstVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgAggregateInitializer* ret = 0;
   SgExprListExp*          lst = 0;
@@ -4858,7 +4845,7 @@ Xml2AstVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent
 
 
 SgNode* 
-Xml2AstVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
 {
   SgFunctionType*                 ret = 0;
   SgType*                         typ = 0;
@@ -4885,7 +4872,7 @@ Xml2AstVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astParent)
 {
   //SgFunctionParameterTypeList*    ret = 0;
   SgExprListExp*                  exp = 0;
@@ -4907,7 +4894,7 @@ Xml2AstVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astP
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgPointerAssignOp(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgPointerAssignOp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgPointerAssignOp*    ret = 0;
   SgExpression*         lhs = 0;
@@ -4932,7 +4919,7 @@ Xml2AstVisitor::visitSgPointerAssignOp(xercesc::DOMNode* node, SgNode* astParent
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgCompoundInitializer*  ret = 0;
   SgExprListExp*          lst = 0;
@@ -4956,7 +4943,7 @@ Xml2AstVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
 
 
 SgNode* 
-Xml2AstVisitor::visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgImpliedDo*        ret = 0;
   SgExpression*       ini = 0;
@@ -4993,7 +4980,7 @@ Xml2AstVisitor::visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent)
 }
 
 SgNode* 
-Xml2AstVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgDataStatementGroup*   ret = new SgDataStatementGroup();
   SgDataStatementObject*  obj = new SgDataStatementObject();
@@ -5037,7 +5024,7 @@ Xml2AstVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astPar
 
 
 SgNode* 
-Xml2AstVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
+XevXmlVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgRenamePair*     ret = 0;
   xe::DOMNamedNodeMap*        amap = node->getAttributes();
