@@ -55,9 +55,11 @@ namespace XevXML {
   // --- for custom transformation between ROSE AST and XML AST ---
   class XevConversionHelper {
     bool addressFlag_;
-    bool rosehpctFlag_;
+    bool rmParenFlag_;
+    bool fPragmaFlag_;
+    int  level_;
 
-    int level_;
+    bool rosehpctFlag_;
 #ifdef XEV_USE_ROSEHPCT
     RoseHPCT::ProgramTreeList_t profiles_;
 #endif
@@ -65,15 +67,25 @@ namespace XevXML {
     /* Ctors and Dtor */
     // -------------------------------------------------------------------------
    XevConversionHelper& operator=(const XevConversionHelper& h) {
-      addressFlag_=h.getAddressFlag();
+      addressFlag_  = h.getAddressFlag();
+      rmParenFlag_  = h.getRemoveParenFlag();
+      fPragmaFlag_  = h.getFortranPragmaFlag();
       level_ = h.getLevel();
       return *this;
     }
     XevConversionHelper(const XevConversionHelper& h){
-      rosehpctFlag_ = false;
       *this = h;
+
+      rosehpctFlag_ = false;
     }
-    XevConversionHelper() {addressFlag_=false;rosehpctFlag_=false;level_=0;}
+    XevConversionHelper() {
+      addressFlag_=false;
+      rmParenFlag_=false;
+      fPragmaFlag_=false;
+      level_=0;
+
+      rosehpctFlag_=false;
+    }
     ~XevConversionHelper() {}
     // -------------------------------------------------------------------------
 
@@ -82,7 +94,7 @@ namespace XevXML {
     /* user-defined callback functions */
     // -------------------------------------------------------------------------
     /*
-      XML syntax and the positision where each function is called.
+      XML syntax and the positision at which each function is called.
 
           <E    A="..."  >   ...  </E>
         ^     ^        ^   ^    ^     ^
@@ -99,6 +111,14 @@ namespace XevXML {
     // set true to write the memory address of each node (for debugging)
     bool getAddressFlag()  const{ return addressFlag_; }
     void setAddressFlag(bool f) { addressFlag_ = f; }  
+
+    // set true to remove additoinal parenthesis at implicit type conversion.
+    bool getRemoveParenFlag()  const{ return rmParenFlag_; }
+    void setRemoveParenFlag(bool f) { rmParenFlag_ = f; }  
+
+    // set true to use Fortran pragmas
+    bool getFortranPragmaFlag()  const{ return fPragmaFlag_; }
+    void setFortranPragmaFlag(bool f) { fPragmaFlag_ = f; }  
 
     // depth of the visited node from the root node
     int  getLevel()        const{ return level_; }

@@ -57,4 +57,6 @@
 	      << x << std::endl;					\
   }
 
+#define ASSERT(x)		 {if((x)) ABORT();}
+
 #endif /* ___COMMON_HPP___ */

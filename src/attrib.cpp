@@ -374,6 +374,8 @@ static void attribSgFunctionRefExp(stringstream& istr,SgNode* node)
   }
 }
 
+// 2014.9.21 deleted
+/*
 static void attribSgSizeOfOp(stringstream& istr,SgNode* node)
 {
   SgSizeOfOp*      n = isSgSizeOfOp(node);
@@ -391,6 +393,7 @@ static void attribSgSizeOfOp(stringstream& istr,SgNode* node)
   else
     istr << " type=\"\"";
 }
+*/
 
 static void attribSgClassDeclaration(stringstream& istr,SgNode* node)
 {
@@ -779,6 +782,20 @@ static void attribSgIfStmt(stringstream& istr,SgNode* node)
   }
 }
 
+static void attribSgConstructorInitializer(stringstream& istr, SgNode* node)
+{
+  SgConstructorInitializer* n = isSgConstructorInitializer(node);
+  if(n){
+    istr << " need_name=\"" << n->get_need_name() << "\" ";
+    istr << " need_qual=\"" << n->get_need_qualifier() << "\" ";
+    istr << " need_paren=\"" << n->get_need_parenthesis_after_name() << "\" ";
+    istr << " unknown_class=\"" << n->get_associated_class_unknown() << "\" ";
+  }
+
+}
+
+
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     XevXML::XevConversionHelper* help)
 {
@@ -805,7 +822,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgPrintStatement(istr,node);                    
   attribSgWriteStatement(istr,node);                    
   attribSgReadStatement(istr,node);                    
-  attribSgSizeOfOp(istr,node);                          
+  //attribSgSizeOfOp(istr,node);  // 2014.09.21 (deleted)
   attribSgClassDeclaration(istr,node);                  
   attribSgClassDefinition(istr,node);                   
   attribSgEnumDeclaration(istr,node);                   
@@ -826,6 +843,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgBreakStmt(istr,node);
   attribSgContinueStmt(istr,node);
   attribSgIfStmt(istr,node);
+  attribSgConstructorInitializer(istr,node);
 
   attribSgExpression(istr,node);
 

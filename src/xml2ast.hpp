@@ -342,7 +342,8 @@ public:
   SgNode* visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent=0);
-    
+  SgNode* visitSgConstructorInitializer(xercesc::DOMNode* node, SgNode* astParent=0);
+
   void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
   void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
   void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);

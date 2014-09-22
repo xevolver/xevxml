@@ -561,7 +561,7 @@ XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   if(isSgSourceFile(node)) 
     outLang_ = isSgSourceFile(node)->get_outputLanguage();
   if(info && outLang_==SgFile::e_Fortran_output_language) 
-    writeFortranPragma(sstr_,info);
+    if(help->getFortranPragmaFlag()) writeFortranPragma(sstr_,info);
 
   for(int i(0);i<help->getLevel();i++)
     sstr_ << "  "; // indent
@@ -592,8 +592,10 @@ XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node,
   /* user-defined callback function call */
   help->afterXmlElement(node);
 
-  if(loc && loc->get_file_info()->isCompilerGenerated()==false)
-    writeTypes(sstr_,node,help);
+  if(loc)
+    if( loc->get_file_info()->isCompilerGenerated()==false
+	|| help->getRemoveParenFlag() == false )
+      writeTypes(sstr_,node,help);
 
   /* write internal nodes as child nodes */
   writeInternalNode(sstr_,node,help);

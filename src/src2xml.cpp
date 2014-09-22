@@ -113,8 +113,6 @@ int main(int argc, char** argv)
   //SgProject::set_verbose(10);
   //sageProject = frontend(cmdopt(argc,argv,&opt));
   sageProject = frontend(argc,argv);
-  dup2(fd,1); // printf messages are written to stdout  
-
 
 #ifdef XEV_USE_ROSEHPCT
   if(opt.rosehpct)
@@ -124,6 +122,8 @@ int main(int argc, char** argv)
   XevXML::XmlInitialize();
   //xevxml::Ast2Xml(xmlString1,file,&opt);
   XevXML::XevConvertAstToXml(xmlString1,&sageProject, new XevXML::XevConversionHelper());
+
+  dup2(fd,1); // printf messages are written to stdout  
   cout << xmlString1.str();
 
   /*

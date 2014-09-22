@@ -53,6 +53,14 @@ int g_count=0;
 #define VISIT(x) if(nname==#x) { ret = visit##x (node,astParent);}
 #endif
 
+#define SUBTREE_VISIT_BEGIN(X,Y,Z)					\
+  {									\
+  xercesc::DOMNode* cld_ = (X)->getFirstChild();			\
+  while(cld_) {								\
+  if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){		\
+  SgNode* Y = this->visit(cld_,Z);					
+
+#define SUBTREE_VISIT_END()     } cld_=cld_->getNextSibling();}}
 
 
 static bool
@@ -369,6 +377,7 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgDataStatementGroup);                  // 0827
 
       VISIT(SgRenamePair);                          // 20140824
+      VISIT(SgConstructorInitializer);              // 20140921
 
 
       if( ret == 0 && nname != "PreprocessingInfo" ) {
@@ -548,15 +557,13 @@ XevXmlVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgPragmaDeclaration* ret = 0;
   SgPragma* pr = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,child,0)
+    {
       if(pr==0)
-	pr = isSgPragma(astchild);
+	pr = isSgPragma(child);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   if(pr) {
     ret = sb::buildPragmaDeclaration(pr->get_pragma()); 
   }
@@ -603,13 +610,9 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"modifier",&storage);
   XmlGetAttributeValue(node,"bitfield",&bitstr);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
-
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       tmp = isSgInitializedName(astchild);
-
       if( tmp ) {
         varList.push_back( tmp );
         if(name==0) name = tmp;
@@ -619,8 +622,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
         cls = isSgDeclarationStatement(astchild);
       }
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
 
   if(name) {
     if( cls ) {                                         
@@ -753,10 +756,8 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   if( XmlGetAttributeValue(node,"name",&name) == false )
     ABORT();
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(lst==0)
 	lst = isSgFunctionParameterList(astchild);
       if(def==0)
@@ -764,8 +765,8 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
       if(typ==0)
 	typ = isSgType(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   if(lst) {
     if(def)
       ret 
@@ -832,10 +833,8 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   XmlGetAttributeValue(node,"pure",&f_pure);
   XmlGetAttributeValue(node,"elemental",&f_elem);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(typ==0)
 	typ = isSgType(astchild);
       if(lst==0)
@@ -845,8 +844,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
       if(def==0)
 	def = isSgBasicBlock(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   if(lst){
     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
@@ -891,17 +889,16 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
 {
   SgFunctionParameterList* ret = sb::buildFunctionParameterList();
   SgInitializedName* ini=0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       if((ini = isSgInitializedName(astchild)) != 0 ){
 	si::appendArg(ret,ini);
       }
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+  ret->set_parent(astParent);
+
   return ret;
 }
 
@@ -924,16 +921,15 @@ XevXmlVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
   SgExprStatement* ret = sb::buildExprStatement(exp);
   //SgExprStatement* ret = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       if(exp==0)
-                exp = isSgExpression(astchild);
+	exp = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_expression(exp);
+  ret->set_parent(astParent);
   exp->set_parent(ret);
 
   return ret;
@@ -948,10 +944,8 @@ XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*   inc = 0;
   SgStatement*    bdy = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       /* assuming these stmts appear in this order */
       if(ini==0)
 	ini = isSgStatement(astchild);
@@ -962,10 +956,15 @@ XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
       else if (bdy==0)
 	bdy = isSgStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildForStatement(ini,tst,inc,bdy);
-  
+  ret->set_parent(astParent);
+  if(ini)ini->set_parent(ret);
+  if(tst)tst->set_parent(ret);
+  if(inc)inc->set_parent(ret);
+  if(bdy)bdy->set_parent(ret);
+
   return ret;
 }
 
@@ -976,15 +975,13 @@ XevXmlVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent
   SgStatement* stmt  = 0;
   SgStatementPtrList lst;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if((stmt = isSgStatement(astchild))!=0)
 	lst.push_back(stmt);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   //lst could be empty
   ret = sb::buildForInitStatement(lst);
 
@@ -1003,11 +1000,9 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"use",&ukey);
   XmlGetAttributeValue(node,"end",&estmt);
-    
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       /* assuming these stmts appear in this order */
       if(cond==0)
 	cond = isSgExprStatement(astchild);
@@ -1016,8 +1011,8 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
       else if (fstmt==0)
 	fstmt = isSgStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildIfStmt(cond,tstmt,fstmt);
   ret->set_has_end_statement(estmt);
   ret->set_use_then_keyword(ukey);
@@ -1040,10 +1035,8 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"slabel",&slabel);
   XmlGetAttributeValue(node,"nlabel",&nlabel);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       /* assuming these stmts appear in this order */
       if(cond==0)
         cond = isSgExprStatement(astchild);
@@ -1052,8 +1045,8 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
       else if (fstmt==0)
         fstmt = isSgStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildWhileStmt(cond,tstmt,fstmt);
   if(cond)  cond->set_parent(ret);
   if(tstmt) tstmt->set_parent(ret);
@@ -1083,18 +1076,15 @@ XevXmlVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
   SgStatement*          body = 0;
   SgExprStatement*      cond = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       /* assuming these stmts appear in this order */
       if(body==0)
         body = isSgStatement(astchild);
       else if (cond==0)
         cond = isSgExprStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
   ret = sb::buildDoWhileStmt(body,cond);
   if(cond)  cond->set_parent(ret);
   if(body)  body->set_parent(ret);
@@ -1109,10 +1099,8 @@ XevXmlVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*         tstmt = 0;
   SgExpression*         fstmt = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child){
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       /* assuming these stmts appear in this order */
       if(cond==0)
         cond = isSgExpression(astchild);
@@ -1121,8 +1109,8 @@ XevXmlVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
       else if (fstmt==0)
         fstmt = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildConditionalExp(cond,tstmt,fstmt);
   
   return ret;
@@ -1136,18 +1124,14 @@ XevXmlVisitor::visitSgSizeOfOp(xercesc::DOMNode* node, SgNode* astParent)
   SgType*               typ = 0;
   string class_name;
 
-  XmlGetAttributeValue(node,"type",&class_name);
-  xe::DOMNode* child=node->getFirstChild();
-  while(child){
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(exp==0)
 	exp = isSgExpression(astchild);
       if(typ==0)
 	typ = isSgType(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   if( typ )
    ret = sb::buildSizeOfOp( typ );
@@ -1164,19 +1148,16 @@ XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
   SgStatement*          item = 0;
   SgStatement*          body = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child)
-  {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE)
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
-      SgNode* astchild = this->visit(child,ret);
+      // assuming the order
       if(item==0)
         item = isSgStatement(astchild);
       else if (body==0)
         body = isSgStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildSwitchStatement(item,body);
   
   return ret;
@@ -1189,19 +1170,15 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*         key  = 0;
   SgStatement*          body = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child)
-  {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE)
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
-      SgNode* astchild = this->visit(child,ret);
       if(key==0)
         key = isSgExpression(astchild);
       else if (body==0)
         body = isSgStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildCaseOptionStmt(key,body);
   
   return ret;
@@ -1240,15 +1217,13 @@ XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParen
   SgDefaultOptionStmt*      ret  = 0;
   SgStatement*              body = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child){
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if (body==0)
         body = isSgStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildDefaultOptionStmt(body);
   
   return ret;
@@ -1417,18 +1392,16 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   SgCastExp*     ret   = 0;
   SgType*        typ   = 0;
   SgExpression*  exp   = 0;
-  xe::DOMNode*   child = node->getFirstChild();
 
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(exp==0)
 	exp = isSgExpression(astchild);
       if(typ==0)
 	typ = isSgType(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ);
     ret->set_parent(astParent);
@@ -1478,15 +1451,14 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 {
   SgReturnStmt*        ret   = 0;
   SgExpression*        exp   = 0;
-  xe::DOMNode*         child = node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(exp==0)
 	exp = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildReturnStmt(exp);
 
   return ret;
@@ -1497,17 +1469,14 @@ SgNode*
 XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock*   ret   = 0;
-  xe::DOMNode*    child = node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      //SgNode* astchild = this->visit(child);
-      SgNode* astchild = this->visit(child,astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(ret == 0 ){
 	ret = isSgBasicBlock(astchild);
       }
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
   
   return ret;
 }
@@ -1523,17 +1492,14 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   
   XmlGetAttributeValue(node,"name",&name);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(ini==0)
 	ini = isSgInitializer(astchild);
       if(typ==0)
 	typ = isSgType(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
 
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
   if(typ) typ->set_parent(ret); // this must be true
@@ -1547,18 +1513,15 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   SgAssignInitializer* ret = 0;
   SgExpression*        exp = 0;
   SgType*              typ = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       if(exp==0)
 	exp = isSgExpression(astchild);
       if(typ==0)
 	typ = isSgType(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
 
   if(exp && typ){
     ret = sb::buildAssignInitializer(exp,typ);
@@ -1632,17 +1595,14 @@ XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"slabel",&slabel);
   XmlGetAttributeValue(node,"nlabel",&nlabel);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       if (body==0)
         body = isSgStatement(astchild);
       if(scope==0)
         scope = isSgScopeStatement(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();  
 
   if( nlabel.size() ){
     ret = sb::buildLabelStatement( nlabel.c_str(), body, scope );
@@ -1744,16 +1704,14 @@ XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
 
   ret = sb::buildExprListExp( exprs );
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
-        if((exp = isSgExpression(astchild))!=0) {
-	  ret->append_expression(exp);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret) 
+    {
+      if((exp = isSgExpression(astchild))!=0) {
+	ret->append_expression(exp);
         }
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+ 
   ret->set_parent(astParent);
   return ret;
 }
@@ -1799,17 +1757,15 @@ XevXmlVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent)
 
   std::vector< SgExpression * > exprs;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if( exp==0 )
         exp = isSgExpression(astchild);
       if( para==0 )
         para = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = sb::buildFunctionCallExp( exp, para );
   ret->set_parent(astParent);
   if(exp) exp->set_parent(ret);
@@ -1824,6 +1780,7 @@ XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
   string name;
   int only=0;
 
+  ASSERT(astParent==0);
   if(XmlGetAttributeValue(node,"name",&name) && XmlGetAttributeValue(node,"only",&only)) 
     ret = new SgUseStatement(astParent->get_file_info(),name,only);
   else 
@@ -1837,6 +1794,7 @@ XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
     }
     child=child->getNextSibling();
   } 
+
   return ret;
 }
 
@@ -1883,17 +1841,15 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     Rose_STL_Container<std::string> slst;
 
 
-    xe::DOMNode* child=node->getFirstChild();
+    //xe::DOMNode* child=node->getFirstChild();
 
     switch (kind){
     case SgAttributeSpecificationStatement::e_parameterStatement:
     case SgAttributeSpecificationStatement::e_externalStatement:
     case SgAttributeSpecificationStatement::e_dimensionStatement:
     case SgAttributeSpecificationStatement::e_allocatableStatement:
-      
-      while(child) {
-	if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-	  SgNode* astchild = this->visit(child,ret);
+      SUBTREE_VISIT_BEGIN(node,astchild,0)
+	{
 	  exp = isSgExpression(astchild);
 	  if( exp ) {
 	    
@@ -1929,8 +1885,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
 	    //ret->get_parameter_list()->prepend_expression(exp);
 	  }
 	}
-	child=child->getNextSibling();
-      }
+      SUBTREE_VISIT_END();
       ret = sb::buildAttributeSpecificationStatement( (SgAttributeSpecificationStatement::attribute_spec_enum)  kind  );
       elst = sb::buildExprListExp( lst );
       elst->set_parent(ret);
@@ -1941,10 +1896,8 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
 
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
       ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-      
-      while(child) {
-	if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-	  SgNode* astchild = this->visit(child,ret);
+      SUBTREE_VISIT_BEGIN(node,astchild,0)      
+	{
 	  dataGroup = isSgDataStatementGroup(astchild);
 	  if( dataGroup ) {
 	    
@@ -1952,8 +1905,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
 	    dataGroup->set_parent(ret);
 	  }
 	}
-	child=child->getNextSibling();
-      }
+      SUBTREE_VISIT_END();
       for (size_t i = 0; i<localList.size(); i++)
 	ret->get_data_statement_group_list().push_back(localList[i]);
       break;
@@ -1961,17 +1913,14 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     case SgAttributeSpecificationStatement::e_saveStatement :
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
       ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-      
-      while(child) {
-	if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-	  SgNode* astchild = this->visit(child,ret);
+      SUBTREE_VISIT_BEGIN(node,astchild,0)      
+	{
 	  str = isSgStringVal(astchild);
 	  if( str ) {
 	    slst.push_back(  str->get_value() );
 	  }
 	}
-	child=child->getNextSibling();
-      }
+      SUBTREE_VISIT_END();
       ret->get_name_list() = slst;
       break;
 
@@ -1996,15 +1945,12 @@ XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName*        inam  = 0;
   SgInitializedNamePtrList  lst;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)      
+    {
       if((inam = isSgInitializedName(astchild))!=0)
         lst.push_back(inam);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
 
   if(!lst.empty()) {
     ret->set_implicit_none( false );
@@ -2019,7 +1965,7 @@ XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
 SgNode* 
 XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgFortranDo*              ret;
+  SgFortranDo*              ret  = 0;
   SgExpression*             ini  = 0;
   SgExpression*             bnd  = 0;
   SgExpression*             inc  = 0;
@@ -2036,10 +1982,8 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"slabel",&slabel);
   XmlGetAttributeValue(node,"nlabel",&nlabel);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0) 
+    {
       /* assuming these stmts appear in this order */
       if(ini==0)
         ini = isSgExpression(astchild);
@@ -2050,8 +1994,8 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
       else if(body==0)
         body = isSgBasicBlock(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+ 
   ret = new SgFortranDo( astParent->get_file_info(), ini,bnd,inc,body);
   ret->set_old_style( style );
   ret->set_has_end_statement( enddo );
@@ -2089,21 +2033,15 @@ XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
   SgValueExp*   real  = 0;
   SgValueExp*   imag  = 0;
 
-
-  xe::DOMNode* child=node->getFirstChild();
-  while(child)
-  {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE)
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
-      SgNode* astchild = this->visit(child,ret);
       /* assuming these exprs appear in this order */
       if(real==0)
         real = isSgValueExp(astchild);
       else if (imag==0)
         imag = isSgValueExp(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
   ret = sb::buildComplexVal( real, imag );
   
   return ret;
@@ -2129,16 +2067,13 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   ret = sb::buildClassDeclaration( SgName(name.c_str()), scope );
   ret->set_class_type( (SgClassDeclaration::class_types)typ  );
 
-
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       if( exp==0 )
         exp = isSgClassDefinition( astchild );
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_definition( exp );
 
   return ret;
@@ -2152,18 +2087,15 @@ XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
   SgDeclarationStatement*   fld = 0;
   
   ret = sb::buildClassDefinition( dec );
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       fld = isSgDeclarationStatement(astchild);
       if( fld ) {
         ret->append_member(fld);
         fld->set_parent(ret);
       }
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   return ret;
 }
 
@@ -2209,18 +2141,14 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
   
   XmlGetAttributeValue(node,"tag_name",&name);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if(typ==0)
         typ = isSgType(astchild);
       if(cls==0)
         cls = isSgClassDeclaration(astchild);
     }
-    child=child->getNextSibling();
-  }
-
+  SUBTREE_VISIT_END();
     
   if(cls) {
     SgType * type = cls->get_type();
@@ -2261,16 +2189,12 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName*        inam  = 0;
   SgInitializedNamePtrList  lst;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if((inam = isSgInitializedName(astchild))!=0)
         lst.push_back(inam);
     }
-    child=child->getNextSibling();
-  }
-
+  SUBTREE_VISIT_END();
 
   if( name.size() ){
     ret = sb::buildEnumDeclaration( SgName( name.c_str() ), scope );
@@ -2330,17 +2254,15 @@ XevXmlVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
 
   std::vector< SgExpression * > exprs;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
       else if( rhs==0 )
         rhs = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = new SgDotExp( lhs->get_file_info(), lhs, rhs, lhs->get_type() );
   return ret;
 }
@@ -2355,17 +2277,15 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
 
   std::vector< SgExpression * > exprs;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
       else if( rhs==0 )
         rhs = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = new SgArrowExp( lhs->get_file_info(), lhs, rhs, lhs->get_type() );
   return ret;
 }
@@ -2401,11 +2321,8 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
   //SgFunctionSymbol* symbol = new SgFunctionSymbol(ret);
   //globalScope->insert_symbol(SgName(name.c_str()), symbol);
 
-
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       if( typ==0 )
         typ = isSgType(astchild);
       if( blk==0 )
@@ -2416,11 +2333,9 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
       if(lst==0)
         lst = isSgFunctionParameterList(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
 
   SgFunctionDefinition* programDefinition = new SgFunctionDefinition(ret, def);
-
 
   def->setCaseInsensitive(true);
   def->set_parent(programDefinition);
@@ -2447,17 +2362,14 @@ XevXmlVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
   SgExprListExp*        exp = 0;
   SgExpression*         fmt = 0;
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
       else if( fmt==0 )
 	fmt = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   ret->set_io_stmt_list(exp);
   ret->set_format( fmt );
@@ -2507,19 +2419,16 @@ XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgFormatItem*           itm = 0;
   SgFormatItemList*       lst = new SgFormatItemList();
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       if((itm = isSgFormatItem(astchild))!=0){
 	lst->get_format_item_list().insert(
               //lst->get_format_item_list().begin(), itm );
               lst->get_format_item_list().end(), itm );
       }
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
 
   SgFormatStatement*    ret = new SgFormatStatement(astParent->get_file_info(),lst);
   lst->set_parent( ret );
@@ -2581,10 +2490,8 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"rec",   &f_rec);
   XmlGetAttributeValue(node,"err",   &f_err);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)  
+    {
       //assuming these stmts appear in this order
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
@@ -2599,8 +2506,8 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
       else if( f_err && err==0 )
 	err = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_io_stmt_list(exp);
   ret->set_format( fmt );
   ret->set_iostat( iost );
@@ -2659,11 +2566,8 @@ XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
   }
 
   ino = 0;
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
-
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)  
+    {
       exp = isSgExpression(astchild);
       if(exp) {
 	switch( flg[ino] ){
@@ -2724,9 +2628,8 @@ XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
 	ino++;
       }
     }
-    child=child->getNextSibling();
-  }
-  
+  SUBTREE_VISIT_END();
+
   return ret;
 }
 
@@ -2735,16 +2638,14 @@ XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgCloseStatement*     ret = new SgCloseStatement(astParent->get_file_info());
   SgExpression*         unt = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)    
+    {
       if( unt==0 )
 	unt = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_unit(unt);
   ret->set_parent(astParent);
   return ret;
@@ -2775,15 +2676,12 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
   ret->set_file_info(info);
   SgClassDefinition*    exp=0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)    
+    {
       if( exp==0 )
         exp = isSgClassDefinition( astchild );
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
 
   ret->set_class_type( (SgClassDeclaration::class_types)typ  );
   ret->set_name( SgName( name.c_str() ) );
@@ -2802,15 +2700,12 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
 
   XmlGetAttributeValue(node,"name",&name);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if( para==0 )
         para = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
 
   ret = sb::buildCommonBlockObject( name, para );
   para ->set_parent(ret);
@@ -2824,15 +2719,12 @@ XevXmlVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
   SgCommonBlock*        ret=0;
   SgCommonBlockObject*  obj=0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if( obj==0 )
         obj = isSgCommonBlockObject(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
 
   ret = sb::buildCommonBlock( obj );
   obj->set_parent(ret);
@@ -2867,11 +2759,9 @@ XevXmlVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astPar
   SgExpression*               low=0;
   SgExpression*               upp=0;
   SgExpression*               str=0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       //assuming these stmts appear in this order
       if( low==0 )
 	low = isSgExpression(astchild);
@@ -2880,8 +2770,7 @@ XevXmlVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astPar
       else if( str==0 )
 	str = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   ret = new SgSubscriptExpression(low,upp,str);
   ret->set_startOfConstruct(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
@@ -2900,18 +2789,16 @@ XevXmlVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent)
     = new SgForAllStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExprListExp*          hed = 0;
   SgBasicBlock*           bdy = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)    
+    {
       if( hed==0 )
 	hed = isSgExprListExp(astchild);
       else if( bdy==0 )
 	bdy = isSgBasicBlock(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_parent(astParent);
   hed->set_parent(ret);
   bdy->set_parent(ret);
@@ -2944,18 +2831,15 @@ XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astPare
   ret = new SgInterfaceStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
          	 SgName( name.c_str() ),(SgInterfaceStatement::generic_spec_enum)typ );
   
-  xe::DOMNode* child = node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)    
+    {
       bdy = isSgInterfaceBody(astchild);
       if( bdy ) {
 	bdy->set_parent(ret);
 	ret->get_interface_body_list().push_back(bdy);
       }
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   ret->set_generic_spec( (SgInterfaceStatement::generic_spec_enum) typ );
   ret->set_parent(astParent);
@@ -2984,20 +2868,17 @@ XevXmlVisitor::visitSgInterfaceBody(xercesc::DOMNode* node, SgNode* astParent)
         ret->set_use_function_name( true );
     }
 ---*/
-        
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)            
+    {
       if( bdy==0 )
 	bdy = isSgFunctionDeclaration(astchild);
       if(def==0)
 	def = isSgProcedureHeaderStatement(astchild);
       
     }
-    child=child->getNextSibling();
-  }
-  
+  SUBTREE_VISIT_END();
+
   ret->set_functionDeclaration( bdy );
   bdy->set_parent(ret);
   
@@ -3028,10 +2909,8 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"end",   &f_end);
   XmlGetAttributeValue(node,"err",   &f_err);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)            
+    {
       //assuming these stmts appear in this order
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
@@ -3048,8 +2927,8 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
       else if( f_err && err==0 )
 	err = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_parent(astParent);  
   ret->set_io_stmt_list(exp);
   ret->set_format( fmt );
@@ -3074,19 +2953,16 @@ XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
   
   XmlGetAttributeValue(node,"name",&name);
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)            
+    {
       if( typ==0 )
 	typ = isSgFunctionType(astchild);
       
       if( def==0 )
 	def = isSgFunctionDefinition(astchild);
     }
-    child=child->getNextSibling();
-  }
-  
+  SUBTREE_VISIT_END();
+
   ret = new SgEntryStatement( astParent->get_file_info(),
 			      SgName( name.c_str() ),
 			      typ,
@@ -3103,16 +2979,14 @@ XevXmlVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParen
   SgExprListExp*          exp=0;
   
   ret = new SgAllocateStatement(astParent->get_file_info());
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)   
+    {
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_parent(astParent);
   ret->set_expr_list(exp);
   //exp->set_parent(ret);
@@ -3129,15 +3003,12 @@ XevXmlVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astPar
   
   ret = new SgDeallocateStatement(astParent->get_file_info());
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)   
+    {
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-    }
+  SUBTREE_VISIT_END();
   
   //printf( "ret=%p,exp=%p\n",ret,exp);
   ret->set_expr_list(exp);
@@ -3157,11 +3028,9 @@ XevXmlVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent
   SgLabelRefExp*              les = 0;
   SgLabelRefExp*              eql = 0;
   SgLabelRefExp*              grt = 0;
-  
-  xe::DOMNode* child = node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)     
+    {
       //assuming these stmts appear in this order
       if( les==0 )
 	les = isSgLabelRefExp(astchild);
@@ -3172,8 +3041,8 @@ XevXmlVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent
       else if( cnd==0 )
 	cnd = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
+
   ret->set_parent(astParent);
 
   ret->set_less_label( les );
@@ -3204,17 +3073,13 @@ XevXmlVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astPa
   ret = new SgStopOrPauseStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
   ret->set_stop_or_pause( (SgStopOrPauseStatement::stop_or_pause_enum) typ );
   ret->set_parent(astParent);
-  
-  xe::DOMNode* child = node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)       
+    {
       if( cod )
 	cod = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
-
+  SUBTREE_VISIT_END();
   if( cod==0 )
     cod = new SgNullExpression(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   
@@ -3232,17 +3097,15 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
   SgExpression*         cond  = 0;
   SgBasicBlock*         body  = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE) {
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)       
+    {
       if(cond==0)
         cond = isSgExpression(astchild);
       else if (body==0)
         body = isSgBasicBlock(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret->set_condition( cond );
   ret->set_body( body );
   ret->set_parent(astParent);
@@ -3259,10 +3122,8 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
   SgBasicBlock*         body = 0;
   SgElseWhereStatement* elsw = 0;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)       
+    {
       /* assuming these stmts appear in this order */
       if(cond==0)
         cond = isSgExpression(astchild);
@@ -3271,8 +3132,8 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
       else if (elsw==0)
         elsw = isSgElseWhereStatement(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret->set_condition( cond );
   ret->set_body( body );
   ret->set_elsewhere( elsw );
@@ -3291,15 +3152,13 @@ XevXmlVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParent
 
   std::vector< SgExpression * > exprs;
 
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)       
+    {
       if( plst==0 )
         plst = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret->set_parent(astParent);
   ret->set_pointer_list( plst );
   ret->set_parent(astParent);
@@ -3316,19 +3175,16 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
   SgLabelRefExp*          err = 0;
   
   string                  nlabel;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)         
+    {
 	//assuming these stmts appear in this order
       if( unt==0 )
 	unt = isSgExpression(astchild);
       else if( err==0 )
 	err = isSgLabelRefExp(astchild);
     }
-    child=child->getNextSibling();
-    }
+  SUBTREE_VISIT_END();
   
   if( unt ) {
     ret->set_unit( unt );
@@ -3352,18 +3208,15 @@ XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
     new SgEndfileStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExpression*           unt = 0;
   SgLabelRefExp*          err = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)           
+    {
       if( unt==0 )
 	unt = isSgExpression(astchild);
       else if( err==0 )
 	err = isSgLabelRefExp(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
 
   if( unt ) {
     ret->set_unit( unt );
@@ -3387,17 +3240,13 @@ XevXmlVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
   SgRewindStatement*      ret = 
     new SgRewindStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExpression*           unt = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
-      //assuming these stmts appear in this order
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)             
+    {
       if( unt==0 )
 	unt = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   if( unt ) {
     ret->set_unit( unt );
@@ -3471,11 +3320,8 @@ XevXmlVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
   }
   
   ino = 0;
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
-      
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)             
+    {      
       exp = isSgExpression(astchild);
       switch( flg[ino] ){
       case 1:
@@ -3593,9 +3439,7 @@ XevXmlVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
       }
       ino++;
     }
-    child=child->getNextSibling();
-  }
-
+  SUBTREE_VISIT_END();
   
   return ret;
 }
@@ -3607,16 +3451,13 @@ XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
     new SgFlushStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExpression*           unt = 0;
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       if( unt==0 )
 	unt = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
-  
+  SUBTREE_VISIT_END();
+
   if( unt ) {
     ret->set_unit( unt );
     unt->set_parent(ret);
@@ -3641,17 +3482,14 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"group",&name);
   
   Rose_STL_Container<std::string> slst;
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
       str = isSgStringVal(astchild);
       if( str ) {
 	slst.push_back(  str->get_value() );
       }
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
 
   grp->set_group_name( name );
   grp->get_name_list() = slst;
@@ -3675,16 +3513,12 @@ XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"tag_name",&name);
   XmlGetAttributeValue(node,"type",&typ);
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
       if( exp==0 )
 	exp = isSgClassDefinition( astchild );
     }
-    child=child->getNextSibling();
-  }
-
+  SUBTREE_VISIT_END();
   exp->setCaseInsensitive(true);
   exp->set_parent(ret);
   ret = new SgDerivedTypeStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
@@ -3728,19 +3562,16 @@ XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent
 {
   SgExprListExp*          exp = 0;
   SgExpression*           var = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
       else if( var==0 )
 	var = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
-    
+  SUBTREE_VISIT_END();
+
   SgComputedGotoStatement*    ret = 
     new SgComputedGotoStatement(astParent->get_file_info(), exp,var );
   
@@ -3757,19 +3588,16 @@ XevXmlVisitor::visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent)
   SgPointerDerefExp*    ret = 0;
   SgExpression*         exp = 0;
   SgType*               typ = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child){
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE) {
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       if(typ==0)
 	typ = isSgType(astchild);
       if(exp==0)
 	exp = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  }
-  
+  SUBTREE_VISIT_END();
+
   ret = new SgPointerDerefExp(Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
 			      exp, typ );
   ret->set_parent(astParent);
@@ -3785,18 +3613,15 @@ XevXmlVisitor::visitSgVarArgStartOp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*     lhs = 0;
   SgExpression*     rhs = 0;
   
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)  
+    {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
       else if( rhs==0 )
         rhs = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = new SgVarArgStartOp( Sg_File_Info::generateDefaultFileInfoForTransformationNode(), lhs, rhs, lhs->get_type() );
   ret->set_parent(astParent);
   lhs->set_parent(ret);
@@ -3811,18 +3636,16 @@ XevXmlVisitor::visitSgVarArgOp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*     lhs = 0;
   SgType*           typ = 0;
   
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)    
+    {
       if( typ==0 )
         typ = isSgType(astchild);
       else if( lhs==0 )
         lhs = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = new SgVarArgOp( Sg_File_Info::generateDefaultFileInfoForTransformationNode(), lhs, typ );
   //ret = sb::buildVarArgOp_nfi( lhs,lhs->get_type() );
   ret->set_parent(astParent);
@@ -3837,16 +3660,14 @@ XevXmlVisitor::visitSgVarArgEndOp(xercesc::DOMNode* node, SgNode* astParent)
   SgVarArgEndOp*  ret = 0;
   SgExpression*     lhs = 0;
   
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)      
+    {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = new SgVarArgEndOp( Sg_File_Info::generateDefaultFileInfoForTransformationNode(), lhs, lhs->get_type() );
   ret->set_parent(astParent);
   lhs->set_parent(ret);
@@ -3858,18 +3679,15 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEquivalenceStatement* ret = new SgEquivalenceStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   SgExprListExp*          lst = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)        
+    {
       //assuming these stmts appear in this order
       if( lst==0 )
 	lst = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  }
-  
+  SUBTREE_VISIT_END();
+
   if( lst ) {
     ret->set_equivalence_set_list(lst);
     lst->set_parent(ret);
@@ -3910,18 +3728,15 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
   SgExprListExp*          lst = 0;
   SgType*                 typ = 0;
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)        
+    {
       if( typ==0 )
 	typ = isSgType(astchild);
       if( lst==0 )
 	lst = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  } 
-  
+  SUBTREE_VISIT_END();
+
   ret = sb::buildAggregateInitializer( lst,typ );
   ret->set_parent(astParent);
   lst->set_parent(ret);
@@ -3936,19 +3751,16 @@ XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
   SgFunctionType*                 ret = 0;
   SgType*                         typ = 0;
   SgFunctionParameterTypeList*    lst = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)          
+    {
       if( typ==0 )
 	typ = isSgType(astchild);
       if( lst==0 )
 	lst = isSgFunctionParameterTypeList(astchild);
     }
-    child=child->getNextSibling();
-  } 
-  
+  SUBTREE_VISIT_END();
+
   if( typ==0 ) {
     typ = isSgType( sb::buildIntType() );
   }
@@ -3965,16 +3777,13 @@ XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astPa
 {
   SgFunctionParameterTypeList*    ret = 0;
   SgExprListExp*                  exp = 0;
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,0)            
+    {
       if( exp==0 )
 	exp = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
   
   if( exp == 0) // modified (2014.09.20)
     exp = new SgExprListExp( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
@@ -3996,17 +3805,15 @@ XevXmlVisitor::visitSgPointerAssignOp(xercesc::DOMNode* node, SgNode* astParent)
   
   std::vector< SgExpression * > exprs;
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)            
+    {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
       else if( rhs==0 )
         rhs = isSgExpression(astchild);
     }
-    child=child->getNextSibling();
-  } 
+  SUBTREE_VISIT_END();
+
   ret = new SgPointerAssignOp( Sg_File_Info::generateDefaultFileInfoForTransformationNode(), lhs, rhs, rhs->get_type() );
   ret->set_parent(astParent);
   lhs->set_parent(ret);
@@ -4021,18 +3828,15 @@ XevXmlVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
   SgExprListExp*          lst = 0;
   SgType*                 typ = 0;
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)            
+    {
       if( typ==0 )
 	typ = isSgType(astchild);
       if( lst==0 )
 	lst = isSgExprListExp(astchild);
     }
-        child=child->getNextSibling();
-  } 
-  
+  SUBTREE_VISIT_END();
+
   ret = sb::buildCompoundInitializer( lst,typ );
   ret->set_parent(astParent);
   lst->set_parent(ret);
@@ -4051,10 +3855,8 @@ XevXmlVisitor::visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent)
   SgExprListExp*      lst = 0;
   SgScopeStatement*   scp = 0;
   
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)            
+    {
       /* assuming these stmts appear in this order */
       if(ini==0)
 	ini = isSgExpression(astchild);
@@ -4065,8 +3867,7 @@ XevXmlVisitor::visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent)
       else if(lst==0)
 	lst = isSgExprListExp(astchild);
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   ret = new SgImpliedDo(  Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
 			  ini,las,inc,lst,scp);
@@ -4091,11 +3892,9 @@ XevXmlVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astPare
   val->set_initializer_list( exprList );
   exprList->set_parent(val);
   val->set_data_initialization_format( SgDataStatementValue::e_explict_list );
-  
-  xe::DOMNode* child=node->getFirstChild();
-  while(child) {
-    if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
-      SgNode* astchild = this->visit(child,ret);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)              
+    {
       /* assuming these stmts appear in this order */
       if(nam==0) {
 	if( (nam = isSgExprListExp(astchild)) != 0 ) {
@@ -4112,8 +3911,7 @@ XevXmlVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astPare
 	}
       }
     }
-    child=child->getNextSibling();
-  }
+  SUBTREE_VISIT_END();
   
   ret->get_object_list().push_back(obj);
   ret->get_value_list().push_back(val);
@@ -4138,13 +3936,51 @@ XevXmlVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
   ret = new SgRenamePair(lname,uname);
   if(ret) {
     ret->set_parent(astParent);
-    // add this SgRenamePair object to its parent node
+    // add this SgRenamePair object to * its parent node *
     SgUseStatement* useStmt = isSgUseStatement(astParent);
     if(useStmt){ // this should be true
       useStmt->get_rename_list().push_back(ret);
     }
   }
   else ABORT();
+  return ret;
+}
+
+
+
+SgNode* 
+XevXmlVisitor::visitSgConstructorInitializer(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgConstructorInitializer* ret      = 0;
+  SgMemberFunctionDeclaration* mdecl = 0;
+  SgExprListExp* elst                = 0;
+  SgType*        typ                 =0;
+  int name     =0;
+  int qual     =0;
+  int paren    =0;
+  int unkc     =0;
+
+  XmlGetAttributeValue(node,"need_name",    &name);
+  XmlGetAttributeValue(node,"need_qual",    &qual);
+  XmlGetAttributeValue(node,"need_paren",   &paren);
+  XmlGetAttributeValue(node,"unknown_class",&unkc);
+
+  SUBTREE_VISIT_BEGIN(node,child,0)
+    {
+      if(mdecl==0)
+	mdecl = isSgMemberFunctionDeclaration(child);
+      if(elst==0)
+	elst = isSgExprListExp(child);
+      if(typ==0)
+	typ = isSgType(child);
+    }    
+  SUBTREE_VISIT_END();
+  
+  ret = sb::buildConstructorInitializer(mdecl,elst,typ,name,qual,paren,unkc);
+  if(mdecl) mdecl->set_parent(ret);
+  if(elst) elst->set_parent(ret);
+  if(typ) typ->set_parent(ret);
+
   return ret;
 }
 
