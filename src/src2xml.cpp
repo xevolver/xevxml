@@ -108,12 +108,13 @@ int main(int argc, char** argv)
   SgProject*      sageProject=0;
   //xevxml::Ast2XmlOpt opt;
 
-  fd = dup(1); 
-  dup2(2,1); // printf messages are written to stderr  
+  fd = dup(fileno(stdout)); 
+  dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr  
   //SgProject::set_verbose(10);
   //sageProject = frontend(cmdopt(argc,argv,&opt));
   sageProject = frontend(argc,argv);
 
+  
 #ifdef XEV_USE_ROSEHPCT
   if(opt.rosehpct)
     RoseHPCT::attachMetrics (opt.profiles, 
@@ -122,10 +123,11 @@ int main(int argc, char** argv)
   XevXML::XmlInitialize();
   //xevxml::Ast2Xml(xmlString1,file,&opt);
   XevXML::XevConvertAstToXml(xmlString1,&sageProject, new XevXML::XevConversionHelper());
-
-  dup2(fd,1); // printf messages are written to stdout  
-  cout << xmlString1.str();
-
+  fflush(stdout);
+  dup2(fd,1); // printf messages are written to stdout
+  clearerr(stdout);
+  //cout << xmlString1.str();
+  printf("%s",xmlString1.str().c_str());
   /*
   char c;
   while((c=cin.get()) != cin.eof()){
