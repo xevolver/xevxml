@@ -126,9 +126,14 @@ static bool hasInternalNode(SgNode* n)
   if(isSgDataStatementGroup(n)) 
     return true;
 
-  if(isSgInquireStatement(n))
+  if(isSgDataStatementValue(n)) 
     return true;
 
+  if(isSgDataStatementObject(n)) 
+    return true;
+
+  if(isSgInquireStatement(n))
+    return true;
 
   return false;
 }
@@ -229,13 +234,22 @@ static void writeTypesRecursive(stringstream& sstr,
     sstr.unsetf(ios::hex);
   }
   writeModifierType(sstr,t);
-  
+
+  if( t->get_type_kind() ){
+    sstr << " type_kind=\"1\" ";
+  }
+
   string s = t->class_name();
   if( s == "SgTypedefType" ){
     SgTypedefType* n = isSgTypedefType(t);
     sstr << " type_name=" << n->get_name();
   }
   else if( s == "SgTypeString" ){
+    SgExpression*   exp = isSgTypeString(t)->get_lengthExpression();
+    if( exp ) {
+      sstr << " lengthExpression=\"1\" ";
+    }
+    /*
     SgIntVal* v = isSgIntVal( isSgTypeString(t)->get_lengthExpression() );
     if( v )
       sstr << " len=\"" << v->get_value() << "\" ";
@@ -243,6 +257,7 @@ static void writeTypesRecursive(stringstream& sstr,
     SgExpression*   exp = isSgTypeString(t)->get_lengthExpression();
     if( exp )
       sstr << " lengthExpression=\"" << exp->class_name() << "\" ";
+    */
   }
   else if( s == "SgTypeComplex" ) {
     SgIntVal* v = isSgIntVal( isSgTypeComplex(t)->get_type_kind() );
@@ -260,7 +275,7 @@ static void writeTypesRecursive(stringstream& sstr,
     else
       sstr << " index=\"\" ";
     
-    sstr << " type=\"" << isSgArrayType(t)->get_base_type()->class_name() << "\" ";
+    //sstr << " type=\"" << isSgArrayType(t)->get_base_type()->class_name() << "\" ";
   }
   else if( s == "SgClassType" ) {
     SgClassType* n = isSgClassType(t);
@@ -287,11 +302,12 @@ static void writeTypesRecursive(stringstream& sstr,
       sstr << " type_kind=\"\" ";
   }
 
-  if(t->containsInternalTypes()==true && f){
+  if( (t->containsInternalTypes()==true || t->get_type_kind() || isSgTypeString(t) )
+	   && f){
     sstr << ">" << endl;
     Rose_STL_Container<SgType*> types = t->getInternalTypes();
     help->setLevel(help->getLevel()+1);
-    
+
     for(size_t i(0);i<types.size();++i){
       writeTypesRecursive(sstr,types[i],help,true);
     }
@@ -316,6 +332,14 @@ static void writeTypesRecursive(stringstream& sstr,
           visitor.traverse(lst,help);
       }
     }
+    if( t->get_type_kind() ) {
+      XevAstVisitorInternal visitor(sstr);
+      visitor.traverse(t->get_type_kind(),help);    
+    }
+    if( isSgTypeString(t) && isSgTypeString(t)->get_lengthExpression() ) {
+      XevAstVisitorInternal visitor(sstr);
+      visitor.traverse(isSgTypeString(t)->get_lengthExpression(),help);    
+    }
 
     help->setLevel(help->getLevel()- 1);
     for(int j(0);j<help->getLevel();j++)
@@ -334,10 +358,11 @@ static SgType* hasType(SgNode* node)
 {
   if(isSgInitializer(node)) 
     return isSgInitializer(node)->get_type();
-  else if (isSgInitializedName(node)) 
+  else if (isSgInitializedName(node))  
     return isSgInitializedName(node)->get_type();
   else if (isSgFunctionDeclaration(node)) 
-    return isSgFunctionDeclaration(node)->get_orig_return_type();
+    //return isSgFunctionDeclaration(node)->get_orig_return_type();
+    return isSgFunctionDeclaration(node)->get_type()->get_return_type();
   else if (isSgCastExp(node)) 
     return isSgCastExp(node)->get_type();
   return 0;
@@ -380,20 +405,28 @@ static void writeInternalNode(stringstream& sstr,
 			      SgNode* n, 
 			      XevConversionHelper* help)
 {
-  if(hasInternalNode(n)==false) return;
+  //if(hasInternalNode(n)==false) return;
 
   XevAstVisitorInternal visitor(sstr);
   if(isSgArrayType(n)) {
     visitor.traverse(isSgArrayType(n)->get_dim_info(),help);
   }
+  /*  deleted (2014.09.28) */
+  // list items will be written when visiting children nodes.
+  // they are not "internal nodes" but children nodes.
+#if 0
   else if(isSgFunctionParameterList(n)){
     SgFunctionParameterList* plst = isSgFunctionParameterList(n);
     SgInitializedNamePtrList& args = plst->get_args();
     // args.size() must be divided by sizeof(void*) ???
     //for(size_t i(0);i<args.size()/sizeof(void*);i++)
-    for(size_t i(0);i<args.size();i++)
+    cerr << "num args " << args.size() << n->class_name() << endl;
+    for(size_t i(0);i<args.size();i++){
+      cerr << args[i]->get_name().getString()  << endl;
       visitor.traverse(args[i],help);
+    }
   }
+#endif
 
   else if(isSgAttributeSpecificationStatement(n)) {
     SgExprListExp* lste = 0;
@@ -435,12 +468,25 @@ static void writeInternalNode(stringstream& sstr,
     SgDataStatementObjectPtrList & lst =
       isSgDataStatementGroup(n)->get_object_list();
     for(size_t i=0;i<lst.size();i++)
-      visitor.traverse(lst[i]->get_variableReference_list(),help);
+      //visitor.traverse(lst[i]->get_variableReference_list(),help);
+      visitor.traverse(lst[i],help);
 
     SgDataStatementValuePtrList & val =
       isSgDataStatementGroup(n)->get_value_list();
-    for(size_t i=0;i<val.size();i++)
-      visitor.traverse(val[i]->get_initializer_list(),help);
+    for(size_t i=0;i<val.size();i++){
+      //visitor.traverse(val[i]->get_initializer_list(),help);
+      visitor.traverse(val[i],help);
+    }
+  }
+  else if(isSgDataStatementObject(n)){ 
+    SgDataStatementObject* obj = isSgDataStatementObject(n);
+    visitor.traverse(obj->get_variableReference_list(),help);
+  }
+  else if(isSgDataStatementValue(n)){ 
+    SgDataStatementValue* v = isSgDataStatementValue(n);
+    visitor.traverse(v->get_initializer_list(),help);
+    visitor.traverse(v->get_repeat_expression(),help);
+    visitor.traverse(v->get_constant_expression(),help);
   }
 
   else if(isSgSizeOfOp(n)){ 

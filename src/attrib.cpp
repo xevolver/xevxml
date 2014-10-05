@@ -68,17 +68,6 @@ DEFINE_VALUE_EXP(SgEnumVal);
 DEFINE_VALUE_AND_STRING(SgCharVal);
 DEFINE_VALUE_AND_STRING(SgWcharVal);
 //DEFINE_VALUE_EXP(SgComplexVal);
-static void attribSgComplexVal(stringstream& istr,SgNode* node)	
-{
-  SgComplexVal* n = isSgComplexVal(node);
-  SgFloatVal*   f;
-  if(n) {
-    f = isSgFloatVal( n->get_real_value() );
-    istr << " real=\"" << f->get_value() << "\" ";
-    f = isSgFloatVal( n->get_imaginary_value() );
-    istr << " imaginary=\"" << f->get_value() << "\" ";
-  }
-}
 DEFINE_VALUE_AND_STRING(SgDoubleVal);
 DEFINE_VALUE_AND_STRING(SgFloatVal);
 DEFINE_VALUE_AND_STRING(SgIntVal);
@@ -130,7 +119,7 @@ static void writeValueAttribs(stringstream& istr,SgNode* node)
   CALL_ATTRIB(SgBoolValExp);
   CALL_ATTRIB(SgCharVal);
   CALL_ATTRIB(SgWcharVal);
-  CALL_ATTRIB(SgComplexVal);
+  //CALL_ATTRIB(SgComplexVal); // deleted (2014.09.25)
   CALL_ATTRIB(SgDoubleVal);
   CALL_ATTRIB(SgFloatVal);
   CALL_ATTRIB(SgIntVal);
@@ -417,6 +406,10 @@ static void attribSgClassDefinition(stringstream& istr,SgNode* node)
       istr << " tag_name=\"\" ";
     else
       istr << " tag_name=" << n->get_declaration()->get_name() << " ";
+
+    istr << " sequence=\"" << n->get_isSequence() << "\" ";
+    istr << " private=\"" << n->get_isPrivate() << "\" ";
+    istr << " abstract=\"" << n->get_isAbstract() << "\" ";
   }
 }
 
@@ -546,7 +539,7 @@ static void attribSgInterfaceBody(stringstream& istr,SgNode* node)
   SgInterfaceBody* n = isSgInterfaceBody(node);
 
   if(n) {
-    if( n->get_use_function_name() )
+    if( n->get_use_function_name() ==false)
       istr << " fnc_name=\"\" ";
     else
       istr << " fnc_name=" << n->get_function_name() << " ";
@@ -794,7 +787,14 @@ static void attribSgConstructorInitializer(stringstream& istr, SgNode* node)
 
 }
 
+static void attribSgDataStatementValue(stringstream& istr, SgNode* node)
+{
+  SgDataStatementValue* n = isSgDataStatementValue(node);
+  if(n){
+    istr << " format=\"" << n->get_data_initialization_format() << "\" ";
+  }
 
+}
 
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     XevXML::XevConversionHelper* help)
@@ -844,8 +844,8 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgContinueStmt(istr,node);
   attribSgIfStmt(istr,node);
   attribSgConstructorInitializer(istr,node);
+  attribSgDataStatementValue(istr,node);
 
   attribSgExpression(istr,node);
-
   return;
 }

@@ -201,28 +201,28 @@ public:
 
   SgNode* visitSgTypedefType(xercesc::DOMNode* node, SgNode* astParent=0);
 
-  SgType* buildModifierType(xercesc::DOMNode* node, SgType* itype);
+  SgType* buildModifierType(xercesc::DOMNode* node, SgType* itype, SgNode* astParent=0);
 
-  SgType* buildType(xercesc::DOMNode* node, SgExpression* ex=0);
+  SgType* buildType(xercesc::DOMNode* node, SgExpression* ex=0, SgNode* astParent=0);
   
   SgNode* visitSgTypeInt(xercesc::DOMNode* node, SgNode* astParent=0)
   {
-    return buildType(node);
+    return buildType(node,0,astParent);
   }
 
   SgNode* visitSgTypeFloat(xercesc::DOMNode* node, SgNode* astParent=0)
   {
-    return buildType(node);
+    return buildType(node,0,astParent);
   }
 
   SgNode* visitSgTypeDouble(xercesc::DOMNode* node, SgNode* astParent=0)
   {
-    return buildType(node);
+    return buildType(node,0,astParent);
   }
 
   SgNode* visitSgModifierType(xercesc::DOMNode* node, SgNode* astParent=0)
   {
-    return buildType(node);
+    return buildType(node,0,astParent);
   }
 
   SgNode* visitSgPointerType(xercesc::DOMNode* node, SgNode* astParent=0);
@@ -230,31 +230,31 @@ public:
 /*
   SgNode* visitSgPointerType(xercesc::DOMNode* node, SgNode* astParent=0)
   {
-    return buildType(node);
+    return buildType(node,0,astParent);
   }
 */
 
-  SgNode* visitSgTypeChar(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeUnsignedChar(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeSignedChar(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
+  SgNode* visitSgTypeChar(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeUnsignedChar(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeSignedChar(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
 
-  SgNode* visitSgTypeShort(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeUnsignedShort(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeSignedShort(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
+  SgNode* visitSgTypeShort(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeUnsignedShort(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeSignedShort(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
 
-  SgNode* visitSgTypeUnsignedInt(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeSignedInt(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
+  SgNode* visitSgTypeUnsignedInt(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeSignedInt(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
 
-  SgNode* visitSgTypeLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeUnsignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeSignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  } 
+  SgNode* visitSgTypeLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeUnsignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeSignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  } 
 
-  SgNode* visitSgTypeLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeUnsignedLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeSignedLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeVoid(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeBool(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
-  SgNode* visitSgTypeLongDouble(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node);  }
+  SgNode* visitSgTypeLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeUnsignedLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeSignedLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeVoid(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeBool(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
+  SgNode* visitSgTypeLongDouble(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
 
 
   SgNode* visitSgLabelStatement(xercesc::DOMNode* node, SgNode* astParent=0);
@@ -323,8 +323,8 @@ public:
   SgNode* visitSgNamelistStatement(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgDerivedTypeStatement(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgComputedGotoStatement(xercesc::DOMNode* node, SgNode* astParent=0);
-  SgNode* visitSgTypeEllipse(xercesc::DOMNode* node, SgNode* astParent=0) {  return buildType(node);  } ;
-  SgNode* visitSgTypeDefault(xercesc::DOMNode* node, SgNode* astParent=0) {  return buildType(node);  } ;
+  SgNode* visitSgTypeEllipse(xercesc::DOMNode* node, SgNode* astParent=0) {  return buildType(node,0,astParent);  } ;
+  SgNode* visitSgTypeDefault(xercesc::DOMNode* node, SgNode* astParent=0) {  return buildType(node,0,astParent);  } ;
   SgNode* visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgVarArgStartOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgVarArgOp(xercesc::DOMNode* node, SgNode* astParent=0);
@@ -341,6 +341,8 @@ public:
   SgNode* visitSgRshiftAssignOp(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgDataStatementObject(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgDataStatementValue (xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent=0);
   SgNode* visitSgConstructorInitializer(xercesc::DOMNode* node, SgNode* astParent=0);
 
@@ -373,6 +375,41 @@ public:
       }
       //cerr << n->unparseToString();
     }
+  }
+};
+
+class VardefSearch 
+{
+  std::string varname;
+public:
+  VardefSearch(const std::string& name):varname(name) {}
+  ~VardefSearch() {}
+
+  SgNode* visit(SgNode* n) {
+    SgNode* ret = NULL;
+    if(n==NULL) return ret;
+
+    SgVariableDeclaration *decl = isSgVariableDeclaration(n);
+    SgVariableDefinition  *def  = isSgVariableDefinition(n);
+    if(def==NULL && decl != NULL ) 
+      def = decl->get_definition();
+    if(def){
+      if(def->get_vardefn()->get_name().getString() == varname )
+	return n;
+    }
+    else if (decl){
+      SgInitializedNamePtrList& lst = decl->get_variables();
+      for(size_t i(0);i<lst.size();++i)
+	if( lst[i]->get_name().getString()  == varname )
+	  return n;
+    }
+    else {
+      for(size_t i(0);i<n->get_numberOfTraversalSuccessors();++i){
+	if ( (ret = this->visit(n->get_traversalSuccessorByIndex(i))) != NULL)
+	  return ret;
+      }
+    }
+    return NULL;
   }
 };
 

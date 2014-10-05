@@ -41,53 +41,61 @@ using namespace std;
 using namespace XevXML;
 
 SgType* 
-XevXmlVisitor::buildModifierType(xe::DOMNode* node, SgType* itype)
+XevXmlVisitor::buildModifierType(xe::DOMNode* node, SgType* itype, SgNode* astParent)
 {
-  xe::DOMNamedNodeMap* amap = node->getAttributes();
-  xe::DOMNode* typatt = 0;
+  SgType* ret;
   string modtype;
   
-  if(amap) {
-    typatt=amap->getNamedItem(xe::XMLString::transcode("modifier"));
-    if(typatt)
-      modtype = xe::XMLString::transcode(typatt->getNodeValue());
-    else 
+  if(XmlGetAttributeValue(node,"modifier",&modtype)==false)
       ABORT();
-  }
+
   if( modtype == "const" ) {
     //return sb::buildConstType(itype);
     SgModifierType *result = new SgModifierType(itype);
     result->get_typeModifier().get_constVolatileModifier().setConst();
-    return result;
+    ret=result;
   }
   else if ( modtype == "volatile" )
-    return sb::buildVolatileType(itype);
+    ret = sb::buildVolatileType(itype);
   else if ( modtype == "restrict" )
-    return sb::buildRestrictType(itype);
+    ret = sb::buildRestrictType(itype);
   else return 0;
+  ret->set_parent(astParent);
+  return ret;
 }
 
 SgType* 
-XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex)
+XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
 {
   SgType* itype = 0;
   SgType* ret = 0;
-
+  SgExpression* kexp = 0;
+  //SgExpression* lexp = 0;
   if(node==0) return ret;
-  
+  int kind=0, len=0;
+
+  XmlGetAttributeValue(node,"type_kind",&kind);
+  //XmlGetAttributeValue(node,"lengthExpression",&len);
+
   // reverse order
   xe::DOMNode* child=node->getLastChild();
+  //xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       if(itype==0)
         itype = buildType(child,ex);
+
+      if(kind && kexp==0){
+	SgNode* astchild = this->visit(child); 
+	kexp = isSgExpression(astchild);
+      }
     }
     child=child->getPreviousSibling();
+    //child=child->getNextSibling();
   } 
   
   string name = xe::XMLString::transcode(node->getNodeName());
-  
-  
+
   if(name=="SgTypeBool")
     ret = sb::buildBoolType();
   else if(name=="SgTypeChar")
@@ -150,15 +158,14 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex)
   }
   else if (name=="SgModifierType") {
     if(itype) {
-      ret = buildModifierType(node,itype);
+      ret = buildModifierType(node,itype,astParent);
     }
     else {
       itype = sb::buildIntType();
-      ret = buildModifierType( node,itype );
+      ret = buildModifierType( node,itype, astParent );
     }
     //else ABORT();
   }
-
   else if (name=="SgClassType") {
     ret = isSgType( this->visit(node,ret) );
   }
@@ -168,7 +175,15 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex)
   else if (name=="SgTypeDefault") {
     ret = new SgTypeDefault();
   }
-
+  else {
+    return NULL;
+  }
+  if(itype) itype->set_parent(ret);
+  if(kind && kexp) {
+    ret->set_type_kind(kexp);
+    kexp->set_parent(ret);
+  }
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -177,18 +192,42 @@ SgNode*
 XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeString* ret = 0;
-  
-  xe::DOMNamedNodeMap* amap = node->getAttributes();
-  xe::DOMNode* nameatt = 0;
-  string length;
-  
+  int len=0,kind=0;
+  SgExpression *kexp=0,*lexp=0;
+  XmlGetAttributeValue(node,"type_kind",&kind);
+  XmlGetAttributeValue(node,"lengthExpression",&len);
+
+  xercesc::DOMNode* cld_ = (node)->getFirstChild();
+  while(cld_) {								
+    if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){		
+      SgNode* astchild = this->visit(cld_);
+      if(kind && kexp==0){
+	kexp = isSgExpression(astchild);
+      }
+      else if(len && lexp==0){
+	lexp = isSgExpression(astchild);
+      }
+      
+    }
+    cld_=cld_->getNextSibling();
+  }
+
+  if(lexp){
+    ret = sb::buildStringType( lexp );
+  }
+  else{
+    lexp
+      = new SgAsteriskShapeExp(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
+    ret = sb::buildStringType( lexp );
+  }
+  lexp->set_parent(ret);
+  /*
   if(amap) {
     nameatt=amap->getNamedItem(xe::XMLString::transcode("len"));
     if(nameatt) {
       length = xe::XMLString::transcode(nameatt->getNodeValue());
     }
   }
-  
   if( length.size() ){
     int ival = atoi(length.c_str());
     Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
@@ -201,8 +240,12 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
       = new SgAsteriskShapeExp(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
     ret = sb::buildStringType( (SgExpression*)ast );
   }
-
+  */
   if(ret==0) ABORT();
+  if(kind&&kexp){
+    ret->set_type_kind(kexp);
+    kexp->set_parent(ret);
+  }
   ret->set_parent(astParent);
   return ret;
 }
@@ -219,27 +262,15 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
   SgPointerType*          ptr = 0;
   SgPointerType*          ptrtyp = 0;
  
-  xe::DOMNamedNodeMap*    amap = node->getAttributes();
-  xe::DOMNode*            nameatt = 0;
+  //xe::DOMNamedNodeMap*    amap = node->getAttributes();
+  //xe::DOMNode*            nameatt = 0;
   string                  str1,str2;
   int                     rnk=0;
   unsigned long           idx=0;
 
-  if(amap) {
-    nameatt=amap->getNamedItem(xe::XMLString::transcode("rank"));
-    if(nameatt) {
-      str1 = xe::XMLString::transcode(nameatt->getNodeValue());
-      rnk = atoi( str1.c_str() );
-    }
-    nameatt=amap->getNamedItem(xe::XMLString::transcode("index"));
-    if(nameatt) {
-      str2 = xe::XMLString::transcode(nameatt->getNodeValue());
-      if( str2.size() )
-	idx = strtoul( str2.c_str(),0,0 );
-    }
-  }
-  else ABORT();
-
+  XmlGetAttributeValue(node,"rank",&rnk);
+  if(XmlGetAttributeValue(node,"index",&str2))
+    idx = strtoul( str2.c_str(),0,0 );
 
   if( rnk == 0 ) {
     xe::DOMNode* child=node->getFirstChild();
@@ -276,14 +307,13 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     xe::DOMNode*                    child=node->getFirstChild();
     SgExprListExp*                  lst;
     std::vector< SgExpression * >   exprs;
-    
+
     while(child){
       if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
 	SgNode* astchild = this->visit(child,ret);
-	
-	if( typ==0 )
+	if(typ==0) 
 	  typ = isSgType(astchild);
-
+	
 	if((exp = isSgExpression(astchild))!=0){
 	  exp->set_startOfConstruct(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
 	  exprs.push_back(exp);
@@ -309,7 +339,6 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
       ret->set_dim_info( lst );
     }
   }
-
   ret->set_parent(astParent);
   return ret;
 }
