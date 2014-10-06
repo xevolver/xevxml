@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.63])
 AC_INIT(xevxml, 0.1.0, tacky@isc.tohoku.ac.jp)
 AC_CONFIG_SRCDIR([src/common.hpp])
 AC_CONFIG_HEADERS([src/config.h])
@@ -99,7 +99,7 @@ XALANC_DIR=$withval
 ])
 
 CPPFLAGS="${CPPFLAGS} ${XERCESC_CFLAGS} -I${XALANC_DIR}/include"
-LDFLAGS="${LDFLAGS} ${XERCESC_LIBS} -L{XALANC_DIR}/lib -lxalan-c"
+LDFLAGS="${LDFLAGS} ${XERCESC_LIBS} -L${XALANC_DIR}/lib -lxalan-c"
 AC_LANG_PUSH([C++])
 AC_MSG_CHECKING(for Xalan-C library)
 AC_CACHE_VAL(ac_cv_libxalanc,
