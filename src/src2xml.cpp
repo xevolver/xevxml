@@ -107,13 +107,17 @@ int main(int argc, char** argv)
   stringstream    xmlString1;
   SgProject*      sageProject=0;
   //xevxml::Ast2XmlOpt opt;
+  vector<string> args;
+
+  for(int id(0);id<argc;++id)
+    args.push_back( string(argv[id]) );
+  args.push_back( string("-rose:skip_syntax_check")); // some Fortran codes need this
 
   fd = dup(fileno(stdout)); 
   dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr  
-  //SgProject::set_verbose(10);
-  //sageProject = frontend(cmdopt(argc,argv,&opt));
-  sageProject = frontend(argc,argv);
 
+  sageProject = frontend(args); // build an ROSE AST from a code
+  //SgProject::set_verbose(10);
   
 #ifdef XEV_USE_ROSEHPCT
   if(opt.rosehpct)

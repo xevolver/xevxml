@@ -434,9 +434,28 @@ XevXmlVisitor::checkFunctDecl(xe::DOMNode* node, SgNode* astNode)
 {
   SgFunctionDeclaration* decl = isSgFunctionDeclaration(astNode);
   int enf=0;
+  string storage;
+  if(decl==0) return;
 
-  if(decl && XmlGetAttributeValue(node,"end_name",&enf))
+  if(XmlGetAttributeValue(node,"end_name",&enf))
     decl->set_named_in_end_statement(enf);
+  XmlGetAttributeValue(node,"modifier",&storage);  
+
+  if(storage=="unknown")
+    ((decl->get_declarationModifier()).get_storageModifier()).setUnknown();
+  else if(storage=="static")
+    ((decl->get_declarationModifier()).get_storageModifier()).setStatic();
+  else if(storage=="extern")
+    ((decl->get_declarationModifier()).get_storageModifier()).setExtern();
+  else if(storage=="auto")
+    ((decl->get_declarationModifier()).get_storageModifier()).setAuto();
+  else if(storage=="register")
+    ((decl->get_declarationModifier()).get_storageModifier()).setRegister();
+  else if(storage=="typedef")
+    ((decl->get_declarationModifier()).get_storageModifier()).setTypedef();
+  else 
+    ((decl->get_declarationModifier()).get_storageModifier()).setDefault();
+  
 }
 
 
@@ -753,8 +772,8 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgBasicBlock*            def = 0;
   SgType*                  typ = 0;
 
-  string storage,name;
-  XmlGetAttributeValue(node,"modifier",&storage);
+  string name;
+
   if( XmlGetAttributeValue(node,"name",&name) == false )
     ABORT();
 
@@ -780,24 +799,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   else ABORT();
   ret->set_parent(astParent);
   lst->set_parent(ret);
-  if(def) def->set_parent(ret);
 
-
-  if(storage=="unknown")
-    ((ret->get_declarationModifier()).get_storageModifier()).setUnknown();
-  else if(storage=="static")
-    ((ret->get_declarationModifier()).get_storageModifier()).setStatic();
-  else if(storage=="extern")
-    ((ret->get_declarationModifier()).get_storageModifier()).setExtern();
-  else if(storage=="auto")
-    ((ret->get_declarationModifier()).get_storageModifier()).setAuto();
-  else if(storage=="register")
-    ((ret->get_declarationModifier()).get_storageModifier()).setRegister();
-  else if(storage=="typedef")
-    ((ret->get_declarationModifier()).get_storageModifier()).setTypedef();
-  else 
-    ((ret->get_declarationModifier()).get_storageModifier()).setDefault();
-    
   if( def == 0 ) {
     Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
     info->setOutputInCodeGeneration();
@@ -806,8 +808,10 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     def->set_parent(ret);
     ret->get_declarationModifier().get_storageModifier().setExtern();
   }
-  else
+  else{
+    def->set_parent(ret);
     si::replaceStatement(ret->get_definition()->get_body(),def,true);
+  }
   return ret;
 }
 
