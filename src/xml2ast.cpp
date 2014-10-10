@@ -1397,6 +1397,11 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
     ABORT();
   ret->set_parent(astParent);
   //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() << endl;
+
+  if(ret->get_symbol()->get_declaration()==0){
+    //ABORT();
+    buildImplicitVariableDeclaration(ret->get_symbol()->get_name());
+  }
   return ret;
 }
 
@@ -1718,7 +1723,7 @@ SgNode*
 XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgExprListExp*                ret = 0;
-  SgExpression*                 exp  = 0;
+  SgExpression*                 exp = 0;
   std::vector< SgExpression * > exprs;
 
   ret = sb::buildExprListExp( exprs );
@@ -1726,8 +1731,9 @@ XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_BEGIN(node,astchild,ret) 
     {
       if((exp = isSgExpression(astchild))!=0) {
+	exp->set_parent(ret);
 	ret->append_expression(exp);
-        }
+      }
     }
   SUBTREE_VISIT_END();
  
@@ -2730,35 +2736,45 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
   string name;
 
   XmlGetAttributeValue(node,"name",&name);
-
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret = sb::buildCommonBlockObject( name);
+  sb::pushScopeStack(sb::topScopeStack());
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( para==0 )
         para = isSgExprListExp(astchild);
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildCommonBlockObject( name, para );
+  if(para==0)ABORT();
+  ret->set_variable_reference_list(para);
   para ->set_parent(ret);
+  ret->set_parent(astParent);
 
+  sb::popScopeStack();
   return ret;
 }
 
 SgNode* 
 XevXmlVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgCommonBlock*        ret=0;
+  SgCommonBlock*        ret=sb::buildCommonBlock();
   SgCommonBlockObject*  obj=0;
+  SgCommonBlockObjectPtrList lst;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( obj==0 )
-        obj = isSgCommonBlockObject(astchild);
+      obj = isSgCommonBlockObject(astchild);
+      if(obj){
+	lst.push_back(obj);
+      }
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildCommonBlock( obj );
-  obj->set_parent(ret);
+  for (size_t i = 0;i<lst.size(); ++i){
+    ret->get_block_list().push_back(lst[i]);
+    lst[i]->set_parent(ret);
+  }
+  ret->set_parent(astParent);
 
   return ret;
 }
