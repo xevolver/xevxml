@@ -413,6 +413,32 @@ public:
   }
 };
 
+class PrintSymTable
+{
+public:
+  PrintSymTable(){}
+  ~PrintSymTable(){}
+
+  SgNode* visit(SgNode* n) {
+    //SgNode* ret = NULL;
+    SgScopeStatement* scope = isSgScopeStatement(n);
+    if(scope){
+      SgSymbolTable* tbl = scope->get_symbol_table();
+      if(tbl==0) ABORT();
+      printf("\n Symbol table of %s (parent=%s)\n", 
+	     n->class_name().c_str(),n->get_parent()->class_name().c_str());
+      printf("=== BEGIN ====\n");
+      tbl->print();
+      printf("===  END  ====\n");
+    }
+    for(size_t i(0);i<n->get_numberOfTraversalSuccessors();++i){
+      if(n->get_traversalSuccessorByIndex(i))
+	this->visit(n->get_traversalSuccessorByIndex(i));
+    }
+    return NULL;
+  }
+};
+
 }
 
 #endif

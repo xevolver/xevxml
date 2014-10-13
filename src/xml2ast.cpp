@@ -83,6 +83,7 @@ TraverseXercesDOMDocument(stringstream& tr, SgProject** prj, XevXML::XevConversi
     XevXML::OrphanTest test;
     test.traverse(&(*prj)->get_file(0),preorder);
 #endif
+    
     //AstTests::runAllTests(*prj);
   }
   catch(...) {
@@ -432,8 +433,10 @@ XevXmlVisitor::checkStatement(xe::DOMNode* node, SgNode* astNode)
     stmt->set_numeric_label(l);
     l->set_parent(stmt);
   }
-  if(isSgScopeStatement(stmt) && si::is_Fortran_language())
-    isSgScopeStatement(stmt)->setCaseInsensitive(true);
+  if(isSgScopeStatement(stmt) ) {
+    if(si::is_Fortran_language())
+      isSgScopeStatement(stmt)->setCaseInsensitive(true);
+  }
 }
 
 void 
@@ -580,6 +583,10 @@ XevXmlVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 
   sb::popScopeStack();
 
+  /* prtine all symbol tables  for debugging */
+  PrintSymTable test;
+  test.visit(ret);
+  
   return ret;
 }
   
@@ -676,10 +683,14 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 					 name->get_initializer());
 
     if(ret==0) ABORT();
-    if( varList.size() > 0 )  // this must be true
+    if( varList.size() > 0 && si::is_Fortran_language() ) 
+      // NOTE: in the case of Fortran, append_statement does not work? 
+      // So this is necessary to define the second variable and later.
       ret->get_variables() = varList;
     for(size_t i(0);i<varList.size();i++){
       //cerr << varList[i]->get_name() << ":" << varList[i]->get_type()->class_name() <<endl;
+      if(i>0 && si::is_Fortran_language() == false )
+	ret->append_variable(varList[i],varList[i]->get_initializer());
       varList[i]->set_parent(ret);
       varList[i]->set_declptr(ret);
     }
@@ -690,6 +701,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   // See buildVariableDeclaration
   if (ret->get_scope() && si::is_Fortran_language()){
     SgFunctionDefinition * f_def = si::getEnclosingProcedure (ret->get_scope());
+    /* variables in a function parameter list are moved? */
     if (f_def != NULL){
       SgSymbolTable * st = f_def->get_symbol_table();
       SgVariableSymbol * v_symbol = st->find_variable(name->get_name());
@@ -698,7 +710,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 	SgInitializedName * new_initName = v_symbol->get_declaration();
 	SgInitializedNamePtrList&  n_list= ret->get_variables();
 	std::replace (n_list.begin(), n_list.end(),default_initName, new_initName );
-	    
+	
 	SgNode * old_parent = new_initName->get_parent();
 	if(old_parent==0 || isSgFunctionParameterList(old_parent)==0) ABORT();
 	new_initName->set_parent(ret); 
@@ -855,7 +867,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
 	lst = isSgFunctionParameterList(astchild);
       if(fdf==0)
 	fdf = isSgFunctionDefinition(astchild);
-      if(def==0) // for block data
+      if(kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind && def==0) // for block data
 	def = isSgBasicBlock(astchild);
     }
   SUBTREE_VISIT_END();
@@ -874,7 +886,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
 	info->setOutputInCodeGeneration();
 	fdf = new SgFunctionDefinition( info,def );
 	ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf );
-	def->set_parent(def);
+	def->set_parent(fdf);
 	fdf->set_parent(ret);
 	ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
       }
@@ -890,6 +902,8 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   if(fdf){
     //si::replaceStatement( ret->get_definition()->get_body(),def,true );
     ret->set_definition(fdf);
+    fdf->set_declaration(ret);
+    fdf->set_parent(ret);
     if(rname.size()){
       VardefSearch search(rname);
       SgDeclarationStatement* vardecl = isSgVariableDeclaration(search.visit(fdf));
@@ -915,6 +929,8 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
       }
     }
   }
+  else ABORT();
+
   if(f_pure)
     ret->get_functionModifier().setPure();
   if(f_elem)
@@ -948,11 +964,14 @@ SgNode*
 XevXmlVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
   SgBasicBlock* ret = sb::buildBasicBlock();
-  SgScopeStatement* scope = sb::topScopeStack();
+  //SgScopeStatement* scope = sb::topScopeStack();
   ret->set_parent(astParent);
-  sb::pushScopeStack(scope);
+  if(si::is_Fortran_language()==false)
+    sb::pushScopeStack(ret);
+  //sb::pushScopeStack(sb::topScopeStack());
   traverseStatementsAndTexts(this, node,ret);
-  sb::popScopeStack();
+  if(si::is_Fortran_language()==false)
+    sb::popScopeStack();
   return ret;
 }
 
@@ -1522,7 +1541,7 @@ XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
   info->setOutputInCodeGeneration();
   SgFunctionDefinition* ret 
     = new SgFunctionDefinition(info);
-
+  ret->set_parent(astParent);
   sb::pushScopeStack(ret);
   if(si::is_Fortran_language())
     ret->setCaseInsensitive(true);
@@ -2142,7 +2161,8 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   SUBTREE_VISIT_END();
 
   ret->set_definition( exp );
-
+  if(exp)
+    exp->set_declaration(ret);
   return ret;
 }
 
@@ -2160,6 +2180,11 @@ XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"private",&pri);
   XmlGetAttributeValue(node,"abstract",&abs);
   ret = sb::buildClassDefinition( dec );
+  ret->set_parent(astParent);
+  sb::pushScopeStack(ret);
+  if(si::is_Fortran_language())
+    ret->setCaseInsensitive(true);
+
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       fld = isSgDeclarationStatement(astchild);
@@ -2169,6 +2194,7 @@ XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
       }
     }
   SUBTREE_VISIT_END();
+  sb::popScopeStack();
   if(seq)
     ret->set_isSequence(seq);
   if(pri)
@@ -3210,7 +3236,7 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgWhereStatement* ret =  
     new SgWhereStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
-    
+  ret->set_parent(astParent);    
   SgExpression*         cond = 0;
   SgBasicBlock*         body = 0;
   SgElseWhereStatement* elsw = 0;
@@ -3231,7 +3257,7 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_body( body );
   ret->set_elsewhere( elsw );
   ret->set_has_end_statement(true);
-  ret->set_parent(astParent);
+
   return ret;
 }
 
