@@ -5,6 +5,8 @@ SRC2XML=../src/src2xml
 XML2SRC=../src/xml2src
 ROSECOMP=roseCompiler
 
+export XEV_ENCODE="EUC-JP" # for testing h024.f90
+
 if [ $# -ne 1 ]; then
     echo "USAGE: testXevXml.sh test.f90"
     exit 1
@@ -19,13 +21,13 @@ case ${SRC} in
 	XML=`echo $SRC |sed 's/.f90$/.xml/'`
 	DIF=`echo $SRC |sed 's/.f90$/.dif/'`
 	LOG=`echo $SRC |sed 's/.f90$/.log/'`
-	echo -n "\" ." 1>&2
+	echo -n "\" r" 1>&2
 	;;
     *.c)
 	XML=`echo $SRC |sed 's/.c$/.xml/'`
 	DIF=`echo $SRC |sed 's/.c$/.dif/'`
 	LOG=`echo $SRC |sed 's/.c$/.log/'`
-	echo -n "\"   ." 1>&2
+	echo -n "\"   r" 1>&2
 	;;
 esac
 
@@ -34,15 +36,15 @@ esac
 ${FC} -c $SRC 2>$LOG
 if [ $? -eq 0 ]
 then 
-    echo -n "." 1>&2
+    echo -n "s" 1>&2
     ${SRC2XML} $SRC 1> $XML 2>> $LOG
     if [ $? -eq 0 ]
     then 
-	echo -n "." 1>&2
+	echo -n "x" 1>&2
 	${XML2SRC} xev_$SRC < $XML  2>> $LOG
 	if [ $? -eq 0 ]
 	then 
-	    echo -n "." 1>&2
+	    echo -n "d" 1>&2
 	    diff rose_$SRC xev_$SRC > $DIF 
 	    if [ $? -eq 0 ]; 
 	    then 

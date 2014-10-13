@@ -466,8 +466,8 @@ XevXmlVisitor::checkFunctDecl(xe::DOMNode* node, SgNode* astNode)
   else 
     ((decl->get_declarationModifier()).get_storageModifier()).setDefault();
   
-  if(decl->get_definition() == 0 ) ABORT();
-  decl->get_definition()->set_declaration(decl);
+  if(decl->get_definition())
+    decl->get_definition()->set_declaration(decl);
 }
 
 
@@ -683,6 +683,11 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 					 name->get_initializer());
 
     if(ret==0) ABORT();
+    ret->set_parent(astParent);
+    ret->set_definingDeclaration(ret);
+    // see buildVariableDeclaration in fortran_support.C 
+    ret->set_variableDeclarationContainsBaseTypeDefiningDeclaration(false);
+
     if( varList.size() > 0 && si::is_Fortran_language() ) 
       // NOTE: in the case of Fortran, append_statement does not work? 
       // So this is necessary to define the second variable and later.
@@ -851,14 +856,14 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   bool                            f_pure  = false;
   bool                            f_elem  = false;
   bool                            f_recur = false;
-
+  
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"subprogram_kind",&kind);
   XmlGetAttributeValue(node,"result_name",&rname);
   XmlGetAttributeValue(node,"recursive",&f_recur);
   XmlGetAttributeValue(node,"pure",&f_pure);
   XmlGetAttributeValue(node,"elemental",&f_elem);
-
+  
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if(typ==0)
@@ -878,59 +883,48 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
       ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
 					       (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
     }
-    else
-      {
-	// add (block data) 0828
-	SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
-	Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
-	info->setOutputInCodeGeneration();
-	fdf = new SgFunctionDefinition( info,def );
-	ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf );
-	def->set_parent(fdf);
-	fdf->set_parent(ret);
-	ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
-      }
+    else {
+      // add (block data) 0828
+      SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
+      Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+      info->setOutputInCodeGeneration();
+      fdf = new SgFunctionDefinition( info,def );
+      ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf );
+      def->set_parent(fdf);
+      fdf->set_parent(ret);
+      ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
+    }
   }
   else ABORT();
-
-  if(rname.size()){
-    SgInitializedName* in = sb::buildInitializedName(rname,typ);
-    in->set_parent(ret);
-    in->set_type(ret->get_type()->get_return_type());
-    ret->set_result_name(in);
-  }
+  
   if(fdf){
     //si::replaceStatement( ret->get_definition()->get_body(),def,true );
     ret->set_definition(fdf);
     fdf->set_declaration(ret);
     fdf->set_parent(ret);
-    if(rname.size()){
-      VardefSearch search(rname);
-      SgDeclarationStatement* vardecl = isSgVariableDeclaration(search.visit(fdf));
-      if(vardecl){
-	ret->get_result_name()->set_definition(isSgDeclarationStatement(vardecl));
+    if(rname.size()) {
+      SgSymbolTable* tbl = fdf->get_symbol_table();
+      SgVariableSymbol* sym = tbl->find_variable( SgName(rname) );
+      SgInitializedName* ini =  0;
+      if(sym &&  sym->get_declaration() ){
+        ini = sym->get_declaration();
+	ret->get_result_name()->set_definition(ini->get_declaration());
       }
       else {
-	WARN("TODO: not implemented yet?");
-#if 0
-	SgType* itype = generateImplicitType(rname);
-	/*
-	vardecl
-	  = new SgVariableDeclaration(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
-	SgInitializedName* iname = new SgInitializedName(vardecl->get_file_info(),
-							 SgName(rname.c_str()), itype, NULL, vardecl,
-							 sb::topScopeStack(), NULL);
-	isSgVariableDeclaration(vardecl)->get_variables().push_back(iname);
-	ret->get_result_name()->set_definition(vardecl);
-	*/
-	ret->get_result_name()->set_scope(fdf);
-	ret->get_result_name()->set_type(itype);
-#endif
+        ini = sb::buildInitializedName(rname,typ);
+	ini->set_parent(ret);
+	ini->set_type(ret->get_type()->get_return_type());
+	ret->set_result_name(ini);
+	
+	ini->set_scope(fdf);
+	sym = new SgVariableSymbol(ini);
+	fdf->insert_symbol(ini->get_name(),sym);
+	//WARN("TODO: not implemented yet?");
       }
     }
   }
   else ABORT();
-
+  
   if(f_pure)
     ret->get_functionModifier().setPure();
   if(f_elem)
@@ -938,7 +932,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   if(f_recur)
     ret->get_functionModifier().setRecursive();
   ret->set_parent(astParent);
-
+  
   return ret;
 }
 
@@ -966,12 +960,12 @@ XevXmlVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
   SgBasicBlock* ret = sb::buildBasicBlock();
   //SgScopeStatement* scope = sb::topScopeStack();
   ret->set_parent(astParent);
-  if(si::is_Fortran_language()==false)
-    sb::pushScopeStack(ret);
+  //if(si::is_Fortran_language()==false)
+  sb::pushScopeStack(ret);
   //sb::pushScopeStack(sb::topScopeStack());
   traverseStatementsAndTexts(this, node,ret);
-  if(si::is_Fortran_language()==false)
-    sb::popScopeStack();
+  //if(si::is_Fortran_language()==false)
+  sb::popScopeStack();
   return ret;
 }
 
@@ -1445,11 +1439,22 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
     ABORT();
   ret->set_parent(astParent);
   //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() << endl;
-
-  if(ret->get_symbol()->get_declaration()==0){
-    ABORT(); // TODO
-    //buildImplicitVariableDeclaration(ret->get_symbol()->get_name());
+#if 0
+  if(ret->get_symbol()->get_declaration()==0 
+     || ret->get_symbol()->get_declaration()->get_declptr()==0){
+    // Implicit variable found 
+    SgInitializedName* ini = isSgInitializedName(ret->get_symbol()->get_declaration());
+    SgVariableDeclaration* decl 
+      = sb::buildVariableDeclaration(name,generateImplicitType(name),NULL,sb::topScopeStack());
+    decl->set_parent(sb::topScopeStack());
+    decl->set_definingDeclaration(decl);
+    if(ini==0) ABORT();
+    //ini->set_declptr(decl);
+    //ini->set_definition(decl);
+    ini->set_parent(decl);
+    // buildImplicitVariableDeclaration(ret->get_symbol()->get_name());
   }
+#endif
   return ret;
 }
 
@@ -1787,17 +1792,17 @@ XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
   std::vector< SgExpression * > exprs;
 
   ret = sb::buildExprListExp( exprs );
-
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret) 
     {
       if((exp = isSgExpression(astchild))!=0) {
 	exp->set_parent(ret);
+	exp->set_startOfConstruct(Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
 	ret->append_expression(exp);
       }
     }
   SUBTREE_VISIT_END();
  
-  ret->set_parent(astParent);
   return ret;
 }
 
@@ -2807,8 +2812,9 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
   string name;
 
   XmlGetAttributeValue(node,"name",&name);
-  ret = sb::buildCommonBlockObject( name);
-  sb::pushScopeStack(sb::topScopeStack());
+  ret = sb::buildCommonBlockObject(name);
+  // get global scope??
+  //sb::pushScopeStack(_file->get_globalScope());
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( para==0 )
@@ -2816,12 +2822,37 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
     }
   SUBTREE_VISIT_END();
 
-  if(para==0)ABORT();
+  if(para==0) ABORT();
   ret->set_variable_reference_list(para);
-  para ->set_parent(ret);
+  para->set_parent(ret);
   ret->set_parent(astParent);
-
-  sb::popScopeStack();
+#if 0
+  for(size_t i(0);i< para->get_numberOfTraversalSuccessors();++i){
+    SgVarRefExp* vref = isSgVarRefExp(para->get_traversalSuccessorByIndex(i));
+    cerr << vref << "--------------------- " << i << endl;
+    if(vref){
+      //cerr << vref->get_symbol()->get_name().getString() << endl;
+      SgVariableSymbol* vsym = isSgVariableSymbol(vref->get_symbol());
+      SgInitializedName* ini = isSgInitializedName(vsym->get_declaration());
+      if(vsym==0) ABORT();
+      if(ini==0) ABORT();
+      if(ini->get_declptr()==0 ){
+	Sg_File_Info* info
+	  = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+	SgScopeStatement* scope = _file->get_globalScope();
+	SgVariableDeclaration* decl  
+	  = new SgVariableDeclaration(info,ini->get_name(),ini->get_type());
+	SgInitializedName* newini = *(decl->get_variables().begin());
+	newini->set_declptr(decl);
+	vsym->set_declaration(newini);
+	//ini->set_declptr(decl);
+	//ini->set_declaration(decl);
+	//ini->set_scope(scope);
+      }
+    }
+  }
+#endif
+  //sb::popScopeStack();
   return ret;
 }
 

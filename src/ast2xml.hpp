@@ -35,6 +35,7 @@
 
 
 #define XEV_PRAGMA_PREFIX "!$xev"
+#define XEV_ENCODE "XEV_ENCODE"
 
 namespace XevXML {
 
@@ -73,7 +74,11 @@ class XevAstVisitor:public XevAstVisitorInternal
 {
 public:
   XevAstVisitor(std::stringstream& s): XevAstVisitorInternal(s){
-    sstr_ << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+    char* enc = getenv(XEV_ENCODE);
+    if(enc==0)
+      sstr_ << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+    else
+      sstr_ << "<?xml version=\"1.0\" encoding=\""<< enc << "\"?>" << std::endl;
   }
   ~XevAstVisitor() {}
 protected:
