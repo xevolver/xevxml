@@ -268,7 +268,7 @@ static void attribSgProcedureHeaderStatement(stringstream& istr,SgNode* node)
   SgProcedureHeaderStatement* n = isSgProcedureHeaderStatement(node);
   if(n) {
     istr << " subprogram_kind=\"" << n->get_subprogram_kind () << "\" ";
-    if(n->get_result_name())
+    if(n->get_result_name()->get_name() != n->get_name())
       istr << " result_name=\"" << n->get_result_name()->get_name().getString() << "\" ";
     if(n->get_functionModifier().isPure())
       istr << " pure=\"1\"";
@@ -762,8 +762,12 @@ static void attribSgContinueStmt(stringstream& istr,SgNode* node)
 static void attribSgExpression(stringstream& istr,SgNode* node)
 {
   SgExpression*  n = isSgExpression(node);  
-  if(n && n->get_need_paren())
+  if(n==0)return;
+
+  if(n->get_need_paren())
     istr << " paren=\"" << n->get_need_paren() << "\"";
+  if(n->get_lvalue())
+    istr << " lvalue=\"" << n->get_lvalue() << "\"";
 }
 
 static void attribSgIfStmt(stringstream& istr,SgNode* node)

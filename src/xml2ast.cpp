@@ -83,7 +83,7 @@ TraverseXercesDOMDocument(stringstream& tr, SgProject** prj, XevXML::XevConversi
     XevXML::OrphanTest test;
     test.traverse(&(*prj)->get_file(0),preorder);
 #endif
-    //AstTests::runAllTests(prj);
+    //AstTests::runAllTests(*prj);
   }
   catch(...) {
     return false;
@@ -402,9 +402,12 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
 {
   SgExpression* e = isSgExpression(astNode);
   int parenf=0;
+  int lvalf=0;
 
   if(e && XmlGetAttributeValue(node,"paren",&parenf)) // probably paren="1"
     e->set_need_paren(parenf);
+  if(e && XmlGetAttributeValue(node,"lvalue",&lvalf)) // probably lvalue="1"
+    e->set_lvalue(lvalf);
 }
 
 void 
@@ -415,11 +418,13 @@ XevXmlVisitor::checkStatement(xe::DOMNode* node, SgNode* astNode)
   if(stmt && XmlGetAttributeValue(node,"s_nlabel",&ino)) {
     SgNode* astParent = astNode->get_parent();
     SgLabelSymbol*  s = new SgLabelSymbol();
+    s->set_parent(stmt);
     if(astParent == 0) {
       cerr << astNode->class_name() << " does not have parent node." << endl;
       ABORT();
     }
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()));
+    s->get_fortran_statement()->set_parent(s);
     //s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
     s->set_label_type(SgLabelSymbol::e_start_label_type);
     s->set_numeric_label_value( ino );
@@ -427,6 +432,8 @@ XevXmlVisitor::checkStatement(xe::DOMNode* node, SgNode* astNode)
     stmt->set_numeric_label(l);
     l->set_parent(stmt);
   }
+  if(isSgScopeStatement(stmt) && si::is_Fortran_language())
+    isSgScopeStatement(stmt)->setCaseInsensitive(true);
 }
 
 void 
@@ -456,6 +463,8 @@ XevXmlVisitor::checkFunctDecl(xe::DOMNode* node, SgNode* astNode)
   else 
     ((decl->get_declarationModifier()).get_storageModifier()).setDefault();
   
+  if(decl->get_definition() == 0 ) ABORT();
+  decl->get_definition()->set_declaration(decl);
 }
 
 
@@ -562,6 +571,8 @@ XevXmlVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(_file);
   Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
   ret->set_file_info(info);
+  if(si::is_Fortran_language())
+    ret->setCaseInsensitive(true);
 
   sb::pushScopeStack(ret);
 
@@ -670,6 +681,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     for(size_t i(0);i<varList.size();i++){
       //cerr << varList[i]->get_name() << ":" << varList[i]->get_type()->class_name() <<endl;
       varList[i]->set_parent(ret);
+      varList[i]->set_declptr(ret);
     }
   }
   else ABORT();
@@ -768,8 +780,8 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgFunctionDeclaration*   ret = 0;
   SgFunctionParameterList* lst = 0;
-  //SgFunctionDefinition*    def = 0;
-  SgBasicBlock*            def = 0;
+  SgFunctionDefinition*    def = 0;
+  //SgBasicBlock*            def = 0;
   SgType*                  typ = 0;
 
   string name;
@@ -782,7 +794,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
       if(lst==0)
 	lst = isSgFunctionParameterList(astchild);
       if(def==0)
-	def = isSgBasicBlock(astchild);
+	def = isSgFunctionDefinition(astchild);
       if(typ==0)
 	typ = isSgType(astchild);
     }
@@ -797,21 +809,17 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 	= sb::buildNondefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
   }
   else ABORT();
-  ret->set_parent(astParent);
-  lst->set_parent(ret);
 
   if( def == 0 ) {
     Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
     info->setOutputInCodeGeneration();
-    SgFunctionDefinition* def = new SgFunctionDefinition(info);
-    ret->set_definition( def );
-    def->set_parent(ret);
+    def = new SgFunctionDefinition(info);
     ret->get_declarationModifier().get_storageModifier().setExtern();
   }
-  else{
-    def->set_parent(ret);
-    si::replaceStatement(ret->get_definition()->get_body(),def,true);
-  }
+  lst->set_parent(ret);
+  def->set_parent(ret);
+  ret->set_definition(def);
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -847,7 +855,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
 	lst = isSgFunctionParameterList(astchild);
       if(fdf==0)
 	fdf = isSgFunctionDefinition(astchild);
-      if(def==0)
+      if(def==0) // for block data
 	def = isSgBasicBlock(astchild);
     }
   SUBTREE_VISIT_END();
@@ -866,6 +874,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
 	info->setOutputInCodeGeneration();
 	fdf = new SgFunctionDefinition( info,def );
 	ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf );
+	def->set_parent(def);
 	fdf->set_parent(ret);
 	ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
       }
@@ -878,13 +887,31 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     in->set_type(ret->get_type()->get_return_type());
     ret->set_result_name(in);
   }
-  if(def){
-    si::replaceStatement( ret->get_definition()->get_body(),def,true );
+  if(fdf){
+    //si::replaceStatement( ret->get_definition()->get_body(),def,true );
+    ret->set_definition(fdf);
     if(rname.size()){
       VardefSearch search(rname);
-      SgDeclarationStatement* vardecl = isSgVariableDeclaration(search.visit(def));
+      SgDeclarationStatement* vardecl = isSgVariableDeclaration(search.visit(fdf));
       if(vardecl){
 	ret->get_result_name()->set_definition(isSgDeclarationStatement(vardecl));
+      }
+      else {
+	WARN("TODO: not implemented yet?");
+#if 0
+	SgType* itype = generateImplicitType(rname);
+	/*
+	vardecl
+	  = new SgVariableDeclaration(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
+	SgInitializedName* iname = new SgInitializedName(vardecl->get_file_info(),
+							 SgName(rname.c_str()), itype, NULL, vardecl,
+							 sb::topScopeStack(), NULL);
+	isSgVariableDeclaration(vardecl)->get_variables().push_back(iname);
+	ret->get_result_name()->set_definition(vardecl);
+	*/
+	ret->get_result_name()->set_scope(fdf);
+	ret->get_result_name()->set_type(itype);
+#endif
       }
     }
   }
@@ -895,6 +922,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   if(f_recur)
     ret->get_functionModifier().setRecursive();
   ret->set_parent(astParent);
+
   return ret;
 }
 
@@ -1074,6 +1102,7 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
   else if( nlabel) {
     SgLabelSymbol*  s = new SgLabelSymbol();
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
     s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
     s->set_numeric_label_value( nlabel );
     SgLabelRefExp*  l = new SgLabelRefExp( s );
@@ -1399,8 +1428,8 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
   //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() << endl;
 
   if(ret->get_symbol()->get_declaration()==0){
-    //ABORT();
-    buildImplicitVariableDeclaration(ret->get_symbol()->get_name());
+    ABORT(); // TODO
+    //buildImplicitVariableDeclaration(ret->get_symbol()->get_name());
   }
   return ret;
 }
@@ -1487,16 +1516,27 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 SgNode* 
 XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
 {
-  SgBasicBlock*   ret   = 0;
+  //SgBasicBlock*   ret   = 0;
+  SgBasicBlock* blk = 0;
+  Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  info->setOutputInCodeGeneration();
+  SgFunctionDefinition* ret 
+    = new SgFunctionDefinition(info);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  sb::pushScopeStack(ret);
+  if(si::is_Fortran_language())
+    ret->setCaseInsensitive(true);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if(ret == 0 ){
-	ret = isSgBasicBlock(astchild);
+      if(blk == 0 ){
+	blk = isSgBasicBlock(astchild);
       }
     }
   SUBTREE_VISIT_END();
-  
+  if(blk) 
+    ret->set_body(blk);
+  sb::popScopeStack();
   return ret;
 }
 
@@ -1632,6 +1672,7 @@ XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
     ret = sb::buildLabelStatement( nlabel.c_str(), body, scope );
     SgLabelSymbol*  s = new SgLabelSymbol();
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
     //s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
     s->set_label_type(SgLabelSymbol::e_start_label_type);
     val << nlabel;
@@ -1819,7 +1860,8 @@ XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
     }
     child=child->getNextSibling();
   } 
-
+  // TODO: set whether defining or non-defining
+  ret->set_parent(astParent);
   return ret;
 }
 
@@ -2037,6 +2079,7 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
     SgLabelSymbol*  s = new SgLabelSymbol();
     //s->set_label_type( SgLabelSymbol::label_type_enum.e_non_numeric_label_type );
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
     s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
     val.str("");
     val.clear(stringstream::goodbit);
@@ -2331,7 +2374,7 @@ SgNode*
 XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgType*               typ = 0;
-  SgFunctionDefinition* blk = 0;
+  SgFunctionDefinition* fdf = 0;
   SgBasicBlock*         def = 0;
   SgFunctionParameterList*      lst = 0;
 
@@ -2362,8 +2405,8 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
     {
       if( typ==0 )
         typ = isSgType(astchild);
-      if( blk==0 )
-        blk = isSgFunctionDefinition(astchild);
+      if( fdf==0 )
+        fdf = isSgFunctionDefinition(astchild);
       if(def==0) {
         def = isSgBasicBlock(astchild);
       }
@@ -2372,22 +2415,23 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
     }
   SUBTREE_VISIT_END();
 
-  SgFunctionDefinition* programDefinition = new SgFunctionDefinition(ret, def);
-
-  def->setCaseInsensitive(true);
-  def->set_parent(programDefinition);
-
-  programDefinition->setCaseInsensitive(true);
-  programDefinition->set_parent(ret);
+  //SgFunctionDefinition* programDefinition = new SgFunctionDefinition(ret, def);
+  if(fdf==0 && def){
+    fdf = new SgFunctionDefinition(ret, def);
+    fdf->setCaseInsensitive(true);
+    def->setCaseInsensitive(true);
+    def->set_parent(fdf);
+  }
+  fdf->set_parent(ret);
 
   Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForCompilerGeneratedNode();
   info->setOutputInCodeGeneration();
-  programDefinition->set_file_info(info);
+  fdf->set_file_info(info);
 
   ret->set_name(SgName(name.c_str()));
-  ret->set_definition(programDefinition);
-  if(def->get_file_info()==0) ABORT();
-  if(programDefinition->get_file_info()==0) ABORT();
+  ret->set_definition(fdf);
+  if(fdf->get_file_info()==0) ABORT();
+  if(def && def->get_file_info()==0) ABORT();
 
   return ret;
 }
@@ -2441,6 +2485,7 @@ XevXmlVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
   SgLabelSymbol*  s = new SgLabelSymbol();
   //s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
   s->set_fortran_statement( new SgStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode()) );
+  s->get_fortran_statement()->set_parent(s);
   s->set_label_type( (SgLabelSymbol::label_type_enum)type );
   s->set_numeric_label_value( ino );
   //SgLabelRefExp*  ret = new SgLabelRefExp( s );
@@ -4051,6 +4096,9 @@ XevXmlVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
     }
   }
   else ABORT();
+  Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  info->setOutputInCodeGeneration();
+  ret->set_file_info(info);
   return ret;
 }
 
