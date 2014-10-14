@@ -271,9 +271,9 @@ static void writeTypesRecursive(stringstream& sstr,
     SgUnsignedLongVal* ul = isSgUnsignedLongVal( isSgArrayType(t)->get_index() );
     sstr << " rank=\"" << isSgArrayType(t)->get_rank() << "\" ";
     if( ul )
-      sstr << " index=\"" << ul->get_value() << "\" ";
-    else
-      sstr << " index=\"\" ";
+      sstr << " index=\"" << ul->get_valueString() << "\" ";
+    //else
+    //sstr << " index=\"\" ";
     
     //sstr << " type=\"" << isSgArrayType(t)->get_base_type()->class_name() << "\" ";
   }
@@ -359,7 +359,8 @@ static SgType* hasType(SgNode* node)
   if(isSgInitializer(node)) 
     return isSgInitializer(node)->get_type();
   else if (isSgInitializedName(node))  
-    return isSgInitializedName(node)->get_type();
+    //return isSgInitializedName(node)->get_type();
+    return isSgInitializedName(node)->get_typeptr();
   else if (isSgFunctionDeclaration(node)) 
     //return isSgFunctionDeclaration(node)->get_orig_return_type();
     return isSgFunctionDeclaration(node)->get_type()->get_return_type();

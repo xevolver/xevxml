@@ -72,7 +72,7 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
   SgExpression* kexp = 0;
   //SgExpression* lexp = 0;
   if(node==0) return ret;
-  int kind=0, len=0;
+  int kind=0;
 
   XmlGetAttributeValue(node,"type_kind",&kind);
   //XmlGetAttributeValue(node,"lengthExpression",&len);
@@ -82,36 +82,46 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
   //xe::DOMNode* child=node->getFirstChild();
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      SgNode* astchild = this->visit(child); 
       if(itype==0)
-        itype = buildType(child,ex);
+        //itype = buildType(child,ex);
+	itype = isSgType(astchild);
 
       if(kind && kexp==0){
-	SgNode* astchild = this->visit(child); 
 	kexp = isSgExpression(astchild);
       }
     }
     child=child->getPreviousSibling();
     //child=child->getNextSibling();
   } 
-  
-  string name = xe::XMLString::transcode(node->getNodeName());
+  char* buf = xe::XMLString::transcode(node->getNodeName());
+  std::string name = std::string(buf);
+  xercesc::XMLString::release(&buf);
 
   if(name=="SgTypeBool")
-    ret = sb::buildBoolType();
+    //ret = sb::buildBoolType();
+    ret = SgTypeBool::createType(kexp);
   else if(name=="SgTypeChar")
-    ret = sb::buildCharType();
+    //ret = sb::buildCharType();
+    ret = SgTypeChar::createType(kexp);
   else if(name=="SgTypeDouble")
-    ret = sb::buildDoubleType();
+    //ret = sb::buildDoubleType();
+    ret = SgTypeDouble::createType(kexp);
   else if(name=="SgTypeFloat")
-    ret = sb::buildFloatType();
+    //ret = sb::buildFloatType();
+    ret = SgTypeFloat::createType(kexp);
   else if(name=="SgTypeInt")
-    ret = sb::buildIntType();
+    //ret = sb::buildIntType();
+    ret = SgTypeInt::createType(0,kexp);
   else if(name=="SgTypeLong")
-    ret = sb::buildLongType();
+    //ret = sb::buildLongType();
+    ret = SgTypeLong::createType(kexp);
   else if(name=="SgTypeLongLong")
-    ret = sb::buildLongLongType();
+    //ret = sb::buildLongLongType();
+    ret = SgTypeLongLong::createType(kexp);
   else if(name=="SgTypeShort")
-    ret = sb::buildShortType();
+    //ret = sb::buildShortType();
+    ret = SgTypeShort::createType(kexp);
 //  else if(name=="SgTypeString"){
 //    if(ex) 
 //      ret = sb::buildStringType(ex);
@@ -119,33 +129,47 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
 //      ret = sb::buildStringType();
 //  }
   else if(name=="SgTypeVoid")
-    ret = sb::buildVoidType();
+    //ret = sb::buildVoidType();
+    ret = SgTypeVoid::createType(kexp);
   else if(name=="SgTypeWchar")
-    ret = sb::buildWcharType();
+    //ret = sb::buildWcharType();
+    ret = SgTypeWchar::createType(kexp);
   else if(name=="SgTypeSignedChar")
-    ret = sb::buildSignedCharType();
+    //ret = sb::buildSignedCharType();
+    ret = SgTypeSignedChar::createType(kexp);
   else if(name=="SgTypeSignedInt")
-    ret = sb::buildSignedIntType();
+    //ret = sb::buildSignedIntType();
+    ret = SgTypeSignedInt::createType(kexp);
   else if(name=="SgTypeSignedLong")
-    ret = sb::buildSignedLongType();
+    //ret = sb::buildSignedLongType();
+    ret = SgTypeSignedLong::createType(kexp);
   else if(name=="SgTypeSignedLongLong")
-    ret = sb::buildSignedLongLongType();
+    //ret = sb::buildSignedLongLongType();
+    ret = SgTypeSignedLongLong::createType(kexp);
   else if(name=="SgTypeSignedShort")
-    ret = sb::buildSignedShortType();
+    //ret = sb::buildSignedShortType();
+    ret = SgTypeSignedShort::createType(kexp);
   else if(name=="SgTypeUnsignedChar")
-    ret = sb::buildUnsignedCharType();
+    //ret = sb::buildUnsignedCharType();
+    ret = SgTypeUnsignedShort::createType(kexp);
   else if(name=="SgTypeUnsignedInt")
-    ret = sb::buildUnsignedIntType();
+    //ret = sb::buildUnsignedIntType();
+    ret = SgTypeUnsignedInt::createType(kexp);
   else if(name=="SgTypeUnsignedLong")
-    ret = sb::buildUnsignedLongType();
+    //ret = sb::buildUnsignedLongType();
+    ret = SgTypeUnsignedLong::createType(kexp);
   else if(name=="SgTypeUnsignedLongLong")
-    ret = sb::buildUnsignedLongLongType();
+    //ret = sb::buildUnsignedLongLongType();
+    ret = SgTypeUnsignedLongLong::createType(kexp);
   else if(name=="SgTypeUnsignedShort")
-    ret = sb::buildUnsignedShortType();
+    //ret = sb::buildUnsignedShortType();
+    ret = SgTypeUnsignedShort::createType(kexp);
   else if(name=="SgTypeLongDouble")
-    ret = sb::buildLongDoubleType();
+    //ret = sb::buildLongDoubleType();
+    ret = SgTypeLongDouble::createType(kexp);
   else if(name=="SgTypeUnknown")
-    ret = sb::buildUnknownType();
+    //ret = sb::buildUnknownType();
+    ret = SgTypeUnknown::createType(kexp);
 //   else if(name=="SgPointerType") {
 //    if(itype)
 //      ret = sb::buildPointerType(itype);
@@ -180,7 +204,7 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
   }
   if(itype) itype->set_parent(ret);
   if(kind && kexp) {
-    ret->set_type_kind(kexp);
+    ret->set_type_kind(kexp);//no effect?
     kexp->set_parent(ret);
   }
   ret->set_parent(astParent);
@@ -274,7 +298,6 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 
   if( rnk == 0 ) {
     xe::DOMNode* child=node->getFirstChild();
-    
     sav = ret;
     while(child){
       if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE) {

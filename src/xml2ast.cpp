@@ -908,19 +908,20 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
       SgInitializedName* ini =  0;
       if(sym &&  sym->get_declaration() ){
         ini = sym->get_declaration();
-	ret->get_result_name()->set_definition(ini->get_declaration());
       }
       else {
-        ini = sb::buildInitializedName(rname,typ);
+        ini = sb::buildInitializedName(rname,ret->get_type()->get_return_type());
 	ini->set_parent(ret);
+	ini->set_definition(fdf);
 	ini->set_type(ret->get_type()->get_return_type());
-	ret->set_result_name(ini);
-	
 	ini->set_scope(fdf);
+	ret->set_result_name(ini);
 	sym = new SgVariableSymbol(ini);
 	fdf->insert_symbol(ini->get_name(),sym);
+
 	//WARN("TODO: not implemented yet?");
       }
+      ret->get_result_name()->set_definition(ini->get_declaration());
     }
   }
   else ABORT();

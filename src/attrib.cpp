@@ -764,7 +764,7 @@ static void attribSgExpression(stringstream& istr,SgNode* node)
   SgExpression*  n = isSgExpression(node);  
   if(n==0)return;
 
-  if(n->get_need_paren())
+  if(n && n->get_need_paren())
     istr << " paren=\"" << n->get_need_paren() << "\"";
   if(n->get_lvalue())
     istr << " lvalue=\"" << n->get_lvalue() << "\"";
