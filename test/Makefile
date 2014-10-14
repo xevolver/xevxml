@@ -1,4 +1,4 @@
-ROSECOMP=roseCompiler
+ROSECOMP=identityTranslator
 
 ALL=s???\.f90 s???\.c h???\.f90
 

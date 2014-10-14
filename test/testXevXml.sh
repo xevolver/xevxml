@@ -3,7 +3,7 @@
 FC=identityTranslator
 SRC2XML=../src/src2xml
 XML2SRC=../src/xml2src
-ROSECOMP=roseCompiler
+ROSECOMP=identityTranslator
 
 export XEV_ENCODE="EUC-JP" # for testing h024.f90
 
