@@ -681,7 +681,6 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       ret = sb::buildVariableDeclaration(name->get_name(), 
 					 name->get_type(),
 					 name->get_initializer());
-
     if(ret==0) ABORT();
     ret->set_parent(astParent);
     ret->set_definingDeclaration(ret);
@@ -903,23 +902,37 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     fdf->set_declaration(ret);
     fdf->set_parent(ret);
     if(rname.size()) {
+    // the symbol table of fdf is not created yet. i don't know why.
+#if 0
       SgSymbolTable* tbl = fdf->get_symbol_table();
-      SgVariableSymbol* sym = tbl->find_variable( SgName(rname) );
+      SgVariableSymbol* sym = tbl->find_variable( SgName(rname.c_str()) );
       SgInitializedName* ini =  0;
-      if(sym &&  sym->get_declaration() ){
+      if(sym && sym->get_declaration()) {
         ini = sym->get_declaration();
+	ini->set_declptr(ret); 
+	WARN("TODO: implemented?");
+	ret->get_result_name()->set_definition(ini->get_declaration());
+      }
+#endif 
+      VardefSearch search(rname);
+      SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
+      if(ini){
+	//WARN("variable found");
+	ret->set_result_name(ini);
+	ini->set_declptr(ret); 
 	ret->get_result_name()->set_definition(ini->get_declaration());
       }
       else {
+	//WARN("variable not found");
         ini = sb::buildInitializedName(rname,ret->get_type()->get_return_type());
 	ini->set_parent(ret);
 	//ini->set_definition(fdf);
+	//ini->set_declptr(ret); // s005.f90:mismatch if uncommented, but needed for h025.f90
 	ini->set_type(ret->get_type()->get_return_type());
 	ini->set_scope(fdf);
 	ret->set_result_name(ini);
-	sym = new SgVariableSymbol(ini);
+	SgVariableSymbol* sym = new SgVariableSymbol(ini);
 	fdf->insert_symbol(ini->get_name(),sym);
-	//WARN("TODO: not implemented yet?");
       }
 
     }
@@ -1439,7 +1452,35 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
   else 
     ABORT();
   ret->set_parent(astParent);
-  //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() << endl;
+  //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() <<endl; 
+#if 0
+  if(isSgTypeUnknown(ret->get_type()) && si::is_Fortran_language() ){
+    //cerr << ret->get_symbol()->get_name().getString() << "=" << ret->get_type()->class_name() <<endl; 
+
+    SgVariableDeclaration* decl 
+      =  new SgVariableDeclaration(name,generateImplicitType(name),NULL,sb::topScopeStack());
+    //= sb::buildVariableDeclaration(name,generateImplicitType(name),NULL,sb::topScopeStack());
+    //NOTE: Implicit variable found (assumption)
+    //SgInitializedName* ini = isSgInitializedName(ret->get_symbol()->get_declaration());
+    decl->set_parent(sb::topScopeStack());
+    decl->set_definingDeclaration(decl);
+
+    //SgInitializedName* ini = isSgInitializedName(decl->get_decl_item(0));
+    SgInitializedName* ini = new SgInitializedName(name,generateImplicitType(name));
+    if(ini==0) ABORT();
+    //ini->set_definition(decl);
+    ini->set_parent(decl);
+    ini->set_declptr(decl);
+    decl->append_variable(ini);
+    // buildImplicitVariableDeclaration(ret->get_symbol()->get_name());
+    //ret->set_symbol(isSgVariableSymbol(ini->get_symbol_from_symbol_table()));
+    //SgVariableDefinition* vdef = isSgVariableDefinition(decl) ;
+    //if(vdef==0)ABORT();
+    //vdef->set_parent(ini);
+    //vdef->set_vardefn(ini);
+
+  }
+#endif
 #if 0
   if(ret->get_symbol()->get_declaration()==0 
      || ret->get_symbol()->get_declaration()->get_declptr()==0){
@@ -2814,8 +2855,7 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
 
   XmlGetAttributeValue(node,"name",&name);
   ret = sb::buildCommonBlockObject(name);
-  // get global scope??
-  //sb::pushScopeStack(_file->get_globalScope());
+
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( para==0 )
@@ -2827,33 +2867,7 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
   ret->set_variable_reference_list(para);
   para->set_parent(ret);
   ret->set_parent(astParent);
-#if 0
-  for(size_t i(0);i< para->get_numberOfTraversalSuccessors();++i){
-    SgVarRefExp* vref = isSgVarRefExp(para->get_traversalSuccessorByIndex(i));
-    cerr << vref << "--------------------- " << i << endl;
-    if(vref){
-      //cerr << vref->get_symbol()->get_name().getString() << endl;
-      SgVariableSymbol* vsym = isSgVariableSymbol(vref->get_symbol());
-      SgInitializedName* ini = isSgInitializedName(vsym->get_declaration());
-      if(vsym==0) ABORT();
-      if(ini==0) ABORT();
-      if(ini->get_declptr()==0 ){
-	Sg_File_Info* info
-	  = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
-	SgScopeStatement* scope = _file->get_globalScope();
-	SgVariableDeclaration* decl  
-	  = new SgVariableDeclaration(info,ini->get_name(),ini->get_type());
-	SgInitializedName* newini = *(decl->get_variables().begin());
-	newini->set_declptr(decl);
-	vsym->set_declaration(newini);
-	//ini->set_declptr(decl);
-	//ini->set_declaration(decl);
-	//ini->set_scope(scope);
-      }
-    }
-  }
-#endif
-  //sb::popScopeStack();
+
   return ret;
 }
 

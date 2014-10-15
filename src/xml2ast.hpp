@@ -391,17 +391,19 @@ public:
 
     SgVariableDeclaration *decl = isSgVariableDeclaration(n);
     SgVariableDefinition  *def  = isSgVariableDefinition(n);
+    /*
     if(def==NULL && decl != NULL ) 
       def = decl->get_definition();
+    */
     if(def){
       if(def->get_vardefn()->get_name().getString() == varname )
-	return n;
+	return def->get_vardefn();
     }
     else if (decl){
       SgInitializedNamePtrList& lst = decl->get_variables();
       for(size_t i(0);i<lst.size();++i)
 	if( lst[i]->get_name().getString()  == varname )
-	  return n;
+	  return lst[i];
     }
     else {
       for(size_t i(0);i<n->get_numberOfTraversalSuccessors();++i){

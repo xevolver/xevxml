@@ -306,11 +306,13 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 	typ = isSgType(astchild);
 	ptr = isSgPointerType(astchild);
 	
-	if( ptrtyp==0 )
-	  sav->set_base_type( typ );
-	else
-	  ptrtyp->set_base_type( typ );
-	
+	if(typ){
+	  if( ptrtyp==0 )
+	    sav->set_base_type( typ );
+	  else
+	    ptrtyp->set_base_type( typ );
+	}
+
 	if( (ptrtyp==0) && ptr )
 	  ptrtyp = ptr;
 	
