@@ -167,49 +167,50 @@ static void attribSgVariableDeclaration(stringstream& istr,SgNode* node)
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
   if(n) {
     SgStorageModifier m = (n->get_declarationModifier()).get_storageModifier();
+    unsigned long mod = 0;
     if(m.isUnknown() )
-      istr << " modifier=\"unknown\" ";
-    else if(m.isStatic())
-      istr << " modifier=\"static\" " ;
-    else if(m.isExtern())
-      istr << " modifier=\"extern\" " ;
-    else if(m.isAuto())
-      istr << " modifier=\"auto\" " ;
-    else if(m.isRegister())
-      istr << " modifier=\"register\" ";
-    else if(m.isTypedef())
-      istr << " modifier=\"typedef\" ";
-
-    else if(n->get_declarationModifier().get_typeModifier().get_constVolatileModifier().isConst())
-      istr << " modifier=\"const\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isAllocatable())
-      istr << " modifier=\"ALLOCATABLE\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isAsynchronous())
-      istr << " modifier=\"ASYNCHRONOUS\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isIntent_in())
-      istr << " modifier=\"INTENT(IN)\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isIntent_out())
-      istr << " modifier=\"INTENT(OUT)\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isIntent_inout())
-      istr << " modifier=\"INTENT(INOUT)\" ";
-    else if(n->get_declarationModifier().get_typeModifier().get_constVolatileModifier().isVolatile())
-      istr << " modifier=\"VOLATILE\" ";
-    else if(n->get_declarationModifier().get_storageModifier().isExtern())
-      istr << " modifier=\"EXTERNAL\" ";
-    else if(n->get_declarationModifier().get_accessModifier().isPublic())
-      istr << " modifier=\"PUBLIC\" ";
-    else if(n->get_declarationModifier().get_accessModifier().isPrivate())
-      istr << " modifier=\"PRIVATE\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isIntrinsic())
-      istr << " modifier=\"INTRINSIC\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isOptional())
-      istr << " modifier=\"OPTIONAL\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isSave())
-      istr << " modifier=\"SAVE\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isTarget())
-      istr << " modifier=\"TARGET\" ";
-    else if(n->get_declarationModifier().get_typeModifier().isValue())
-      istr << " modifier=\"VALUE\" ";
+      mod |= (1U << 0);
+    if(m.isStatic())
+      mod |= (1U << 1);
+    if(m.isExtern())
+      mod |= (1U << 2);
+    if(m.isAuto())
+      mod |= (1U << 3);
+    if(m.isRegister())
+      mod |= (1U << 4);
+    if(m.isTypedef())
+      mod |= (1U << 5);
+    if(n->get_declarationModifier().get_typeModifier().get_constVolatileModifier().isConst())
+      mod |= (1U << 6);
+    if(n->get_declarationModifier().get_typeModifier().isAllocatable())
+      mod |= (1U << 7);
+    if(n->get_declarationModifier().get_typeModifier().isAsynchronous())
+      mod |= (1U << 8);
+    if(n->get_declarationModifier().get_typeModifier().isIntent_in())
+      mod |= (1U << 9);
+    if(n->get_declarationModifier().get_typeModifier().isIntent_out())
+      mod |= (1U << 10);
+    if(n->get_declarationModifier().get_typeModifier().isIntent_inout())
+      mod |= (1U << 11);
+    if(n->get_declarationModifier().get_typeModifier().get_constVolatileModifier().isVolatile())
+      mod |= (1U << 12);
+    if(n->get_declarationModifier().get_storageModifier().isExtern())
+      mod |= (1U << 13);
+    if(n->get_declarationModifier().get_accessModifier().isPublic())
+      mod |= (1U << 14);
+    if(n->get_declarationModifier().get_accessModifier().isPrivate())
+      mod |= (1U << 15);
+    if(n->get_declarationModifier().get_typeModifier().isIntrinsic())
+      mod |= (1U << 16);
+    if(n->get_declarationModifier().get_typeModifier().isOptional())
+      mod |= (1U << 17);
+    if(n->get_declarationModifier().get_typeModifier().isSave())
+      mod |= (1U << 18);
+    if(n->get_declarationModifier().get_typeModifier().isTarget())
+      mod |= (1U << 19);
+    if(n->get_declarationModifier().get_typeModifier().isValue())
+      mod |= (1U << 20);
+    istr << " modifier=\"" << mod << "\" ";
 
     SgUnsignedLongVal *bit = n->get_bitfield();
     if( bit )
@@ -223,18 +224,22 @@ static void attribSgFunctionDeclaration(stringstream& istr,SgNode* node)
   if(n) {
     SgStorageModifier m = (n->get_declarationModifier()).get_storageModifier();
     istr << " name=" << n->get_name() << " ";
+    unsigned long mod = 0U;
+
     if(m.isUnknown() )
-      istr << " modifier=\"unknown\" ";
-    else if(m.isStatic())
-      istr << " modifier=\"static\" " ;
-    else if(m.isExtern())
-      istr << " modifier=\"extern\" " ;  // not get
-    else if(m.isAuto())
-      istr << " modifier=\"auto\" " ;
-    else if(m.isRegister())
-      istr << " modifier=\"register\" ";
-    else if(m.isTypedef())
-      istr << " modifier=\"typedef\" ";
+      mod |= (1U<<0);
+    if(m.isStatic())
+      mod |= (1U<<1);
+    if(m.isExtern())
+      mod |= (1U<<2);
+    if(m.isAuto())
+      mod |= (1U<<3);
+    if(m.isRegister())
+      mod |= (1U<<4);
+    if(m.isTypedef())
+      mod |= (1U<<5);
+    istr << " modifier=\"" << mod << "\" ";
+
     istr << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
   }
 }
@@ -800,6 +805,16 @@ static void attribSgDataStatementValue(stringstream& istr, SgNode* node)
 
 }
 
+static void attribSgEntryStatement(stringstream& istr, SgNode* node)
+{
+  SgEntryStatement* n = isSgEntryStatement(node);
+  if(n){
+    if(n->get_result_name())
+      istr << " result_name=" << n->get_result_name()->get_name() << " ";
+  }
+}
+
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     XevXML::XevConversionHelper* help)
 {
@@ -849,6 +864,7 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgIfStmt(istr,node);
   attribSgConstructorInitializer(istr,node);
   attribSgDataStatementValue(istr,node);
+  attribSgEntryStatement(istr,node);
 
   attribSgExpression(istr,node);
   return;

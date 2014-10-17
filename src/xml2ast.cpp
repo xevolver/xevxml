@@ -444,30 +444,71 @@ XevXmlVisitor::checkFunctDecl(xe::DOMNode* node, SgNode* astNode)
 {
   SgFunctionDeclaration* decl = isSgFunctionDeclaration(astNode);
   int enf=0;
-  string storage;
+  unsigned long storage=0;
+  string rname;
   if(decl==0) return;
 
   if(XmlGetAttributeValue(node,"end_name",&enf))
     decl->set_named_in_end_statement(enf);
   XmlGetAttributeValue(node,"modifier",&storage);  
 
-  if(storage=="unknown")
+  if(storage & (1U<<0))
     ((decl->get_declarationModifier()).get_storageModifier()).setUnknown();
-  else if(storage=="static")
+  if(storage & (1U<<1))
     ((decl->get_declarationModifier()).get_storageModifier()).setStatic();
-  else if(storage=="extern")
+  if(storage & (1U<<2))
     ((decl->get_declarationModifier()).get_storageModifier()).setExtern();
-  else if(storage=="auto")
+  if(storage & (1U<<3))
     ((decl->get_declarationModifier()).get_storageModifier()).setAuto();
-  else if(storage=="register")
+  if(storage & (1U<<4))
     ((decl->get_declarationModifier()).get_storageModifier()).setRegister();
-  else if(storage=="typedef")
+  if(storage & (1U<<5))
     ((decl->get_declarationModifier()).get_storageModifier()).setTypedef();
-  else 
-    ((decl->get_declarationModifier()).get_storageModifier()).setDefault();
+  //if(storage==0)
+  //((decl->get_declarationModifier()).get_storageModifier()).setDefault();
   
   if(decl->get_definition())
     decl->get_definition()->set_declaration(decl);
+
+  if( si::is_Fortran_language() && XmlGetAttributeValue(node,"result_name",&rname) ){
+    SgFunctionDefinition* fdf = decl->get_definition();
+    if(fdf==0) // for SgEntryStatement
+      fdf = si::getEnclosingProcedure (sb::topScopeStack());
+    if(fdf==0) ABORT();
+    // the symbol table of fdf is not created yet. i don't know why.
+    VardefSearch search(rname);
+    SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
+    bool found = false;
+    if(ini){
+      //WARN("variable found");
+      found = true;
+      ini->set_declptr(decl); 
+    }
+    else {
+      //WARN("variable not found");
+      ini = sb::buildInitializedName(rname,decl->get_type()->get_return_type());
+      ini->set_parent(decl);
+      //ini->set_definition(fdf);
+      //ini->set_declptr(ret); // s005.f90:mismatch if uncommented, but needed for h025.f90
+      ini->set_type(decl->get_type()->get_return_type());
+      ini->set_scope(fdf);
+      SgVariableSymbol* sym = new SgVariableSymbol(ini);
+      fdf->insert_symbol(ini->get_name(),sym);
+    }
+    if(isSgProcedureHeaderStatement(decl)){
+      SgProcedureHeaderStatement* prc = isSgProcedureHeaderStatement(decl);
+      prc->set_result_name(ini);
+      if(found)
+	prc->get_result_name()->set_definition(ini->get_declaration());
+    }
+    else if (isSgEntryStatement(decl)){
+      SgEntryStatement* ent = isSgEntryStatement(decl);
+      ini->set_type(ent->get_type()->get_return_type());
+      ent->set_result_name(ini);
+      if(found)
+	ent->get_result_name()->set_definition(ini->get_declaration());
+    }
+  }
 }
 
 
@@ -642,7 +683,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   //SgClassDeclaration*                       cls  = 0;
   SgDeclarationStatement*                   cls  = 0;
   Rose_STL_Container<SgInitializedName*>    varList;
-  string            storage;
+  unsigned long     storage=0U;
   string            bitstr;
   unsigned long     bit = 0;
 
@@ -733,49 +774,49 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   // Initialize SgAccessModifier (2014.04.16)
   ret->get_declarationModifier().get_accessModifier().setUndefined();
 
-  if(storage=="unknown")
+  if(storage & (1U<<0) )
     ((ret->get_declarationModifier()).get_storageModifier()).setUnknown();
-  else if(storage=="static")
+  if(storage & (1U<<1) )
     ((ret->get_declarationModifier()).get_storageModifier()).setStatic();
-  else if(storage=="extern")
+  if(storage & (1U<<2) )
     ((ret->get_declarationModifier()).get_storageModifier()).setExtern();
-  else if(storage=="auto")
+  if(storage & (1U<<3) )
     ((ret->get_declarationModifier()).get_storageModifier()).setAuto();
-  else if(storage=="register")
+  if(storage & (1U<<4) )
     ((ret->get_declarationModifier()).get_storageModifier()).setRegister();
-  else if(storage=="typedef")
+  if(storage & (1U<<5) )
     ((ret->get_declarationModifier()).get_storageModifier()).setTypedef();
-  else if(storage=="const")
+  if(storage & (1U<<6) )
     ret->get_declarationModifier().get_typeModifier().get_constVolatileModifier().setConst();
-  else if(storage=="ALLOCATABLE")
+  if(storage & (1U<<7) )
     ret->get_declarationModifier().get_typeModifier().setAllocatable();
-  else if(storage=="ASYNCHRONOUS")
+  if(storage & (1U<<8) )
     ret->get_declarationModifier().get_typeModifier().setAsynchronous();
-  else if(storage=="INTENT(IN)")
+  if(storage & (1U<<9) )
     ret->get_declarationModifier().get_typeModifier().setIntent_in();
-  else if(storage=="INTENT(OUT)")
+  if(storage & (1U<<10) )
     ret->get_declarationModifier().get_typeModifier().setIntent_out();
-  else if(storage=="INTENT(INOUT)")
+  if(storage & (1U<<11) )
     ret->get_declarationModifier().get_typeModifier().setIntent_inout();
-  else if(storage=="VOLATILE")
+  if(storage & (1U<<12) )
     ret->get_declarationModifier().get_typeModifier().get_constVolatileModifier().setVolatile();
-  else if(storage=="EXTERNAL")
+  if(storage & (1U<<13) )
     ret->get_declarationModifier().get_storageModifier().setExtern();
-  else if(storage=="PUBLIC")
+  if(storage & (1U<<14) )
     ret->get_declarationModifier().get_accessModifier().setPublic();
-  else if(storage=="PRIVATE")
+  if(storage & (1U<<15) )
     ret->get_declarationModifier().get_accessModifier().setPrivate();
-  else if(storage=="INTRINSIC")
+  if(storage & (1U<<16) )
     ret->get_declarationModifier().get_typeModifier().setIntrinsic();
-  else if(storage=="OPTIONAL")
+  if(storage & (1U<<17) )
     ret->get_declarationModifier().get_typeModifier().setOptional();
-  else if(storage=="SAVE")
+  if(storage & (1U<<18) )
     ret->get_declarationModifier().get_typeModifier().setSave();
-  else if(storage=="TARGET")
+  if(storage & (1U<<19) )
     ret->get_declarationModifier().get_typeModifier().setTarget();
-  else if(storage=="VALUE")
+  if(storage & (1U<<20) )
     ret->get_declarationModifier().get_typeModifier().setValue();
-  else 
+  if(storage==0)
     ((ret->get_declarationModifier()).get_storageModifier()).setDefault();
   //checkPreprocInfo(node,ret);
 
@@ -843,7 +884,7 @@ SgNode*
 XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgProcedureHeaderStatement*     ret = 0;
-  SgType*                         typ = 0;
+  SgFunctionType*                 typ = 0;
   SgFunctionParameterList*        lst = 0;
   SgScopeStatement*               scope = isSgScopeStatement(_file->get_globalScope());
   //SgScopeStatement*               scope = sb::topScopeStack();
@@ -855,10 +896,9 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   bool                            f_pure  = false;
   bool                            f_elem  = false;
   bool                            f_recur = false;
-  
+
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"subprogram_kind",&kind);
-  XmlGetAttributeValue(node,"result_name",&rname);
   XmlGetAttributeValue(node,"recursive",&f_recur);
   XmlGetAttributeValue(node,"pure",&f_pure);
   XmlGetAttributeValue(node,"elemental",&f_elem);
@@ -866,7 +906,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if(typ==0)
-	typ = isSgType(astchild);
+	typ = isSgFunctionType(astchild);
       if(lst==0)
 	lst = isSgFunctionParameterList(astchild);
       if(fdf==0)
@@ -878,9 +918,10 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   
   if(lst){
     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-      //SgFunctionParameterList* cpy = isSgFunctionParameterList(si::deepCopyNode(lst)); //error! why?
-      ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
-					       (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
+    //SgFunctionParameterList* cpy = isSgFunctionParameterList(si::deepCopyNode(lst)); //error! why?
+    ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), 
+      typ->get_return_type(), lst,
+      (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
     }
     else {
       // add (block data) 0828
@@ -901,41 +942,9 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     ret->set_definition(fdf);
     fdf->set_declaration(ret);
     fdf->set_parent(ret);
-    if(rname.size()) {
-    // the symbol table of fdf is not created yet. i don't know why.
-#if 0
-      SgSymbolTable* tbl = fdf->get_symbol_table();
-      SgVariableSymbol* sym = tbl->find_variable( SgName(rname.c_str()) );
-      SgInitializedName* ini =  0;
-      if(sym && sym->get_declaration()) {
-        ini = sym->get_declaration();
-	ini->set_declptr(ret); 
-	WARN("TODO: implemented?");
-	ret->get_result_name()->set_definition(ini->get_declaration());
-      }
-#endif 
-      VardefSearch search(rname);
-      SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
-      if(ini){
-	//WARN("variable found");
-	ret->set_result_name(ini);
-	ini->set_declptr(ret); 
-	ret->get_result_name()->set_definition(ini->get_declaration());
-      }
-      else {
-	//WARN("variable not found");
-        ini = sb::buildInitializedName(rname,ret->get_type()->get_return_type());
-	ini->set_parent(ret);
-	//ini->set_definition(fdf);
-	//ini->set_declptr(ret); // s005.f90:mismatch if uncommented, but needed for h025.f90
-	ini->set_type(ret->get_type()->get_return_type());
-	ini->set_scope(fdf);
-	ret->set_result_name(ini);
-	SgVariableSymbol* sym = new SgVariableSymbol(ini);
-	fdf->insert_symbol(ini->get_name(),sym);
-      }
-
-    }
+    VardefSearch search(name);
+    SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
+    if(ini) ini->set_declptr(ret);
   }
   else ABORT();
   
@@ -946,7 +955,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   if(f_recur)
     ret->get_functionModifier().setRecursive();
   ret->set_parent(astParent);
-  
+
   return ret;
 }
 
@@ -3111,18 +3120,20 @@ SgNode*
 XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEntryStatement*       ret = 0;
-  SgFunctionType*         typ = 0;
+  SgFunctionType*        ftyp = 0;
   SgFunctionDefinition*   def = 0;
-  
+  SgFunctionParameterList* lst = 0;
   string                  name;
+  string                  rname;
   
   XmlGetAttributeValue(node,"name",&name);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)            
     {
-      if( typ==0 )
-	typ = isSgFunctionType(astchild);
-      
+      if( ftyp==0 )
+	ftyp = isSgFunctionType(astchild);
+      if( lst==0 )
+	lst = isSgFunctionParameterList(astchild);
       if( def==0 )
 	def = isSgFunctionDefinition(astchild);
     }
@@ -3130,10 +3141,12 @@ XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
 
   ret = new SgEntryStatement( astParent->get_file_info(),
 			      SgName( name.c_str() ),
-			      typ,
-			      def  );
+			      ftyp,
+			      def);
   ret->set_scope(def);
   ret->set_parent(astParent);  
+  if(lst)
+    ret->set_parameterList(lst);
   return ret;
 }
 
@@ -3926,6 +3939,7 @@ XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
+  if(lst==0)ABORT();
   if( typ==0 ) {
     typ = isSgType( sb::buildIntType() );
   }
