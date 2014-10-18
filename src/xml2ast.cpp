@@ -916,10 +916,10 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     }
   SUBTREE_VISIT_END();
   
-  if(lst){
+  if(lst && typ){
     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
     //SgFunctionParameterList* cpy = isSgFunctionParameterList(si::deepCopyNode(lst)); //error! why?
-    ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), 
+      ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), 
       typ->get_return_type(), lst,
       (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
     }
@@ -936,7 +936,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     }
   }
   else ABORT();
-  
+
   if(fdf){
     //si::replaceStatement( ret->get_definition()->get_body(),def,true );
     ret->set_definition(fdf);
@@ -944,7 +944,11 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     fdf->set_parent(ret);
     VardefSearch search(name);
     SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
-    if(ini) ini->set_declptr(ret);
+    if(ini){
+      ini->set_declptr(ret);
+      // remove type description before the function name
+      ret->get_type()->set_return_type(SgTypeVoid::createType());
+    }
   }
   else ABORT();
   
