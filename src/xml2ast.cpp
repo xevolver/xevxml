@@ -1856,6 +1856,7 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
   stringstream         val;
   int                  kind;
   
+  sb::pushScopeStack(_file->get_globalScope());
   if( XmlGetAttributeValue(node,"symbol",&name) )
     ret = sb::buildFunctionRefExp( SgName(name) );
   else
@@ -1872,7 +1873,9 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     if(procedureHeaderStatement)
       procedureHeaderStatement
 	->set_subprogram_kind((SgProcedureHeaderStatement::subprogram_kind_enum)kind );
+    else ABORT();
   }
+  sb::popScopeStack();
   return ret;
 }
 
@@ -3847,7 +3850,6 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)        
     {
-      //assuming these stmts appear in this order
       if( lst==0 )
 	lst = isSgExprListExp(astchild);
     }
@@ -3858,8 +3860,9 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
     lst->set_parent(ret);
     lst->set_startOfConstruct(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   }
+  else ABORT();
   ret->set_parent(astParent);
-  
+
   return ret;
 }
 
