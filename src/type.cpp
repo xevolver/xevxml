@@ -73,8 +73,10 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
   //SgExpression* lexp = 0;
   if(node==0) return ret;
   int kind=0;
+  string tagname;
 
   XmlGetAttributeValue(node,"type_kind",&kind);
+  XmlGetAttributeValue(node,"tag_name",&tagname);
   //XmlGetAttributeValue(node,"lengthExpression",&len);
 
   // reverse order
@@ -191,7 +193,13 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
     //else ABORT();
   }
   else if (name=="SgClassType") {
-    ret = isSgType( this->visit(node,ret) );
+    SgClassSymbol* sym = sb::topScopeStack()->lookup_class_symbol(tagname);
+    if(sym==0)ABORT();
+    SgClassDeclaration* decl = sym->get_declaration();
+    if(decl==0)ABORT();
+    ret = SgClassType::createType(decl,kexp);
+    if(ret==0)ABORT();
+    //ret = isSgType( this->visit(node,ret) );
   }
   else if (name=="SgTypeEllipse") {
     ret = new SgTypeEllipse();
