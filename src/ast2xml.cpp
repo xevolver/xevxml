@@ -236,7 +236,11 @@ static void writeTypesRecursive(stringstream& sstr,
   writeModifierType(sstr,t);
 
   if( t->get_type_kind() ){
-    sstr << " type_kind=\"1\" ";
+    SgIntVal* v = isSgIntVal( t->get_type_kind() );
+    if( v )
+      sstr << " type_kind=\"" << v->get_valueString() << "\" ";
+    else
+      sstr << " type_kind=\"\" ";
   }
 
   string s = t->class_name();
@@ -332,10 +336,13 @@ static void writeTypesRecursive(stringstream& sstr,
           visitor.traverse(lst,help);
       }
     }
+#if 0
+    // type_kind is now output as attribute
     if( t->get_type_kind() ) {
       XevAstVisitorInternal visitor(sstr);
       visitor.traverse(t->get_type_kind(),help);    
     }
+#endif
     if( isSgTypeString(t) && isSgTypeString(t)->get_lengthExpression() ) {
       XevAstVisitorInternal visitor(sstr);
       visitor.traverse(isSgTypeString(t)->get_lengthExpression(),help);    

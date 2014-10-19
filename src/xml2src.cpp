@@ -56,8 +56,8 @@ int main(int argc, char** argv)
   else {
     prj->get_file(0).set_unparse_output_filename(fn);
     /* prtine all symbol tables  for debugging */
-    XevXML::PrintSymTable test;
-    test.visit(&prj->get_file(0));
+    //XevXML::PrintSymTable test;
+    //test.visit(&prj->get_file(0));
 
     UnparseSgFile(&prj->get_file(0)); // defined in unparse.cpp
   }
