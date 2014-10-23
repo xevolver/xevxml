@@ -95,9 +95,18 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
   xercesc::XMLString::release(&buf);
 
   kexp = 0;
+  if(itype) itype->set_parent(ret);
+  if( kind.size()>0 ) {
+    int val = atoi(kind.c_str());
+    kexp = new SgIntVal(val,kind);
+    kexp->set_startOfConstruct( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
+    //ret->set_type_kind( kexp );
+    kexp->set_parent(ret);
+  }
+
   if(name=="SgTypeBool")
-    //ret = SgTypeBool::createType(kexp);
-    ret = sb::buildBoolType();
+    ret = SgTypeBool::createType(kexp);
+  //ret = sb::buildBoolType();
   else if(name=="SgTypeChar")
     ret = SgTypeChar::createType(kexp);
   //ret = sb::buildCharType();
@@ -204,14 +213,6 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
   }
   else {
     return NULL;
-  }
-  if(itype) itype->set_parent(ret);
-  if( kind.size()>0 ) {
-    int val = atoi(kind.c_str());
-    kexp = new SgIntVal(val,kind);
-    kexp->set_startOfConstruct( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
-    ret->set_type_kind( kexp );
-    kexp->set_parent(ret);
   }
   ret->set_parent(astParent);
   return ret;
