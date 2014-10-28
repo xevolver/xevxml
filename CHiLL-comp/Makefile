@@ -1,4 +1,4 @@
-include ../Makefile
+include ../lib/Makefile-xev.in
 
 
 defalut:

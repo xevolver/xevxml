@@ -34,14 +34,8 @@
             </SgInitializedName>
           </SgVariableDeclaration>
           <SgPragmaDeclaration>
-            <SgPragma pragma="xev loop_unroll step(3)">
-              <DIRECTIVE name="loop_unroll">
-                <CLAUSE name="step" specified="true">
-                  <ARG specified="true" value="3"/>
-                </CLAUSE>
-              </DIRECTIVE>
-            </SgPragma>
-          </SgPragmaDeclaration>
+            <SgPragma pragma="xev loop_unroll step(3)"/>
+</SgPragmaDeclaration>
           <SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
               <SgVarRefExp name="k"/>
@@ -54,14 +48,8 @@
             <SgNullExpression/>
             <SgBasicBlock>
               <SgPragmaDeclaration>
-                <SgPragma pragma="xev loop_unroll step(3)">
-                  <DIRECTIVE name="loop_unroll">
-                    <CLAUSE name="step" specified="true">
-                      <ARG specified="true" value="3"/>
-                    </CLAUSE>
-                  </DIRECTIVE>
-                </SgPragma>
-              </SgPragmaDeclaration>
+                <SgPragma pragma="xev loop_unroll step(3)"/>
+</SgPragmaDeclaration>
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
                   <SgVarRefExp name="j"/>
@@ -74,14 +62,8 @@
                 <SgNullExpression/>
                 <SgBasicBlock>
                   <SgPragmaDeclaration>
-                    <SgPragma pragma="xev loop_unroll step(3)">
-                      <DIRECTIVE name="loop_unroll">
-                        <CLAUSE name="step" specified="true">
-                          <ARG specified="true" value="3"/>
-                        </CLAUSE>
-                      </DIRECTIVE>
-                    </SgPragma>
-                  </SgPragmaDeclaration>
+                    <SgPragma pragma="xev loop_unroll step(3)"/>
+</SgPragmaDeclaration>
                   <SgFortranDo end="1" nlabel="" slabel="" style="0">
                     <SgAssignOp>
                       <SgVarRefExp name="i"/>
@@ -132,5 +114,4 @@
       </SgFunctionDefinition>
     </SgProgramHeaderStatement>
   </SgGlobal>
-
 </SgSourceFile>
