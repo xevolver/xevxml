@@ -149,9 +149,7 @@
                 </SgBasicBlock>
               </SgFortranDo>
             </SgBasicBlock>
-            <PreprocessingInfo pos="2" type="3">
-    !$xev loop_tag
-</PreprocessingInfo>
+            
           </SgFortranDo>
         </SgBasicBlock>
       </SgFunctionDefinition>

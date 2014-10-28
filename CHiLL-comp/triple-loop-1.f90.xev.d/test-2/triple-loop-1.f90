@@ -1,7 +1,6 @@
 PROGRAM triple_loop_1
 INTEGER, PARAMETER :: n = 139
 REAL :: A(n,n,n), B(n,n,n)
-    !$xev loop_tag
 DO k = 1, n - 1
 DO j = 1, n - 1
 DO i = 1, n - 1, 4

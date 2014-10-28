@@ -43,5 +43,10 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<xsl:template match="SgPragmaDeclaration" mode="find_loop">
+	</xsl:template>
+	<xsl:template match="PreprocessingInfo" mode="find_loop">
+	</xsl:template>
+
 </xsl:stylesheet>
 	
