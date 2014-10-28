@@ -13,7 +13,10 @@
 				<xsl:comment>
 					test-1.xsl xev loop_tag
 				</xsl:comment>
-				<xsl:apply-templates select="." mode="chill_unroll" />
+				<xsl:apply-templates select="." mode="chill_unroll_jam">
+					<xsl:with-param name="max" select="3" />
+					<xsl:with-param name="var" select="'k'" />
+				</xsl:apply-templates>
 			</xsl:when>
 
 			<xsl:otherwise>
