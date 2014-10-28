@@ -6,9 +6,9 @@ program triple_loop_1
     real*8 A(n, n, n), B(n, n, n)
 
     !$xev loop_tag
-    do k=2,n-1
-        do j=2,n-1
-            do i=2,n-1
+    do k=1,n-1
+        do j=1,n-1
+            do i=1,n-1
                 B(i,j,k) = A(i,j,k)
             end do
         end do

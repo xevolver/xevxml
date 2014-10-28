@@ -39,7 +39,7 @@
           <SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
               <SgVarRefExp name="k"/>
-              <SgIntVal value="2"/>
+              <SgIntVal value="1"/>
             </SgAssignOp>
             <SgSubtractOp>
               <SgVarRefExp name="n"/>
@@ -50,7 +50,7 @@
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
                   <SgVarRefExp name="j"/>
-                  <SgIntVal value="2"/>
+                  <SgIntVal value="1"/>
                 </SgAssignOp>
                 <SgSubtractOp>
                   <SgVarRefExp name="n"/>
@@ -61,7 +61,7 @@
                   <SgFortranDo end="1" nlabel="" slabel="" style="0">
                     <SgAssignOp>
                       <SgVarRefExp name="i"/>
-                      <SgIntVal value="2"/>
+                      <SgIntVal value="1"/>
                     </SgAssignOp>
                     <SgSubtractOp>
                       <SgVarRefExp name="n"/>
