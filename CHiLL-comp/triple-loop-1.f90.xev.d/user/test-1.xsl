@@ -8,5 +8,33 @@
 	<xsl:output method="xml" encoding="UTF-8" />
 
 
+	<xsl:template match="SgFortranDo">
+		<xsl:choose>
+			<xsl:when
+				test="preceding-sibling::*[1]/SgPragmaDeclaration/@pragma = 'xev loop_tag'">
+				<xsl:comment>
+					<xsl:variable name="QName">
+						test-1.xsl xev loop_tag
+					</xsl:variable>
+				</xsl:comment>
+
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates />
+				</xsl:copy>
+			</xsl:when>
+
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates />
+				</xsl:copy>
+			</xsl:otherwise>
+
+		</xsl:choose>
+
+	</xsl:template>
+
+
 </xsl:stylesheet>
 	

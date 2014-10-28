@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <SgSourceFile filename="triple-loop-1.f90" format="2" language="4">
   <SgGlobal>
-    <SgProgramHeaderStatement name="catalog_no14">
+    <SgProgramHeaderStatement name="triple_loop_1">
         <SgTypeVoid/>
       <SgFunctionParameterList/>
       <SgFunctionDefinition>
@@ -34,7 +34,7 @@
             </SgInitializedName>
           </SgVariableDeclaration>
           <SgPragmaDeclaration>
-            <SgPragma pragma="xev loop_unroll step(3)"/>
+            <SgPragma pragma="xev loop_tag"/>
 </SgPragmaDeclaration>
           <SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
@@ -47,9 +47,6 @@
             </SgSubtractOp>
             <SgNullExpression/>
             <SgBasicBlock>
-              <SgPragmaDeclaration>
-                <SgPragma pragma="xev loop_unroll step(3)"/>
-</SgPragmaDeclaration>
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
                   <SgVarRefExp name="j"/>
@@ -61,9 +58,6 @@
                 </SgSubtractOp>
                 <SgNullExpression/>
                 <SgBasicBlock>
-                  <SgPragmaDeclaration>
-                    <SgPragma pragma="xev loop_unroll step(3)"/>
-</SgPragmaDeclaration>
                   <SgFortranDo end="1" nlabel="" slabel="" style="0">
                     <SgAssignOp>
                       <SgVarRefExp name="i"/>
@@ -96,18 +90,12 @@
                         </SgAssignOp>
                       </SgExprStatement>
                     </SgBasicBlock>
-                    <PreprocessingInfo pos="2" type="3">
-  !$xev loop_unroll step(3)
-</PreprocessingInfo>
                   </SgFortranDo>
                 </SgBasicBlock>
-                <PreprocessingInfo pos="2" type="3">
-  !$xev loop_unroll step(3)
-</PreprocessingInfo>
               </SgFortranDo>
             </SgBasicBlock>
             <PreprocessingInfo pos="2" type="3">
-  !$xev loop_unroll step(3)
+    !$xev loop_tag
 </PreprocessingInfo>
           </SgFortranDo>
         </SgBasicBlock>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="triple-loop-1.f90" format="2" language="4">
   <SgGlobal>
-    <SgProgramHeaderStatement name="catalog_no14">
+    <SgProgramHeaderStatement name="triple_loop_1">
         <SgTypeVoid/>
       <SgFunctionParameterList/>
       <SgFunctionDefinition>
@@ -46,9 +46,6 @@
             </SgSubtractOp>
             <SgNullExpression/>
             <SgBasicBlock>
-              <!--
-			SgPragmaDeclaration
-		-->
               <SgFortranDo end="1" nlabel="" slabel="" style="0">
                 <SgAssignOp>
                   <SgVarRefExp name="j"/>
@@ -60,9 +57,6 @@
                 </SgSubtractOp>
                 <SgNullExpression/>
                 <SgBasicBlock>
-                  <!--
-			SgPragmaDeclaration
-		-->
                   <SgFortranDo end="1" nlabel="" slabel="" style="0">
                     <SgAssignOp>
                       <SgVarRefExp name="i"/>
@@ -95,14 +89,8 @@
                         </SgAssignOp>
                       </SgExprStatement>
                     </SgBasicBlock>
-                    <!--
-			PreprocessingInfo
-		-->
                   </SgFortranDo>
                 </SgBasicBlock>
-                <!--
-			PreprocessingInfo
-		-->
               </SgFortranDo>
             </SgBasicBlock>
             <!--

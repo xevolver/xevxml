@@ -1,4 +1,4 @@
-PROGRAM catalog_no14
+PROGRAM triple_loop_1
 INTEGER, PARAMETER :: n = 139
 REAL :: A(n,n,n), B(n,n,n)
 DO k = 2, n - 1
