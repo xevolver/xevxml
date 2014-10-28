@@ -9,7 +9,7 @@ XSLT_DIR	= xev-translate
 
 
 ##############################################
-# set env
+# set default env
 
 ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
 XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
@@ -50,6 +50,7 @@ all:
 	@echo "usage: make {var-replace-simple, *}.check}"
 	@echo "xevxml-env: $(XEVXML_ENV)"
 	@hostname -a
+	@date
 
 src2xml-files: $(SRC2XMLS)
 	@echo "TARGET: $(SRC2XMLS)"
