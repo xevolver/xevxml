@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="triple-loop-1.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProgramHeaderStatement name="catalog_no14">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration modifier="const">
+            <SgInitializedName name="n">
+                <SgTypeInt/>
+              <SgAssignInitializer>
+                  <SgTypeInt/>
+                <SgIntVal value="139"/>
+              </SgAssignInitializer>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="A">
+                <SgArrayType index="" rank="3" type="SgTypeFloat">
+                  <SgTypeFloat/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                </SgArrayType>
+            </SgInitializedName>
+            <SgInitializedName name="B">
+                <SgArrayType index="" rank="3" type="SgTypeFloat">
+                  <SgTypeFloat/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev loop_unroll step(3)">
+              <DIRECTIVE name="loop_unroll">
+                <CLAUSE name="step" specified="true">
+                  <ARG specified="true" value="3"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+            <SgAssignOp>
+              <SgVarRefExp name="k"/>
+              <SgIntVal value="2"/>
+            </SgAssignOp>
+            <SgSubtractOp>
+              <SgVarRefExp name="n"/>
+              <SgIntVal value="1"/>
+            </SgSubtractOp>
+            <SgNullExpression/>
+            <SgBasicBlock>
+              <SgPragmaDeclaration>
+                <SgPragma pragma="xev loop_unroll step(3)">
+                  <DIRECTIVE name="loop_unroll">
+                    <CLAUSE name="step" specified="true">
+                      <ARG specified="true" value="3"/>
+                    </CLAUSE>
+                  </DIRECTIVE>
+                </SgPragma>
+              </SgPragmaDeclaration>
+              <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="2"/>
+                </SgAssignOp>
+                <SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <SgPragmaDeclaration>
+                    <SgPragma pragma="xev loop_unroll step(3)">
+                      <DIRECTIVE name="loop_unroll">
+                        <CLAUSE name="step" specified="true">
+                          <ARG specified="true" value="3"/>
+                        </CLAUSE>
+                      </DIRECTIVE>
+                    </SgPragma>
+                  </SgPragmaDeclaration>
+                  <SgFortranDo end="1" nlabel="" slabel="" style="0">
+                    <SgAssignOp>
+                      <SgVarRefExp name="i"/>
+                      <SgIntVal value="2"/>
+                    </SgAssignOp>
+                    <SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                      <SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgVarRefExp name="i"/>
+                              <SgVarRefExp name="j"/>
+                              <SgVarRefExp name="k"/>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement>
+                    </SgBasicBlock>
+                    <PreprocessingInfo pos="2" type="3">
+  !$xev loop_unroll step(3)
+</PreprocessingInfo>
+                  </SgFortranDo>
+                </SgBasicBlock>
+                <PreprocessingInfo pos="2" type="3">
+  !$xev loop_unroll step(3)
+</PreprocessingInfo>
+              </SgFortranDo>
+            </SgBasicBlock>
+            <PreprocessingInfo pos="2" type="3">
+  !$xev loop_unroll step(3)
+</PreprocessingInfo>
+          </SgFortranDo>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+    </SgProgramHeaderStatement>
+  </SgGlobal>
+
+</SgSourceFile>
