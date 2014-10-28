@@ -9,11 +9,14 @@
 
 	<xsl:template match="SgFortranDo">
 		<xsl:choose>
-			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
+			<xsl:when
+				test="preceding-sibling::*[1]/SgPragmaDeclaration/@pragma = 'xev loop_tag'">
 				<xsl:comment>
-					test-1.xsl xev loop_tag
+					<xsl:variable name="QName">
+						test-2.xsl xev loop_tag
+					</xsl:variable>
 				</xsl:comment>
-				<xsl:apply-templates select="." mode="chill_unroll" />
+				<xsl:apply-templates select="." mode="chill_unroll_jam" />
 			</xsl:when>
 
 			<xsl:otherwise>

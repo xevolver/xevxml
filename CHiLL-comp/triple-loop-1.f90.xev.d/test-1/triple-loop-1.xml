@@ -35,7 +35,11 @@
           <!--
 			SgPragmaDeclaration
 		-->
-          <SgFortranDo end="1" nlabel="" slabel="" style="0">
+          <!--
+					test-1.xsl xev loop_tag
+				--><!--
+			libCHiLL.xsl chill_unroll
+		--><SgFortranDo end="1" nlabel="" slabel="" style="0">
             <SgAssignOp>
               <SgVarRefExp name="k"/>
               <SgIntVal value="2"/>
