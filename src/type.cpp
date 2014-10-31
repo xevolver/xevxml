@@ -47,7 +47,7 @@ XevXmlVisitor::buildModifierType(xe::DOMNode* node, SgType* itype, SgNode* astPa
   string modtype;
   
   if(XmlGetAttributeValue(node,"modifier",&modtype)==false)
-      ABORT();
+      XEV_ABORT();
 
   if( modtype == "const" ) {
     //return sb::buildConstType(itype);
@@ -179,12 +179,12 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
 //   else if(name=="SgPointerType") {
 //    if(itype)
 //      ret = sb::buildPointerType(itype);
-//    else ABORT();
+//    else XEV_ABORT();
 // }
   else if(name=="SgReferenceType") {
     if(itype)
       ret = sb::buildReferenceType(itype);
-    else ABORT();
+    else XEV_ABORT();
   }
   else if (name=="SgModifierType") {
     if(itype) {
@@ -194,15 +194,15 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
       itype = sb::buildIntType();
       ret = buildModifierType( node,itype, astParent );
     }
-    //else ABORT();
+    //else XEV_ABORT();
   }
   else if (name=="SgClassType") {
     SgClassSymbol* sym = sb::topScopeStack()->lookup_class_symbol(tagname);
-    if(sym==0)ABORT();
+    if(sym==0)XEV_ABORT();
     SgClassDeclaration* decl = sym->get_declaration();
-    if(decl==0)ABORT();
+    if(decl==0)XEV_ABORT();
     ret = new SgClassType(decl);
-    if(ret==0)ABORT();
+    if(ret==0)XEV_ABORT();
     //ret = isSgType( this->visit(node,ret) );
   }
   else if (name=="SgTypeEllipse") {
@@ -271,7 +271,7 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
     ret = sb::buildStringType( (SgExpression*)ast );
   }
   */
-  if(ret==0) ABORT();
+  if(ret==0) XEV_ABORT();
   if(kind.size()>0){
     kexp = new SgIntVal(atoi(kind.c_str()),kind);
     kexp->set_startOfConstruct( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
@@ -290,7 +290,7 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
   SgArrayType*            ary = 0; 
   SgArrayType*            sav = 0; 
   SgType*                 typ = 0;
-  SgExpression*           exp = 0;
+  //SgExpression*           exp = 0;
   SgExpression*           v;
   SgPointerType*          ptr = 0;
   SgPointerType*          ptrtyp = 0;
@@ -362,14 +362,14 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     }
     if(typ){
       ret = new SgArrayType(typ);
-      if(ret==0) ABORT();
+      if(ret==0) XEV_ABORT();
       ret->set_base_type( typ );
       typ->set_parent(ret);
       ret->set_parent(astParent);
     }
-    else ABORT();
-    if(rnk == lst->get_expressions().size()){
-      //if(exprs.size() != (size_t)rnk) ABORT();
+    else XEV_ABORT();
+    if((size_t)rnk == lst->get_expressions().size()){
+      //if(exprs.size() != (size_t)rnk) XEV_ABORT();
       ret->set_rank( rnk );
       //lst=sb::buildExprListExp( exprs );
       lst->set_parent(ret);
@@ -379,7 +379,7 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
       ret->set_dim_info( lst );
 
     }
-    else ABORT();
+    else XEV_ABORT();
   }
 
   return ret;
@@ -390,10 +390,6 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 {
   SgPointerType*      ret = new SgPointerType();
   SgType*             typ = 0;
-  SgModifierType*     mdf = 0;
-  SgTypedefType*      tdf = 0;
-  SgPointerType*      ptr = 0;
-  SgArrayType*        ary = 0;
   
   xe::DOMNode* child=node->getFirstChild();
   while(child) {
@@ -404,34 +400,12 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 	typ = isSgType(astchild);
 
       if(typ){
-	SgType* etype = si::getElementType(typ);
-	//if(etype) ret->set_base_type(etype);
-	//else 
 	ret->set_base_type(typ);
       }
-#if 0
-      if( (mdf==0) && (tdf==0) && (ptr==0) && (ary==0) ){
-	ret->set_base_type( typ );
-	mdf = isSgModifierType(astchild);
-	tdf = isSgTypedefType(astchild);
-	ary = isSgArrayType(astchild);
-	ptr = isSgPointerType(astchild);
-	if( tdf )
-	  break;
-      }
-      else {
-	if( mdf )
-	  mdf->set_base_type( typ );
-	if( ptr )
-	  ptr->set_base_type( typ );
-	if( ary )
-	  ary->set_base_type( typ );
-      }
-#endif
     }
     child=child->getNextSibling();
   }
-  if(ret==0) ABORT();
+  if(ret==0) XEV_ABORT();
   ret->set_parent(astParent);
   return ret;
 }
@@ -472,9 +446,9 @@ XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
       ret->set_type_kind( v );
     }
   }
-  else ABORT();
+  else XEV_ABORT();
 
-  if(ret==0) ABORT();
+  if(ret==0) XEV_ABORT();
   ret->set_parent(astParent);
   return ret;
 }
@@ -515,9 +489,9 @@ XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
     }
 
   }
-  else ABORT();
+  else XEV_ABORT();
 
-  if(ret==0) ABORT();
+  if(ret==0) XEV_ABORT();
   ret->set_parent(astParent);
   return ret;
 }

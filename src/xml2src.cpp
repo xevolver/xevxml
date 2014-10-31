@@ -51,7 +51,7 @@ int main(int argc, char** argv)
   }
   XevXML::XevInitialize();
   if( XevXML::XevConvertXmlToAst(istr,&prj, NULL) == false ){
-    ABORT();
+    XEV_ABORT();
   }
   else {
     prj->get_file(0).set_unparse_output_filename(fn);

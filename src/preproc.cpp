@@ -69,7 +69,7 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
     if(posatt)
       typ << xe::XMLString::transcode(posatt->getNodeValue());
   }
-  else ABORT();
+  else XEV_ABORT();
   
   if(pos.str().size() && typ.str().size()){
     int pval,tval;
@@ -83,7 +83,7 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
     si::attachArbitraryText(isSgLocatedNode(astParent),content,
 				       (PreprocessingInfo::RelativePositionType)pval);
   }
-  else ABORT();
+  else XEV_ABORT();
   
   return 0;
 }

@@ -66,7 +66,7 @@ void XmlInitialize(void)
   }
   catch (const xe::XMLException& toCatch) {
     // Do your failure processing here
-    ABORT();
+    XEV_ABORT();
   }
   return;
 }
