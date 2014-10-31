@@ -333,14 +333,15 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     }
     
     if( idx ){
-      v= new SgUnsignedLongVal( idx,str2 );
-      v->set_startOfConstruct( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
+      v= new SgUnsignedLongVal( DEFAULT_FILE_INFO, idx);
+      v->set_startOfConstruct(DEFAULT_FILE_INFO);
       ret->set_index(v);
+      v->set_parent(ret);
     }
   }
   else{
     xe::DOMNode*                    child=node->getFirstChild();
-    SgExprListExp*                  lst;
+    SgExprListExp*                  lst=0;
     std::vector< SgExpression * >   exprs;
 
     while(child){
@@ -348,12 +349,14 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 	SgNode* astchild = this->visit(child,ret);
 	if(typ==0) 
 	  typ = isSgType(astchild);
-	
+	/*
 	if((exp = isSgExpression(astchild))!=0){
-	  exp->set_startOfConstruct(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
+	  exp->set_startOfConstruct(DEFAULT_FILE_INFO);
 	  exprs.push_back(exp);
 	}
-
+	*/
+	if(lst==0)
+	  lst = isSgExprListExp(astchild);
       }
       child=child->getNextSibling();
     }
@@ -362,20 +365,23 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
       if(ret==0) ABORT();
       ret->set_base_type( typ );
       typ->set_parent(ret);
+      ret->set_parent(astParent);
     }
     else ABORT();
-    if(rnk){
-      if(exprs.size() != (size_t)rnk) ABORT();
+    if(rnk == lst->get_expressions().size()){
+      //if(exprs.size() != (size_t)rnk) ABORT();
       ret->set_rank( rnk );
-      lst=sb::buildExprListExp( exprs );
+      //lst=sb::buildExprListExp( exprs );
       lst->set_parent(ret);
-      //std::cerr << lst->unparseToCompleteString() << std::endl;
-      for(size_t i=0;i<exprs.size();i++)
-	exprs[i]->set_parent(lst);
+      //std::cerr <<  lst->unparseToCompleteString() << ret->get_base_type()->class_name() << std::endl;
+      //for(size_t i=0;i<exprs.size();i++)
+      //exprs[i]->set_parent(lst);
       ret->set_dim_info( lst );
+
     }
+    else ABORT();
   }
-  ret->set_parent(astParent);
+
   return ret;
 }
 
@@ -393,8 +399,17 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){
       SgNode* astchild = this->visit(child,ret);
-      typ = isSgType(astchild);
-      
+
+      if(typ==0)
+	typ = isSgType(astchild);
+
+      if(typ){
+	SgType* etype = si::getElementType(typ);
+	//if(etype) ret->set_base_type(etype);
+	//else 
+	ret->set_base_type(typ);
+      }
+#if 0
       if( (mdf==0) && (tdf==0) && (ptr==0) && (ary==0) ){
 	ret->set_base_type( typ );
 	mdf = isSgModifierType(astchild);
@@ -412,10 +427,10 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 	if( ary )
 	  ary->set_base_type( typ );
       }
+#endif
     }
     child=child->getNextSibling();
   }
-
   if(ret==0) ABORT();
   ret->set_parent(astParent);
   return ret;

@@ -115,10 +115,9 @@ int main(int argc, char** argv)
 
   fd = dup(fileno(stdout)); 
   dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr  
-
   sageProject = frontend(args); // build an ROSE AST from a code
   //SgProject::set_verbose(10);
-  
+
 #ifdef XEV_USE_ROSEHPCT
   if(opt.rosehpct)
     RoseHPCT::attachMetrics (opt.profiles, 

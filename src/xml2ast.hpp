@@ -371,7 +371,7 @@ public:
       if(p==0) {
 	std::cerr << n->class_name() << ": ";
 	std::cerr << n->unparseToString()	<< " \n";
-	ABORT();
+	XEV_ABORT();
       }
       //cerr << n->unparseToString();
     }
@@ -426,7 +426,7 @@ public:
     SgScopeStatement* scope = isSgScopeStatement(n);
     if(scope){
       SgSymbolTable* tbl = scope->get_symbol_table();
-      if(tbl==0) ABORT();
+      if(tbl==0) XEV_ABORT();
       printf("\n Symbol table of %s (parent=%s)\n", 
 	     n->class_name().c_str(),n->get_parent()->class_name().c_str());
       printf("=== BEGIN ====\n");
@@ -440,6 +440,17 @@ public:
     return NULL;
   }
 };
+
+class CheckUndeclVars
+{
+public:
+  CheckUndeclVars(){}
+  ~CheckUndeclVars(){}
+  void visit(SgNode*);
+};
+
+
+#define DEFAULT_FILE_INFO (Sg_File_Info::generateDefaultFileInfoForTransformationNode())
 
 }
 

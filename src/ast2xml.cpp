@@ -50,7 +50,7 @@ namespace XevXML {
   {
     XevAstVisitor visitor(sstr);
     if(prj == 0 || *prj == 0 ){
-      WARN("Invalid SgProject object. Conversion failed.");
+      XEV_WARN("Invalid SgProject object. Conversion failed.");
       return false;
     }
     SgProject* p = *prj;
@@ -275,7 +275,7 @@ static void writeTypesRecursive(stringstream& sstr,
     SgUnsignedLongVal* ul = isSgUnsignedLongVal( isSgArrayType(t)->get_index() );
     sstr << " rank=\"" << isSgArrayType(t)->get_rank() << "\" ";
     if( ul )
-      sstr << " index=\"" << ul->get_valueString() << "\" ";
+      sstr << " index=\"" << ul->get_value() << "\" ";
     //else
     //sstr << " index=\"\" ";
     
@@ -318,14 +318,8 @@ static void writeTypesRecursive(stringstream& sstr,
     
     if( s == "SgArrayType" ) { 
       SgExprListExp* lste = isSgArrayType(t)->get_dim_info();
-      if( lste ) {
-        XevAstVisitorInternal visitor(sstr);
-        SgExpressionPtrList& lst = lste->get_expressions();
-        for(size_t i=0;i<lst.size();i++){
-          visitor.traverse(lst[i],help);
-          //writeTypesRecursive(sstr,isSgType(lst[i]), att,true);
-        }
-      }
+      XevAstVisitorInternal visitor(sstr);
+      visitor.traverse(lste,help);
     }
     
     if( s == "SgFunctionType" ) { 
