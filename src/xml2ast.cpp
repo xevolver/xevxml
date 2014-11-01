@@ -765,6 +765,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       varList[i]->set_parent(ret);
       varList[i]->set_declptr(ret);
       varList[i]->set_scope(name->get_scope());
+      //varList[i]->set_scope(sb::topScopeStack());
       //varList[i]->set_type(name->get_type());
     }
   }
@@ -914,9 +915,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   SgProcedureHeaderStatement*     ret = 0;
   SgFunctionType*                 typ = 0;
   SgFunctionParameterList*        lst = 0;
-  // the scope must be SgGlobal of this SgProject.
-  SgScopeStatement*               scope = isSgScopeStatement(_file->get_globalScope());
-  //SgScopeStatement*               scope = sb::topScopeStack();
+  SgScopeStatement*               scope = 0;
   SgBasicBlock*                   def = 0;
   SgFunctionDefinition*           fdf = 0;
   SgInitializedName*              var = 0;
@@ -926,7 +925,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   bool                            f_pure  = false;
   bool                            f_elem  = false;
   bool                            f_recur = false;
-  Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  Sg_File_Info* info = DEFAULT_FILE_INFO;
   info->setOutputInCodeGeneration();
 
   XmlGetAttributeValue(node,"name",&name);
@@ -951,6 +950,9 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     }
   SUBTREE_VISIT_END();
 #endif
+  // the scope must be SgGlobal of this SgProject.
+  scope = isSgScopeStatement(_file->get_globalScope());
+
   xe::DOMNode* cld_ = (node)->getFirstChild();
   while(cld_) {
     if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
@@ -969,7 +971,6 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     }
     cld_=cld_->getNextSibling();
   }
-
   
   if(lst && typ){
     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
@@ -991,6 +992,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     var->set_scope(sb::topScopeStack());
   }
   ret->set_scope(sb::topScopeStack());
+  //ret->set_scope(scope); // s020.f90 does not work with this.
   ret->set_parent(astParent);
 
   cld_ = (node)->getFirstChild();
@@ -1619,7 +1621,7 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
       //scope->get_symbol_table()->print();
       XEV_ABORT();
     }
-    else {
+    else  {
       // implicit variables
       scope = si::getEnclosingProcedure (sb::topScopeStack());
       if(scope==0) scope = _file->get_globalScope();
@@ -2263,6 +2265,8 @@ XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName*        inam  = 0;
   SgInitializedNamePtrList  lst;
 
+  ret->set_parent(astParent);
+  ret->set_definingDeclaration(ret);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)      
     {
       if((inam = isSgInitializedName(astchild))!=0)
@@ -2398,7 +2402,7 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   
   ret = sb::buildClassDeclaration( SgName(name.c_str()), scope );
   ret->set_class_type( (SgClassDeclaration::class_types)typ  );
-  
+  ret->set_parent(astParent);  
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==0 )
@@ -2409,7 +2413,11 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   ret->set_definition( exp );
   if(exp)
     exp->set_declaration(ret);
-  if(ret) ret->set_parent(astParent);
+
+  SgClassSymbol* csym = si::lookupClassSymbolInParentScopes(name);
+  if(csym) 
+    ret->set_firstNondefiningDeclaration(csym->get_declaration());
+
   else XEV_ABORT();
   return ret;
 }
@@ -2480,13 +2488,18 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   if(csym)
     ds = isSgDeclarationStatement( csym->get_declaration() );
   else {
+    //XEV_WARN("undeclared class object found"); // this is not an error
     SgClassDeclaration* dec 
       = sb::buildClassDeclaration( SgName(name.c_str()), sb::topScopeStack() );
     dec->set_class_type( (SgClassDeclaration::class_types)typ  );
+    dec->set_parent(sb::topScopeStack());
+    dec->set_firstNondefiningDeclaration(dec);
     ds = isSgDeclarationStatement( dec );
     ds->setForward();
+    csym = new SgClassSymbol(dec);
+    sb::topScopeStack()->insert_symbol(name,csym);
   }
-  //if(ds==0) XEV_ABORT();
+  XEV_ASSERT(ds!=NULL);
   //SgDeclarationStatement* ds = isSgDeclarationStatement( dec );
   //  ds->setForward();
   ret = new SgClassType( ds );
@@ -2508,6 +2521,7 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
   
   XmlGetAttributeValue(node,"tag_name",&name);
 
+
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if(typ==0)
@@ -2520,18 +2534,16 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
   if(cls) {
     SgType * type = cls->get_type();
     SgNamedType *namedType = isSgNamedType(type->findBaseType());
-    cls->set_parent( type );
     namedType->get_declaration()->set_definingDeclaration(cls);
     namedType->set_declaration (cls);
     ret = sb::buildTypedefDeclaration( name.c_str(), 
                                        namedType,
                                        sb::topScopeStack());
-
-    ret->set_declaration( isSgDeclarationStatement(cls) );
+    XEV_ASSERT(ret!=NULL);
     cls->set_parent(ret);
+    ret->set_declaration( isSgDeclarationStatement(cls) );
     ret->set_requiresGlobalNameQualificationOnType(true);
     ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
-
   }
   else {                                            // add (0819)
     ret = sb::buildTypedefDeclaration( name.c_str(), 
@@ -3287,7 +3299,11 @@ XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astPare
 
   ret = new SgInterfaceStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
          	 SgName( name.c_str() ),(SgInterfaceStatement::generic_spec_enum)typ );
-  
+
+  ret->set_generic_spec( (SgInterfaceStatement::generic_spec_enum) typ );
+  ret->set_parent(astParent);
+  ret->set_definingDeclaration(ret);
+
   SUBTREE_VISIT_BEGIN(node,astchild,ret)    
     {
       bdy = isSgInterfaceBody(astchild);
@@ -3298,8 +3314,6 @@ XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astPare
     }
   SUBTREE_VISIT_END();
 
-  ret->set_generic_spec( (SgInterfaceStatement::generic_spec_enum) typ );
-  ret->set_parent(astParent);
   return ret;
 }
 
@@ -3968,40 +3982,24 @@ XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
   SgClassDefinition*          exp = 0;
   SgScopeStatement* scope = sb::topScopeStack();    //?
   //SgScopeStatement* scope = sb::ScopeStack.front();
-  
+  SgDerivedTypeStatement*     nondefn = 0;  
   string                      name;
   int                         typ=0;
   
   XmlGetAttributeValue(node,"tag_name",&name);
   XmlGetAttributeValue(node,"type",&typ);
-  
-  ret = new SgDerivedTypeStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
-				   name.c_str(),SgClassDeclaration::e_struct,NULL,NULL );
 
-  ret->set_definingDeclaration(ret);
-  SgDerivedTypeStatement* nondefiningClassDeclaration = 
-    new SgDerivedTypeStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode(),
-			       name.c_str(),SgClassDeclaration::e_struct,NULL,NULL);
-  nondefiningClassDeclaration->set_parent(scope);
-  
-  if (nondefiningClassDeclaration->get_type () == NULL) 
-    nondefiningClassDeclaration->set_type (SgClassType::createType(nondefiningClassDeclaration));
-  ret->set_type(nondefiningClassDeclaration->get_type());
-  ret->set_firstNondefiningDeclaration(nondefiningClassDeclaration);
-  
-  nondefiningClassDeclaration->set_firstNondefiningDeclaration(nondefiningClassDeclaration);
-  nondefiningClassDeclaration->set_definingDeclaration(ret);
-  
-  nondefiningClassDeclaration->setForward();
-  ret->set_scope(scope);
-  nondefiningClassDeclaration->set_scope(scope);
+  SgClassSymbol* newsym = 0;
+  SgClassSymbol* sym = si::lookupClassSymbolInParentScopes(name);
+  ret = new SgDerivedTypeStatement(DEFAULT_FILE_INFO,
+				   name,SgClassDeclaration::e_struct,NULL,NULL );
   ret->set_parent(scope);
-  
-  //SgClassSymbol* classSymbol = new SgClassSymbol(nondefiningClassDeclaration);
-  SgClassSymbol* classSymbol = new SgClassSymbol(ret);
-  
-  scope->insert_symbol(name,classSymbol);
-  
+  ret->set_scope(scope);
+
+  if(sym==NULL) {
+    newsym = new SgClassSymbol(ret);
+    scope->insert_symbol(name,newsym);
+  }
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==0 )
@@ -4010,14 +4008,47 @@ XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   if(exp){
-    //classSymbol->set_declaration(ret);
     ret->set_definition(exp);
     ret->set_definingDeclaration(ret);
     exp->setCaseInsensitive(true);
     exp->set_parent(ret);
     exp->set_declaration(ret);
+
+    if(sym==NULL){ // this is the first decl.
+      nondefn = new SgDerivedTypeStatement(DEFAULT_FILE_INFO,
+					   name,SgClassDeclaration::e_struct,NULL,NULL );
+      nondefn->set_parent(scope);
+      nondefn->set_scope(scope);
+      nondefn->set_firstNondefiningDeclaration(nondefn);
+      nondefn->setForward();
+      nondefn->set_definition(exp);
+      newsym->set_declaration(nondefn);
+      ret->set_firstNondefiningDeclaration(nondefn);
+    }
+    else{
+      SgClassDeclaration* firstnondefn 
+	= isSgClassDeclaration(sym->get_declaration());
+      XEV_ASSERT(firstnondefn!=NULL);
+      ret->set_firstNondefiningDeclaration(firstnondefn);
+      firstnondefn->set_definition(exp);
+    }
+  }
+  else if(sym==NULL){ // this is the first decl.
+    ret->set_definition(NULL);
+    ret->set_definingDeclaration(NULL);
+    ret->set_firstNondefiningDeclaration(ret);
+    ret->setForward();
+    newsym->set_declaration(ret);
   }
 
+  if (ret->get_type () == NULL) {
+    if(nondefn!=NULL){
+      nondefn->set_type (SgClassType::createType(nondefn));
+      ret->set_type (nondefn->get_type());
+    }
+    else
+      ret->set_type (SgClassType::createType(ret));
+  }
   return ret;
 }
 
