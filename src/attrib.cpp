@@ -166,6 +166,7 @@ static void attribSgVariableDeclaration(stringstream& istr,SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
   if(n) {
+#if 0
     SgStorageModifier m = (n->get_declarationModifier()).get_storageModifier();
     unsigned long mod = 0;
     if(m.isUnknown() )
@@ -211,7 +212,7 @@ static void attribSgVariableDeclaration(stringstream& istr,SgNode* node)
     if(n->get_declarationModifier().get_typeModifier().isValue())
       mod |= (1U << 20);
     istr << " modifier=\"" << mod << "\" ";
-
+#endif
     SgUnsignedLongVal *bit = n->get_bitfield();
     if( bit )
       istr << " bitfield=\"" << bit->get_value() << "\" ";
@@ -224,6 +225,7 @@ static void attribSgFunctionDeclaration(stringstream& istr,SgNode* node)
   if(n) {
     SgStorageModifier m = (n->get_declarationModifier()).get_storageModifier();
     istr << " name=" << n->get_name() << " ";
+#if 0
     unsigned long mod = 0U;
 
     if(m.isUnknown() )
@@ -239,7 +241,7 @@ static void attribSgFunctionDeclaration(stringstream& istr,SgNode* node)
     if(m.isTypedef())
       mod |= (1U<<5);
     istr << " modifier=\"" << mod << "\" ";
-
+#endif
     istr << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
   }
 }
@@ -814,6 +816,33 @@ static void attribSgEntryStatement(stringstream& istr, SgNode* node)
   }
 }
 
+static void attribSgDeclarationStatement(stringstream& istr, SgNode* node)
+{
+  SgDeclarationStatement* decl = isSgDeclarationStatement(node);
+  if(decl==NULL) return;
+
+  SgDeclarationModifier& modifier = decl->get_declarationModifier();
+  unsigned long mod = 0;
+  SgBitVector vec = modifier.get_modifierVector();
+  for(size_t i(0);i<vec.size();i++){
+    mod |= (((unsigned int)vec[i]) << i );
+  }
+  istr << " declaration_modifier=\"" << mod << "\" ";
+  mod = 0;
+  vec = modifier.get_typeModifier().get_modifierVector();
+  for(size_t i(0);i<vec.size();i++){
+    mod |= (((unsigned int)vec[i]) << i );
+  }
+  istr << " type_modifier=\"" << mod << "\" ";
+
+  if(modifier.get_typeModifier().get_constVolatileModifier().get_modifier() 
+     != SgConstVolatileModifier::e_default)
+    istr << " cv_modifier=\"" <<  modifier.get_typeModifier().get_constVolatileModifier().get_modifier()<< "\" ";
+  if( SageInterface::is_C_language() == false )
+    istr << " access_modifier=\"" <<  modifier.get_accessModifier().get_modifier()<< "\" ";
+  if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default)
+    istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
+}
 
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     XevXML::XevConversionHelper* help)
@@ -867,5 +896,6 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgEntryStatement(istr,node);
 
   attribSgExpression(istr,node);
+  attribSgDeclarationStatement(istr,node);
   return;
 }

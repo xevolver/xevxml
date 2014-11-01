@@ -349,7 +349,7 @@ public:
   void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
   void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
   void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);
-  void checkFunctDecl  (xercesc::DOMNode* node, SgNode* astNode);
+  void checkDeclStmt  (xercesc::DOMNode* node, SgNode* astNode);
 
   //SgFile* getSgFile() {return _file;}
   SgProject* getSgProject() {return _prj;}
