@@ -67,7 +67,7 @@
 											<SgVarRefExp name="n" />
 											<SgIntVal value="1" />
 										</SgSubtractOp>
-										<SgIntVal value="4" />
+										<SgIntVal value="2" />
 										<SgBasicBlock>
 											<SgExprStatement>
 												<SgAssignOp>
@@ -108,58 +108,6 @@
 															<SgAddOp>
 																<SgVarRefExp name="i" />
 																<SgIntVal value="1" />
-															</SgAddOp>
-															<SgVarRefExp name="j" />
-															<SgVarRefExp name="k" />
-														</SgExprListExp>
-													</SgPntrArrRefExp>
-												</SgAssignOp>
-											</SgExprStatement>
-											<SgExprStatement>
-												<SgAssignOp>
-													<SgPntrArrRefExp>
-														<SgVarRefExp name="B" />
-														<SgExprListExp>
-															<SgAddOp>
-																<SgVarRefExp name="i" />
-																<SgIntVal value="2" />
-															</SgAddOp>
-															<SgVarRefExp name="j" />
-															<SgVarRefExp name="k" />
-														</SgExprListExp>
-													</SgPntrArrRefExp>
-													<SgPntrArrRefExp>
-														<SgVarRefExp name="A" />
-														<SgExprListExp>
-															<SgAddOp>
-																<SgVarRefExp name="i" />
-																<SgIntVal value="2" />
-															</SgAddOp>
-															<SgVarRefExp name="j" />
-															<SgVarRefExp name="k" />
-														</SgExprListExp>
-													</SgPntrArrRefExp>
-												</SgAssignOp>
-											</SgExprStatement>
-											<SgExprStatement>
-												<SgAssignOp>
-													<SgPntrArrRefExp>
-														<SgVarRefExp name="B" />
-														<SgExprListExp>
-															<SgAddOp>
-																<SgVarRefExp name="i" />
-																<SgIntVal value="3" />
-															</SgAddOp>
-															<SgVarRefExp name="j" />
-															<SgVarRefExp name="k" />
-														</SgExprListExp>
-													</SgPntrArrRefExp>
-													<SgPntrArrRefExp>
-														<SgVarRefExp name="A" />
-														<SgExprListExp>
-															<SgAddOp>
-																<SgVarRefExp name="i" />
-																<SgIntVal value="3" />
 															</SgAddOp>
 															<SgVarRefExp name="j" />
 															<SgVarRefExp name="k" />

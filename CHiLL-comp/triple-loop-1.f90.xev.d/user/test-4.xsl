@@ -15,13 +15,17 @@
 				</xsl:comment>
 
 				<xsl:variable name="step1">
-					<xsl:apply-templates select="." mode="find_loop">
+					<xsl:comment>
+						test-4.xsl step1
+					</xsl:comment>
+					<xsl:apply-templates select="."
+						mode="find_loop_and_unroll">
 					</xsl:apply-templates>
 				</xsl:variable>
 
 				<xsl:apply-templates select="exslt:node-set($step1)"
 					mode="chill_unroll_jam">
-					<xsl:with-param name="max" select="4" />
+					<xsl:with-param name="max" select="2" />
 					<xsl:with-param name="var" select="'k'" />
 				</xsl:apply-templates>
 			</xsl:when>
@@ -37,26 +41,26 @@
 	</xsl:template>
 
 
-	<xsl:template match="*" mode="find_loop">
+	<xsl:template match="*" mode="find_loop_and_unroll">
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
 				<xsl:apply-templates select="." mode="chill_unroll">
-					<xsl:with-param name="max" select="4" />
+					<xsl:with-param name="max" select="2" />
 					<xsl:with-param name="var" select="'i'" />
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="find_loop" />
+					<xsl:apply-templates mode="find_loop_and_unroll" />
 				</xsl:copy>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="SgPragmaDeclaration" mode="find_loop">
+	<xsl:template match="SgPragmaDeclaration" mode="find_loop_and_unroll">
 	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="find_loop">
+	<xsl:template match="PreprocessingInfo" mode="find_loop_and_unroll">
 	</xsl:template>
 
 </xsl:stylesheet>
