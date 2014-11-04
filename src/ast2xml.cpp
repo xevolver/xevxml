@@ -96,7 +96,7 @@ static bool hasInternalNode(SgNode* n)
   if(isSgFormatStatement(n))
     return true;
 
-  if(isSgInterfaceBody(n))  
+  if(isSgInterfaceBody(n) && isSgInterfaceBody(n)->get_use_function_name()==false)
     return true;
 
   if(isSgNamelistStatement(n))
@@ -506,8 +506,8 @@ static void writeInternalNode(stringstream& sstr,
     for(size_t i=0;i<lst.size();i++)
       visitor.traverse(lst[i],help);
   }
-
-  else if(isSgInterfaceBody(n)){  
+  
+  else if(isSgInterfaceBody(n) && isSgInterfaceBody(n)->get_use_function_name() ==false ){  
     visitor.traverse(isSgInterfaceBody(n)->get_functionDeclaration(),help);
   }
 

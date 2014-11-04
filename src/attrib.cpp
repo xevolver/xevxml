@@ -546,9 +546,7 @@ static void attribSgInterfaceBody(stringstream& istr,SgNode* node)
   SgInterfaceBody* n = isSgInterfaceBody(node);
 
   if(n) {
-    if( n->get_use_function_name() ==false)
-      istr << " fnc_name=\"\" ";
-    else
+    if( n->get_use_function_name() == true )
       istr << " fnc_name=" << n->get_function_name() << " ";
   }
 }
