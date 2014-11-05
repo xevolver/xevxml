@@ -531,12 +531,12 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
     bool found = false;
     if(ini){
-      //XEV_WARN("variable found");
+      //XEV_WARN("result variable found");
       found = true;
       ini->set_declptr(fdecl); 
     }
     else {
-      //XEV_WARN("variable not found");
+      //XEV_WARN("result variable not found");
       ini = sb::buildInitializedName(rname,fdecl->get_type()->get_return_type());
       ini->set_parent(fdecl);
       //ini->set_definition(fdf);
@@ -806,7 +806,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     }
   }
   else XEV_ABORT();
-#if 0
+#if 1
   bool isFortranParameter = false;
   // See buildVariableDeclaration
   if (ret->get_scope() && si::is_Fortran_language()){
@@ -822,7 +822,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 	  SgInitializedName * new_initName = v_symbol->get_declaration();
 	  SgInitializedNamePtrList&  n_list= ret->get_variables();
 	  std::replace (n_list.begin(), n_list.end(),default_initName, new_initName );
-	  
+	  XEV_WARN("replace:" << name->get_name());
 	  SgNode * old_parent = new_initName->get_parent();
 	  if(old_parent==0 || isSgFunctionParameterList(old_parent)==0) XEV_ABORT();
 	  new_initName->set_parent(ret); 
@@ -1018,6 +1018,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     lst->set_parent(ret);
   }
   else XEV_ABORT();
+
   if(var){
     var->set_parent(ret);
     var->set_scope(scope); // is this OK??
@@ -1058,10 +1059,45 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
     if(ini){
       ini->set_declptr(ret);
-      // remove type description before the function name
+      // This will remove type description before the function name
       ret->get_type()->set_return_type(SgTypeVoid::createType());
     }
     var->set_scope(fdf);
+
+#if 1
+    SgBasicBlock* body = fdf->get_body();
+    XEV_ASSERT(body!=NULL);
+    if(lst && si::is_Fortran_language()==true){
+      for(size_t i(0);i<lst->get_args().size();i++){
+	ini = lst->get_args()[i];
+	ini->set_parent(fdf);
+	XEV_ASSERT(body!=NULL);
+	SgVariableSymbol* sym = body->lookup_variable_symbol(ini->get_name());
+	if(sym!=NULL){
+	  ini->set_scope(body);
+	  ini->set_type(sym->get_type());
+	  ini->set_declptr(sym->get_declaration()->get_declptr());
+	}
+	else{
+	  SgVariableSymbol* vsym = new SgVariableSymbol(ini);
+	  fdf->insert_symbol(ini->get_name(),vsym);
+	  ini->set_scope(fdf);
+	  //ini->set_type(sym->get_type());
+	}
+      }
+    } // if lst 
+#endif
+    if( isSgClassType(typ->get_return_type()) ){
+      XEV_WARN("hoge");
+      SgClassType* ctyp = isSgClassType(typ->get_return_type());
+      SgClassSymbol* csym 
+	= si::lookupClassSymbolInParentScopes(ctyp->get_name(),body);
+      body->get_symbol_table()->print();
+      if(csym!=NULL){
+	XEV_WARN("hoge");
+	ctyp->set_declaration(csym->get_declaration());
+      }
+    }
   }
   else XEV_ABORT();
   
@@ -1072,9 +1108,6 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
   if(f_recur)
     ret->get_functionModifier().setRecursive();
   ret->set_parent(astParent);
-
-  //XevXML::PrintSymTable symtbl;
-  //symtbl.visit(&((_prj)->get_file(0)));
 
   return ret;
 }
@@ -1087,7 +1120,7 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if((ini = isSgInitializedName(astchild)) != 0 ){
+      if((ini = isSgInitializedName(astchild)) != NULL ){
 	si::appendArg(ret,ini);
 	ini->set_scope(sb::topScopeStack());
       }
@@ -1818,11 +1851,12 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   //  typ = isSgArrayType(typ)->get_base_type();
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
   ret->set_parent(astParent);
-  ret->set_scope(sb::topScopeStack());// NG for s009 but needed by s005
+  ret->set_scope(sb::topScopeStack());// This was NG for s009 but needed by s005
   if(typ) {
     typ->set_parent(ret); // this must be true
   }
   if(ini) ini->set_parent(ret);
+
   return ret;
 }
 
@@ -2437,9 +2471,9 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   if(csym==NULL) {
     nondefn = sb::buildClassDeclaration( SgName(name.c_str()), scope );
     nondefn->set_firstNondefiningDeclaration(nondefn);
-    nondefn->set_class_type( (SgClassDeclaration::class_types)typ  );
     nondefn->set_definition(NULL);
     nondefn->set_definingDeclaration(NULL);
+    nondefn->set_class_type( (SgClassDeclaration::class_types)typ  );
     nondefn->set_parent(scope);
     nondefn->set_scope(scope);
     csym = new SgClassSymbol(nondefn);
@@ -2449,18 +2483,21 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     nondefn = csym->get_declaration();
     nondefn->set_firstNondefiningDeclaration(nondefn);
     nondefn->set_definition(NULL);
+    nondefn->set_definingDeclaration(NULL);
     nondefn->set_class_type( (SgClassDeclaration::class_types)typ  );
   }
+  /*
   ret = sb::buildClassDeclaration( SgName(name.c_str()), scope );
   ret->set_class_type( (SgClassDeclaration::class_types)typ  );
-  /*
+  */
   ret = new SgClassDeclaration( DEFAULT_FILE_INFO, name, 
 				(SgClassDeclaration::class_types)typ, 
 				SgClassType::createType(nondefn));
-  */
+
   ret->set_parent(astParent);  
   ret->set_scope(scope);
   ret->set_firstNondefiningDeclaration(nondefn);
+  XEV_WARN("nondefn: " << nondefn << " ret " << ret);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==NULL )
@@ -2545,27 +2582,32 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   if(csym)
     ds = isSgDeclarationStatement( csym->get_declaration() );
   else {
-    //XEV_WARN("undeclared class object found"); // this is not an error
-    SgScopeStatement* scope = sb::topScopeStack();
     //SgScopeStatement* scope = si::getEnclosingProcedure (sb::topScopeStack());
     //if(scope==NULL) scope = _file->get_globalScope();
+
+    // A dummy object is created and is not registered in the symbol table.
+    // It is not used by other objects. It is put on the current scope.
+    SgScopeStatement* scope = sb::topScopeStack();
     SgClassDeclaration* dec 
-      = sb::buildClassDeclaration( SgName(name.c_str()), scope );
+      = new SgClassDeclaration(DEFAULT_FILE_INFO); //don't use high-level build function
+
     dec->set_class_type( (SgClassDeclaration::class_types)typ  );
+    dec->set_name(name);
     dec->set_parent(scope);
-    dec->set_firstNondefiningDeclaration(dec);
+    dec->set_scope(scope);
+    dec->set_firstNondefiningDeclaration(NULL);
     dec->set_definition(NULL);
     dec->set_definingDeclaration(NULL);
     ds = isSgDeclarationStatement( dec );
     ds->setForward();
+#if 0
+    // don't insert symbol!
     csym = new SgClassSymbol(dec);
     scope->insert_symbol(name,csym);
+#endif
   }
   XEV_ASSERT(ds!=NULL); 
-  //SgDeclarationStatement* ds = isSgDeclarationStatement( dec );
-  //  ds->setForward();
   ret = new SgClassType( ds );
-//ds->set_parent(ret);
   ret->set_parent(astParent);
   return ret;
 }

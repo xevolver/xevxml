@@ -434,8 +434,9 @@ public:
       printf("===  END  ====\n");
     }
     for(size_t i(0);i<n->get_numberOfTraversalSuccessors();++i){
-      if(n->get_traversalSuccessorByIndex(i))
-	this->visit(n->get_traversalSuccessorByIndex(i));
+      SgNode* child = n->get_traversalSuccessorByIndex(i);
+      if(child!=NULL)
+	this->visit(child);
     }
     return NULL;
   }
