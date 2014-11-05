@@ -2469,13 +2469,15 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
 
   SgClassSymbol* csym = si::lookupClassSymbolInParentScopes(name);
   if(csym==NULL) {
-    nondefn = sb::buildClassDeclaration( SgName(name.c_str()), scope );
+    nondefn = new SgClassDeclaration( DEFAULT_FILE_INFO, name, 
+				      (SgClassDeclaration::class_types)typ); 
     nondefn->set_firstNondefiningDeclaration(nondefn);
     nondefn->set_definition(NULL);
     nondefn->set_definingDeclaration(NULL);
     nondefn->set_class_type( (SgClassDeclaration::class_types)typ  );
     nondefn->set_parent(scope);
     nondefn->set_scope(scope);
+    nondefn->set_type(SgClassType::createType(nondefn));
     csym = new SgClassSymbol(nondefn);
     scope->insert_symbol(name,csym);
   }
@@ -2595,7 +2597,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     dec->set_name(name);
     dec->set_parent(scope);
     dec->set_scope(scope);
-    dec->set_firstNondefiningDeclaration(NULL);
+    dec->set_firstNondefiningDeclaration(dec);
     dec->set_definition(NULL);
     dec->set_definingDeclaration(NULL);
     ds = isSgDeclarationStatement( dec );
@@ -2639,7 +2641,8 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
     SgType * type = cls->get_type();
     SgNamedType *namedType = isSgNamedType(type->findBaseType());
     namedType->get_declaration()->set_definingDeclaration(cls);
-    namedType->set_declaration (cls);
+    // for s010.c  to pass runAllTests
+    namedType->set_declaration (cls->get_firstNondefiningDeclaration());
     ret = sb::buildTypedefDeclaration( name.c_str(), 
                                        namedType,
                                        sb::topScopeStack());
@@ -2649,6 +2652,9 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
     ret->set_requiresGlobalNameQualificationOnType(true);
     if(cls->get_definingDeclaration() == cls )
       ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
+    SgClassType* ctyp = isSgClassType(typ);
+    XEV_ASSERT(ctyp!=NULL);
+    ctyp->set_declaration(cls->get_firstNondefiningDeclaration());
   }
   else if(typ) {                                         // add (0819)
     ret = sb::buildTypedefDeclaration( name.c_str(), 
@@ -2656,6 +2662,7 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
                                        sb::topScopeStack());
   }
   else XEV_ABORT();
+
   ret->set_parent(astParent);
   return ret;
 }
