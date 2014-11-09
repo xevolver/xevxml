@@ -363,8 +363,8 @@ static SgType* hasType(SgNode* node)
     //return isSgInitializedName(node)->get_type();
     return isSgInitializedName(node)->get_typeptr();
   else if (isSgFunctionDeclaration(node)) {
-    return isSgFunctionDeclaration(node)->get_type();
-    //return isSgFunctionDeclaration(node)->get_type()->get_return_type();
+    //return isSgFunctionDeclaration(node)->get_type();
+    return isSgFunctionDeclaration(node)->get_type()->get_return_type();
   }
   else if (isSgCastExp(node)) 
     return isSgCastExp(node)->get_type();

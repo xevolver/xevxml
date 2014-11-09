@@ -464,6 +464,8 @@ static void attribSgWriteStatement(stringstream& istr,SgNode* node)
       istr << " rec=\"1\"";
     if( n->get_err() )
       istr << " err=\"1\"";
+    if( n->get_namelist() )
+      istr << " nml=\"1\"";
   }
 }
 
@@ -842,6 +844,16 @@ static void attribSgDeclarationStatement(stringstream& istr, SgNode* node)
     istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
 }
 
+static void attribSgLocatedNode(stringstream& istr, SgNode* node)
+{
+  SgLocatedNode* loc = isSgLocatedNode(node);
+  if(loc){
+    istr << " file_info=\"" << loc->get_file_info()->get_file_id()
+	 << " " << loc->get_file_info()->get_raw_line()
+	 << " " << loc->get_file_info()->get_raw_col() << "\" ";
+  }
+}
+
 void writeXmlAttribs(stringstream& istr,SgNode* node,
 		     XevXML::XevConversionHelper* help)
 {
@@ -895,5 +907,6 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
 
   attribSgExpression(istr,node);
   attribSgDeclarationStatement(istr,node);
+  attribSgLocatedNode(istr,node);
   return;
 }
