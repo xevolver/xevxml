@@ -145,4 +145,20 @@ bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, std::string
   return false;
 }
 
+string XmlGetNodePosition(xercesc::DOMNode* node)
+{
+  char* buf;
+  string path;
+
+  while(node!=NULL){
+    buf = xercesc::XMLString::transcode(node->getNodeName());
+    path = '/' + path;
+    path = buf + path;
+    xercesc::XMLString::release(&buf);
+    node = node->getParentNode();
+  }
+  return path;
 }
+
+}
+

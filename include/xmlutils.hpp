@@ -81,7 +81,7 @@ bool XmlGetAttributeValue( xercesc::DOMNode* node, std::string& name, Tp_* val)
   return XmlGetAttributeValue(node,name.c_str(),val);
 }
 
-
+std::string XmlGetNodePosition(xercesc::DOMNode* node);
 }
 
 #endif

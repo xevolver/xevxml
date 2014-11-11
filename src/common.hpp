@@ -35,14 +35,14 @@
 //#define XEVXML_DEBUG
 
 #ifdef XEVXML_DEBUG
-#define XEV_ABORT()			 {				\
+#define XEV_ABORT()			 {			\
     std::cerr << "ERROR @ " << __func__ << " :";		\
     std::cerr << __FILE__ ;					\
     std::cerr << "(" << __LINE__ << "): " << std::endl;		\
     abort();							\
   }
 #else
-#define XEV_ABORT()			 {				\
+#define XEV_ABORT()			 {			\
     std::cerr << "ERROR @ " << __func__ << " :";		\
     std::cerr << __FILE__ ;					\
     std::cerr << "(" << __LINE__ << "): " << std::endl;		\
@@ -50,7 +50,7 @@
   }
 #endif
 
-#define XEV_WARN(x)			 {					\
+#define XEV_WARN(x)			 {				\
     std::cerr << "WARN @ " << __func__ << " :";				\
     std::cerr << __FILE__ ;						\
     std::cerr << "(" << __LINE__ << "): "				\
@@ -58,5 +58,10 @@
   }
 
 #define XEV_ASSERT(x)		 {if(!(x)) XEV_ABORT();}
+
+#define XEV_DEBUG_INFO(x) {					\
+    std::cerr << "NODE = "					\
+	      << XevXML::XmlGetNodePosition(x) << std::endl;	\
+  }
 
 #endif /* ___COMMON_HPP___ */
