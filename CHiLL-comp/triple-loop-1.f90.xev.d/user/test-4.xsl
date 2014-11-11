@@ -25,7 +25,7 @@
 
 				<xsl:apply-templates select="exslt:node-set($step1)"
 					mode="chill_unroll_jam">
-					<xsl:with-param name="max" select="2" />
+					<xsl:with-param name="max" select="4" />
 					<xsl:with-param name="var" select="'k'" />
 				</xsl:apply-templates>
 			</xsl:when>

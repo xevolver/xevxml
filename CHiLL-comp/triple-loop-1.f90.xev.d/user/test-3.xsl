@@ -11,7 +11,7 @@
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>
-					test-3.xsl xev loop_tag
+					xev loop_tag start test-3.xsl
 				</xsl:comment>
 
 				<xsl:variable name="step1">

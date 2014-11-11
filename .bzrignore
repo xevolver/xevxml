@@ -1,4 +1,5 @@
 **/*.out.xml
+**/*.out.f90
 **/expected-xml2src
 **/expected-xml2src/*
 **/xev-dir2xml/*
