@@ -63,7 +63,7 @@
                     </SgAssignOp><SgSubtractOp>
                       <SgVarRefExp name="n"/>
                       <SgIntVal value="1"/>
-                    </SgSubtractOp><SgIntVal value="4"/><SgBasicBlock>
+                    </SgSubtractOp><SgIntVal value="2"/><SgBasicBlock>
                       <SgExprStatement>
                         <SgAssignOp>
                           <SgPntrArrRefExp>
@@ -147,7 +147,7 @@
                             <SgExprListExp>
                               <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
                               <SgVarRefExp name="j"/>
-                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="3"/></SgAddOp>
+                              <SgVarRefExp name="k"/>
                             </SgExprListExp>
                           </SgPntrArrRefExp>
                           <SgPntrArrRefExp>
@@ -155,7 +155,7 @@
                             <SgExprListExp>
                               <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
                               <SgVarRefExp name="j"/>
-                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="3"/></SgAddOp>
+                              <SgVarRefExp name="k"/>
                             </SgExprListExp>
                           </SgPntrArrRefExp>
                         </SgAssignOp>
@@ -164,17 +164,17 @@
                           <SgPntrArrRefExp>
                             <SgVarRefExp name="B"/>
                             <SgExprListExp>
-                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="2"/></SgAddOp>
+                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
                               <SgVarRefExp name="j"/>
-                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="3"/></SgAddOp>
+                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
                             </SgExprListExp>
                           </SgPntrArrRefExp>
                           <SgPntrArrRefExp>
                             <SgVarRefExp name="A"/>
                             <SgExprListExp>
-                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="2"/></SgAddOp>
+                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
                               <SgVarRefExp name="j"/>
-                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="3"/></SgAddOp>
+                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="1"/></SgAddOp>
                             </SgExprListExp>
                           </SgPntrArrRefExp>
                         </SgAssignOp>
@@ -183,7 +183,26 @@
                           <SgPntrArrRefExp>
                             <SgVarRefExp name="B"/>
                             <SgExprListExp>
-                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="3"/></SgAddOp>
+                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="A"/>
+                            <SgExprListExp>
+                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
+                              <SgVarRefExp name="j"/>
+                              <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="2"/></SgAddOp>
+                            </SgExprListExp>
+                          </SgPntrArrRefExp>
+                        </SgAssignOp>
+                      </SgExprStatement><SgExprStatement>
+                        <SgAssignOp>
+                          <SgPntrArrRefExp>
+                            <SgVarRefExp name="B"/>
+                            <SgExprListExp>
+                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
                               <SgVarRefExp name="j"/>
                               <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="3"/></SgAddOp>
                             </SgExprListExp>
@@ -191,7 +210,7 @@
                           <SgPntrArrRefExp>
                             <SgVarRefExp name="A"/>
                             <SgExprListExp>
-                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="3"/></SgAddOp>
+                              <SgAddOp><SgVarRefExp name="i"/><SgIntVal value="1"/></SgAddOp>
                               <SgVarRefExp name="j"/>
                               <SgAddOp><SgVarRefExp name="k"/><SgIntVal value="3"/></SgAddOp>
                             </SgExprListExp>

@@ -40,7 +40,7 @@
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
 				<xsl:apply-templates select="." mode="chill_unroll">
-					<xsl:with-param name="max" select="4" />
+					<xsl:with-param name="max" select="2" />
 					<xsl:with-param name="var" select="'i'" />
 				</xsl:apply-templates>
 			</xsl:when>

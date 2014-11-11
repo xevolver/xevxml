@@ -7,15 +7,15 @@
 		<xsl:param name="var" />		<!-- 置き換える変数 -->
 
 		<!-- 自分を出力する -->
-		<!-- <xsl:apply-templates select="." /> -->
+		<xsl:apply-templates select="." />
 
 
 		<!-- コピーする【SgExprStatement】行を設定 -->
-		<!-- <xsl:param name="copy-stm" select="../SgExprStatement" /> -->
+		<xsl:param name="copy_stm" select="../SgExprStatement" />
 		<!-- <xsl:variable name="copy_stm" select="../SgExprStatement" /> -->
-		<xsl:variable name="copy_stm" select="." />
+		<!-- <xsl:variable name="copy_stm" select="." /> -->
 
-		<xsl:apply-templates select="$copy_stm" />
+		<!-- <xsl:apply-templates select="$copy_stm" /> -->
 
 		<!-- コピーする【SgExprStatement】行を設定 -->
 		<xsl:for-each select="(//*)[position() &lt; $max]">
