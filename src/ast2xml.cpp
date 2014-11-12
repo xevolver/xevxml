@@ -58,8 +58,14 @@ namespace XevXML {
       // NOTE: only the last file is converted.
       // In the case of using Fortran mod files, this could happen.
     }
-    SgFile* file = &p->get_file(p->numberOfFiles()-1);
 
+#if (ROSE_EDG_MAJOR_VERSION_NUMBER < 3)
+    // assuming the previous(stable) version of ROSE
+    SgFile* file = &p->get_file(p->numberOfFiles()-1);
+#else
+    // assuming EDG4X-ROSE
+    SgFile* file = &p->get_file(0);
+#endif
     if(help==NULL) 
       // set default transformation
       help = new XevConversionHelper();

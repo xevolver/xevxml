@@ -1548,6 +1548,7 @@ XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParen
     xe::DOMNode* child=node->getFirstChild();				\
     Sg##op* ret = sb::build##op(lhs,rhs);				\
     ret->set_parent(astParent);						\
+    ret->set_file_info(DEFAULT_FILE_INFO);				\
     while(child) {							\
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){	\
 	SgNode* astchild = this->visit(child,ret);			\
@@ -2925,7 +2926,6 @@ XevXmlVisitor::visitSgPntrArrRefExp(xercesc::DOMNode* node, SgNode* astParent)
   SgPntrArrRefExp*     ret = 0;
   SgExpression* lhs = 0;
   SgExpression* rhs = 0;
-
   ret = sb::buildPntrArrRefExp( lhs,rhs);
   ret->set_file_info(DEFAULT_FILE_INFO);
 
@@ -4240,7 +4240,8 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
   SgStringVal*            str = 0;
   
   string                  name;
-
+  SgNamelistStatement* nondefn =
+    new SgNamelistStatement(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   XmlGetAttributeValue(node,"group",&name);
   
   Rose_STL_Container<std::string> slst;
@@ -4255,9 +4256,14 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
 
   grp->set_group_name( name );
   grp->get_name_list() = slst;
-  grp->set_parent(ret);
+  grp->set_parent(NULL);//parent must be set to NULL.
   ret->get_group_list().push_back( grp );
   ret->set_parent(astParent);
+  ret->set_firstNondefiningDeclaration(nondefn);
+  ret->set_definingDeclaration(ret);
+  nondefn->set_parent(sb::topScopeStack());
+  nondefn->set_firstNondefiningDeclaration(nondefn);
+  nondefn->set_definingDeclaration(ret);
   return ret;
 }
 
