@@ -213,7 +213,7 @@ static void attribSgVariableDeclaration(stringstream& istr,SgNode* node)
       mod |= (1U << 20);
     istr << " modifier=\"" << mod << "\" ";
 #endif
-    SgUnsignedLongVal *bit = n->get_bitfield();
+    SgUnsignedLongVal *bit = isSgUnsignedLongVal(n->get_bitfield());
     if( bit )
       istr << " bitfield=\"" << bit->get_value() << "\" ";
   }

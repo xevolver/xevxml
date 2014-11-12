@@ -21,7 +21,7 @@ AC_ARG_WITH(rosedir,
 ROSE_DIR=$withval
 ])
 
-CPPFLAGS="${CPPFLAGS} -I${ROSE_DIR}/include"
+CPPFLAGS="${CPPFLAGS} -I${ROSE_DIR}/include -I${ROSE_DIR}/include/rose"
 LDFLAGS="${LDFLAGS} -L${ROSE_DIR}/lib -lrose"
 AC_LANG_PUSH([C++])
 AC_MSG_CHECKING(for ROSE library)
@@ -37,7 +37,7 @@ if test "x$ac_cv_librose" != "xyes"; then
 AC_MSG_ERROR([ROSE is not available. Use --with-rosedir option to specify the ROSE directory.])
 fi
 if test "x${ROSE_DIR}" != "x"; then
-ROSE_CFLAGS="-I${ROSE_DIR}/include"
+ROSE_CFLAGS="-I${ROSE_DIR}/include -I${ROSE_DIR}/include/rose"
 ROSE_LIBS="-L${ROSE_DIR}/lib -lrose"
 else
 ROSE_LIBS="-lrose"

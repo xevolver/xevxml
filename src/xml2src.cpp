@@ -36,6 +36,59 @@
 
 using namespace std;
 
+//! Build a SgFile node
+SgSourceFile*
+buildEmptySourceFile(const string& fn, SgProject* project=0)
+{
+  // This is a more direct, alternative implementation (not sure if it is better).
+  SgSourceFile* newFile = new SgSourceFile();
+  ROSE_ASSERT(newFile != NULL);
+  
+  // Mark as a C file for now.
+  newFile->set_Fortran_only(true);
+  
+  // Specify the name of the file (and line and column numbers), using a Sg_File_Info object.
+  Sg_File_Info* info 
+    = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  //Sg_File_Info* fileInfo = new Sg_File_Info(outputFileName,0,0);
+  ROSE_ASSERT(info != NULL);
+  
+  newFile->set_startOfConstruct(info);
+  info->set_parent(newFile);
+  
+  SgGlobal* globalScope = new SgGlobal();
+  ROSE_ASSERT(globalScope != NULL);
+  
+  newFile->set_globalScope(globalScope);
+  globalScope->set_parent(newFile);
+  
+  ROSE_ASSERT(newFile->get_globalScope() != NULL);
+  
+
+  project = new SgProject();
+  ROSE_ASSERT(project);
+  project->get_fileList().clear();
+  Rose_STL_Container<std::string> arglist;
+  //int nextErrorCode = 0;
+
+  arglist.push_back("cc"); 
+  arglist.push_back("-c"); 
+  arglist.push_back("dummy");
+  arglist.push_back("-rose:o");
+  arglist.push_back(fn);
+  arglist.push_back("-rose:verbose 2");
+  project->set_originalCommandLineArgumentList (arglist);
+  project->get_sourceFileNameList().push_back("dummy");
+
+  newFile->set_parent(project);
+  SgFilePtrList& flist = project->get_fileList();
+  flist.insert(flist.begin(),newFile);
+  if (newFile->get_globalMangledNameMap().size() != 0)
+    newFile->clearGlobalMangledNameMap();
+
+  return newFile;
+}
+
 int main(int argc, char** argv)
 {
   SgProject* prj = 0;
@@ -43,6 +96,8 @@ int main(int argc, char** argv)
   string fn;
   if( argc < 2 )  fn = "-";
   else fn = argv[1];
+  //SgSourceFile* file = buildEmptySourceFile(fn);
+  //SgProject* prj = file->get_project();
 
   stringstream istr;
 

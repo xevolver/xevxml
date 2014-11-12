@@ -313,7 +313,8 @@ static void writeTypesRecursive(stringstream& sstr,
     help->setLevel(help->getLevel()+1);
 
     for(size_t i(0);i<types.size();++i){
-      writeTypesRecursive(sstr,types[i],help,true);
+      if(types[i]!=t)
+	writeTypesRecursive(sstr,types[i],help,true);
     }
     
     if( s == "SgArrayType" ) { 
