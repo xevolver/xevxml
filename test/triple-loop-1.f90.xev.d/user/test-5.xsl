@@ -41,7 +41,9 @@
 	</xsl:template>
 
 
-	<xsl:template match="*" mode="find_loop_and_unroll">
+	<xsl:template match="*" mode="loop_collapse">
+		<xsl:param name="firstLoop" />
+		<xsl:param name="secondLoop" />
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
 				<xsl:apply-templates select="." mode="chill_unroll">
@@ -58,9 +60,55 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="SgPragmaDeclaration" mode="find_loop_and_unroll">
+	<xsl:template match="*" mode="loop_collapse_find_first">
+		<xsl:param name="firstLoop" />
+		<xsl:param name="secondLoop" />
+		<xsl:choose>
+			<xsl:when
+				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $firstLoop">
+				<xsl:variable name="max" select="./*[2]" />
+				<!-- TODO change max -->
+				<xsl:apply-templates select="."
+					mode="loop_collapse_find_second">
+					<xsl:with-param name="firstMax" select="$max" />
+					<xsl:with-param name="secondLoop" select="$secondLoop" />
+				</xsl:apply-templates>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates mode="loop_collapse_find_first">
+						<xsl:with-param name="firstLoop" select="$firstLoop" />
+						<xsl:with-param name="secondLoop" select="$secondLoop" />
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="find_loop_and_unroll">
+
+	<xsl:template match="*" mode="loop_collapse_find_second">
+		<xsl:param name="firstMax" />
+		<xsl:param name="secondLoop" />
+		<xsl:choose>
+			<xsl:when
+				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $secondLoop">
+				<!-- TODO change max -->
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates mode="loop_collapse_find_second">
+						<xsl:with-param name="firstMax" select="$max" />
+						<xsl:with-param name="secondLoop" select="$secondLoop" />
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="SgPragmaDeclaration" mode="loop_collapse">
+	</xsl:template>
+	<xsl:template match="PreprocessingInfo" mode="loop_collapse">
 	</xsl:template>
 
 </xsl:stylesheet>
