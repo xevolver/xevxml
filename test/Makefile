@@ -6,8 +6,19 @@ defalut:
 
 test: 
 	triple-loop-1.f90
+
+test-5:
+	@echo "test-5"
+# test-5
+	@-mkdir triple-loop-1.f90.xev.d/test-5
+	$(XEVXML_ENV) ; xsltrans triple-loop-1.f90.xev.d/user/test-5.xsl < triple-loop-1.f90.xev.d/dir2xml/triple-loop-1.xml > triple-loop-1.f90.xev.d/test-5/triple-loop-1.xml
+	$(XEVXML_ENV) ; xml2src < triple-loop-1.f90.xev.d/test-5/triple-loop-1.xml	 triple-loop-1.f90.xev.d/test-5/triple-loop-1.f90
+
+test-5-out-f:
+	$(XEVXML_ENV) ; xml2src < triple-loop-1.f90.xev.d/test-5/triple-loop-1.out.xml triple-loop-1.f90.xev.d/test-5/triple-loop-1.out.f90
+
 	
-test-triple-loop-1:
+test-CHiLL-comp-1:
 	@-mkdir triple-loop-1.f90.xev.d
 # src2xml
 	@-mkdir triple-loop-1.f90.xev.d/src2xml
