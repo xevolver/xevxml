@@ -59,7 +59,7 @@ namespace XevXML {
       // In the case of using Fortran mod files, this could happen.
     }
 
-#if (ROSE_EDG_MAJOR_VERSION_NUMBER < 3)
+#if (ROSE_EDG_MAJOR_VERSION_NUMBER < 4)
     // assuming the previous(stable) version of ROSE
     SgFile* file = &p->get_file(p->numberOfFiles()-1);
 #else
