@@ -20,14 +20,9 @@
 					</xsl:apply-templates>
 				</xsl:variable>
 
-				<!-- <xsl:comment> test-4.xsl step1 </xsl:comment> <xsl:apply-templates 
-					select="exslt:node-set($step1)" /> -->
+				<xsl:apply-templates mode="call_chill_unroll_jam"
+					select="exslt:node-set($step1)" />
 
-				<xsl:apply-templates select="exslt:node-set($step1)"
-					mode="chill_unroll_jam">
-					<xsl:with-param name="max" select="4" />
-					<xsl:with-param name="var" select="'k'" />
-				</xsl:apply-templates>
 			</xsl:when>
 
 			<xsl:otherwise>
@@ -38,6 +33,13 @@
 			</xsl:otherwise>
 
 		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="*" mode="call_chill_unroll_jam">
+		<xsl:apply-templates select="." mode="chill_unroll_jam">
+			<xsl:with-param name="max" select="4" />
+			<xsl:with-param name="var" select="'k'" />
+		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="*" mode="find_loop_and_unroll">
