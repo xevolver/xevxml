@@ -2,32 +2,6 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
-		<xsl:param name="max" />		<!-- STEP数 -->
-		<xsl:param name="var" />		<!-- 置き換える変数 -->
-
-		<!-- 自分を出力する -->
-		<xsl:apply-templates select="." />
-
-
-		<!-- コピーする【SgExprStatement】行を設定 -->
-		<xsl:param name="copy_stm" select="../SgExprStatement" />
-		<!-- <xsl:variable name="copy_stm" select="../SgExprStatement" /> -->
-		<!-- <xsl:variable name="copy_stm" select="." /> -->
-
-		<!-- <xsl:apply-templates select="$copy_stm" /> -->
-
-		<!-- コピーする【SgExprStatement】行を設定 -->
-		<xsl:for-each select="(//*)[position() &lt; $max]">
-			<xsl:apply-templates select="$copy_stm" mode="loop_unroll_body">
-				<xsl:with-param name="max" select="$max" />
-				<xsl:with-param name="var" select="$var" />
-				<xsl:with-param name="cnt" select="position()" />
-			</xsl:apply-templates>
-		</xsl:for-each>
-
-	</xsl:template>
-
 	<xsl:template match="*" mode="loop_unroll">
 		<xsl:param name="max" />
 		<xsl:param name="var" />
@@ -44,6 +18,32 @@
 	<xsl:template match="PreprocessingInfo" mode="loop_unroll">
 	</xsl:template>
 	<!-- <xsl:template match="SgPragmaDeclaration[1]" mode="loop_unroll"> </xsl:template> -->
+
+	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
+		<xsl:param name="max" />		<!-- STEP数 -->
+		<xsl:param name="var" />		<!-- 置き換える変数 -->
+
+		<!-- 自分を出力する -->
+		<xsl:apply-templates select="." />
+
+
+		<!-- コピーする【SgExprStatement】行を設定 -->
+		<!-- <xsl:param name="copy_stm" select="../SgExprStatement" /> OK for libxml -->
+		<xsl:variable name="copy_stm" select="../SgExprStatement" />
+		<!-- <xsl:variable name="copy_stm" select="." /> -->
+
+		<!-- <xsl:apply-templates select="$copy_stm" /> -->
+
+		<!-- コピーする【SgExprStatement】行を設定 -->
+		<xsl:for-each select="(//*)[position() &lt; $max]">
+			<xsl:apply-templates select="$copy_stm" mode="loop_unroll_body">
+				<xsl:with-param name="max" select="$max" />
+				<xsl:with-param name="var" select="$var" />
+				<xsl:with-param name="cnt" select="position()" />
+			</xsl:apply-templates>
+		</xsl:for-each>
+
+	</xsl:template>
 
 
 	<xsl:template match="SgVarRefExp" mode="loop_unroll_body">

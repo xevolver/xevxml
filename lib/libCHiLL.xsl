@@ -7,6 +7,19 @@
 
 	<xsl:import href="libXev.xsl" />
 
+	<xsl:template match="*" mode="chill_unroll_jam">
+		<xsl:param name="max" />
+		<xsl:param name="var" />
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates mode="chill_unroll_jam">
+				<xsl:with-param name="max" />
+				<xsl:with-param name="var" />
+			</xsl:apply-templates>
+		</xsl:copy>
+	</xsl:template>
+
+
 	<xsl:template match="SgFortranDo" mode="chill_unroll_jam">
 		<xsl:param name="max" />
 		<xsl:param name="var" />
@@ -34,6 +47,7 @@
 
 		</xsl:copy>
 	</xsl:template>
+
 
 	<xsl:template match="SgFortranDo" mode="chill_unroll">
 		<xsl:param name="max" />

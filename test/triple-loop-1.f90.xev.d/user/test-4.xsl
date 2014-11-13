@@ -15,13 +15,13 @@
 				</xsl:comment>
 
 				<xsl:variable name="step1">
-					<xsl:comment>
-						test-4.xsl step1
-					</xsl:comment>
 					<xsl:apply-templates select="."
 						mode="find_loop_and_unroll">
 					</xsl:apply-templates>
 				</xsl:variable>
+
+				<!-- <xsl:comment> test-4.xsl step1 </xsl:comment> <xsl:apply-templates 
+					select="exslt:node-set($step1)" /> -->
 
 				<xsl:apply-templates select="exslt:node-set($step1)"
 					mode="chill_unroll_jam">
@@ -39,7 +39,6 @@
 
 		</xsl:choose>
 	</xsl:template>
-
 
 	<xsl:template match="*" mode="find_loop_and_unroll">
 		<xsl:choose>
