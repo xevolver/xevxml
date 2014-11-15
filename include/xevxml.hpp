@@ -81,7 +81,7 @@ namespace XevXML {
     XevConversionHelper() {
       addressFlag_=false;
       rmParenFlag_=false;
-      fPragmaFlag_=false;
+      fPragmaFlag_=true;
       level_=0;
 
       rosehpctFlag_=false;
