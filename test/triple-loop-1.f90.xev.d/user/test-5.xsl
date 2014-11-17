@@ -63,9 +63,9 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $firstLoop">
+				<!-- get info from first loop -->
 				<xsl:variable name="max" select="./*[2]" />
-				<!-- TODO change max -->
-				<xsl:call-template name="emitSgFortranDo"></xsl:call-template>
+				<!-- <xsl:call-template name="emitSgFortranDo"></xsl:call-template> -->
 				<xsl:apply-templates select="."
 					mode="loop_collapse_find_second">
 					<xsl:with-param name="firstMax" select="$max" />
@@ -90,7 +90,27 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $secondLoop">
-				<!-- TODO change max -->
+				<!--change max -->
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<!-- 変数 初期値 -->
+					<xsl:copy-of select="./*[1]" />
+					<!-- TODO change the last value -->
+					<xsl:copy-of select="./*[2]" />
+					<!-- TODO calculate the stride -->
+					<xsl:element name="SgIntVal">
+						<xsl:attribute name="value">
+							<xsl:value-of select="$max" />
+						</xsl:attribute>
+					</xsl:element>
+				</xsl:copy>
+
+				<xsl:apply-templates select="./SgBasicBlock"
+					mode="loop_collapse_body">
+					<xsl:with-param name="max" select="$max" />
+					<xsl:with-param name="var" select="$var" />
+				</xsl:apply-templates>
+
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
