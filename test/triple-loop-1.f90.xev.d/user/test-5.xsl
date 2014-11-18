@@ -19,6 +19,8 @@
 						test-5.xsl step1
 					</xsl:comment>
 					<xsl:apply-templates select="." mode="loop_collapse">
+						<xsl:with-param name="firstLoop" select="k" />
+						<xsl:with-param name="secondLoop" select="i" />
 					</xsl:apply-templates>
 				</xsl:variable>
 
@@ -95,20 +97,15 @@
 					<xsl:copy-of select="@*" />
 					<!-- 変数 初期値 -->
 					<xsl:copy-of select="./*[1]" />
-					<!-- TODO change the last value -->
+					<!-- TODO change the last value ($firstMax * ./*[2]) -->
 					<xsl:copy-of select="./*[2]" />
-					<!-- TODO calculate the stride -->
-					<xsl:element name="SgIntVal">
-						<xsl:attribute name="value">
-							<xsl:value-of select="$max" />
-						</xsl:attribute>
-					</xsl:element>
+					<!-- stride -->
+					<xsl:copy-of select="./*[3]" />
 				</xsl:copy>
 
 				<xsl:apply-templates select="./SgBasicBlock"
 					mode="loop_collapse_body">
-					<xsl:with-param name="max" select="$max" />
-					<xsl:with-param name="var" select="$var" />
+					<xsl:with-param name="secondLoop" select="$secondLoop" />
 				</xsl:apply-templates>
 
 			</xsl:when>
@@ -122,6 +119,15 @@
 				</xsl:copy>
 			</xsl:otherwise>
 		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="*" mode="loop_collapse_body">
+		<xsl:param name="secondLoop" />
+		<xsl:comment>
+			<xsl:value-of select="$secondLoop" />
+		</xsl:comment>
+		<!-- TODO -->
+		<xsl:apply-templates select="." />
 	</xsl:template>
 
 	<xsl:template match="SgPragmaDeclaration" mode="loop_collapse">
