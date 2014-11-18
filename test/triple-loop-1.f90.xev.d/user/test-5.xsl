@@ -18,7 +18,8 @@
 					<xsl:comment>
 						test-5.xsl step1
 					</xsl:comment>
-					<xsl:apply-templates select="." mode="loop_collapse">
+					<xsl:apply-templates select="."
+						mode="loop_collapse_find_first">
 						<xsl:with-param name="firstLoop" select="'k'" />
 						<xsl:with-param name="secondLoop" select="'i'" />
 					</xsl:apply-templates>
@@ -62,7 +63,7 @@
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $firstLoop">
 				<!-- get loop max from first loop -->
 				<xsl:variable name="max" select="./*[2]" />
-				<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock/SgFortarnDo"
+				<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock/SgFortranDo"
 					mode="loop_collapse_find_second">
 					<xsl:with-param name="firstMax" select="$max" />
 					<xsl:with-param name="secondLoop" select="$secondLoop" />
