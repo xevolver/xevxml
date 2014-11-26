@@ -270,12 +270,14 @@ static void writeTypesRecursive(stringstream& sstr,
     */
   }
   else if( s == "SgTypeComplex" ) {
-    SgIntVal* v = isSgIntVal( isSgTypeComplex(t)->get_type_kind() );
+    //SgIntVal* v = isSgIntVal( isSgTypeComplex(t)->get_type_kind() );
     sstr << " base_type=\"" << isSgTypeComplex(t)->get_base_type()->class_name() << "\" ";
+    /*
     if( v )
       sstr << " type_kind=\"" << v->get_valueString() << "\" ";
     else
       sstr << " type_kind=\"\" ";
+    */
   }
   else if( s == "SgArrayType" ) {
     SgUnsignedLongVal* ul = isSgUnsignedLongVal( isSgArrayType(t)->get_index() );
@@ -312,23 +314,19 @@ static void writeTypesRecursive(stringstream& sstr,
       sstr << " type_kind=\"\" ";
   }
 
-  if( (t->containsInternalTypes()==true || t->get_type_kind() || isSgTypeString(t) )
-	   && f){
+  if( t->containsInternalTypes()==true || isSgTypeString(t) ){
     sstr << ">" << endl;
     Rose_STL_Container<SgType*> types = t->getInternalTypes();
     help->setLevel(help->getLevel()+1);
-
     for(size_t i(0);i<types.size();++i){
       if(types[i]!=t)
 	writeTypesRecursive(sstr,types[i],help,true);
     }
-    
     if( s == "SgArrayType" ) { 
       SgExprListExp* lste = isSgArrayType(t)->get_dim_info();
       XevAstVisitorInternal visitor(sstr);
       visitor.traverse(lste,help);
     }
-    
     if( s == "SgFunctionType" ) { 
       SgFunctionParameterTypeList* lst = isSgFunctionType(t)->get_argument_list();
       if( lst ) {
@@ -338,6 +336,9 @@ static void writeTypesRecursive(stringstream& sstr,
       }
     }
 #if 0
+    if( s == "SgPointerType" ) { 
+      writeTypesRecursive(sstr,isSgPointerType(t)->get_base_type(),help,true);
+    }
     // type_kind is now output as attribute
     if( t->get_type_kind() ) {
       XevAstVisitorInternal visitor(sstr);
@@ -594,7 +595,7 @@ static void writeInternalNode(stringstream& sstr,
     TRAVERSE_IF_EXISTS(inq->get_pending());
   }
   else if(isSgTypedefDeclaration(n)){
-      writeTypesRecursive(sstr,isSgTypedefDeclaration(n)->get_base_type(), help,false);
+    writeTypesRecursive(sstr,isSgTypedefDeclaration(n)->get_base_type(), help, false);
   }
 
   return;

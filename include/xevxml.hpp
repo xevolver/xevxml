@@ -58,6 +58,7 @@ namespace XevXML {
     bool rmParenFlag_;
     bool fPragmaFlag_;
     int  level_;
+    int  outLang_;
 
     bool rosehpctFlag_;
 #ifdef XEV_USE_ROSEHPCT
@@ -83,6 +84,7 @@ namespace XevXML {
       rmParenFlag_=false;
       fPragmaFlag_=true;
       level_=0;
+      outLang_ = SgFile::e_Fortran_output_language;
 
       rosehpctFlag_=false;
     }
@@ -123,6 +125,9 @@ namespace XevXML {
     // depth of the visited node from the root node
     int  getLevel()        const{ return level_; }
     void setLevel(int l)        { level_ = l; }
+
+    int getOutputLanguage() const {return outLang_;}
+    void setOutputLanguage(int l) {outLang_ = l; }
   };
 
   // --- XML utility functions ---

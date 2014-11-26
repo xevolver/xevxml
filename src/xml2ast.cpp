@@ -324,6 +324,7 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       VISIT(SgExprListExp);                         // 0701
 
       VISIT(SgTypedefType);                         // 0702
+      VISIT(SgTypedefSeq);                          // 20141126
       VISIT(SgPntrArrRefExp);                       // 0702
 
       VISIT(SgNullStatement);                       // 0705
@@ -2118,17 +2119,62 @@ XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
 SgNode* 
 XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
 {
+  SgTypedefType*          ret = 0;
+  string                  name;
+  SgDeclarationStatement* ds = 0;
+
+  XmlGetAttributeValue(node,"type_name",&name);
+  SgTypedefSymbol* tsym = isSgTypedefSymbol(si::lookupSymbolInParentScopes(name));
+  if(tsym)
+    ds = isSgDeclarationStatement( tsym->get_declaration() );
+  else {
+    SgScopeStatement* scope = sb::topScopeStack();
+    SgTypedefDeclaration* dec 
+      = new SgTypedefDeclaration(DEFAULT_FILE_INFO,name,SgTypeUnknown::createType()); //don't use high-level build function
+
+    dec->set_name(name);
+    dec->set_parent(scope);
+    dec->set_scope(scope);
+    dec->set_firstNondefiningDeclaration(dec);
+    //dec->set_definition(NULL);
+    dec->set_definingDeclaration(NULL);
+    ds = isSgDeclarationStatement( dec );
+    ds->setForward();
+    // don't insert symbol!
+  }
+  XEV_ASSERT(ds!=NULL); 
+  ret = new SgTypedefType( ds );
+  ret->set_parent(astParent);
+  return ret;
+}
+
+#if 0
+SgNode* 
+XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
+{
   SgType* ret = 0;
   SgScopeStatement* scope = sb::topScopeStack();    //?
   string name;
 
-  if( XmlGetAttributeValue(node,"type_name",&name) ){
-    ret = sb::buildOpaqueType( name.c_str(), scope );
+  if(XmlGetAttributeValue(node,"type_name",&name)){
+    //ret = sb::buildOpaqueType( name.c_str(), scope );
+    
   }
   else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    ret = sb::buildOpaqueType( name.c_str(), scope );
+    //XEV_DEBUG_INFO(node);
+    //XEV_ABORT();
   }
+  return ret;
+}
+#endif
+
+SgNode* 
+XevXmlVisitor::visitSgTypedefSeq(xe::DOMNode* node, SgNode* astParent)
+{
+  SgTypedefSeq* ret = 0;
+
+  ret = new SgTypedefSeq();
   return ret;
 }
 
@@ -2203,7 +2249,12 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     }
 #endif
   }
-  ret = sb::buildFunctionRefExp( functionSymbol );
+  if(functionSymbol==NULL){
+    //build a function based on the name (C language)
+    ret = sb::buildFunctionRefExp(name);
+  }
+  else
+    ret = sb::buildFunctionRefExp( functionSymbol );
 
   if(XmlGetAttributeValue(node,"subprogram_kind",&kind )){
     // set subprogram_kind (2014.04.14)

@@ -200,6 +200,7 @@ public:
 
 
   SgNode* visitSgTypedefType(xercesc::DOMNode* node, SgNode* astParent=0);
+  SgNode* visitSgTypedefSeq(xercesc::DOMNode* node, SgNode* astParent=0);
 
   SgType* buildModifierType(xercesc::DOMNode* node, SgType* itype, SgNode* astParent=0);
 
