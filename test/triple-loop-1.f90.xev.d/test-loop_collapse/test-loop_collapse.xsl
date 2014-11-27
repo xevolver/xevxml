@@ -11,12 +11,12 @@
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>
-					test-5.xsl xev loop_tag
+					test-loop_collapse.xsl found xev loop_tag
 				</xsl:comment>
 
 				<xsl:variable name="step1">
 					<xsl:comment>
-						test-5.xsl step1
+						test-loop_collapse.xsl start step1
 					</xsl:comment>
 					<xsl:apply-templates select="."
 						mode="loop_collapse_find_first">
@@ -29,7 +29,7 @@
 				<!-- mode="chill_unroll_jam"> -->
 				<!-- <xsl:with-param name="max" select="4" /> -->
 				<!-- <xsl:with-param name="var" select="'k'" /> -->
-				<xsl:apply-templates />
+				<xsl:apply-templates select="exslt:node-set($step1)" />
 
 			</xsl:when>
 
@@ -61,6 +61,10 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $firstLoop">
+				<xsl:comment>
+					test-loop_collapse.xsl found firstLoop
+				</xsl:comment>
+
 				<!-- get loop max from first loop -->
 				<xsl:variable name="max" select="./*[2]" />
 				<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock/SgFortranDo"
@@ -89,6 +93,9 @@
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $secondLoop">
 				<!--change max -->
+				<xsl:comment>
+					test-loop_collapse.xsl found secondLoop
+				</xsl:comment>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<!-- 変数 初期値 -->
@@ -96,16 +103,17 @@
 					<!-- TODO change the last value ($firstMax * ./*[2]) -->
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />
-						<xsl:value-of select="$firstMax" />
+						<xsl:apply-templates select="exslt:node-set($firstMax)" />
 					</SgMultiplyOp>
 					<!-- stride -->
 					<xsl:copy-of select="./*[3]" />
-				</xsl:copy>
 
-				<xsl:apply-templates select="./SgBasicBlock"
-					mode="loop_collapse_body">
-					<xsl:with-param name="secondLoop" select="$secondLoop" />
-				</xsl:apply-templates>
+					<xsl:apply-templates select="./SgBasicBlock"
+						mode="loop_collapse_body">
+						<xsl:with-param name="secondLoop" select="$secondLoop" />
+					</xsl:apply-templates>
+
+				</xsl:copy>
 
 			</xsl:when>
 			<xsl:otherwise>
