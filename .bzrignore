@@ -1,6 +1,7 @@
 # new
 **/*.xev.*
 **/*.target-*.*
+**/*.target.xml
 **/*.diff.*
 
 # old

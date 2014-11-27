@@ -41,7 +41,7 @@ EXP_SRCS	= ${SRCS:$(INPUT_DIR)/%.f90=$(EXP_XML_DIR)/%.f90}
 
 XML_DIFFS	= ${SRCS:$(INPUT_DIR)/%.f90=$(XML2SRC_DIR)/%.xmldiff}
 
-.PRECIOUS: $(SRC2XMLS) $(DIR2XMLS) $(TRANS_XMLS) $(XML2SRCS) $(EXP_XMLS) $(EXP_SRCS) $(XML_DIFFS)
+.PRECIOUS: $(SRC2XMLS) $(DIR2XMLS) $(TRANS_XMLS) $(XML2SRCS) $(EXP_XMLS) $(EXP_SRCS) $(XML_DIFFS) %.xev.f90 %.xev.xml %.target-xml2src.f90 %.target.xml %.diff.xml  %.diff.f90
 
 ##############################################
 # targets
