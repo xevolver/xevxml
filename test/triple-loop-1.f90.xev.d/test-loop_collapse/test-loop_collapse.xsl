@@ -94,7 +94,10 @@
 					<!-- 変数 初期値 -->
 					<xsl:copy-of select="./*[1]" />
 					<!-- TODO change the last value ($firstMax * ./*[2]) -->
-					<xsl:copy-of select="./*[2]" />
+					<SgMultiplyOp>
+						<xsl:copy-of select="./*[2]" />
+						<xsl:value-of select="$firstMax" />
+					</SgMultiplyOp>
 					<!-- stride -->
 					<xsl:copy-of select="./*[3]" />
 				</xsl:copy>
