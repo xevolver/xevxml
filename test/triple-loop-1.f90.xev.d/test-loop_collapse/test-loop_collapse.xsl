@@ -18,8 +18,7 @@
 				<xsl:comment>
 					test-loop_collapse.xsl start step1
 				</xsl:comment>
-				<xsl:apply-templates select="."
-					mode="loop_collapse_find_first">
+				<xsl:apply-templates select="." mode="loop_collapse">
 					<xsl:with-param name="firstLoop" select="'k'" />
 					<xsl:with-param name="secondLoop" select="'i'" />
 				</xsl:apply-templates>
@@ -101,7 +100,7 @@
 					<!-- TODO change the last value ($firstMax * ./*[2]) -->
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />
-						<xsl:apply-templates select="exslt:node-set($firstMax)" />
+						<xsl:apply-templates select="$firstMax" />
 					</SgMultiplyOp>
 					<!-- stride -->
 					<xsl:copy-of select="./*[3]" />
