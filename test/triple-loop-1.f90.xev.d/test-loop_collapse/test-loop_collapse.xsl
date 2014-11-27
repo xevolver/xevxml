@@ -14,22 +14,18 @@
 					test-loop_collapse.xsl found xev loop_tag
 				</xsl:comment>
 
-				<xsl:variable name="step1">
-					<xsl:comment>
-						test-loop_collapse.xsl start step1
-					</xsl:comment>
-					<xsl:apply-templates select="."
-						mode="loop_collapse_find_first">
-						<xsl:with-param name="firstLoop" select="'k'" />
-						<xsl:with-param name="secondLoop" select="'i'" />
-					</xsl:apply-templates>
-				</xsl:variable>
+				<!-- <xsl:variable name="step1"> -->
+				<xsl:comment>
+					test-loop_collapse.xsl start step1
+				</xsl:comment>
+				<xsl:apply-templates select="."
+					mode="loop_collapse_find_first">
+					<xsl:with-param name="firstLoop" select="'k'" />
+					<xsl:with-param name="secondLoop" select="'i'" />
+				</xsl:apply-templates>
+				<!-- </xsl:variable> -->
 
-				<!-- <xsl:apply-templates select="exslt:node-set($step1)" -->
-				<!-- mode="chill_unroll_jam"> -->
-				<!-- <xsl:with-param name="max" select="4" /> -->
-				<!-- <xsl:with-param name="var" select="'k'" /> -->
-				<xsl:apply-templates select="exslt:node-set($step1)" />
+				<!-- <xsl:apply-templates select="exslt:node-set($step1)" /> -->
 
 			</xsl:when>
 
@@ -70,6 +66,7 @@
 				<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock/SgFortranDo"
 					mode="loop_collapse_find_second">
 					<xsl:with-param name="firstMax" select="$max" />
+					<xsl:with-param name="firstLoop" select="$firstLoop" />
 					<xsl:with-param name="secondLoop" select="$secondLoop" />
 				</xsl:apply-templates>
 			</xsl:when>
@@ -87,6 +84,7 @@
 
 	<xsl:template match="*" mode="loop_collapse_find_second">
 		<xsl:param name="firstMax" />
+		<xsl:param name="firstLoop" />
 		<xsl:param name="secondLoop" />
 		<xsl:variable name="currentNode" select="." /> <!-- for debug -->
 		<xsl:choose>
@@ -110,7 +108,7 @@
 
 					<xsl:apply-templates select="./SgBasicBlock"
 						mode="loop_collapse_body">
-						<xsl:with-param name="secondLoop" select="$secondLoop" />
+						<xsl:with-param name="firstLoop" select="$firstLoop" />
 					</xsl:apply-templates>
 
 				</xsl:copy>
@@ -121,6 +119,7 @@
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates mode="loop_collapse_find_second">
 						<xsl:with-param name="firstMax" select="$firstMax" />
+						<xsl:with-param name="firstLoop" select="$firstLoop" />
 						<xsl:with-param name="secondLoop" select="$secondLoop" />
 					</xsl:apply-templates>
 				</xsl:copy>
@@ -129,12 +128,24 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="loop_collapse_body">
-		<xsl:param name="secondLoop" />
-		<xsl:comment>
-			<xsl:value-of select="$secondLoop" />
-		</xsl:comment>
-		<!-- TODO -->
-		<xsl:apply-templates select="." />
+		<xsl:param name="firstLoop" />
+
+		<xsl:choose>
+			<xsl:when test="self::SgVarRefExp/@name = $firstLoop">
+				<SgIntVal value="1" />
+				<xsl:apply-templates mode="loop_collapse_body">
+					<xsl:with-param name="firstLoop" select="$firstLoop" />
+				</xsl:apply-templates>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates mode="loop_collapse_body">
+						<xsl:with-param name="firstLoop" select="$firstLoop" />
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template match="SgPragmaDeclaration" mode="loop_collapse">
