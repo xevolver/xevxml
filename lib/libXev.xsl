@@ -7,6 +7,7 @@
 
 	<!-- loop/* -->
 	<xsl:import href="loop/unroll.xsl" />
+	<xsl:import href="loop/collapse.xsl" />
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
