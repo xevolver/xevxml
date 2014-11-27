@@ -48,9 +48,14 @@ XML_DIFFS	= ${SRCS:$(INPUT_DIR)/%.f90=$(XML2SRC_DIR)/%.xmldiff}
 
 all:
 	@echo "usage: make {var-replace-simple, *}.check}"
+	@make env
+
+env:
 	@echo "xevxml-env: $(XEVXML_ENV)"
-	@hostname -a
-	@date
+	@echo "pwd: " `pwd`
+	@echo "hostname: " `hostname -a`
+	@echo "date: " `date`
+
 
 src2xml-files: $(SRC2XMLS)
 	@echo "TARGET: $(SRC2XMLS)"
