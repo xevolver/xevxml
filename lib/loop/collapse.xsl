@@ -60,7 +60,6 @@
 					<xsl:copy-of select="@*" />
 					<!-- 変数 初期値 -->
 					<xsl:copy-of select="./*[1]" />
-					<!-- TODO change the last value ($firstMax * ./*[2]) -->
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />
 						<xsl:apply-templates select="$firstMax" />
