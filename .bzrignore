@@ -1,3 +1,9 @@
+# new
+**/*.xev.*
+**/*.target-*.*
+**/*.diff.*
+
+# old
 **/*.out.xml
 **/*.out.f90
 **/expected-xml2src
