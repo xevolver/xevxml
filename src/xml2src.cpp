@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -31,7 +31,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "common.hpp"
-#include "xml2ast.hpp"
+#include "xml2rose.hpp"
 #include "unparse.hpp"
 
 using namespace std;
@@ -43,27 +43,27 @@ buildEmptySourceFile(const string& fn, SgProject* project=0)
   // This is a more direct, alternative implementation (not sure if it is better).
   SgSourceFile* newFile = new SgSourceFile();
   ROSE_ASSERT(newFile != NULL);
-  
+
   // Mark as a C file for now.
   newFile->set_Fortran_only(true);
-  
+
   // Specify the name of the file (and line and column numbers), using a Sg_File_Info object.
-  Sg_File_Info* info 
+  Sg_File_Info* info
     = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
   //Sg_File_Info* fileInfo = new Sg_File_Info(outputFileName,0,0);
   ROSE_ASSERT(info != NULL);
-  
+
   newFile->set_startOfConstruct(info);
   info->set_parent(newFile);
-  
+
   SgGlobal* globalScope = new SgGlobal();
   ROSE_ASSERT(globalScope != NULL);
-  
+
   newFile->set_globalScope(globalScope);
   globalScope->set_parent(newFile);
-  
+
   ROSE_ASSERT(newFile->get_globalScope() != NULL);
-  
+
 
   project = new SgProject();
   ROSE_ASSERT(project);
@@ -71,8 +71,8 @@ buildEmptySourceFile(const string& fn, SgProject* project=0)
   Rose_STL_Container<std::string> arglist;
   //int nextErrorCode = 0;
 
-  arglist.push_back("cc"); 
-  arglist.push_back("-c"); 
+  arglist.push_back("cc");
+  arglist.push_back("-c");
   arglist.push_back("dummy");
   arglist.push_back("-rose:o");
   arglist.push_back(fn);
@@ -99,13 +99,13 @@ int main(int argc, char** argv)
   //SgSourceFile* file = buildEmptySourceFile(fn);
   //SgProject* prj = file->get_project();
 
-  stringstream istr;
+  //stringstream istr;
 
-  while(cin.get(c)){
-    istr << c;
-  }
-  XevXML::XevInitialize();
-  if( XevXML::XevConvertXmlToAst(istr,&prj, NULL) == false ){
+  //while(cin.get(c)){
+  //istr << c;
+  //}
+  XevXml::XevInitialize();
+  if( XevXml::XevConvertXmlToRose(cin,&prj) == false ){
     XEV_ABORT();
   }
   else {
@@ -138,6 +138,6 @@ int main(int argc, char** argv)
   ofs.close();
   */
 
-  XevXML::XevFinalize();
+  XevXml::XevFinalize();
   return 0;
 }

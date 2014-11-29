@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -47,7 +47,7 @@ class XevAstTraversalAttribute
 public:
   XevAstTraversalAttribute (XevConversionHelper* h):level_(0),help_(h){};
   ~XevAstTraversalAttribute(){}
-  
+
   XevConversionHelper*  getTransformHelper() {return help_; }
   int&                 getIndentLevel()     {return level_;}
 };
@@ -58,13 +58,13 @@ class XevAstVisitorInternal: public AstTopDownProcessing <XevConversionHelper*>
 protected:
   std::stringstream& sstr_;
   int outLang_;
-  
+
   XevConversionHelper*
   evaluateInheritedAttribute(SgNode* node, XevConversionHelper* att);
-  
-  void 
+
+  void
   destroyInheritedValue (SgNode* node, XevConversionHelper* att);
-  
+
 public:
   XevAstVisitorInternal(std::stringstream& s): sstr_(s),outLang_(0) {}
   ~XevAstVisitorInternal() {}
@@ -83,7 +83,7 @@ public:
   ~XevAstVisitor() {}
 protected:
   void atTraversalStart() {/* do nothing */}
-  void atTraversalEnd() 
+  void atTraversalEnd()
   {
     sstr_<<std::endl<<std::ends;
   }

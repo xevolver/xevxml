@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -35,40 +35,40 @@
 
 using namespace std;
 
-static bool myUnparser(ostream* os, SgFile* file, UnparseFormatHelp* unparseHelp = NULL, 
-	      UnparseDelegate *repl  = NULL, SgScopeStatement* unparseScope = NULL )
+static bool myUnparser(ostream* os, SgFile* file, UnparseFormatHelp* unparseHelp = NULL,
+              UnparseDelegate *repl  = NULL, SgScopeStatement* unparseScope = NULL )
 {
   bool UseAutoKeyword                = false;
   // bool linefile                      = false;
   bool generateLineDirectives        = file->get_unparse_line_directives();
-  
+
   bool useOverloadedOperators        = false;
   // bool useOverloadedOperators        = true;
-  
+
   bool num                           = false;
-  
+
   // It is an error to have this always turned off (e.g. pointer = this; will not unparse correctly)
   bool _this                         = true;
-  
+
   bool caststring                    = false;
   bool _debug                        = false;
   bool _class                        = false;
   bool _forced_transformation_format = false;
-  
+
   // control unparsing of include files into the source file (default is false)
   bool _unparse_includes             = file->get_unparse_includes();
-  
+
   Unparser_Opt roseOptions( UseAutoKeyword,
-			    generateLineDirectives,
-			    useOverloadedOperators,
-			    num,
-			    _this,
-			    caststring,
-			    _debug,
-			    _class,
-			    _forced_transformation_format,
-			    _unparse_includes );
-  
+                            generateLineDirectives,
+                            useOverloadedOperators,
+                            num,
+                            _this,
+                            caststring,
+                            _debug,
+                            _class,
+                            _forced_transformation_format,
+                            _unparse_includes );
+
   Unparser roseUnparser (os, file->get_file_info()->get_filenameString(),roseOptions,unparseHelp,repl);
 
   roseUnparser.set_embedColorCodesInGeneratedCode ( file->get_embedColorCodesInGeneratedCode() );
@@ -81,12 +81,12 @@ static bool myUnparser(ostream* os, SgFile* file, UnparseFormatHelp* unparseHelp
     roseUnparser.unparseFile(sourceFile,inheritedAttributeInfo, unparseScope);
   else
     return false;
-  
+
   return true;
 }
 
-bool UnparseSgFile(SgFile* file, UnparseFormatHelp* unparseHelp, 
-		     UnparseDelegate *repl, SgScopeStatement* unparseScope )
+bool UnparseSgFile(SgFile* file, UnparseFormatHelp* unparseHelp,
+                     UnparseDelegate *repl, SgScopeStatement* unparseScope )
 {
   if (file->get_skip_unparse()==true) return false;
   if (file->get_unparse_output_filename().empty() == true) {
@@ -98,8 +98,8 @@ bool UnparseSgFile(SgFile* file, UnparseFormatHelp* unparseHelp,
     if(outputFilename!="-") {
       fstream os(outputFilename.c_str(),ios::out);
       if (!os) {
-	printf ("Error detected in opening file %s for output \n",outputFilename.c_str());
-	return false;
+        printf ("Error detected in opening file %s for output \n",outputFilename.c_str());
+        return false;
       }
       bool ret = myUnparser(&os,file,unparseHelp,repl,unparseScope);
       os.close();
@@ -110,5 +110,3 @@ bool UnparseSgFile(SgFile* file, UnparseFormatHelp* unparseHelp,
   }
   return false;
 }
-
-

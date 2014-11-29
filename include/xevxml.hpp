@@ -2,7 +2,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -14,7 +14,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -42,16 +42,13 @@
 #include <rosehpct/rosehpct.hh>
 #endif
 
-namespace XevXML {
-
-  class XevConversionHelper ; // see defined later
-
+namespace XevXml {
   extern void XevInitialize(void);
   extern void XevFinalize(void);
-  extern bool XevConvertXmlToAst(std::stringstream& str, SgProject** prj, XevConversionHelper* help = NULL);
-  extern bool XevConvertAstToXml(std::stringstream& str, SgProject** prj, XevConversionHelper* help = NULL);
+  extern bool XevConvertXmlToRose(std::istream& str, SgProject** prj);
+  extern bool XevConvertRoseToXml(std::ostream& str, SgProject** prj);
 
-
+#if 0
   // --- for custom transformation between ROSE AST and XML AST ---
   class XevConversionHelper {
     bool addressFlag_;
@@ -112,15 +109,15 @@ namespace XevXML {
 
     // set true to write the memory address of each node (for debugging)
     bool getAddressFlag()  const{ return addressFlag_; }
-    void setAddressFlag(bool f) { addressFlag_ = f; }  
+    void setAddressFlag(bool f) { addressFlag_ = f; }
 
     // set true to remove additoinal parenthesis at implicit type conversion.
     bool getRemoveParenFlag()  const{ return rmParenFlag_; }
-    void setRemoveParenFlag(bool f) { rmParenFlag_ = f; }  
+    void setRemoveParenFlag(bool f) { rmParenFlag_ = f; }
 
     // set true to use Fortran pragmas
     bool getFortranPragmaFlag()  const{ return fPragmaFlag_; }
-    void setFortranPragmaFlag(bool f) { fPragmaFlag_ = f; }  
+    void setFortranPragmaFlag(bool f) { fPragmaFlag_ = f; }
 
     // depth of the visited node from the root node
     int  getLevel()        const{ return level_; }
@@ -129,6 +126,7 @@ namespace XevXML {
     int getOutputLanguage() const {return outLang_;}
     void setOutputLanguage(int l) {outLang_ = l; }
   };
+#endif
 
   // --- XML utility functions ---
   extern void XmlInitialize(void);

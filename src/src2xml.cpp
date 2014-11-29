@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -31,75 +31,14 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "common.hpp"
-#include "ast2xml.hpp"
-#include "xml2ast.hpp"
+#include "rose2xml.hpp"
+#include "xml2rose.hpp"
 
 #include <getopt.h>
 #include <vector>
 #include <string>
 
 using namespace std;
-#if 0
-static vector<string> cmdopt(int argc, char** argv, xevxml::Ast2XmlOpt* opt)
-{
-  int c;
-  int digit_optind = 0;
-  vector<string> args;
-  
-  args.push_back(argv[0]);
-#ifndef XEV_USE_ROSEHPCT
-  while (1) {
-    int this_option_optind = optind ? optind : 1;
-    int option_index = 0;
-    static struct option long_options[] = {
-      {"xev:verbose", required_argument, 0,  0 },
-      {"xev:address", required_argument, 0,  0 },
-      {"xev:rosehpct", required_argument, 0,  0 },
-      {0,         0,                 0,  0 }
-    };
-    
-    c = getopt_long(argc, argv, "",
-		    long_options, &option_index);
-    if (c == -1) {
-      break;
-    }
-
-    switch (c) {
-    case 0:
-      cerr << "option " << long_options[option_index].name << endl;
-      if (optarg) {
-	cerr << " with arg " <<  optarg;
-	if(option_index==0)
-	  SgProject::set_verbose(atoi(optarg));
-	if(option_index==1)
-	  opt->address = atoi(optarg);
-	if(option_index==2)
-	  opt->rosehpct = atoi(optarg);
-      }
-      cerr << "\n";
-      break;
-
-    case '?':
-      break;
-      
-    default:
-      cerr << "?? getopt returned character code " << c << endl;
-    }
-  }
-
-  for(int i(optind);i<argc;i++)
-    args.push_back(argv[i]);
-#else
-  opt->rosehpct=1;
-  for(int i(1);i<argc;i++)
-    args.push_back(argv[i]);
-  if( opt->rosehpct )
-    opt->profiles = RoseHPCT::loadProfilingFiles(args);
-#endif
-  return args;
-}
-#endif
-
 
 int main(int argc, char** argv)
 {
@@ -113,33 +52,23 @@ int main(int argc, char** argv)
     args.push_back( string(argv[id]) );
   args.push_back( string("-rose:skip_syntax_check")); // some Fortran codes need this
 
-  fd = dup(fileno(stdout)); 
-  dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr  
+  fd = dup(fileno(stdout));
+  dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr
   sageProject = frontend(args); // build an ROSE AST from a code
   //SgProject::set_verbose(10);
 
 #ifdef XEV_USE_ROSEHPCT
   if(opt.rosehpct)
-    RoseHPCT::attachMetrics (opt.profiles, 
-			     sageProject, sageProject->get_verbose () > 0);
+    RoseHPCT::attachMetrics (opt.profiles,
+                             sageProject, sageProject->get_verbose () > 0);
 #endif
-  XevXML::XmlInitialize();
-  //xevxml::Ast2Xml(xmlString1,file,&opt);
-  XevXML::XevConvertAstToXml(xmlString1,&sageProject, new XevXML::XevConversionHelper());
+  XevXml::XmlInitialize();
+
   fflush(stdout);
   dup2(fd,1); // printf messages are written to stdout
   clearerr(stdout);
-  //cout << xmlString1.str();
-  printf("%s",xmlString1.str().c_str());
-  /*
-  char c;
-  while((c=cin.get()) != cin.eof()){
-    xmlString1 << c;
-  }
+  XevXml::XevConvertRoseToXml(cout,&sageProject);
 
-  xevxml::Xml2Ast(xmlString1,sageProject,"dummy.c");
-  sageProject->unparse();
-  */
-  XevXML::XmlFinalize();
+  XevXml::XmlFinalize();
   return 0;
 }

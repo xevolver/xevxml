@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -40,27 +40,27 @@ using namespace XevXML;
 
 #define CALL_ATTRIB(ty) attrib##ty(istr,node)
 /*
-  Sg*Val represents a literal data. 
-  So we expect that iostream will properly spell out the data. 
+  Sg*Val represents a literal data.
+  So we expect that iostream will properly spell out the data.
 */
-#define DEFINE_VALUE_EXP(ty)					\
-  static void attrib##ty(stringstream& istr,SgNode* node)	\
-  {								\
-    ty* n = is##ty(node);					\
-    if(n) {							\
-      istr << " value=\"" << n->get_value() << "\" ";		\
-    }								\
+#define DEFINE_VALUE_EXP(ty)                                    \
+  static void attrib##ty(stringstream& istr,SgNode* node)       \
+  {                                                             \
+    ty* n = is##ty(node);                                       \
+    if(n) {                                                     \
+      istr << " value=\"" << n->get_value() << "\" ";           \
+    }                                                           \
   }
 
-#define DEFINE_VALUE_AND_STRING(ty)				\
-  static void attrib##ty(stringstream& istr,SgNode* node)	\
-  {								\
-    ty* n = is##ty(node);					\
-    if(n) {							\
-      istr << " value=\"" << n->get_value() << "\" ";		\
-      if(n->get_valueString().size())				\
-	istr << " string=\"" << n->get_valueString() << "\" ";	\
-    }								\
+#define DEFINE_VALUE_AND_STRING(ty)                             \
+  static void attrib##ty(stringstream& istr,SgNode* node)       \
+  {                                                             \
+    ty* n = is##ty(node);                                       \
+    if(n) {                                                     \
+      istr << " value=\"" << n->get_value() << "\" ";           \
+      if(n->get_valueString().size())                           \
+        istr << " string=\"" << n->get_valueString() << "\" ";  \
+    }                                                           \
   }
 
 DEFINE_VALUE_EXP(SgBoolValExp);
@@ -81,12 +81,12 @@ DEFINE_VALUE_AND_STRING(SgUnsignedShortVal);
 DEFINE_VALUE_AND_STRING(SgUnsignedIntVal);
 DEFINE_VALUE_AND_STRING(SgUnsignedLongVal);
 DEFINE_VALUE_AND_STRING(SgUnsignedLongLongIntVal);
-static void attribSgUnaryOp(stringstream& istr,SgNode* node)	
-{								
-  SgUnaryOp* n = isSgUnaryOp(node);					
-  if(n) {							
-    istr << " mode=\"" << n->get_mode() << "\" ";		
-  }								
+static void attribSgUnaryOp(stringstream& istr,SgNode* node)
+{
+  SgUnaryOp* n = isSgUnaryOp(node);
+  if(n) {
+    istr << " mode=\"" << n->get_mode() << "\" ";
+  }
 }
 
 static void attribSgStringVal(stringstream& istr,SgNode* node)
@@ -556,7 +556,7 @@ static void attribSgInterfaceBody(stringstream& istr,SgNode* node)
 static void attribSgStopOrPauseStatement(stringstream& istr,SgNode* node)
 {
   SgStopOrPauseStatement*      n = isSgStopOrPauseStatement(node);
-  
+
   if(n) {
     istr << " type=\"" << n->get_stop_or_pause () << "\" ";
   }
@@ -565,7 +565,7 @@ static void attribSgStopOrPauseStatement(stringstream& istr,SgNode* node)
 static void attribFortranNumericlabel(stringstream& istr,SgNode* node)
 {
   SgStatement*    stmt = isSgStatement(node);
-  
+
   if( stmt ) {
     SgLabelRefExp*  l = stmt->get_numeric_label();
     if(l)
@@ -576,7 +576,7 @@ static void attribFortranNumericlabel(stringstream& istr,SgNode* node)
 static void attribSgNamelistStatement(stringstream& istr,SgNode* node)
 {
   SgNamelistStatement*    nlst = isSgNamelistStatement(node);
-  
+
   if( nlst ) {
     SgNameGroupPtrList & grp = nlst->get_group_list();
     SgNameGroup* nam = isSgNameGroup(grp[0]);
@@ -588,7 +588,7 @@ static void attribSgAsmStmt(stringstream& istr,SgNode* node)
 {
   SgAsmStmt*      n = isSgAsmStmt(node);
   std::string       str;
-  
+
   if(n) {
     str = n->get_assemblyCode();
     str = XmlStr2Entity( str );
@@ -642,85 +642,85 @@ static void attribSgOpenStatement(stringstream& istr,SgNode* node)
 static void attribSgInquireStatement(stringstream& istr,SgNode* node)
 {
   SgInquireStatement*      n = isSgInquireStatement(node);
-  
+
   if(n) {
     if( n->get_iolengthExp() )  istr << " iolength=\"1\" ";
-    
+
     if( n->get_unit() )         istr << " unit=\"1\" ";
-    
+
     if( n->get_iostat() )       istr << " iostat=\"1\" ";
-    
+
     if( n->get_err() )          istr << " err=\"1\" ";
-    
+
     if( n->get_iomsg() )        istr << " iomsg=\"1\" ";
-    
+
     if( n->get_file() )         istr << " file=\"1\" ";
-    
+
     if( n->get_access() )       istr << " access=\"1\" ";
-    
+
     if( n->get_form() )         istr << " form=\"1\" ";
-    
+
     if( n->get_recl() )         istr << " recl=\"1\" ";
-    
+
     if( n->get_blank() )        istr << " blank=\"1\" ";
-    
+
     if( n->get_exist() )        istr << " exist=\"1\" ";
-    
+
     if( n->get_opened() )       istr << " opened=\"1\" ";
-      
+
     if( n->get_number() )       istr << " number=\"1\" ";
-    
+
     if( n->get_named() )        istr << " named=\"1\" ";
-    
+
     if( n->get_name() )         istr << " name=\"1\" ";
-    
+
     if( n->get_sequential() )   istr << " sequential=\"1\" ";
-    
+
     if( n->get_direct() )       istr << " direct=\"1\" ";
-    
+
     if( n->get_formatted() )    istr << " formatted=\"1\" ";
-    
+
     if( n->get_unformatted() )  istr << " unformatted=\"1\" ";
-      
+
     if( n->get_nextrec() )      istr << " nextrec=\"1\" ";
-      
+
     if( n->get_position() )     istr << " position=\"1\" ";
-    
+
     if( n->get_action() )       istr << " action=\"1\" ";
-    
+
     if( n->get_read() )         istr << " read=\"1\" ";
-    
+
     if( n->get_write() )        istr << " write=\"1\" ";
-      
+
     if( n->get_readwrite() )    istr << " readwrite=\"1\" ";
-    
+
     if( n->get_delim() )        istr << " delim=\"1\" ";
-    
+
     if( n->get_pad() )          istr << " pad=\"1\" ";
-    
+
     if( n->get_asynchronous() ) istr << " asynchronous=\"1\" ";
-    
+
     if( n->get_stream() )       istr << " decimal=\"1\" ";
-    
+
     if( n->get_stream() )       istr << " stream=\"1\" ";
-    
+
     if( n->get_size() )         istr << " size=\"1\" ";
-    
+
     if( n->get_pending() )      istr << " pending=\"1\" ";
   }
 }
 
 static void writeFlopsAttribs(stringstream& istr,SgNode* node,
-			      XevXML::XevConversionHelper* help)
+                              XevXML::XevConversionHelper* help)
 {
 #ifdef XEV_USE_ROSEHPCT
   if(help->rosehpct==0) return;
   SgLocatedNode * loc = isSgLocatedNode(node);
   if(loc && loc->attributeExists ("PAPI_FP_OPS") ){
     const RoseHPCT::MetricAttr* flops_attr =
-      dynamic_cast<const RoseHPCT::MetricAttr *> 
+      dynamic_cast<const RoseHPCT::MetricAttr *>
     (loc->getAttribute ("PAPI_FP_OPS"));
-    
+
     if(flops_attr) {
       istr << " flops=";
       istr << const_cast<RoseHPCT::MetricAttr *> (flops_attr)->toString ();
@@ -731,7 +731,7 @@ static void writeFlopsAttribs(stringstream& istr,SgNode* node,
 
 static void attribSgSourceFile(stringstream& istr,SgNode* node)
 {
-  SgSourceFile*  n = isSgSourceFile(node);  
+  SgSourceFile*  n = isSgSourceFile(node);
   if(n) {
     istr << " filename=\"" << n->get_sourceFileNameWithoutPath() << "\"";
     istr << " language=\"" << n->get_outputLanguage() << "\"";
@@ -741,7 +741,7 @@ static void attribSgSourceFile(stringstream& istr,SgNode* node)
 
 static void attribSgRenamePair(stringstream& istr,SgNode* node)
 {
-  SgRenamePair*  n = isSgRenamePair(node);  
+  SgRenamePair*  n = isSgRenamePair(node);
   if(n) {
     istr << " lname=" << n->get_local_name() << "";
     istr << " uname=" << n->get_use_name() << "";
@@ -750,7 +750,7 @@ static void attribSgRenamePair(stringstream& istr,SgNode* node)
 
 static void attribSgBreakStmt(stringstream& istr,SgNode* node)
 {
-  SgBreakStmt*  n = isSgBreakStmt(node);  
+  SgBreakStmt*  n = isSgBreakStmt(node);
   if(n) {
     if(n->get_do_string_label().size())
       istr << " label=\"" << n->get_do_string_label() << "\"";
@@ -759,7 +759,7 @@ static void attribSgBreakStmt(stringstream& istr,SgNode* node)
 
 static void attribSgContinueStmt(stringstream& istr,SgNode* node)
 {
-  SgContinueStmt*  n = isSgContinueStmt(node);  
+  SgContinueStmt*  n = isSgContinueStmt(node);
   if(n) {
     if(n->get_do_string_label().size())
       istr << " label=\"" << n->get_do_string_label() << "\"";
@@ -768,7 +768,7 @@ static void attribSgContinueStmt(stringstream& istr,SgNode* node)
 
 static void attribSgExpression(stringstream& istr,SgNode* node)
 {
-  SgExpression*  n = isSgExpression(node);  
+  SgExpression*  n = isSgExpression(node);
   if(n==0)return;
 
   if(n && n->get_need_paren())
@@ -779,7 +779,7 @@ static void attribSgExpression(stringstream& istr,SgNode* node)
 
 static void attribSgIfStmt(stringstream& istr,SgNode* node)
 {
-  SgIfStmt*  n = isSgIfStmt(node);  
+  SgIfStmt*  n = isSgIfStmt(node);
   if(n) {
     istr << " end=\"" << n->get_has_end_statement() << "\" ";
     istr << " use=\"" << n->get_use_then_keyword() << "\" ";
@@ -835,7 +835,7 @@ static void attribSgDeclarationStatement(stringstream& istr, SgNode* node)
   }
   istr << " type_modifier=\"" << mod << "\" ";
 
-  if(modifier.get_typeModifier().get_constVolatileModifier().get_modifier() 
+  if(modifier.get_typeModifier().get_constVolatileModifier().get_modifier()
      != SgConstVolatileModifier::e_default)
     istr << " cv_modifier=\"" <<  modifier.get_typeModifier().get_constVolatileModifier().get_modifier()<< "\" ";
   if( SageInterface::is_C_language() == false )
@@ -849,13 +849,13 @@ static void attribSgLocatedNode(stringstream& istr, SgNode* node)
   SgLocatedNode* loc = isSgLocatedNode(node);
   if(loc){
     istr << " file_info=\"" << loc->get_file_info()->get_file_id()
-	 << " " << loc->get_file_info()->get_raw_line()
-	 << " " << loc->get_file_info()->get_raw_col() << "\" ";
+         << " " << loc->get_file_info()->get_raw_line()
+         << " " << loc->get_file_info()->get_raw_col() << "\" ";
   }
 }
 
 void writeXmlAttribs(stringstream& istr,SgNode* node,
-		     XevXML::XevConversionHelper* help)
+                     XevXML::XevConversionHelper* help)
 {
 
   writeValueAttribs(istr,node);
@@ -868,35 +868,35 @@ void writeXmlAttribs(stringstream& istr,SgNode* node,
   attribSgVariableDeclaration(istr,node);
   attribSgFunctionDeclaration(istr,node);
   attribSgUnaryOp(istr,node);
-  attribSgGotoStatement(istr,node);                     
-  attribSgLabelStatement(istr,node);                    
-  attribSgProcedureHeaderStatement(istr,node);          
-  attribSgUseStatement(istr,node);                      
-  attribSgFortranIncludeLine(istr,node);                
-  attribSgAttributeSpecificationStatement(istr,node);   
+  attribSgGotoStatement(istr,node);
+  attribSgLabelStatement(istr,node);
+  attribSgProcedureHeaderStatement(istr,node);
+  attribSgUseStatement(istr,node);
+  attribSgFortranIncludeLine(istr,node);
+  attribSgAttributeSpecificationStatement(istr,node);
   attribSgFortranDo(istr,node);
   attribSgWhileStmt(istr,node);
-  attribSgFunctionRefExp(istr,node);                    
-  attribSgPrintStatement(istr,node);                    
-  attribSgWriteStatement(istr,node);                    
-  attribSgReadStatement(istr,node);                    
+  attribSgFunctionRefExp(istr,node);
+  attribSgPrintStatement(istr,node);
+  attribSgWriteStatement(istr,node);
+  attribSgReadStatement(istr,node);
   //attribSgSizeOfOp(istr,node);  // 2014.09.21 (deleted)
-  attribSgClassDeclaration(istr,node);                  
-  attribSgClassDefinition(istr,node);                   
-  attribSgEnumDeclaration(istr,node);                   
-  attribSgTypedefDeclaration(istr,node);                
-  attribSgLabelRefExp(istr,node);                       
-  attribSgFormatStatement(istr,node);                   
-  attribSgFormatItem(istr,node);                        
-  attribSgCommonBlockObject(istr,node);                 
-  attribSgInterfaceStatement(istr,node);                
-  attribSgInterfaceBody(istr,node);                     
-  attribSgStopOrPauseStatement(istr,node);              
-  attribFortranNumericlabel(istr,node);                 
-  attribSgNamelistStatement(istr,node);                 
-  attribSgAsmStmt(istr,node);                           
-  attribSgOpenStatement(istr,node);                     
-  attribSgInquireStatement(istr,node);                  
+  attribSgClassDeclaration(istr,node);
+  attribSgClassDefinition(istr,node);
+  attribSgEnumDeclaration(istr,node);
+  attribSgTypedefDeclaration(istr,node);
+  attribSgLabelRefExp(istr,node);
+  attribSgFormatStatement(istr,node);
+  attribSgFormatItem(istr,node);
+  attribSgCommonBlockObject(istr,node);
+  attribSgInterfaceStatement(istr,node);
+  attribSgInterfaceBody(istr,node);
+  attribSgStopOrPauseStatement(istr,node);
+  attribFortranNumericlabel(istr,node);
+  attribSgNamelistStatement(istr,node);
+  attribSgAsmStmt(istr,node);
+  attribSgOpenStatement(istr,node);
+  attribSgInquireStatement(istr,node);
   attribSgRenamePair(istr,node);
   attribSgBreakStmt(istr,node);
   attribSgContinueStmt(istr,node);

@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -74,12 +74,12 @@ public:
     if(node) {
       xercesc::DOMNode* child=node->getFirstChild();
       while(child){
-	std::cerr<< depth 
-		 << xercesc::XMLString::transcode(child->getNodeName()) 
-		 << std::endl;
-	this->visit2(child,depth+1);
-	xercesc::DOMNode* next=child->getNextSibling();
-	child=next;
+        std::cerr<< depth
+                 << xercesc::XMLString::transcode(child->getNodeName())
+                 << std::endl;
+        this->visit2(child,depth+1);
+        xercesc::DOMNode* next=child->getNextSibling();
+        child=next;
       }
     }
   }
@@ -205,7 +205,7 @@ public:
   SgType* buildModifierType(xercesc::DOMNode* node, SgType* itype, SgNode* astParent=0);
 
   SgType* buildType(xercesc::DOMNode* node, SgExpression* ex=0, SgNode* astParent=0);
-  
+
   SgNode* visitSgTypeInt(xercesc::DOMNode* node, SgNode* astParent=0)
   {
     return buildType(node,0,astParent);
@@ -248,7 +248,7 @@ public:
 
   SgNode* visitSgTypeLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
   SgNode* visitSgTypeUnsignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
-  SgNode* visitSgTypeSignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  } 
+  SgNode* visitSgTypeSignedLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
 
   SgNode* visitSgTypeLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
   SgNode* visitSgTypeUnsignedLongLong(xercesc::DOMNode* node, SgNode* astParent=0)  {  return buildType(node,0,astParent);  }
@@ -357,7 +357,7 @@ public:
 };
 
 
-class OrphanTest : public AstSimpleProcessing 
+class OrphanTest : public AstSimpleProcessing
 {
 public:
   OrphanTest() {}
@@ -370,16 +370,16 @@ public:
       //cerr << n->unparseToString();
       //cerr << p <<endl;
       if(p==0) {
-	std::cerr << n->class_name() << ": ";
-	std::cerr << n->unparseToString()	<< " \n";
-	XEV_ABORT();
+        std::cerr << n->class_name() << ": ";
+        std::cerr << n->unparseToString()       << " \n";
+        XEV_ABORT();
       }
       //cerr << n->unparseToString();
     }
   }
 };
 
-class VardefSearch 
+class VardefSearch
 {
   std::string varname;
 public:
@@ -393,23 +393,23 @@ public:
     SgVariableDeclaration *decl = isSgVariableDeclaration(n);
     SgVariableDefinition  *def  = isSgVariableDefinition(n);
     /*
-    if(def==NULL && decl != NULL ) 
+    if(def==NULL && decl != NULL )
       def = decl->get_definition();
     */
     if(def){
       if(def->get_vardefn()->get_name().getString() == varname )
-	return def->get_vardefn();
+        return def->get_vardefn();
     }
     else if (decl){
       SgInitializedNamePtrList& lst = decl->get_variables();
       for(size_t i(0);i<lst.size();++i)
-	if( lst[i]->get_name().getString()  == varname )
-	  return lst[i];
+        if( lst[i]->get_name().getString()  == varname )
+          return lst[i];
     }
     else {
       for(size_t i(0);i<n->get_numberOfTraversalSuccessors();++i){
-	if ( (ret = this->visit(n->get_traversalSuccessorByIndex(i))) != NULL)
-	  return ret;
+        if ( (ret = this->visit(n->get_traversalSuccessorByIndex(i))) != NULL)
+          return ret;
       }
     }
     return NULL;
@@ -428,8 +428,8 @@ public:
     if(scope){
       SgSymbolTable* tbl = scope->get_symbol_table();
       if(tbl==0) XEV_ABORT();
-      printf("\n Symbol table of %s (parent=%s)\n", 
-	     n->class_name().c_str(),n->get_parent()->class_name().c_str());
+      printf("\n Symbol table of %s (parent=%s)\n",
+             n->class_name().c_str(),n->get_parent()->class_name().c_str());
       printf("=== BEGIN ====\n");
       tbl->print();
       printf("===  END  ====\n");
@@ -437,7 +437,7 @@ public:
     for(size_t i(0);i<n->get_numberOfTraversalSuccessors();++i){
       SgNode* child = n->get_traversalSuccessorByIndex(i);
       if(child!=NULL)
-	this->visit(child);
+        this->visit(child);
     }
     return NULL;
   }
@@ -453,6 +453,15 @@ public:
 
 
 #define DEFAULT_FILE_INFO (Sg_File_Info::generateDefaultFileInfoForTransformationNode())
+
+#define SUBTREE_VISIT_BEGIN(X,Y,Z)                                      \
+  {                                                                     \
+  xercesc::DOMNode* cld_ = (X)->getFirstChild();                        \
+  while(cld_) {                                                         \
+  if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){            \
+  SgNode* Y = this->visit(cld_,Z);
+
+#define SUBTREE_VISIT_END()     } cld_=cld_->getNextSibling();}}
 
 }
 

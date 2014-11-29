@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -60,7 +60,7 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/framework/Wrapper4InputSource.hpp>
 
-namespace XevXML {
+namespace XevXml {
 
 struct DirAST {
 public:
@@ -73,30 +73,30 @@ public:
   DirAST(const DirAST& dir) {*this=dir;}
   ~DirAST() {}
 
-  DirAST& operator+= (DirAST& dir) { 
-    succ.push_back(dir); 
+  DirAST& operator+= (DirAST& dir) {
+    succ.push_back(dir);
     return *this;
   }
-  DirAST& operator+= (std::string& s) { 
+  DirAST& operator+= (std::string& s) {
     str += s;
     return *this;
   }
-  DirAST& operator= (const DirAST& dir) { 
+  DirAST& operator= (const DirAST& dir) {
     succ = dir.succ;
     str  = dir.str;
     cname = dir.cname;
     return *this;
   }
-  DirAST& operator= (const std::string& s) { 
+  DirAST& operator= (const std::string& s) {
     str = s;
     return *this;
   }
-  DirAST& operator << (const std::string& s) { 
+  DirAST& operator << (const std::string& s) {
     cname = s;
     return *this;
   }
 
-  void print(int indent=0) 
+  void print(int indent=0)
   {
     std::cout << succ.size() <<": " << cname << " ";
     if(str.size())
@@ -106,23 +106,23 @@ public:
 
     std::vector<DirAST>::iterator it=succ.begin();
     for(;it!=succ.end();++it){
-      for(int j(0);j<indent+1;j++) 
-	std::cout << '+';
+      for(int j(0);j<indent+1;j++)
+        std::cout << '+';
       (*it).print(indent+1);
     }
   }
 };
 
 
-  
+
 class Dir2XmlVisitor {
   std::vector<xercesc::DOMNode*> defs_;
   std::vector<std::string> dnames_;
   xercesc::DOMDocument * doc_;
 public:
-  Dir2XmlVisitor(xercesc::DOMDocument * d) {doc_=d;} 
+  Dir2XmlVisitor(xercesc::DOMDocument * d) {doc_=d;}
   ~Dir2XmlVisitor() {}
-  
+
   void visit() {visit(doc_);}
   void getDefs(xercesc::DOMNode* node);
   void printDefs()
@@ -140,4 +140,3 @@ protected:
 };
 
 #endif
-

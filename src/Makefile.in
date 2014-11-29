@@ -1,19 +1,18 @@
-LD	= $(CXX)
+LD = $(CXX)
 
 ROSEROOT = @ROSE_DIR@
 XEROOT = @XERCESC_DIR@
 XAROOT = @XALANC_DIR@
-CXXFLAGS= -g -Wall -Wno-deprecated -I../include 
+CXXFLAGS= -g -Wall -Wno-deprecated -I../include
 CXXFLAGS += -I../include @ROSE_CFLAGS@ @XALANC_CFLAGS@ @XERCESC_CFLAGS@
-#LIBS	= @ROSE_LIBS@ -lxalan-c -lxerces-c
-LIBS	 += @ROSE_LIBS@ @XALANC_LIBS@ @XERCESC_LIBS@
+LIBS  += @ROSE_LIBS@ @XALANC_LIBS@ @XERCESC_LIBS@
 
-SRCS    =  ast2xml.cpp xml2ast.cpp attrib.cpp \
-	 xmlutils.cpp type.cpp preproc.cpp unparse.cpp
-OBJS	= ${SRCS:.cpp=.o}
-DEPS	= ${SRCS:.cpp=.d}
+SRCS    =  xmlutils.cpp type.cpp rose2xml.cpp xml2rose.cpp \
+	preproc.cpp unparse.cpp expr.cpp stmt.cpp decl.cpp supp.cpp value.cpp
+OBJS = ${SRCS:.cpp=.o}
+DEPS = ${SRCS:.cpp=.d}
 
-TARGET	= src2xml xsltexec xml2src dir2xml
+TARGET = src2xml xsltexec xml2src dir2xml
 
 .SUFFIXES: .cpp .o
 

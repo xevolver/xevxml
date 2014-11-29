@@ -4,7 +4,7 @@
  * \license This project is released under the BSD 2-clause license
  *
  * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -16,7 +16,7 @@
  *   notice, this list of conditions and the following disclaimer in
  *   the documentation and/or other materials provided with the
  *   distribution.
- *    
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -45,7 +45,7 @@ namespace XevXML {
   void XevInitialize(void) { XmlInitialize(); }
 
   void XevFinalize(void)   { XmlFinalize(); }
-  
+
   bool XevConvertAstToXml(stringstream& sstr, SgProject** prj, XevConversionHelper* help)
   {
     XevAstVisitor visitor(sstr);
@@ -66,18 +66,18 @@ namespace XevXML {
     // assuming EDG4X-ROSE
     SgFile* file = &p->get_file(0);
 #endif
-    if(help==NULL) 
+    if(help==NULL)
       // set default transformation
       help = new XevConversionHelper();
 
     visitor.traverseWithinFile(file,help);
-    
+
     return true; // success
   }
 }
 
 using namespace XevXML;
-/* 
+/*
  * returns true if the node has internal node(s).not printed by just traversing an AST.
  */
 static bool hasInternalNode(SgNode* n)
@@ -111,10 +111,10 @@ static bool hasInternalNode(SgNode* n)
   if(isSgArithmeticIfStatement(n))
     return true;
 
-  if(isSgPointerDerefExp(n))     
+  if(isSgPointerDerefExp(n))
     return true;
 
-  if(isSgVarArgOp(n)) 
+  if(isSgVarArgOp(n))
     return true;
 
   if(isSgEquivalenceStatement(n))
@@ -123,19 +123,19 @@ static bool hasInternalNode(SgNode* n)
   if(isSgFunctionParameterTypeList(n))
     return true;
 
-  if(isSgInquireStatement(n)) 
+  if(isSgInquireStatement(n))
     return true;
 
   if(isSgTypedefDeclaration(n))
     return true;
 
-  if(isSgDataStatementGroup(n)) 
+  if(isSgDataStatementGroup(n))
     return true;
 
-  if(isSgDataStatementValue(n)) 
+  if(isSgDataStatementValue(n))
     return true;
 
-  if(isSgDataStatementObject(n)) 
+  if(isSgDataStatementObject(n))
     return true;
 
   if(isSgInquireStatement(n))
@@ -147,9 +147,9 @@ static bool hasInternalNode(SgNode* n)
 /*
  * creates a SgPramgaDeclaration node if a pragma prefix (!$) is found in the Fortran comment.
  */
-static void 
-writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info, 
-		   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
+static void
+writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info,
+                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
 {
   std::string str;
   int idx;
@@ -157,18 +157,18 @@ writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info,
   if(info){
     for(size_t i(0);i<(*info).size();i++) {
       if((*info)[i]->getRelativePosition()==pos){
-	str = (*info)[i]->getString();
-	std::transform(str.begin(),str.end(),str.begin(),::tolower);
-	idx = str.find( XEV_PRAGMA_PREFIX );
-	if( idx >= 0 ) {
-	  str = (*info)[i]->getString(); // read the string again
-	  sstr_ << "<SgPragmaDeclaration >\n";
-	  sstr_ << "  "; // indent
-	  sstr_ << "<SgPragma pragma=\"";
-	  // assuming Fortran directives start with !$
-	  sstr_ << XevXML::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
-	  sstr_ << "</SgPragmaDeclaration >\n";
-	}
+        str = (*info)[i]->getString();
+        std::transform(str.begin(),str.end(),str.begin(),::tolower);
+        idx = str.find( XEV_PRAGMA_PREFIX );
+        if( idx >= 0 ) {
+          str = (*info)[i]->getString(); // read the string again
+          sstr_ << "<SgPragmaDeclaration >\n";
+          sstr_ << "  "; // indent
+          sstr_ << "<SgPragma pragma=\"";
+          // assuming Fortran directives start with !$
+          sstr_ << XevXML::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
+          sstr_ << "</SgPragmaDeclaration >\n";
+        }
       }
     }
   }
@@ -178,7 +178,7 @@ writeFortranPragma(stringstream& sstr_,  AttachedPreprocessingInfoType* info,
 /*
  * writes Preprocessing Info of a SgNode as a text element in XML.
  */
-static AttachedPreprocessingInfoType* 
+static AttachedPreprocessingInfoType*
 writePreprocessingInfo(stringstream& sstr_,SgNode* n)
 {
   SgLocatedNode* loc = isSgLocatedNode(n);
@@ -191,7 +191,7 @@ writePreprocessingInfo(stringstream& sstr_,SgNode* n)
   if(info){
     for(size_t i(0);i<(*info).size();i++) {
       str = (*info)[i]->getString();
-      str = XmlStr2Entity( str );                     
+      str = XmlStr2Entity( str );
       sstr_ << "<PreprocessingInfo pos=\"";
       sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
       sstr_ << " type=\"";
@@ -211,26 +211,26 @@ static void writeModifierType(stringstream& istr,SgType* t)
   SgModifierType* n = isSgModifierType(t);
   if(n) {
     SgTypeModifier m = n->get_typeModifier();
-    if( m.isRestrict() ) 
+    if( m.isRestrict() )
       istr << " modifier=\"restrict\" ";
-    
+
     SgConstVolatileModifier cv = m.get_constVolatileModifier();
-    if( cv.isConst() ) 
+    if( cv.isConst() )
       istr << " modifier=\"const\" ";
-    else if(cv.isVolatile() ) 
+    else if(cv.isVolatile() )
       istr << " modifier=\"volatile\" ";
   }
 }
 
 /* --- write types --- */
 static void writeTypesRecursive(stringstream& sstr,
-				SgType* t, 
-				XevConversionHelper* help,bool f=true)
+                                SgType* t,
+                                XevConversionHelper* help,bool f=true)
 {
   if(t==0) return;
   for(int j(0);j<help->getLevel();j++)
     sstr << "  ";
-  
+
   sstr << '<';
   sstr << t->class_name();
   if(help->getAddressFlag()){
@@ -259,35 +259,12 @@ static void writeTypesRecursive(stringstream& sstr,
     if( exp ) {
       sstr << " lengthExpression=\"1\" ";
     }
-    /*
-    SgIntVal* v = isSgIntVal( isSgTypeString(t)->get_lengthExpression() );
-    if( v )
-      sstr << " len=\"" << v->get_value() << "\" ";
-    
-    SgExpression*   exp = isSgTypeString(t)->get_lengthExpression();
-    if( exp )
-      sstr << " lengthExpression=\"" << exp->class_name() << "\" ";
-    */
-  }
-  else if( s == "SgTypeComplex" ) {
-    //SgIntVal* v = isSgIntVal( isSgTypeComplex(t)->get_type_kind() );
-    sstr << " base_type=\"" << isSgTypeComplex(t)->get_base_type()->class_name() << "\" ";
-    /*
-    if( v )
-      sstr << " type_kind=\"" << v->get_valueString() << "\" ";
-    else
-      sstr << " type_kind=\"\" ";
-    */
   }
   else if( s == "SgArrayType" ) {
     SgUnsignedLongVal* ul = isSgUnsignedLongVal( isSgArrayType(t)->get_index() );
     sstr << " rank=\"" << isSgArrayType(t)->get_rank() << "\" ";
     if( ul )
       sstr << " index=\"" << ul->get_value() << "\" ";
-    //else
-    //sstr << " index=\"\" ";
-    
-    //sstr << " type=\"" << isSgArrayType(t)->get_base_type()->class_name() << "\" ";
   }
   else if( s == "SgClassType" ) {
     SgClassType* n = isSgClassType(t);
@@ -299,55 +276,37 @@ static void writeTypesRecursive(stringstream& sstr,
       sstr << " tag_name=" << n->get_name() << " ";
     sstr << " type=\"" << cd->get_class_type() << "\" ";
   }
-  else if( s == "SgPointerType" ) {
-    SgPointerType* n = isSgPointerType(t);
-    if( n )
-      sstr << " base_type=\"" << n->get_base_type()->class_name() << "\" ";
-  }
-  else if( s == "SgTypeImaginary" ) {
-    SgIntVal* v = isSgIntVal( isSgTypeImaginary(t)->get_type_kind() );
-    sstr << " base_type=\"" << isSgTypeImaginary(t)->get_base_type()->class_name() << "\" ";
-    
-    if( v )
-      sstr << " type_kind=\"" << v->get_valueString() << "\" ";
-    else
-      sstr << " type_kind=\"\" ";
-  }
 
-  if( t->containsInternalTypes()==true || isSgTypeString(t) ){
+  if( t->containsInternalTypes()==true || isSgTypeString(t) || isSgTypeComplex(t) || isSgTypeImaginary(t) ){
     sstr << ">" << endl;
     Rose_STL_Container<SgType*> types = t->getInternalTypes();
     help->setLevel(help->getLevel()+1);
     for(size_t i(0);i<types.size();++i){
       if(types[i]!=t)
-	writeTypesRecursive(sstr,types[i],help,true);
+        writeTypesRecursive(sstr,types[i],help,true);
     }
-    if( s == "SgArrayType" ) { 
+    if( s == "SgArrayType" ) {
       SgExprListExp* lste = isSgArrayType(t)->get_dim_info();
       XevAstVisitorInternal visitor(sstr);
       visitor.traverse(lste,help);
     }
-    if( s == "SgFunctionType" ) { 
+    if( s == "SgFunctionType" ) {
       SgFunctionParameterTypeList* lst = isSgFunctionType(t)->get_argument_list();
       if( lst ) {
-	  XevAstVisitorInternal visitor(sstr);
+          XevAstVisitorInternal visitor(sstr);
           writeTypesRecursive(sstr,isSgFunctionType(t)->get_return_type(),help,true);
           visitor.traverse(lst,help);
       }
     }
-#if 0
-    if( s == "SgPointerType" ) { 
-      writeTypesRecursive(sstr,isSgPointerType(t)->get_base_type(),help,true);
-    }
-    // type_kind is now output as attribute
-    if( t->get_type_kind() ) {
-      XevAstVisitorInternal visitor(sstr);
-      visitor.traverse(t->get_type_kind(),help);    
-    }
-#endif
     if( isSgTypeString(t) && isSgTypeString(t)->get_lengthExpression() ) {
       XevAstVisitorInternal visitor(sstr);
-      visitor.traverse(isSgTypeString(t)->get_lengthExpression(),help);    
+      visitor.traverse(isSgTypeString(t)->get_lengthExpression(),help);
+    }
+    if( s == "SgTypeComplex" ) {
+      writeTypesRecursive(sstr,isSgTypeComplex(t)->get_base_type(),help,true);
+    }
+    if( s == "SgTypeImaginary" ) {
+      writeTypesRecursive(sstr,isSgTypeImaginary(t)->get_base_type(),help,true);
     }
 
     help->setLevel(help->getLevel()- 1);
@@ -365,24 +324,24 @@ static void writeTypesRecursive(stringstream& sstr,
 /* --- check if the node needs to write SgType elements --- */
 static SgType* hasType(SgNode* node)
 {
-  if(isSgInitializer(node)) 
+  if(isSgInitializer(node))
     return isSgInitializer(node)->get_type();
-  else if (isSgInitializedName(node))  
+  else if (isSgInitializedName(node))
     //return isSgInitializedName(node)->get_type();
     return isSgInitializedName(node)->get_typeptr();
   else if (isSgFunctionDeclaration(node)) {
     //return isSgFunctionDeclaration(node)->get_type();
     return isSgFunctionDeclaration(node)->get_type()->get_return_type();
   }
-  else if (isSgCastExp(node)) 
+  else if (isSgCastExp(node))
     return isSgCastExp(node)->get_type();
   return 0;
 }
 
 /* --- write SgType elements of a node --- */
 static bool writeTypes(stringstream& sstr,
-		       SgNode* node, 
-		       XevConversionHelper* help)
+                       SgNode* node,
+                       XevConversionHelper* help)
 {
   SgType* t=hasType(node);
   if(t==0) return false;
@@ -397,13 +356,13 @@ static bool writeTypes(stringstream& sstr,
 /* --- check if the node is a leaf node --- */
 static bool isLeafNode(SgNode* node)
 {
-  if( node->numberOfNodesInSubtree() > 1 ) 
+  if( node->numberOfNodesInSubtree() > 1 )
     return false;
   if( hasInternalNode(node) )
     return false;
   if( hasType(node) )
     return false;
-  
+
   return true;
 }
 
@@ -413,8 +372,8 @@ static bool isLeafNode(SgNode* node)
  *  write internal nodes that are not written by simple AST traversal
  */
 static void writeInternalNode(stringstream& sstr,
-			      SgNode* n, 
-			      XevConversionHelper* help)
+                              SgNode* n,
+                              XevConversionHelper* help)
 {
   //if(hasInternalNode(n)==false) return;
 
@@ -444,7 +403,7 @@ static void writeInternalNode(stringstream& sstr,
     lste = isSgAttributeSpecificationStatement(n)->get_parameter_list();
     if( lste){
       SgExpressionPtrList& lst = lste->get_expressions();
-      
+
       for(size_t i=0;i<lst.size();i++){
         visitor.traverse(lst[i],help);
       }
@@ -453,13 +412,13 @@ static void writeInternalNode(stringstream& sstr,
     lste = isSgAttributeSpecificationStatement(n)->get_bind_list();
     if( lste) {
       SgExpressionPtrList& lst = lste->get_expressions();
-      
+
       for(size_t i=0;i<lst.size();i++){
         visitor.traverse(lst[i],help);
       }
     }
 
-    SgDataStatementGroupPtrList & lst 
+    SgDataStatementGroupPtrList & lst
       = isSgAttributeSpecificationStatement(n)->get_data_statement_group_list();
     for(size_t i=0;i<lst.size();i++){
         visitor.traverse(lst[i],help);
@@ -475,7 +434,7 @@ static void writeInternalNode(stringstream& sstr,
     }
   }
 
-  else if(isSgDataStatementGroup(n)){ 
+  else if(isSgDataStatementGroup(n)){
     SgDataStatementObjectPtrList & lst =
       isSgDataStatementGroup(n)->get_object_list();
     for(size_t i=0;i<lst.size();i++)
@@ -489,18 +448,18 @@ static void writeInternalNode(stringstream& sstr,
       visitor.traverse(val[i],help);
     }
   }
-  else if(isSgDataStatementObject(n)){ 
+  else if(isSgDataStatementObject(n)){
     SgDataStatementObject* obj = isSgDataStatementObject(n);
     visitor.traverse(obj->get_variableReference_list(),help);
   }
-  else if(isSgDataStatementValue(n)){ 
+  else if(isSgDataStatementValue(n)){
     SgDataStatementValue* v = isSgDataStatementValue(n);
     visitor.traverse(v->get_initializer_list(),help);
     visitor.traverse(v->get_repeat_expression(),help);
     visitor.traverse(v->get_constant_expression(),help);
   }
 
-  else if(isSgSizeOfOp(n)){ 
+  else if(isSgSizeOfOp(n)){
     string s = n->class_name();
     if( s == "SgSizeOfOp" ){
       SgType* typ = isSgSizeOfOp(n)->get_operand_type();
@@ -515,18 +474,18 @@ static void writeInternalNode(stringstream& sstr,
     for(size_t i=0;i<lst.size();i++)
       visitor.traverse(lst[i],help);
   }
-  
-  else if(isSgInterfaceBody(n) && isSgInterfaceBody(n)->get_use_function_name() ==false ){  
+
+  else if(isSgInterfaceBody(n) && isSgInterfaceBody(n)->get_use_function_name() ==false ){
     visitor.traverse(isSgInterfaceBody(n)->get_functionDeclaration(),help);
   }
 
-  else if(isSgArithmeticIfStatement(n)){ 
+  else if(isSgArithmeticIfStatement(n)){
     visitor.traverse(isSgArithmeticIfStatement(n)->get_less_label(),help);
     visitor.traverse(isSgArithmeticIfStatement(n)->get_equal_label(),help);
     visitor.traverse(isSgArithmeticIfStatement(n)->get_greater_label(),help);
   }
 
-  else if(isSgNamelistStatement(n)){ 
+  else if(isSgNamelistStatement(n)){
     SgNameGroupPtrList & grp = isSgNamelistStatement(n)->get_group_list();
     for(size_t i=0;i<grp.size();i++) {
       SgNameGroup* nam = isSgNameGroup(grp[i]);
@@ -541,25 +500,25 @@ static void writeInternalNode(stringstream& sstr,
     }
   }
 
-  else if(isSgPointerDerefExp(n)){ 
+  else if(isSgPointerDerefExp(n)){
     writeTypesRecursive( sstr,isSgPointerDerefExp(n)->get_type(),help,false );
   }
 
-  else if(isSgVarArgOp(n)){ 
+  else if(isSgVarArgOp(n)){
     writeTypesRecursive( sstr,isSgVarArgOp(n)->get_expression_type(),help,false );
   }
 
-  else if(isSgEquivalenceStatement(n)){ 
+  else if(isSgEquivalenceStatement(n)){
     visitor.traverse(isSgEquivalenceStatement(n)->get_equivalence_set_list(),help);
   }
 
-  else if(isSgFunctionParameterTypeList(n)){ 
+  else if(isSgFunctionParameterTypeList(n)){
     SgTypePtrList & lst = isSgFunctionParameterTypeList(n)->get_arguments();
     for(size_t i=0;i<lst.size();i++)
       visitor.traverse(lst[i],help);
   }
 
-  else if(isSgInquireStatement(n)){ 
+  else if(isSgInquireStatement(n)){
     SgInquireStatement* inq = isSgInquireStatement(n);
     TRAVERSE_IF_EXISTS(inq->get_iolengthExp());
     TRAVERSE_IF_EXISTS(inq->get_unit());
@@ -604,27 +563,27 @@ static void writeInternalNode(stringstream& sstr,
 
 /* --- AST preprocessing (called before going down to the child nodes) --- */
 XevConversionHelper*
-XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node, 
-						  XevConversionHelper* help)
+XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node,
+                                                  XevConversionHelper* help)
 {
   SgLocatedNode* loc = isSgLocatedNode(node);
-  AttachedPreprocessingInfoType* info=0; 
+  AttachedPreprocessingInfoType* info=0;
 
   /* user-defined callback function call */
   help->beforeXmlElement(node);
 
-  if(loc) 
+  if(loc)
     info = loc->getAttachedPreprocessingInfo();
-  if(isSgSourceFile(node)) 
+  if(isSgSourceFile(node))
     outLang_ = isSgSourceFile(node)->get_outputLanguage();
-  if(info && outLang_==SgFile::e_Fortran_output_language) 
+  if(info && outLang_==SgFile::e_Fortran_output_language)
     if(help->getFortranPragmaFlag()) writeFortranPragma(sstr_,info);
 
   for(int i(0);i<help->getLevel();i++)
     sstr_ << "  "; // indent
   help->setLevel(help->getLevel()+1);
   sstr_ << '<';
-  sstr_ << node->class_name();  
+  sstr_ << node->class_name();
 
   /* user-defined callback function call */
   help->beforeXmlAttribute(node);
@@ -651,11 +610,9 @@ XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node,
 
   if(loc)
     if( loc->get_file_info()->isCompilerGenerated()==false
-	|| help->getRemoveParenFlag() == false )
+        || help->getRemoveParenFlag() == false )
       writeTypes(sstr_,node,help);
 
-  /* write internal nodes as child nodes */
-  writeInternalNode(sstr_,node,help);
 
   return help;
 }
@@ -663,13 +620,16 @@ XevAstVisitorInternal::evaluateInheritedAttribute(SgNode* node,
 
 /* --- AST postprocessing (called after coming back from the child nodes) --- */
 void XevAstVisitorInternal::destroyInheritedValue (SgNode* node,
-						   XevConversionHelper* help)
+                                                   XevConversionHelper* help)
 {
+  /* write internal nodes as child nodes */
+  writeInternalNode(sstr_,node,help);
+
   /* user-defined callback function call */
   help->beforeXmlClosingElement(node);
 
-  AttachedPreprocessingInfoType* info=writePreprocessingInfo(sstr_,node); 
-  if(info && outLang_==SgFile::e_Fortran_output_language) 
+  AttachedPreprocessingInfoType* info=writePreprocessingInfo(sstr_,node);
+  if(info && outLang_==SgFile::e_Fortran_output_language)
     writeFortranPragma(sstr_,info,PreprocessingInfo::inside);
 
   if ( isLeafNode(node) == false || info != 0) {
@@ -679,7 +639,7 @@ void XevAstVisitorInternal::destroyInheritedValue (SgNode* node,
     sstr_ << node->class_name() << '>' << endl;
   }
 
-  if(info && outLang_==SgFile::e_Fortran_output_language) 
+  if(info && outLang_==SgFile::e_Fortran_output_language)
     writeFortranPragma(sstr_,info,PreprocessingInfo::after);
 
   help->setLevel(help->getLevel()-1);
@@ -688,5 +648,3 @@ void XevAstVisitorInternal::destroyInheritedValue (SgNode* node,
   help->afterXmlClosingElement(node);
   return;
 }
-
-
