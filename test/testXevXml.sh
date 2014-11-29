@@ -33,7 +33,7 @@ esac
 
 
 # error messages are written in 1
-${FC} -rose:skip_syntax_check -c $SRC 2>$LOG
+${FC} -rose:skip_syntax_check -rose:skipfinalCompileStep -c $SRC 2>$LOG
 if [ $? -eq 0 ]
 then 
     echo -n "s" 1>&2
