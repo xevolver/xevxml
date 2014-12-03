@@ -10,8 +10,9 @@ check-env:
 
 DIRS = $(wildcard triple-loop-1.f90.xev.d/test-*)
 
-test-all:
-	@$(foreach dir,$(DIRS),echo $(dir); cd $(dir); make check)
+check-all: input-src
+	@$(foreach dir,$(DIRS),echo $(dir); cd $(dir); make check; cd ../..)
+	@wc triple-loop-1.f90.xev.d/test-*/*.diff.*
 
 input-src:
 	@-mkdir triple-loop-1.f90.xev.d
