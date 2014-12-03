@@ -18,6 +18,8 @@ else ifeq ($(HOSTNAME), hagi-a)
 XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
+else
+XEVXML_ENV = . /home/hirasawa/research-git/xevxml/src/env-xevxml-local-here.sh
 endif
 
 ##############################################
