@@ -52,6 +52,7 @@ XevXmlVisitor::checkPreprocInfo(xe::DOMNode* node, SgNode* astNode)
   }
 }
 
+/// Visitor of a PreprocessingInfo element in an XML document
 SgNode*
 XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
 {

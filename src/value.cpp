@@ -42,6 +42,7 @@ using namespace std;
 using namespace XevXml;
 
 #define VISIT_VAL(valType,baseType)                                     \
+  /** Visitor of a Sg##valType element in an XML document */            \
   SgNode* XevXmlVisitor::                                               \
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
@@ -58,6 +59,7 @@ using namespace XevXml;
       ret->set_valueString(vstr);                                       \
     return ret;                                                         \
   }                                                                     \
+  /** XML attribute writer of Sg##vatType */                            \
   void XevSageVisitor::attribSg##valType(SgNode* node)                  \
   {                                                                     \
     Sg##valType* n = isSg##valType(node);                               \
@@ -67,9 +69,11 @@ using namespace XevXml;
           sstr() << " string=\"" << n->get_valueString() << "\" ";      \
       }                                                                 \
   }                                                                     \
+  /** XML internal node writer of Sg##vatType */                        \
   void XevSageVisitor::inodeSg##valType(SgNode* node) {return;}
 
 #define VISIT_VAL_NO_STRING(valType,baseType)                           \
+  /** Visitor of a Sg##valType element in an XML document */            \
   SgNode* XevXmlVisitor::                                               \
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
@@ -84,6 +88,7 @@ using namespace XevXml;
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
+  /** XML attribute writer of Sg##valType */                            \
   void XevSageVisitor::attribSg##valType(SgNode* node)                  \
   {                                                                     \
     Sg##valType* n = isSg##valType(node);                               \
@@ -91,6 +96,7 @@ using namespace XevXml;
         sstr() << " value=\"" << n->get_value() << "\" ";               \
       }                                                                 \
   }                                                                     \
+  /** XML internal node writer of Sg##valType */                        \
   void XevSageVisitor::inodeSg##valType(SgNode* node) {return;}
 
 VISIT_VAL_NO_STRING(BoolValExp,bool);
@@ -113,8 +119,7 @@ VISIT_VAL(UnsignedShortVal,unsigned short);
 VISIT_VAL(WcharVal,unsigned short);
 
 // =====================================================================
-//   SgEnumVal
-// =====================================================================
+/// Visitor of a SgEnumVal element in an XML document
 SgNode*
 XevXmlVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
 {
@@ -129,17 +134,19 @@ XevXmlVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
   }
   return ret;
 }
+/** XML attribute writer of SgEnumVal */
 void XevSageVisitor::attribSgEnumVal(SgNode* node) {
   SgEnumVal* n = isSgEnumVal(node);
     if(n) {
       sstr() << " value=\"" << n->get_value() << "\" ";
     }
 }
+/** XML internal node writer of SgEnumVal */
 void XevSageVisitor::inodeSgEnumVal(SgNode* node) {return;}
 
+
 // =====================================================================
-//   SgComplexVal
-// =====================================================================
+/// Visitor of a SgComplexVal element in an XML document
 SgNode*
 XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -161,14 +168,15 @@ XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgComplexVal */
 void
 XevSageVisitor::attribSgComplexVal(SgNode* node) {return;}
 void
+/** XML internal node writer of SgComplexVal */
 XevSageVisitor::inodeSgComplexVal(SgNode* node)  {return;}
 
 // =====================================================================
-//   SgStringVal
-// =====================================================================
+/// Visitor of a SgStringVal element in an XML document
 SgNode*
 XevXmlVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -189,6 +197,7 @@ XevXmlVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
     ret->set_usesSingleQuotes(flag);
   return ret;
 }
+/** XML attribute writer of SgStringVal */
 void XevSageVisitor::attribSgStringVal(SgNode* node)
 {
   SgStringVal* n = isSgStringVal(node);
@@ -198,4 +207,5 @@ void XevSageVisitor::attribSgStringVal(SgNode* node)
       sstr() << " single=\"1\" ";
   }
 }
+/** XML internal node writer of SgStringVal */
  void XevSageVisitor::inodeSgStringVal(SgNode* node) {return;}

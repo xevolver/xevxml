@@ -72,9 +72,11 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
 }
 
 #define INODE_DECL_DEFAULT(x)                           \
+  /** XML internal node writer of Sg##x */              \
   void XevSageVisitor::inodeSg##x(SgNode* node)         \
   { return; }
 #define ATTRIB_DECL_DEFAULT(x)                          \
+  /** XML attribute writer of Sg##x */                  \
   void XevSageVisitor::attribSg##x(SgNode* node)        \
   { return; }
 
@@ -83,7 +85,8 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
   INODE_DECL_DEFAULT(x)
 
 
-// -------------------------------------
+// =====================================================================
+/// Visitor of a SgAsmStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 {
@@ -104,6 +107,7 @@ XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgAsmStmt */
 void XevSageVisitor::attribSgAsmStmt(SgNode* node)
 {
   SgAsmStmt*      n = isSgAsmStmt(node);
@@ -119,6 +123,11 @@ void XevSageVisitor::attribSgAsmStmt(SgNode* node)
 }
 INODE_DECL_DEFAULT(AsmStmt);
 
+
+
+// =====================================================================
+/// Visitor of a SgAttributeSpecificationStatement element in an XML document
+//@note not fully implemented yet
 SgNode*
 XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -239,6 +248,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     if(ret) ret->set_definingDeclaration(ret);
     return ret;
 }
+/** XML attribute writer of SgAttributeSpecificationStatement */
 void XevSageVisitor::attribSgAttributeSpecificationStatement(SgNode* node)
 {
   SgAttributeSpecificationStatement* n = isSgAttributeSpecificationStatement(node);
@@ -253,6 +263,7 @@ void XevSageVisitor::attribSgAttributeSpecificationStatement(SgNode* node)
       sstr() << " bind_list=\"0\" ";
   }
 }
+/** XML internal node writer of SgAttributeSpecificationStatement */
 void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
 {
   if(isSgAttributeSpecificationStatement(node)) {
@@ -289,6 +300,10 @@ void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
   }
 }
 
+
+
+// =====================================================================
+/// Visitor of a SgClassDeclaration element in an XML document
 SgNode*
 XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -361,6 +376,7 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   if(isNamed==false) ret->set_isUnNamed(true);
   return ret;
 }
+/** XML attribute writer of SgClassDeclaration */
 void XevSageVisitor::attribSgClassDeclaration(SgNode* node)
 {
   SgClassDeclaration*      n = isSgClassDeclaration(node);
@@ -374,6 +390,8 @@ void XevSageVisitor::attribSgClassDeclaration(SgNode* node)
 INODE_DECL_DEFAULT(ClassDeclaration);
 
 
+// =====================================================================
+/// Visitor of a SgCommonBlock element in an XML document
 SgNode*
 XevXmlVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -399,6 +417,9 @@ XevXmlVisitor::visitSgCommonBlock(xercesc::DOMNode* node, SgNode* astParent)
 }
 DECL_DEFAULT(CommonBlock);
 
+
+// =====================================================================
+/// Visitor of a SgContainsStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgContainsStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -410,6 +431,9 @@ XevXmlVisitor::visitSgContainsStatement(xe::DOMNode* node, SgNode* astParent)
 }
 DECL_DEFAULT(ContainsStatement);
 
+
+// =====================================================================
+/// Visitor of a SgDerivedTypeStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -489,12 +513,16 @@ XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
   }
   return ret;
 }
+/** XML attribute writer of SgDerivedTypeStatement */
 void XevSageVisitor::attribSgDerivedTypeStatement(SgNode* node)
 {
   attribSgClassDeclaration(node);
 }
 INODE_DECL_DEFAULT(DerivedTypeStatement);
 
+
+// =====================================================================
+/// Visitor of a SgEntryStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -533,6 +561,7 @@ XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
   }
   return ret;
 }
+/** XML attribute writer of SgEntryStatement */
 void XevSageVisitor::attribSgEntryStatement(SgNode* node)
 {
   SgEntryStatement* n = isSgEntryStatement(node);
@@ -542,11 +571,15 @@ void XevSageVisitor::attribSgEntryStatement(SgNode* node)
   }
   attribSgFunctionDeclaration(node);
 }
+/** XML internal node writer of SgEntryStatement */
 void XevSageVisitor::inodeSgEntryStatement(SgNode* node)
 {
   inodeSgProcedureHeaderStatement(node);
 }
 
+
+// =====================================================================
+/// Visitor of a SgEnumDeclaration element in an XML document
 SgNode*
 XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
@@ -585,6 +618,7 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgEnumDeclaration */
 void XevSageVisitor::attribSgEnumDeclaration(SgNode* node)
 {
   SgEnumDeclaration*      n = isSgEnumDeclaration(node);
@@ -598,6 +632,9 @@ void XevSageVisitor::attribSgEnumDeclaration(SgNode* node)
 }
 INODE_DECL_DEFAULT(EnumDeclaration);
 
+
+// =====================================================================
+/// Visitor of a SgEquivalenceStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -626,12 +663,16 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
   return ret;
 }
 ATTRIB_DECL_DEFAULT(EquivalenceStatement);
+/** XML internal node writer of SgEquivalenceStatement */
 void XevSageVisitor::inodeSgEquivalenceStatement(SgNode* node)
 {
   this->visit(isSgEquivalenceStatement(node)->get_equivalence_set_list());
 }
 
 
+
+// =====================================================================
+/// Visitor of a SgFormatStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -654,6 +695,7 @@ XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
   return ret;
 }
 ATTRIB_DECL_DEFAULT(FormatStatement);
+/** XML internal node writer of SgFOrmatStatement */
 void XevSageVisitor::inodeSgFormatStatement(SgNode* node)
 {
   SgFormatItemPtrList & lst =
@@ -662,6 +704,10 @@ void XevSageVisitor::inodeSgFormatStatement(SgNode* node)
     this->visit(lst[i]);
 }
 
+
+
+// =====================================================================
+/// Visitor of a SgFortranIncludeLine element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFortranIncludeLine(xe::DOMNode* node, SgNode* astParent)
 {
@@ -679,6 +725,7 @@ XevXmlVisitor::visitSgFortranIncludeLine(xe::DOMNode* node, SgNode* astParent)
   }
   return ret;
 }
+/** XML attribute writer of SgFortranIncludeLine */
 void XevSageVisitor::attribSgFortranIncludeLine(SgNode* node)
 {
   SgFortranIncludeLine* n = isSgFortranIncludeLine(node);
@@ -688,6 +735,9 @@ void XevSageVisitor::attribSgFortranIncludeLine(SgNode* node)
 }
 INODE_DECL_DEFAULT(FortranIncludeLine);
 
+
+// =====================================================================
+/// Visitor of a SgFunctionDeclaration element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
@@ -737,6 +787,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgFunctionDeclaration */
 void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
 {
   SgFunctionDeclaration* n = isSgFunctionDeclaration(node);
@@ -746,12 +797,16 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
   }
 }
+/** XML internal node writer of SgFunctionDeclaration */
 void XevSageVisitor::inodeSgFunctionDeclaration(SgNode* node)
 {
   SgType* t = isSgFunctionDeclaration(node)->get_type()->get_return_type();
   this->visit(t);
 }
 
+
+// =====================================================================
+/// Visitor of a SgFunctionParameterList element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -772,6 +827,10 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
 }
 DECL_DEFAULT(FunctionParameterList);
 
+
+
+// =====================================================================
+/// Visitor of a SgImplicitStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -799,6 +858,10 @@ XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
 }
 DECL_DEFAULT(ImplicitStatement);
 
+
+
+// =====================================================================
+/// Visitor of a SgInterfaceStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -830,6 +893,7 @@ XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astPare
 
   return ret;
 }
+/** XML attribute writer of SgInterfaceStatement */
 void XevSageVisitor::attribSgInterfaceStatement(SgNode* node)
 {
   SgInterfaceStatement* n = isSgInterfaceStatement(node);
@@ -841,6 +905,10 @@ void XevSageVisitor::attribSgInterfaceStatement(SgNode* node)
 }
 INODE_DECL_DEFAULT(InterfaceStatement);
 
+
+
+// =====================================================================
+/// Visitor of a SgModuleStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -894,6 +962,7 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
   }
   return ret;
 }
+/** XML attribute writer of SgModuleStatement */
 void XevSageVisitor::attribSgModuleStatement(SgNode* node)
 {
   attribSgClassDeclaration(node);
@@ -901,6 +970,10 @@ void XevSageVisitor::attribSgModuleStatement(SgNode* node)
 INODE_DECL_DEFAULT(ModuleStatement);
 
 
+
+
+// =====================================================================
+/// Visitor of a SgNamelistStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -935,6 +1008,7 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
   nondefn->set_definingDeclaration(ret);
   return ret;
 }
+/** XML attribute writer of SgNamelistStatement */
 void XevSageVisitor::attribSgNamelistStatement(SgNode* node)
 {
   SgNamelistStatement*    nlst = isSgNamelistStatement(node);
@@ -945,6 +1019,7 @@ void XevSageVisitor::attribSgNamelistStatement(SgNode* node)
     sstr() << " group=\"" << nam->get_group_name() << "\" ";
   }
 }
+/** XML internal node writer of SgNamelistStatement */
 void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 {
   SgNameGroupPtrList & grp = isSgNamelistStatement(node)->get_group_list();
@@ -961,6 +1036,10 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
   }
 }
 
+
+
+// =====================================================================
+/// Visitor of a SgPragmaDeclaration element in an XML document
 SgNode*
 XevXmlVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
@@ -985,6 +1064,10 @@ XevXmlVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
 }
 DECL_DEFAULT(PragmaDeclaration);
 
+
+
+// =====================================================================
+/// Visitor of a SgProcedureHeaderStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1149,6 +1232,7 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
 
   return ret;
 }
+/** XML attribute writer of SgProcedureHeaderStatement */
 void XevSageVisitor::attribSgProcedureHeaderStatement(SgNode* node)
 {
   SgProcedureHeaderStatement* n = isSgProcedureHeaderStatement(node);
@@ -1165,11 +1249,16 @@ void XevSageVisitor::attribSgProcedureHeaderStatement(SgNode* node)
   }
   attribSgFunctionDeclaration(node);
 }
+/** XML internal node writer of SgProcedureHeaderStatement */
 void XevSageVisitor::inodeSgProcedureHeaderStatement(SgNode* node)
 {
   inodeSgFunctionDeclaration(node);
 }
 
+
+
+// =====================================================================
+/// Visitor of a SgProgramHeaderStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1236,15 +1325,21 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
   }
   return ret;
 }
+/** XML attribute writer of SgProgramHeaderStatement */
 void XevSageVisitor::attribSgProgramHeaderStatement(SgNode* node)
 {
   attribSgFunctionDeclaration(node);
 }
+/** XML internal node writer of SgProgramHeaderStatement */
 void XevSageVisitor::inodeSgProgramHeaderStatement(SgNode* node)
 {
   inodeSgFunctionDeclaration(node);
 }
 
+
+
+// =====================================================================
+/// Visitor of a SgTypedefDeclaration element in an XML document
 SgNode*
 XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1298,6 +1393,7 @@ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgTypedefDeclaration */
 void XevSageVisitor::attribSgTypedefDeclaration(SgNode* node)
 {
   SgTypedefDeclaration*      n = isSgTypedefDeclaration(node);
@@ -1306,11 +1402,15 @@ void XevSageVisitor::attribSgTypedefDeclaration(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
   }
 }
+/** XML internal node writer of SgTypedefDeclaration */
 void XevSageVisitor::inodeSgTypedefDeclaration(SgNode* node)
 {
   this->visit(isSgTypedefDeclaration(node)->get_base_type());
 }
 
+
+// =====================================================================
+/// Visitor of a SgUseStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1359,6 +1459,7 @@ XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgUseStatement */
 void XevSageVisitor::attribSgUseStatement(SgNode* node)
 {
   SgUseStatement* n = isSgUseStatement(node);
@@ -1369,6 +1470,9 @@ void XevSageVisitor::attribSgUseStatement(SgNode* node)
 }
 INODE_DECL_DEFAULT(UseStatement);
 
+
+// =====================================================================
+/// Visitor of a SgVariableDeclaration element in an XML document
 SgNode*
 XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1498,6 +1602,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgVariableDeclaration */
 void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);

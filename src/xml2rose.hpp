@@ -57,7 +57,7 @@
 #include <xercesc/framework/Wrapper4InputSource.hpp>
 
 namespace XevXml {
-
+  /// Visitor class for traversing XML AST nodes to generate a Sage AST
 class XevXmlVisitor
 {
   //XevConversionHelper* _help;
@@ -69,27 +69,28 @@ public:
   XevXmlVisitor(SgProject*);
   ~XevXmlVisitor();
 
-
-  SgNode* visit(xercesc::DOMNode* node, SgNode* astParent=0);
+  /// Visiting all XML elements in a subtree whose root is given as the 1st argument.
+  virtual SgNode* visit(xercesc::DOMNode* node, SgNode* astParent=0);
 
 #define SAGE3(NodeType)  \
-  SgNode* visitSg##NodeType(xercesc::DOMNode* node, SgNode* astParent=0);
+  virtual SgNode* visitSg##NodeType(xercesc::DOMNode* node, SgNode* astParent=0);
 #include "sgnode.hpp"
 
-  SgNode* visitPreprocessingInfo(xercesc::DOMNode* node, SgNode* astParent=0);
+  virtual SgNode* visitPreprocessingInfo(xercesc::DOMNode* node, SgNode* astParent=0);
 
   //SgType* buildType(xercesc::DOMNode* node, SgExpression* ex=0, SgNode* astParent=0);
 
-  void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
-  void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
-  void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);
-  void checkDeclStmt  (xercesc::DOMNode* node, SgNode* astNode);
+  virtual void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
+  virtual void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
+  virtual void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);
+  virtual void checkDeclStmt  (xercesc::DOMNode* node, SgNode* astNode);
 
   //SgFile* getSgFile() {return _file;}
-  SgProject* getSgProject() {return _prj;}
+  /// get the SgProject object created from an XML document 
+  virtual SgProject* getSgProject() {return _prj;}
 };
 
-
+  /// (internal) Visitor class for checking if there is a orphan node
 class OrphanTest : public AstSimpleProcessing
 {
 public:
@@ -112,6 +113,7 @@ public:
   }
 };
 
+  /// (internal) Visitor class for searching SgVariableDeclaration in a subtree
 class VardefSearch
 {
   std::string varname;
@@ -149,6 +151,7 @@ public:
   }
 };
 
+  /// (internal) Visitor class for printing out all symbol tables in an AST
 class PrintSymTable
 {
 public:
@@ -176,6 +179,7 @@ public:
   }
 };
 
+  /// (internal) Visitor class for finding a reference to a variable not found in symbol tables.
 class CheckUndeclVars
 {
 public:

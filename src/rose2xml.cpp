@@ -68,9 +68,39 @@ namespace XevXml {
     else
       sstr << "<?xml version=\"1.0\" encoding=\""<< enc << "\"?>" << std::endl;
 
-    visitor.setSgFileToVisit(file);
+    //visitor.setSgFileToVisit(file);
     visitor.visit(file);
     return true; // success
+  }
+}
+
+/*
+ * creates a SgPramgaDeclaration node if a pragma prefix (!$) is found in the Fortran comment.
+ */
+static void
+writeFortranPragma(std::ostream& sstr_,  AttachedPreprocessingInfoType* info,
+                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
+{
+  std::string str;
+  int idx;
+
+  if(info){
+    for(size_t i(0);i<(*info).size();i++) {
+      if((*info)[i]->getRelativePosition()==pos){
+        str = (*info)[i]->getString();
+        std::transform(str.begin(),str.end(),str.begin(),::tolower);
+        idx = str.find( XEV_PRAGMA_PREFIX );
+        if( idx >= 0 ) {
+          str = (*info)[i]->getString(); // read the string again
+          sstr_ << "<SgPragmaDeclaration >\n";
+          sstr_ << "  "; // indent
+          sstr_ << "<SgPragma pragma=\"";
+          // assuming Fortran directives start with !$
+          sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
+          sstr_ << "</SgPragmaDeclaration >\n";
+        }
+      }
+    }
   }
 }
 
@@ -181,6 +211,8 @@ static bool isInSameFile(SgNode* node, SgFile* file){
 
 void XevSageVisitor::visit(SgNode* node)
 {
+  if(isSgFile(node)!=NULL)
+    this->setSgFileToVisit(isSgFile(node));
   if(node==NULL||isInSameFile(node,this->getSgFileToVisit())==false )
     return;
   int  indentw = getIndent();

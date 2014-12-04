@@ -41,6 +41,8 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
+/// Check if there is a text between two adjacent statement.
+/// If such a text exists, it is attached to either of the two statements.
 static
 void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* blk)
 {
@@ -109,6 +111,7 @@ static void attribSgStatement(std::ostream& str,SgNode* node)
 }
 
 #define ATTRIB_STMT_DEFAULT(x)                          \
+  /** XML attribute writer of Sg##x */                  \
   void XevSageVisitor::attribSg##x(SgNode* node)        \
   {                                                     \
     attribSgStatement(sstr(),node);                     \
@@ -116,6 +119,7 @@ static void attribSgStatement(std::ostream& str,SgNode* node)
   }
 
 #define INODE_STMT_DEFAULT(x)                           \
+  /** XML internal node writer of Sg##x */              \
   void XevSageVisitor::inodeSg##x(SgNode* node)         \
   {                                                     \
     return;                                             \
@@ -127,6 +131,8 @@ static void attribSgStatement(std::ostream& str,SgNode* node)
 
 #define TRAVERSE_IF_EXISTS(x) if(x){this->visit(x);}
 
+// ===============================================================================
+/// Visitor of a SgAllocateStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -149,6 +155,9 @@ XevXmlVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParen
 }
 STMT_DEFAULT(AllocateStatement);
 
+
+// ===============================================================================
+/// Visitor of a SgArithmeticIfStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -190,6 +199,7 @@ XevXmlVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent
   return ret;
 }
 ATTRIB_STMT_DEFAULT(ArithmeticIfStatement);
+/** XML internal node writer of SgArithmeticIfStatement */
 void XevSageVisitor::inodeSgArithmeticIfStatement(SgNode* node)
 {
   SgArithmeticIfStatement* stmt = isSgArithmeticIfStatement(node);
@@ -198,6 +208,8 @@ void XevSageVisitor::inodeSgArithmeticIfStatement(SgNode* node)
   this->visit(stmt->get_greater_label());
 }
 
+// ===============================================================================
+/// Visitor of a SgBackspaceStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -234,6 +246,8 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(BackspaceStatement);
 
+// ===============================================================================
+/// Visitor of a SgBasicBlock element in an XML document
 SgNode*
 XevXmlVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 {
@@ -247,6 +261,8 @@ XevXmlVisitor::visitSgBasicBlock(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(BasicBlock);
 
+// ===============================================================================
+/// Visitor of a SgBreakStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -260,6 +276,7 @@ XevXmlVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgBreakStmt */
 void XevSageVisitor::attribSgBreakStmt(SgNode* node)
 {
   SgBreakStmt*  n = isSgBreakStmt(node);
@@ -271,6 +288,8 @@ void XevSageVisitor::attribSgBreakStmt(SgNode* node)
 }
 INODE_STMT_DEFAULT(BreakStmt);
 
+// ===============================================================================
+/// Visitor of a SgCaseOptionStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -292,6 +311,8 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(CaseOptionStmt);
 
+// ===============================================================================
+/// Visitor of a SgClassDefinition element in an XML document
 SgNode*
 XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -330,6 +351,7 @@ XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgClassDefinition */
 void XevSageVisitor::attribSgClassDefinition(SgNode* node)
 {
   SgClassDefinition*      n = isSgClassDefinition(node);
@@ -349,6 +371,8 @@ void XevSageVisitor::attribSgClassDefinition(SgNode* node)
 }
 INODE_STMT_DEFAULT(ClassDefinition);
 
+// ===============================================================================
+/// Visitor of a SgCloseStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -368,6 +392,8 @@ XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(CloseStatement);
 
+// ===============================================================================
+/// Visitor of a SgComputedGotoStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -393,6 +419,8 @@ XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent
 }
 STMT_DEFAULT(ComputedGotoStatement);
 
+// ===============================================================================
+/// Visitor of a SgContinueStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -405,6 +433,7 @@ XevXmlVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgContinueStmt */
 void XevSageVisitor::attribSgContinueStmt(SgNode* node)
 {
   SgContinueStmt*  n = isSgContinueStmt(node);
@@ -416,6 +445,8 @@ void XevSageVisitor::attribSgContinueStmt(SgNode* node)
 }
 INODE_STMT_DEFAULT(ContinueStmt);
 
+// ===============================================================================
+/// Visitor of a SgDeallocateStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -440,6 +471,8 @@ XevXmlVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astPar
 }
 STMT_DEFAULT(DeallocateStatement);
 
+// ===============================================================================
+/// Visitor of a SgDefaultOptionStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -459,6 +492,8 @@ XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParen
 }
 STMT_DEFAULT(DefaultOptionStmt);
 
+// ===============================================================================
+/// Visitor of a SgDoWhileStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -482,6 +517,8 @@ XevXmlVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(DoWhileStmt);
 
+// ===============================================================================
+/// Visitor of a SgElseWhereStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -506,6 +543,8 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
 }
 STMT_DEFAULT(ElseWhereStatement);
 
+// ===============================================================================
+/// Visitor of a SgEndfileStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -539,6 +578,8 @@ XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(EndfileStatement);
 
+// ===============================================================================
+/// Visitor of a SgExprStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -561,6 +602,8 @@ XevXmlVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(ExprStatement);
 
+// ===============================================================================
+/// Visitor of a SgFlushStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -584,6 +627,8 @@ XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(FlushStatement);
 
+// ===============================================================================
+/// Visitor of a SgForAllStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -617,6 +662,8 @@ XevXmlVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(ForAllStatement);
 
+// ===============================================================================
+/// Visitor of a SgForInitStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -638,6 +685,8 @@ XevXmlVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent
 }
 STMT_DEFAULT(ForInitStatement);
 
+// ===============================================================================
+/// Visitor of a SgForStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -672,6 +721,8 @@ XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(ForStatement);
 
+// ===============================================================================
+/// Visitor of a SgFortranDo element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -747,6 +798,7 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgFortranDo */
 void XevSageVisitor::attribSgFortranDo(SgNode* node)
 {
   SgFortranDo*      n = isSgFortranDo(node);
@@ -766,6 +818,8 @@ void XevSageVisitor::attribSgFortranDo(SgNode* node)
 }
 INODE_STMT_DEFAULT(FortranDo);
 
+// ===============================================================================
+/// Visitor of a SgFunctionDefinition element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
 {
@@ -793,6 +847,8 @@ XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(FunctionDefinition);
 
+// ===============================================================================
+/// Visitor of a SgGlobal element in an XML document
 SgNode*
 XevXmlVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 {
@@ -817,6 +873,8 @@ XevXmlVisitor::visitSgGlobal(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(Global);
 
+// ===============================================================================
+/// Visitor of a SgGotoStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -867,6 +925,7 @@ XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgGotoStatement */
 void XevSageVisitor::attribSgGotoStatement(SgNode* node)
 {
   SgGotoStatement* n = isSgGotoStatement(node);
@@ -881,6 +940,8 @@ void XevSageVisitor::attribSgGotoStatement(SgNode* node)
 }
 INODE_STMT_DEFAULT(GotoStatement);
 
+// ===============================================================================
+/// Visitor of a SgIfStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -921,6 +982,7 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgIfStmt */
 void XevSageVisitor::attribSgIfStmt(SgNode* node)
 {
   SgIfStmt*  n = isSgIfStmt(node);
@@ -931,6 +993,8 @@ void XevSageVisitor::attribSgIfStmt(SgNode* node)
 }
 INODE_STMT_DEFAULT(IfStmt);
 
+// ===============================================================================
+/// Visitor of a SgInquireStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1115,6 +1179,7 @@ XevXmlVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgInquireStatement */
 void XevSageVisitor::attribSgInquireStatement(SgNode* node)
 {
   SgInquireStatement*      n = isSgInquireStatement(node);
@@ -1154,6 +1219,7 @@ void XevSageVisitor::attribSgInquireStatement(SgNode* node)
     if( n->get_pending() )      sstr() << " pending=\"1\" ";
   }
 }
+/** XML interanal node writer of SgInquireStatement */
 void XevSageVisitor::inodeSgInquireStatement(SgNode* node)
 {
   if(isSgInquireStatement(node)){
@@ -1193,6 +1259,8 @@ void XevSageVisitor::inodeSgInquireStatement(SgNode* node)
   }
 }
 
+// ===============================================================================
+/// Visitor of a SgLabelStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1242,6 +1310,7 @@ XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgLabelStatement */
 void XevSageVisitor::attribSgLabelStatement(SgNode* node)
 {
   SgLabelStatement* n = isSgLabelStatement(node);
@@ -1254,6 +1323,8 @@ void XevSageVisitor::attribSgLabelStatement(SgNode* node)
 }
 INODE_STMT_DEFAULT(LabelStatement);
 
+// ===============================================================================
+/// Visitor of a SgNullStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgNullStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1263,6 +1334,8 @@ XevXmlVisitor::visitSgNullStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(NullStatement);
 
+// ===============================================================================
+/// Visitor of a SgNullifyStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -1284,6 +1357,8 @@ XevXmlVisitor::visitSgNullifyStatement(xercesc::DOMNode* node, SgNode* astParent
 }
 STMT_DEFAULT(NullifyStatement);
 
+// ===============================================================================
+/// Visitor of a SgOpenStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1389,6 +1464,7 @@ XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgOpenStatement */
 void XevSageVisitor::attribSgOpenStatement(SgNode* node)
 {
   SgOpenStatement*      n = isSgOpenStatement(node);
@@ -1415,6 +1491,8 @@ void XevSageVisitor::attribSgOpenStatement(SgNode* node)
 }
 INODE_STMT_DEFAULT(OpenStatement)
 
+// ===============================================================================
+/// Visitor of a SgPrintStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1440,6 +1518,8 @@ XevXmlVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(PrintStatement);
 
+// ===============================================================================
+/// Visitor of a SgReadStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1496,6 +1576,7 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   if(err)err->set_parent(ret);
   return ret;
 }
+/** XML attribute writer of SgReadStatement */
 void XevSageVisitor::attribSgReadStatement(SgNode* node)
 {
   SgReadStatement* n = isSgReadStatement(node);
@@ -1514,6 +1595,8 @@ void XevSageVisitor::attribSgReadStatement(SgNode* node)
 }
 INODE_STMT_DEFAULT(ReadStatement);
 
+// ===============================================================================
+/// Visitor of a SgReturnStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1533,6 +1616,8 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(ReturnStmt);
 
+// ===============================================================================
+/// Visitor of a SgRewindStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1556,6 +1641,8 @@ XevXmlVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(RewindStatement);
 
+// ===============================================================================
+/// Visitor of a SgStopOrPauseStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -1584,6 +1671,7 @@ XevXmlVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astPa
 
   return ret;
 }
+/** XML attribute writer of SgStopOrPauseStatement */
 void XevSageVisitor::attribSgStopOrPauseStatement(SgNode* node)
 {
   SgStopOrPauseStatement* n = isSgStopOrPauseStatement(node);
@@ -1593,6 +1681,8 @@ void XevSageVisitor::attribSgStopOrPauseStatement(SgNode* node)
 }
 INODE_STMT_DEFAULT(StopOrPauseStatement);
 
+// ===============================================================================
+/// Visitor of a SgSwitchStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -1616,6 +1706,8 @@ XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(SwitchStatement);
 
+// ===============================================================================
+/// Visitor of a SgWhereStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -1646,6 +1738,8 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
 }
 STMT_DEFAULT(WhereStatement);
 
+// ===============================================================================
+/// Visitor of a SgWhileStmt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -1695,6 +1789,7 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgWhileStmt */
 void XevSageVisitor::attribSgWhileStmt(SgNode* node)
 {
   SgWhileStmt*   n = isSgWhileStmt(node);
@@ -1713,6 +1808,8 @@ void XevSageVisitor::attribSgWhileStmt(SgNode* node)
 }
 INODE_STMT_DEFAULT(WhileStmt)
 
+// ===============================================================================
+/// Visitor of a SgWriteStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 {
@@ -1777,6 +1874,7 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   if(nml)nml->set_parent(ret);
   return ret;
 }
+/** XML attribute writer of SgWriteStatement */
 void XevSageVisitor::attribSgWriteStatement(SgNode* node)
 {
   SgWriteStatement* n = isSgWriteStatement(node);

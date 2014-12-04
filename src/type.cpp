@@ -222,6 +222,7 @@ static void attribSgType(std::ostream& str, SgNode* node)
 }
 
 #define VISIT_TYPE(Type) \
+  /** Visitor of a Sg##Type element in an XML document */               \
   SgNode* XevXmlVisitor::                                               \
   visitSg##Type(xercesc::DOMNode* node, SgNode* astParent)              \
   {                                                                     \
@@ -239,13 +240,16 @@ static void attribSgType(std::ostream& str, SgNode* node)
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
+  /** XML attribute writer of Sg##Type */                               \
   void XevSageVisitor::attribSg##Type(SgNode* node)                     \
   {                                                                     \
     attribSgType(sstr(),node);                                          \
   }                                                                     \
+  /** XML interanal node writer of Sg##Type */                          \
   void XevSageVisitor::inodeSg##Type(SgNode* node){}
 
-#define VISIT_TYPE2(Type) \
+#define VISIT_TYPE2(Type)                                               \
+  /** Visitor of a Sg##Type element in an XML document */               \
   SgNode* XevXmlVisitor::                                               \
   visitSg##Type(xercesc::DOMNode* node, SgNode* astParent)              \
   {                                                                     \
@@ -254,13 +258,16 @@ static void attribSgType(std::ostream& str, SgNode* node)
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
+  /** XML attribute writer of Sg##Type */                               \
   void XevSageVisitor::attribSg##Type(SgNode* node)                     \
   {                                                                     \
     attribSgType(sstr(),node);                                          \
   }                                                                     \
+  /** XML interanal node writer of Sg##Type */                          \
   void XevSageVisitor::inodeSg##Type(SgNode* node){}
 
 #define VISIT_TYPE3(Type) \
+  /** Visitor of a Sg##Type element in an XML document */               \
   SgNode* XevXmlVisitor::                                               \
   visitSg##Type(xercesc::DOMNode* node, SgNode* astParent)              \
   {                                                                     \
@@ -285,10 +292,12 @@ static void attribSgType(std::ostream& str, SgNode* node)
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
+  /** XML attribute writer of Sg##Type */                               \
   void XevSageVisitor::attribSg##Type(SgNode* node)                     \
   {                                                                     \
     attribSgType(sstr(),node);                                          \
   }                                                                     \
+  /** XML internal node writer of Sg##Type */                           \
   void XevSageVisitor::inodeSg##Type(SgNode* node){}
 
 //VISIT_TYPE(ArrayType);
@@ -326,7 +335,8 @@ VISIT_TYPE(TypeVoid);
 
 
 
-// -------------------------------------
+// ===============================================================================
+/// Visitor of a SgArrayType element in an XML document
 SgNode*
 XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -414,6 +424,7 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgArrayType */
 void XevSageVisitor::attribSgArrayType(SgNode* node) {
   SgArrayType* n = isSgArrayType(node);
   if(n){
@@ -424,11 +435,14 @@ void XevSageVisitor::attribSgArrayType(SgNode* node) {
   }
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgArrayType */
 void XevSageVisitor::inodeSgArrayType(SgNode* node) {
   SgExprListExp* lste = isSgArrayType(node)->get_dim_info();
   this->visit(lste);
 }
 
+// ===============================================================================
+/// Visitor of a SgClassType element in an XML document
 SgNode*
 XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -483,6 +497,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgClassType */
 void XevSageVisitor::attribSgClassType(SgNode* node)
 {
   SgClassType* n = isSgClassType(node);
@@ -494,9 +509,14 @@ void XevSageVisitor::attribSgClassType(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
   sstr() << " type=\"" << cd->get_class_type() << "\" ";
 }
+/** XML internal node writer of SgClassType */
 void XevSageVisitor::inodeSgClassType(SgNode* node) {}
 
 
+// ===============================================================================
+// SgEnumType
+// ===============================================================================
+/** Visitor of a SgEnumType element in an XML document */
 SgNode*
 XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -504,9 +524,13 @@ XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgEnumType */
 void XevSageVisitor::attribSgEnumType(SgNode*) {}
+/** XML internal node writer of SgEnumType */
 void XevSageVisitor::inodeSgEnumType (SgNode*) {}
 
+// ===============================================================================
+/// Visitor of a SgFunctionType element in an XML document
 SgNode*
 XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -538,9 +562,11 @@ XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
 
   return ret;
 }
+/** XML attribute writer of SgFunctionType */
 void XevSageVisitor::attribSgFunctionType(SgNode* node) {
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgFunctionType */
 void XevSageVisitor::inodeSgFunctionType (SgNode* node)
 {
   SgFunctionType* t = isSgFunctionType(node);
@@ -552,6 +578,8 @@ void XevSageVisitor::inodeSgFunctionType (SgNode* node)
   }
 }
 
+// ===============================================================================
+/// Visitor of a SgModifierType element in an XML document
 SgNode*
 XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -584,6 +612,7 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgModifierType */
 void XevSageVisitor::attribSgModifierType(SgNode* node){
   SgModifierType* n = isSgModifierType(node);
   if(n) {
@@ -598,8 +627,12 @@ void XevSageVisitor::attribSgModifierType(SgNode* node){
       sstr() << " modifier=\"volatile\" ";
   }
 }
+/** XML interanal node writer of SgModifierType */
 void XevSageVisitor::inodeSgModifierType (SgNode* node) {}
 
+
+// ===============================================================================
+/// Visitor of a SgTypeString element in an XML document
 SgNode*
 XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
 {
@@ -642,6 +675,7 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgTypeString */
 void XevSageVisitor::attribSgTypeString(SgNode* node){
   SgExpression*   exp = isSgTypeString(node)->get_lengthExpression();
   if( exp ) {
@@ -649,11 +683,14 @@ void XevSageVisitor::attribSgTypeString(SgNode* node){
   }
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgTypeString */
 void XevSageVisitor::inodeSgTypeString(SgNode* node){
   if(isSgTypeString(node)->get_lengthExpression())
     this->visit(isSgTypeString(node)->get_lengthExpression());
 }
 
+// ===============================================================================
+/// Visitor of a SgTypedefType element in an XML document
 SgNode*
 XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -687,13 +724,17 @@ XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgTypedefType */
 void XevSageVisitor::attribSgTypedefType(SgNode* node){
   SgTypedefType* n = isSgTypedefType(node);
   sstr() << " name=" << n->get_name() << " ";
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgTypedefType */
 void XevSageVisitor::inodeSgTypedefType(SgNode* node){}
 
+// ===============================================================================
+/// Visitor of a SgTypeComplex element in an XML document
 SgNode*
 XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
 {
@@ -727,14 +768,18 @@ XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgTypeComplex */
 void XevSageVisitor::attribSgTypeComplex(SgNode* node){
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgTypeComplex */
 void XevSageVisitor::inodeSgTypeComplex(SgNode* node){
   this->visit(isSgTypeComplex(node)->get_base_type());
 }
 
 
+// ===============================================================================
+/// Visitor of a SgTypeImaginary element in an XML document
 SgNode*
 XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
 {
@@ -768,14 +813,18 @@ XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgTypeImaginary */
 void XevSageVisitor::attribSgTypeImaginary(SgNode* node){
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgTypeImaginary */
 void XevSageVisitor::inodeSgTypeImaginary(SgNode* node){
   this->visit(isSgTypeImaginary(node)->get_base_type());
 }
 
 
+// ===============================================================================
+/// Visitor of a SgTypeInt element in an XML document
 SgNode*
 XevXmlVisitor::visitSgTypeInt(xercesc::DOMNode* node, SgNode* astParent)
 {
@@ -793,11 +842,16 @@ XevXmlVisitor::visitSgTypeInt(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgTypeInt */
 void XevSageVisitor::attribSgTypeInt(SgNode* node){
   attribSgType(sstr(),node);
 }
+/** XML internal node writer of SgTypeInt */
 void XevSageVisitor::inodeSgTypeInt(SgNode* node){}
 
+
+// ===============================================================================
+/// Visitor of a SgPointerType element in an XML document
 SgNode*
 XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
 {
@@ -821,9 +875,11 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   return ret;
 }
+/** XML attribute writer of SgPointerType */
 void XevSageVisitor::attribSgPointerType(SgNode* node){
   attribSgType(sstr(),node);
 }
+/** XML interanal node writer of SgPointerType */
 void XevSageVisitor::inodeSgPointerType(SgNode* node){
 }
 

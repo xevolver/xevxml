@@ -42,15 +42,16 @@ namespace XevXml {
 #define XEV_PRAGMA_PREFIX "!$xev"
 #define XEV_ENCODE "XEV_ENCODE"
 
+  /// Encapsulate options of XevSageVisitor
 class XevSageVisitorOptions
 {
   /* string stream for writing XML data */
   std::ostream& sstr_;
 
-  int  lang_;    // output language
-  bool faddr_;   // print address attribute
-  bool fparen_;  // remove compiler-generated parentheses
-  bool fpragma_; // analyze Fortran pragmas
+  int  lang_;    /// output language
+  bool faddr_;   /// print address attribute
+  bool fparen_;  /// remove compiler-generated parentheses
+  bool fpragma_; /// analyze Fortran pragmas
   int  depth_;
   SgFile* file_;
 
@@ -89,6 +90,7 @@ public:
   void setSgFile(SgFile* f) {file_=f;}
 };
 
+  /// Visitor class for traversing Sage AST nodes to generate an XML AST
 class XevSageVisitor {
   XevSageVisitorOptions* opt_;
 
@@ -96,6 +98,10 @@ protected:
   std::ostream& sstr() {
     return opt_->getStream();
   }
+
+  int getIndent()      { return opt_->getIndent()  ;}
+  int setIndent(int i) { return opt_->setIndent(i) ;}
+  int writeIndent()    { return opt_->writeIndent();}
 
 public:
   void unsetStream(void){
@@ -111,10 +117,6 @@ public:
     return this->sstr();
   }
 
-  int getIndent()      { return opt_->getIndent()  ;}
-  int setIndent(int i) { return opt_->setIndent(i) ;}
-  int writeIndent()    { return opt_->writeIndent();}
-
   XevSageVisitor (void):opt_(NULL){}
   XevSageVisitor (std::ostream& s) {
     opt_ = NULL;
@@ -123,15 +125,17 @@ public:
   ~XevSageVisitor() {
   }
 
-  bool hasInode(SgNode* node );
+  /// return true if a given node has an internal node
+  virtual bool hasInode(SgNode* node );
 
   SgFile* getSgFileToVisit() {return opt_->getSgFile();}
   void  setSgFileToVisit(SgFile* f){opt_->setSgFile(f);}
 
-  void visit(SgNode* node);
+  /// Visiting all AST nodes in a subtree whose root is given as the argument.
+  virtual void visit(SgNode* node);
 #define SAGE3(op)                                       \
-  void attribSg##op(SgNode* node);                      \
-  void inodeSg##op(SgNode* node);
+  virtual void attribSg##op(SgNode* node);              \
+  virtual void inodeSg##op(SgNode* node);
 #include "sgnode.hpp"
 };
 
