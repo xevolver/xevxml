@@ -63,11 +63,12 @@ int main(int argc, char** argv)
                              sageProject, sageProject->get_verbose () > 0);
 #endif
   XevXml::XmlInitialize();
-
+  XevXml::XevXmlOption opt;
+  opt.getFortranPragmaFlag() = true;
   fflush(stdout);
   dup2(fd,1); // printf messages are written to stdout
   clearerr(stdout);
-  XevXml::XevConvertRoseToXml(cout,&sageProject);
+  XevXml::XevConvertRoseToXml(cout,&sageProject,&opt);
 
   XevXml::XmlFinalize();
   return 0;

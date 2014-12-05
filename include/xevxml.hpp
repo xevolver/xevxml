@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include <rose.h>
+#include <xercesc/dom/DOMNode.hpp>
 
 //#define XEV_USE_ROSEHPCT // experimental
 
@@ -43,90 +44,13 @@
 #endif
 
 namespace XevXml {
+  // prototype declaration of option classes
+  class XevXmlOption;
+
   extern void XevInitialize(void);
   extern void XevFinalize(void);
   extern bool XevConvertXmlToRose(std::istream& str, SgProject** prj);
-  extern bool XevConvertRoseToXml(std::ostream& str, SgProject** prj);
-
-#if 0
-  // --- for custom transformation between ROSE AST and XML AST ---
-  class XevConversionHelper {
-    bool addressFlag_;
-    bool rmParenFlag_;
-    bool fPragmaFlag_;
-    int  level_;
-    int  outLang_;
-
-    bool rosehpctFlag_;
-#ifdef XEV_USE_ROSEHPCT
-    RoseHPCT::ProgramTreeList_t profiles_;
-#endif
-  public:
-    /* Ctors and Dtor */
-    // -------------------------------------------------------------------------
-   XevConversionHelper& operator=(const XevConversionHelper& h) {
-      addressFlag_  = h.getAddressFlag();
-      rmParenFlag_  = h.getRemoveParenFlag();
-      fPragmaFlag_  = h.getFortranPragmaFlag();
-      level_ = h.getLevel();
-      return *this;
-    }
-    XevConversionHelper(const XevConversionHelper& h){
-      *this = h;
-
-      rosehpctFlag_ = false;
-    }
-    XevConversionHelper() {
-      addressFlag_=false;
-      rmParenFlag_=false;
-      fPragmaFlag_=true;
-      level_=0;
-      outLang_ = SgFile::e_Fortran_output_language;
-
-      rosehpctFlag_=false;
-    }
-    ~XevConversionHelper() {}
-    // -------------------------------------------------------------------------
-
-
-
-    /* user-defined callback functions */
-    // -------------------------------------------------------------------------
-    /*
-      XML syntax and the positision at which each function is called.
-
-          <E    A="..."  >   ...  </E>
-        ^     ^        ^   ^    ^     ^
-       (1)   (2)      (3) (4)  (5)   (6)
-    */
-    virtual void beforeXmlElement         (SgNode*&){} //(1)
-    virtual void afterXmlElement          (SgNode*&){} //(4)
-    virtual void beforeXmlAttribute       (SgNode*&){} //(2)
-    virtual void afterXmlAttribute        (SgNode*&){} //(3)
-    virtual void beforeXmlClosingElement  (SgNode*&){} //(5)
-    virtual void afterXmlClosingElement   (SgNode*&){} //(6)
-    // -------------------------------------------------------------------------
-
-    // set true to write the memory address of each node (for debugging)
-    bool getAddressFlag()  const{ return addressFlag_; }
-    void setAddressFlag(bool f) { addressFlag_ = f; }
-
-    // set true to remove additoinal parenthesis at implicit type conversion.
-    bool getRemoveParenFlag()  const{ return rmParenFlag_; }
-    void setRemoveParenFlag(bool f) { rmParenFlag_ = f; }
-
-    // set true to use Fortran pragmas
-    bool getFortranPragmaFlag()  const{ return fPragmaFlag_; }
-    void setFortranPragmaFlag(bool f) { fPragmaFlag_ = f; }
-
-    // depth of the visited node from the root node
-    int  getLevel()        const{ return level_; }
-    void setLevel(int l)        { level_ = l; }
-
-    int getOutputLanguage() const {return outLang_;}
-    void setOutputLanguage(int l) {outLang_ = l; }
-  };
-#endif
+  extern bool XevConvertRoseToXml(std::ostream& str, SgProject** prj, XevXmlOption* opt=NULL);
 
   // --- XML utility functions ---
   extern void XmlInitialize(void);
@@ -134,6 +58,99 @@ namespace XevXml {
   extern std::string XmlStr2Entity( std::string);
   extern std::string XmlEntity2Str( std::string);
 
+  /// Visitor class for traversing XML AST nodes to generate a Sage AST
+  class XevXmlVisitor
+  {
+    SgSourceFile* _file;  /// SgFile to visit
+    SgProject*    _prj;   /// SgProject to be built
+
+  public:
+    XevXmlVisitor();
+    ~XevXmlVisitor();
+
+    /// Visiting all XML elements in a subtree whose root is given as the 1st argument.
+    virtual SgNode* visit(xercesc::DOMNode* node, SgNode* astParent=0);
+
+#define SAGE3(NodeType)                                                 \
+    virtual SgNode* visitSg##NodeType(xercesc::DOMNode* node, SgNode* astParent=0);
+#include "sgnode.hpp"
+    virtual SgNode* visitPreprocessingInfo(xercesc::DOMNode* node, SgNode* astParent=0);
+
+    virtual void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
+    virtual void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
+    virtual void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);
+    virtual void checkDeclStmt  (xercesc::DOMNode* node, SgNode* astNode);
+
+    bool read(std::istream& is, SgProject** prj);
+    virtual SgProject* getSgProject() {return _prj;}
+  };
+
+  /// Encapsulate options of XevSageVisitor
+  class XevXmlOption
+  {
+    int  lang_;    /// output language
+    bool faddr_;   /// print address attribute
+    bool fparen_;  /// remove compiler-generated parentheses
+    bool fpragma_; /// analyze Fortran pragmas
+
+
+
+    void init() {
+      lang_    = 0;
+      faddr_   = false;
+      fparen_  = false;
+      fpragma_ = false;
+    }
+  public:
+    XevXmlOption(){init();}
+    ~XevXmlOption() {}
+
+    int    getOutoutLanguage()     {return lang_;}
+    bool&  getPrintAddressFlag()   {return faddr_;}
+    bool&  getRemoveParenFlag()    {return fparen_;}
+    bool&  getFortranPragmaFlag()  {return fpragma_;}
+  };
+
+
+  /// Visitor class for traversing Sage AST nodes to generate an XML AST
+  class XevSageVisitor {
+    XevXmlOption* opt_;
+    std::ostream* ostr_;
+
+    SgFile* file_;
+    int  depth_;
+  protected:
+    std::ostream& sstr() {
+      return *ostr_;
+    }
+
+    void writeIndent()    {
+      for(int i(0);i<depth_;i++)
+        sstr() << ' ';
+    }
+
+    /// return true if a given node has an internal node
+    virtual bool hasInode(SgNode* node );
+
+    SgFile* getSgFileToVisit()         {return file_;}
+    void    setSgFileToVisit(SgFile* f){file_=f;}
+
+  public:
+    void setXmlOption(XevXmlOption* o)  {opt_ = o;}
+    XevXmlOption* getXmlOption(){return opt_;}
+
+    XevSageVisitor (XevXmlOption* o=NULL):opt_(o),ostr_(NULL),depth_(0){}
+    ~XevSageVisitor() {}
+
+    /// Visiting all AST nodes in a subtree whose root is given as the argument.
+    virtual void visit(SgNode* node);
+#define SAGE3(op)                               \
+    virtual void attribSg##op(SgNode* node);    \
+    virtual void inodeSg##op(SgNode* node);
+#include "sgnode.hpp"
+
+    bool write(std::ostream& os, SgProject** prj);
+  };
 
 }
 

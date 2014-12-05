@@ -92,7 +92,6 @@ buildEmptySourceFile(const string& fn, SgProject* project=0)
 int main(int argc, char** argv)
 {
   SgProject* prj = 0;
-  char c;
   string fn;
   if( argc < 2 )  fn = "-";
   else fn = argv[1];

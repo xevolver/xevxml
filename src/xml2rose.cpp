@@ -47,13 +47,42 @@ namespace xa=xalanc;
 using namespace std;
 
 
-static bool
-TraverseXercesDOMDocument(istream& tr, SgProject** prj)
+namespace XevXml {
+
+bool XevConvertXmlToRose(istream& str, SgProject** prj)
 {
+  XevXmlVisitor visitor;
+  return visitor.read(str,prj);
+}}
+
+
+using namespace XevXml;
+XevXmlVisitor::XevXmlVisitor()
+{
+  _prj = new SgProject();
+  if(_prj==0){ XEV_ABORT(); }
+  _file = new SgSourceFile();
+  if(_file==0){ XEV_ABORT(); }
+  _prj->set_file(*_file); // set_file() is obsolete.
+  _file->set_parent(_prj);
+
+  Sg_File_Info* info = DEFAULT_FILE_INFO;
+  _file->set_file_info(info);
+  info->set_parent(_file);
+}
+
+XevXmlVisitor::~XevXmlVisitor() {}
+
+bool XevXmlVisitor::read(std::istream& is, SgProject** prj) {
+  if(prj == 0){ // if (*prj == 0) then *prj is set later.
+    XEV_WARN("Invalid SgProject pointer. Conversion failed.");
+    return false;
+  }
+
   try {
     xe::DOMDocument* doc = 0;
     xe::XercesDOMParser parser;
-    std::istreambuf_iterator<char> begin(tr);
+    std::istreambuf_iterator<char> begin(is);
     std::istreambuf_iterator<char> end;
     std::string buf(begin,end);
     //string buf = tr.str();
@@ -63,18 +92,8 @@ TraverseXercesDOMDocument(istream& tr, SgProject** prj)
     doc = parser.getDocument();
     buf.clear();
 
-    class XevXml::XevXmlVisitor visit(*prj);
-    visit.visit(doc,0);
-    *prj = visit.getSgProject();
-
-#if 0
-#ifdef XEVXML_DEBUG
-    XevXML::OrphanTest test;
-    test.traverse(&(*prj)->get_file(0)->get_globalScope(),preorder);
-#endif
-#endif
-    //XevXML::PrintSymTable symtbl;
-    //symtbl.visit(&((*prj)->get_file(0)));
+    visit(doc,0);
+    *prj = getSgProject();
     AstTests::runAllTests(*prj);
   }
   catch(...) {
@@ -82,49 +101,6 @@ TraverseXercesDOMDocument(istream& tr, SgProject** prj)
   }
   return true;
 }
-
-
-
-namespace XevXml {
-
-bool XevConvertXmlToRose(istream& str, SgProject** prj)
-{
-  if(prj == 0){ // if (*prj == 0) then *prj is set later.
-    XEV_WARN("Invalid SgProject pointer. Conversion failed.");
-    return false;
-  }
-
-  if(TraverseXercesDOMDocument(str,prj)==false){
-    XEV_WARN("XML document parsing failed.");
-    return false;
-  }
-  return true;
-}}
-
-using namespace XevXml;
-XevXmlVisitor::XevXmlVisitor(SgProject* prj)
-{
-  if(prj!=NULL) {
-    _prj = prj;
-    _file = isSgSourceFile(&(prj->get_file(0)));
-    if(_file==0){ XEV_ABORT(); }
-  }
-  else {
-    _prj = new SgProject();
-    if(_prj==0){ XEV_ABORT(); }
-    _file = new SgSourceFile();
-    if(_file==0){ XEV_ABORT(); }
-    _prj->set_file(*_file); // set_file() is obsolete.
-    _file->set_parent(_prj);
-  }
-  Sg_File_Info* info = DEFAULT_FILE_INFO;
-  _file->set_file_info(info);
-  info->set_parent(_file);
-}
-
-XevXmlVisitor::
-~XevXmlVisitor() {}
-
 
 void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
 {

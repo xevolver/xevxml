@@ -41,36 +41,14 @@ namespace XevXml {
 
   void XevFinalize(void)   { XmlFinalize(); }
 
-  bool XevConvertRoseToXml(std::ostream& sstr, SgProject** prj)
+  bool XevConvertRoseToXml(std::ostream& sstr, SgProject** prj, XevXmlOption* opt)
   {
-    XevSageVisitor visitor(sstr);
-    if(prj == 0 || *prj == 0 ){
-      XEV_WARN("Invalid SgProject object. Conversion failed.");
-      return false;
-    }
-    SgProject* p = *prj;
-    if(p->numberOfFiles() > 1 ){
-      // NOTE: only the last file is converted.
-      // In the case of using Fortran mod files, this could happen.
-    }
+    XevSageVisitor visitor;
+    if(opt==NULL)
+      opt = new XevXmlOption();
+    visitor.setXmlOption(opt);
 
-#if (ROSE_EDG_MAJOR_VERSION_NUMBER < 4)
-    // assuming the previous(stable) version of ROSE
-    SgFile* file = &p->get_file(p->numberOfFiles()-1);
-#else
-    // assuming EDG4X-ROSE
-    SgFile* file = &p->get_file(0);
-#endif
-    //visitor.traverseWithinFile(file,help);
-    char* enc = getenv(XEV_ENCODE);
-    if(enc==0)
-      sstr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
-    else
-      sstr << "<?xml version=\"1.0\" encoding=\""<< enc << "\"?>" << std::endl;
-
-    //visitor.setSgFileToVisit(file);
-    visitor.visit(file);
-    return true; // success
+    return visitor.write(sstr,prj);
   }
 }
 
@@ -78,9 +56,17 @@ namespace XevXml {
  * creates a SgPramgaDeclaration node if a pragma prefix (!$) is found in the Fortran comment.
  */
 static void
-writeFortranPragma(std::ostream& sstr_,  AttachedPreprocessingInfoType* info,
+writeFortranPragma(std::ostream& sstr_, SgNode* node,
                    PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
 {
+  if( SageInterface::is_Fortran_language()==false) return;
+
+  SgLocatedNode* loc =isSgLocatedNode(node);
+  if(loc==NULL) return;
+
+  AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
+  if(info==NULL) return;
+
   std::string str;
   int idx;
 
@@ -136,6 +122,37 @@ writePreprocessingInfo(std::ostream& sstr_,SgNode* n)
   }
 
   return info;
+}
+
+bool XevSageVisitor::write(std::ostream& str, SgProject** prj){
+  ostr_ = &str;
+  if(prj == 0 || *prj == 0 ){
+    XEV_WARN("Invalid SgProject object. Conversion failed.");
+    return false;
+  }
+  SgProject* p = *prj;
+  if(p->numberOfFiles() > 1 ){
+    // NOTE: only the last file is converted.
+    // In the case of using Fortran mod files, this could happen.
+  }
+
+#if (ROSE_EDG_MAJOR_VERSION_NUMBER < 4)
+  // assuming the previous(stable) version of ROSE
+  SgFile* file = &p->get_file(p->numberOfFiles()-1);
+#else
+  // assuming EDG4X-ROSE
+  SgFile* file = &p->get_file(0);
+#endif
+  //visitor.traverseWithinFile(file,help);
+  char* enc = getenv(XEV_ENCODE);
+  if(enc==0)
+    sstr() << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+  else
+    sstr() << "<?xml version=\"1.0\" encoding=\""<< enc << "\"?>" << std::endl;
+
+  //visitor.setSgFileToVisit(file);
+  this->visit(file);
+  return true; // success
 }
 
 bool XevSageVisitor::hasInode(SgNode* node)
@@ -215,9 +232,10 @@ void XevSageVisitor::visit(SgNode* node)
     this->setSgFileToVisit(isSgFile(node));
   if(node==NULL||isInSameFile(node,this->getSgFileToVisit())==false )
     return;
-  int  indentw = getIndent();
 
   writeIndent();
+  if(getXmlOption()->getFortranPragmaFlag())
+    writeFortranPragma(sstr(),node,PreprocessingInfo::before);
   sstr() << "<" << node->class_name();
   switch((int)node->variantT()) {
 #define SAGE3(x)                                                        \
@@ -237,7 +255,7 @@ void XevSageVisitor::visit(SgNode* node)
     return;
   }
 
-  setIndent(indentw+1);
+  depth_  = depth_ + 1;
   if(isSgType(node)==NULL){
     for(size_t i(0);i<node->get_numberOfTraversalSuccessors();i++){
       SgNode* succ = node->get_traversalSuccessorByIndex(i);
@@ -263,11 +281,16 @@ void XevSageVisitor::visit(SgNode* node)
     XEV_WARN("unknown Sage AST node found");
     XEV_ABORT();
   }
-  setIndent(indentw);
+  depth_  = depth_ - 1;
+
   writePreprocessingInfo(sstr(),node);
+  if(getXmlOption()->getFortranPragmaFlag())
+    writeFortranPragma(sstr(),node,PreprocessingInfo::inside);
+
   writeIndent();
   sstr() << "</" << node->class_name() << ">" << std::endl;
-
+  if(getXmlOption()->getFortranPragmaFlag())
+    writeFortranPragma(sstr(),node,PreprocessingInfo::after);
   return;
 }
 

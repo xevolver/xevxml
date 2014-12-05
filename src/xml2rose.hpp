@@ -36,8 +36,6 @@
 #include <xevxml.hpp>
 #include <xmlutils.hpp>
 
-//#include <string>
-
 #include <xercesc/framework/MemBufInputSource.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
@@ -45,9 +43,9 @@
 #include <xalanc/XalanTransformer/XalanTransformer.hpp>
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
-//#include <xercesc/dom/DOMLSParser.hpp>
+/*#include <xercesc/dom/DOMLSParser.hpp>*/
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
-//#include <xercesc/dom/DOMLSInput.hpp>
+/*#include <xercesc/dom/DOMLSInput.hpp>*/
 #include <xercesc/dom/DOMDocument.hpp>
 #include <xercesc/dom/DOMImplementation.hpp>
 #include <xercesc/dom/DOMImplementationLS.hpp>
@@ -57,38 +55,6 @@
 #include <xercesc/framework/Wrapper4InputSource.hpp>
 
 namespace XevXml {
-  /// Visitor class for traversing XML AST nodes to generate a Sage AST
-class XevXmlVisitor
-{
-  //XevConversionHelper* _help;
-  SgSourceFile*        _file;
-  SgProject*           _prj;
-
-public:
-  //XevXmlVisitor(SgProject* =0, XevConversionHelper* =0);
-  XevXmlVisitor(SgProject*);
-  ~XevXmlVisitor();
-
-  /// Visiting all XML elements in a subtree whose root is given as the 1st argument.
-  virtual SgNode* visit(xercesc::DOMNode* node, SgNode* astParent=0);
-
-#define SAGE3(NodeType)  \
-  virtual SgNode* visitSg##NodeType(xercesc::DOMNode* node, SgNode* astParent=0);
-#include "sgnode.hpp"
-
-  virtual SgNode* visitPreprocessingInfo(xercesc::DOMNode* node, SgNode* astParent=0);
-
-  //SgType* buildType(xercesc::DOMNode* node, SgExpression* ex=0, SgNode* astParent=0);
-
-  virtual void checkPreprocInfo(xercesc::DOMNode* node, SgNode* astNode);
-  virtual void checkExpression (xercesc::DOMNode* node, SgNode* astNode);
-  virtual void checkStatement  (xercesc::DOMNode* node, SgNode* astNode);
-  virtual void checkDeclStmt  (xercesc::DOMNode* node, SgNode* astNode);
-
-  //SgFile* getSgFile() {return _file;}
-  /// get the SgProject object created from an XML document 
-  virtual SgProject* getSgProject() {return _prj;}
-};
 
   /// (internal) Visitor class for checking if there is a orphan node
 class OrphanTest : public AstSimpleProcessing
