@@ -94,7 +94,7 @@ bool XevXmlVisitor::read(std::istream& is, SgProject** prj) {
 
     visit(doc,0);
     *prj = getSgProject();
-    AstTests::runAllTests(*prj);
+    //AstTests::runAllTests(*prj);
   }
   catch(...) {
     return false;

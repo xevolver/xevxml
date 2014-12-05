@@ -319,7 +319,8 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
     XEV_WARN("Format attribute is missing.");
 
   // 0:error, 1: unknown, 2:C, 3:C++, 4:Fortran
-  if(langid==2){
+  // C++ is not supported for now. trying to output as a C program
+  if(langid==2 || langid == 3 ){
     _file->set_C_only(true);
     _file->set_outputLanguage(SgFile::e_C_output_language);
   }
@@ -333,7 +334,7 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
       _file->set_outputFormat(SgFile::e_free_form_output_format);
       _file->set_backendCompileFormat(SgFile::e_free_form_output_format);
     }
-  } // C++ is not supported for now
+  }
 
   while(child) {
     if(child->getNodeType() == xe::DOMNode::ELEMENT_NODE){

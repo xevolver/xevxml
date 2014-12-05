@@ -648,7 +648,8 @@ XevXmlVisitor::visitSgForAllStatement(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   hed->set_parent(ret);
   bdy->set_parent(ret);
-  bdy->setCaseInsensitive(true);
+  if(si::is_Fortran_language()==true)
+    bdy->setCaseInsensitive(true);
 
   hed->set_startOfConstruct(DEFAULT_FILE_INFO);
   bdy->set_startOfConstruct(DEFAULT_FILE_INFO);
@@ -747,7 +748,8 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 
   ret = new SgFortranDo(info);
   ret->set_parent(astParent);
-  ret->setCaseInsensitive(true);
+  if(si::is_Fortran_language()==true)
+    ret->setCaseInsensitive(true);
   sb::pushScopeStack(ret);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -956,7 +958,8 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"end",&estmt);
 
   ret = new SgIfStmt(DEFAULT_FILE_INFO);
-  ret->setCaseInsensitive(true);
+  if(si::is_Fortran_language()==true)
+    ret->setCaseInsensitive(true);
   ret->set_parent(astParent);
   sb::pushScopeStack(ret);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
