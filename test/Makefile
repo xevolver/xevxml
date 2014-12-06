@@ -5,7 +5,7 @@ default:
 	@echo "useage: make {check-env, input-src, test-all"
 
 check-env:
-	$(XEVXML_ENV) ; src2xml
+	@$(XEVXML_ENV) ; which src2xml
 
 
 DIRS = $(wildcard triple-loop-1.f90.xev.d/test-*)

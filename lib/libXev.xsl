@@ -6,8 +6,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<!-- loop/* -->
-	<xsl:import href="loop/unroll.xsl" />
-	<xsl:import href="loop/collapse.xsl" />
+	<xsl:import href="loop/loop.xsl" />
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
