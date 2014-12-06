@@ -11,17 +11,15 @@
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>
-					test-loop_collapse.xsl found xev loop_tag
+					found xev loop_tag
 				</xsl:comment>
 
 				<xsl:comment>
 					test-loop_collapse.xsl start interchange
 				</xsl:comment>
 				<xsl:apply-templates select="." mode="loop_interchange">
-					<xsl:with-param name="firstLoop" select="'i'" />
-					<xsl:with-param name="secondLoop" select="'j'" />
+					<xsl:with-param name="loopName" select="'j'" />
 				</xsl:apply-templates>
-
 
 			</xsl:when>
 
