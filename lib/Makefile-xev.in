@@ -12,7 +12,8 @@ XSLT_DIR	= .
 # set default env
 
 ifeq ($(HOSTNAME), hagi-a)
-XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
+XEVXML_ENV = . /opt/xevxml/xevxml-20141201-scope/env-xevxml-hagi.sh
+#XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
