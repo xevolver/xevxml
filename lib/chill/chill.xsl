@@ -7,6 +7,7 @@
 
 	<xsl:import href="../libXev.xsl" />
 	
+	<xsl:import href="split.xsl" />
 	<xsl:import href="tile.xsl" />
 	<xsl:import href="unroll_jam.xsl" />
 	<xsl:import href="unroll.xsl" />
