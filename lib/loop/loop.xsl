@@ -7,7 +7,7 @@
 
 	<xsl:import href="collapse.xsl" />
 	<xsl:import href="fission.xsl" />
-	<!-- <xsl:import href="fusion.xsl" /> -->
+	<xsl:import href="fusion.xsl" />
 	<xsl:import href="interchange.xsl" />
 	<xsl:import href="tile.xsl" />
 	<xsl:import href="unroll.xsl" />
