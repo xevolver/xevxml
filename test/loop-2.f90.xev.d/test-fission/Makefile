@@ -1,9 +1,9 @@
 include ../../../lib/Makefile-xev.in
 
 
-check: clean-translated loop-3.diff.f90
+check: clean-translated loop-2.diff.f90
 
 test:
 	@echo "test"
-	make  loop-3.diff.f90
+	make  loop-2.diff.f90
 

@@ -13,7 +13,7 @@
 				<xsl:comment>
 					xev loop_tag loop_fusion
 				</xsl:comment>
-				<xsl:apply-templates select="." mode="loop_fusion">
+				<xsl:apply-templates select="." mode="loop_fission">
 				</xsl:apply-templates>
 			</xsl:when>
 
