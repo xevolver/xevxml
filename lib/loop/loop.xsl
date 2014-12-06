@@ -7,6 +7,7 @@
 
 	<xsl:import href="collapse.xsl" />
 	<xsl:import href="interchange.xsl" />
+	<xsl:import href="tile.xsl" />
 	<xsl:import href="unroll.xsl" />
 
 </xsl:stylesheet>
