@@ -14,16 +14,18 @@ check-all: input-src
 	@$(foreach dir,$(DIRS),echo $(dir); cd $(dir); make check; cd ../..)
 	@wc triple-loop-1.f90.xev.d/test-*/*.diff.*
 
-input-src:
-	@-mkdir triple-loop-1.f90.xev.d
+input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple-loop-1.f90.input-src
+
+%.f90.input-src:
+	@-mkdir $*.f90.xev.d
 # src2xml
-	@-mkdir triple-loop-1.f90.xev.d/src2xml
-	$(XEVXML_ENV) ; src2xml triple-loop-1.f90 > triple-loop-1.f90.xev.d/src2xml/triple-loop-1.xml
-	$(XEVXML_ENV) ; xml2src < triple-loop-1.f90.xev.d/src2xml/triple-loop-1.xml	 triple-loop-1.f90.xev.d/src2xml/triple-loop-1.f90
+	@-mkdir $*.f90.xev.d/src2xml
+	$(XEVXML_ENV) ; src2xml $*.f90 > $*.f90.xev.d/src2xml/$*.xml
+	$(XEVXML_ENV) ; xml2src < $*.f90.xev.d/src2xml/$*.xml $*.f90.xev.d/src2xml/$*.f90
 # dir2xml
-	@-mkdir triple-loop-1.f90.xev.d/dir2xml
-	$(XEVXML_ENV) ; dir2xml ../dir-defs.xml < triple-loop-1.f90.xev.d/src2xml/triple-loop-1.xml > triple-loop-1.f90.xev.d/dir2xml/triple-loop-1.xml
-	$(XEVXML_ENV) ; xml2src < triple-loop-1.f90.xev.d/dir2xml/triple-loop-1.xml	 triple-loop-1.f90.xev.d/dir2xml/triple-loop-1.f90
+	@-mkdir $*.f90.xev.d/dir2xml
+	$(XEVXML_ENV) ; dir2xml ../dir-defs.xml < $*.f90.xev.d/src2xml/$*.xml > $*.f90.xev.d/dir2xml/$*.xml
+	$(XEVXML_ENV) ; xml2src < $*.f90.xev.d/dir2xml/$*.xml	 $*.f90.xev.d/dir2xml/$*.f90
 	
 ####################
 # tags
