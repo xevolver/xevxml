@@ -2,17 +2,17 @@ include ../lib/Makefile-xev.in
 
 
 default:
-	@echo "useage: make {check-env, input-src, test-all"
+	@echo "useage: make {check-env, input-src, check-all}"
 
 check-env:
 	@$(XEVXML_ENV) ; which src2xml
 
 
-DIRS = $(wildcard triple-loop-1.f90.xev.d/test-*)
+DIRS = $(wildcard *.f90.xev.d/test-*)
 
 check-all: input-src
 	@$(foreach dir,$(DIRS),echo $(dir); cd $(dir); make check; cd ../..)
-	@wc triple-loop-1.f90.xev.d/test-*/*.diff.*
+	@wc *.xev.d/test-*/*.diff.*
 
 input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple-loop-1.f90.input-src
 
