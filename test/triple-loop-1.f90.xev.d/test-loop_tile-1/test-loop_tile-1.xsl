@@ -7,7 +7,7 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
-	<xsl:template match="*">
+	<xsl:template match="SgFortranDo">
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>

@@ -15,7 +15,7 @@
 			<xsl:with-param name="end" select="$end" />
 			<xsl:with-param name="size" select="$size" />
 		</xsl:apply-templates>
-		ENDDO
+		END DO
 	</xsl:template>
 
 	<xsl:template match="*" mode="loop_tile_find_loop">
@@ -33,7 +33,7 @@
 		DO	<xsl:value-of select="$loopName" /> =	<xsl:value-of select="$loopName" />_tile, min(<xsl:value-of select="$end"/>, <xsl:value-of select="$loopName" />_tile + <xsl:value-of select="$size" /> - 1)
 					<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock">
 					</xsl:apply-templates>
-		ENDDO
+		END DO
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
@@ -52,6 +52,10 @@
 	<xsl:template match="SgPragmaDeclaration" mode="loop_tile">
 	</xsl:template>
 	<xsl:template match="PreprocessingInfo" mode="loop_tile">
+	</xsl:template>
+	<xsl:template match="SgPragmaDeclaration" mode="loop_tile_find_loop">
+	</xsl:template>
+	<xsl:template match="PreprocessingInfo" mode="loop_tile_find_loop">
 	</xsl:template>
 
 </xsl:stylesheet>
