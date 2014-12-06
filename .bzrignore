@@ -1,5 +1,6 @@
 # new
-**/*.xev.*
+**/*.xev.xml
+**/*.xev.f90
 **/*.target-*.*
 **/*.target.xml
 **/*.diff.*
