@@ -7,14 +7,18 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
-	<xsl:template match="SgPragmaDeclaration">
+	<xsl:template match="SgFortranDo">
 		<xsl:choose>
-			<xsl:when test="./SgPragma/@pragma = 'xev loop_tag'">
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
+				<xsl:comment>
+					xev loop_tag loop_fusion skip
+				</xsl:comment>
+			</xsl:when>
+			<xsl:when test="preceding-sibling::*[2]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>
 					xev loop_tag loop_fusion
 				</xsl:comment>
-				<xsl:apply-templates select="../SgFortranDo[2]"
-					mode="loop_fusion">
+				<xsl:apply-templates select="." mode="loop_fusion">
 				</xsl:apply-templates>
 			</xsl:when>
 
