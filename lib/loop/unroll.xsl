@@ -14,11 +14,6 @@
 		</xsl:copy>
 	</xsl:template>
 
-	<!-- remove PreprocessingInfo -->
-	<xsl:template match="PreprocessingInfo" mode="loop_unroll">
-	</xsl:template>
-	<!-- <xsl:template match="SgPragmaDeclaration[1]" mode="loop_unroll"> </xsl:template> -->
-
 	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
 		<xsl:param name="max" />		<!-- STEP数 -->
 		<xsl:param name="var" />		<!-- 置き換える変数 -->
@@ -97,6 +92,12 @@
 		</xsl:copy>
 	</xsl:template>
 	<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+	<!-- remove PreprocessingInfo -->
+	<xsl:template match="PreprocessingInfo" mode="loop_unroll">
+	</xsl:template>
+	<!-- <xsl:template match="SgPragmaDeclaration[1]" mode="loop_unroll"> </xsl:template> -->
+
 
 
 </xsl:stylesheet>
