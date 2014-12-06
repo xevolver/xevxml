@@ -5,14 +5,55 @@
 	<xsl:template match="*" mode="loop_unroll">
 		<xsl:param name="max" />
 		<xsl:param name="var" />
+
+		<xsl:choose>
+			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $var">
+				<xsl:apply-templates select="." mode="unroll_target_loop">
+					<xsl:with-param name="max" select="$max" />
+					<xsl:with-param name="var" select="$var" />
+				</xsl:apply-templates>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates mode="loop_unroll">
+						<xsl:with-param name="max" select="$max" />
+						<xsl:with-param name="var" select="$var" />
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+
+	</xsl:template>
+
+
+
+	<xsl:template match="SgFortranDo" mode="unroll_target_loop">
+		<xsl:param name="max" />
+		<xsl:param name="var" />
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
-			<xsl:apply-templates mode="loop_unroll">
+			<!-- 変数 初期値 -->
+			<xsl:copy-of select="./*[1]" />
+			<!-- 最終値 -->
+			<xsl:copy-of select="./*[2]" />
+			<!-- 刻み幅 -->
+			<xsl:element name="SgIntVal">
+				<xsl:attribute name="value">
+							<xsl:value-of select="$max" />
+						</xsl:attribute>
+			</xsl:element>
+
+			<xsl:apply-templates select="./SgBasicBlock"
+				mode="loop_unroll">
 				<xsl:with-param name="max" select="$max" />
 				<xsl:with-param name="var" select="$var" />
 			</xsl:apply-templates>
+
 		</xsl:copy>
 	</xsl:template>
+
+
 
 	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
 		<xsl:param name="max" />		<!-- STEP数 -->
