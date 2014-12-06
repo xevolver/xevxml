@@ -8,6 +8,7 @@
 	<xsl:import href="../libXev.xsl" />
 	
 	<xsl:import href="fuse.xsl" />
+	<xsl:import href="permute.xsl" />
 	<xsl:import href="split.xsl" />
 	<xsl:import href="tile.xsl" />
 	<xsl:import href="unroll_jam.xsl" />
