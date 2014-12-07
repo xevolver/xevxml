@@ -34,6 +34,7 @@
 #include <fstream>
 #include <unparser.h>
 
-extern bool UnparseSgFile(SgFile*, UnparseFormatHelp* =NULL, UnparseDelegate* =NULL, SgScopeStatement* =NULL);
+/* renamed and moved to xevxml.hpp */
+//extern bool UnparseSgFile(SgFile*, const char* =NULL, UnparseFormatHelp* =NULL, UnparseDelegate* =NULL, SgScopeStatement* =NULL);
 
 #endif

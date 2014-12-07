@@ -85,9 +85,20 @@ static bool myUnparser(ostream* os, SgFile* file, UnparseFormatHelp* unparseHelp
   return true;
 }
 
-bool UnparseSgFile(SgFile* file, UnparseFormatHelp* unparseHelp,
+bool XevXml::XevUnparseToStream(std::ostream& os, SgProject** prj, UnparseFormatHelp* unparseHelp,
+                        UnparseDelegate *repl, SgScopeStatement* unparseScope )
+{
+  return myUnparser(&os, &(*prj)->get_file(0),unparseHelp,repl,unparseScope);
+}
+
+
+/*
+bool UnparseSgFile(SgFile* file, const char* filename, UnparseFormatHelp* unparseHelp,
                      UnparseDelegate *repl, SgScopeStatement* unparseScope )
 {
+  if(file==NULL) return false;
+  if(filename!=NULL)
+    file->set_unparse_output_filename(filename);
   if (file->get_skip_unparse()==true) return false;
   if (file->get_unparse_output_filename().empty() == true) {
     file->set_unparse_output_filename("-");
@@ -110,3 +121,4 @@ bool UnparseSgFile(SgFile* file, UnparseFormatHelp* unparseHelp,
   }
   return false;
 }
+*/

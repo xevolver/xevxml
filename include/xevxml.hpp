@@ -51,6 +51,8 @@ namespace XevXml {
   extern void XevFinalize(void);
   extern bool XevConvertXmlToRose(std::istream& str, SgProject** prj);
   extern bool XevConvertRoseToXml(std::ostream& str, SgProject** prj, XevXmlOption* opt=NULL);
+  extern bool XevUnparseToStream (std::ostream& str, SgProject** prj, UnparseFormatHelp* unparseHelp=NULL,
+                                  UnparseDelegate *repl=NULL, SgScopeStatement* unparseScope=NULL );
 
   // --- XML utility functions ---
   extern void XmlInitialize(void);

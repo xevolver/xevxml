@@ -92,51 +92,29 @@ buildEmptySourceFile(const string& fn, SgProject* project=0)
 int main(int argc, char** argv)
 {
   SgProject* prj = 0;
-  string fn;
-  if( argc < 2 )  fn = "-";
-  else fn = argv[1];
-  //SgSourceFile* file = buildEmptySourceFile(fn);
-  //SgProject* prj = file->get_project();
+  bool r = false;
 
-  //stringstream istr;
-
-  //while(cin.get(c)){
-  //istr << c;
-  //}
   XevXml::XevInitialize();
   if( XevXml::XevConvertXmlToRose(cin,&prj) == false ){
     XEV_ABORT();
   }
   else {
-    prj->get_file(0).set_unparse_output_filename(fn);
     /* prtine all symbol tables  for debugging */
     //XevXML::PrintSymTable test;
     //test.visit(&prj->get_file(0));
 
-    UnparseSgFile(&prj->get_file(0)); // defined in unparse.cpp
+    if( argc < 2 )
+      r = XevXml::XevUnparseToStream(cout,&prj);
+    else {
+      fstream os(argv[1],ios::out);
+      if (!os) {
+        printf ("Error detected in opening file %s for output \n",argv[1]);
+        return -1;
+      }
+      r = XevXml::XevUnparseToStream(os,&prj);
+      os.close();
+    }
   }
-  /*
-  SgFile& file = prj->get_file(0);
-  ofstream ofs(argv[1],std::ios::app);
-  if(ofs.fail()){
-    cerr << "ERROR: cannot open file \"" << argv[1] << "\"" << endl;
-    return -1;
-  }
-  SgUnparse_Info* uinfo = new SgUnparse_Info();
-  uinfo->unset_SkipComments();
-  uinfo->unset_SkipWhitespaces();
-  file.set_Fortran_only(true);
-  file.set_outputFormat(SgFile::e_fixed_form_output_format);
-  file.set_outputLanguage(SgFile::e_Fortran_output_language);
-  ofs << file.unparseToString(uinfo)  << endl;
-
-  file.set_outputFormat(SgFile::e_free_form_output_format);
-  file.set_outputLanguage(SgFile::e_Fortran_output_language);
-  ofs << file.unparseToString(uinfo)  << endl;
-
-  ofs.close();
-  */
-
   XevXml::XevFinalize();
-  return 0;
+  return r?0:(-1);
 }
