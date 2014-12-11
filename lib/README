@@ -1,6 +1,6 @@
 XSLT translation Rules Library
 
-1.
+1. Xevolver general translation rules
 
 libXev.xsl:
 
@@ -11,7 +11,7 @@ loop/*:
 Xevolver translation rules.
 
 
-2.
+2. CHiLL compatible translation rules
 
 libCHiLL.xsl:
 

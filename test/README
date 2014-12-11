@@ -5,33 +5,33 @@ XSLT translation Rules Test Cases
 
 *.f90
 
-2. xevolver dir
+2. xevolver translation dir
 
 *.f90.xev.d
 
 3. src file translation
 
-*.f90
--> src2xml -> *.f90.xev.d/src2xml/*.xml -> dir2xml -> *.f90.xev.d/dir2xml/*.xml
+*.f90 -> (src2xml) -> *.f90.xev.d/src2xml/*.xml -> (dir2xml) -> *.f90.xev.d/dir2xml/*.xml
 
-4. xsl translatoin and unparse to src file
+4. xsl translatoin and unparsing to src file
 
 input xml file: *.f90.xev.d/dir2xml/*.xml
-current directory: *.f90.xev.d/test-(test rule name)
+current directory: *.f90.xev.d/test-(test case name)
 
-{input xml file} + {test-(test rule name).xsl} -> test-(test rule name).xev.xsl 
-test-(test rule name).xev.xsl  -> test-(test rule name).xev.f90
+{input xml file} + {test-(test case name).xsl} -> test-(test case name).xev.xsl 
+test-(test case name).xev.xsl  -> test-(test case name).xev.f90
 
 
-for test use
+test translation result
 
 5. expected src code
 
-test-(test rule name).target.f90 -> (src2xml) -> test-(test rule name).target..xml -> (xml2src) -> test-(test rule name).target-xml2src.f90
+test-(test case name).target.f90 -> (src2xml) -> test-(test case name).target..xml
+-> (xml2src) -> test-(test case name).target-xml2src.f90
 
-6. comparing translation result with expected src
+6. comparing translation result src with expected src
 
-diff  test-(test rule name).xev.f90 test-(test rule name).target-xml2src.f90 > test-(test rule name).diff.f90
+diff  test-(test case name).xev.f90 test-(test case name).target-xml2src.f90 > test-(test case name).diff.f90
 
 
 
