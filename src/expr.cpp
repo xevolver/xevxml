@@ -85,25 +85,27 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgAggregateInitializer* ret = 0;
   SgExprListExp*          lst = 0;
-  SgType*                 typ = 0;
+  //SgType*                 typ = 0;
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
-      if( typ==0 )
-        typ = isSgType(astchild);
       if( lst==0 )
         lst = isSgExprListExp(astchild);
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildAggregateInitializer( lst,typ );
+  if(lst!=NULL)
+    ret = sb::buildAggregateInitializer( lst,lst->get_type() );
+  else {
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+
   ret->set_parent(astParent);
   lst->set_parent(ret);
-  typ->set_parent(ret);
   return ret;
 }
-ATTRIB_EXPR_DEFAULT(AggregateInitializer);
-INODE_EXPR_TYPE(AggregateInitializer);
+EXPR_DEFAULT(AggregateInitializer);
 
 // ===============================================================================
 /// Visitor of a SgAssignInitializer element in an XML document
@@ -112,21 +114,17 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgAssignInitializer* ret = 0;
   SgExpression*        exp = 0;
-  SgType*              typ = 0;
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if(exp==0)
         exp = isSgExpression(astchild);
-      if(typ==0)
-        typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
 
-  if(exp && typ){
-    ret = sb::buildAssignInitializer(exp,typ);
+  if(exp){
+    ret = sb::buildAssignInitializer(exp,exp->get_type());
     exp->set_parent(ret);
-    typ->set_parent(ret);
   }
   else {
     XEV_DEBUG_INFO(node);
@@ -134,8 +132,7 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   }
   return ret;
 }
-ATTRIB_EXPR_DEFAULT(AssignInitializer);
-INODE_EXPR_TYPE(AssignInitializer);
+EXPR_DEFAULT(AssignInitializer);
 
 
 // ===============================================================================
@@ -208,26 +205,21 @@ XevXmlVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgCompoundInitializer*  ret = 0;
   SgExprListExp*          lst = 0;
-  SgType*                 typ = 0;
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
-      if( typ==0 )
-        typ = isSgType(astchild);
       if( lst==0 )
         lst = isSgExprListExp(astchild);
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildCompoundInitializer( lst,typ );
+  ret = sb::buildCompoundInitializer( lst,lst->get_type() );
   ret->set_parent(astParent);
   lst->set_parent(ret);
-  typ->set_parent(ret);
+  //typ->set_parent(ret);
   return ret;
 }
-ATTRIB_EXPR_DEFAULT(CompoundInitializer);
-INODE_EXPR_TYPE(CompoundInitializer);
-
+EXPR_DEFAULT(CompoundInitializer);
 
 
 // ===============================================================================
@@ -267,7 +259,7 @@ XevXmlVisitor::visitSgConstructorInitializer(xercesc::DOMNode* node, SgNode* ast
   SgConstructorInitializer* ret      = 0;
   SgMemberFunctionDeclaration* mdecl = 0;
   SgExprListExp* elst                = 0;
-  SgType*        typ                 =0;
+  SgType*        typ                 = 0;
   int name     =0;
   int qual     =0;
   int paren    =0;

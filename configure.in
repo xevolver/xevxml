@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT(xevxml, 0.1.0, tacky@isc.tohoku.ac.jp)
+AC_INIT(xevxml, 0.1.0, takizawa@cc.tohoku.ac.jp)
 AC_CONFIG_SRCDIR([src/common.hpp])
 AC_CONFIG_HEADERS([src/config.h])
 
@@ -10,9 +10,31 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+dnl Set install paths.
+if test "x$prefix" = "xNONE" ; then
+  prefix="/usr/local"
+fi
+if test "x$exec_prefix" = "xNONE" ; then
+  exec_prefix=$prefix
+fi
+PREFIX=$prefix
+AC_SUBST([PREFIX])
+BINDIR=`eval echo $bindir`
+BINDIR=`eval echo $BINDIR`
+AC_SUBST([BINDIR])
+LIBDIR=`eval echo $libdir`
+LIBDIR=`eval echo $LIBDIR`
+AC_SUBST([LIBDIR])
+INCDIR=`eval echo $includedir`
+INCDIR=`eval echo $INCDIR`
+AC_SUBST([INCDIR])
+
+
 
 # Checks for libraries.
-# ROSE 
+# ROSE
 ROSE_DIR="/usr/local"
 
 AC_ARG_WITH(rosedir,

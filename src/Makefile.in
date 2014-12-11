@@ -1,11 +1,15 @@
-LD = $(CXX)
-
+INSTALL= @INSTALL@
 ROSEROOT = @ROSE_DIR@
 XEROOT = @XERCESC_DIR@
 XAROOT = @XALANC_DIR@
 CXXFLAGS= -g -Wall -Wno-deprecated -I../include
 CXXFLAGS += -I../include @ROSE_CFLAGS@ @XALANC_CFLAGS@ @XERCESC_CFLAGS@
 LIBS  += -L. -lxevxml @ROSE_LIBS@ @XALANC_LIBS@ @XERCESC_LIBS@
+
+
+BINDIR=@BINDIR@
+LIBDIR=@LIBDIR@
+INCDIR=@INCDIR@/xevxml
 
 SRCS    =  xmlutils.cpp type.cpp rose2xml.cpp xml2rose.cpp \
 	preproc.cpp unparse.cpp expr.cpp stmt.cpp decl.cpp supp.cpp value.cpp
@@ -14,7 +18,7 @@ DEPS = ${SRCS:.cpp=.d}
 
 # static link library for ease of debugging
 LIBTARGET = libxevxml.a
-TARGET =  $(LIBTARGET) src2xml xsltexec xml2src dir2xml
+TARGET =  src2xml xsltexec xml2src #dir2xml
 
 .SUFFIXES: .cpp .o
 
@@ -22,17 +26,17 @@ all : $(TARGET)
 
 $(LIBTARGET): $(OBJS)
 	ar crv $(LIBTARGET) $(OBJS)
-src2xml: libxevxml.a
+src2xml: $(LIBTARGET)
 	$(CXX) $(CXXFLAGS) src2xml.cpp -o $@ $(LIBS)
 
-xsltexec: libxevxml.a
+xsltexec: $(LIBTARGET)
 	$(CXX) $(CXXFLAGS) xslt.cpp -o $@ $(LIBS)
 
-xml2src: libxevxml.a
+xml2src: $(LIBTARGET)
 	$(CXX) $(CXXFLAGS) xml2src.cpp -o $@ $(LIBS)
 
-dir2xml: libxevxml.a
-	$(CXX) $(CXXFLAGS) dir2xml.cpp -o $@ $(LIBS)
+#dir2xml: $(LIBTARGET)
+#	$(CXX) $(CXXFLAGS) dir2xml.o -o $@ $(LIBS)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -o $@ -c $^
@@ -41,3 +45,10 @@ dir2xml: libxevxml.a
 
 clean:
 	-@rm -fr *~ $(OBJS) src2xml.o xslt.o xml2src.o dir2xml.o $(DEPS) $(TARGET) rose_* a.out
+install:
+	$(INSTALL) -m 775 -d $(BINDIR)
+	$(INSTALL) -m 775 -d $(INCDIR)
+	$(INSTALL) -m 775 -d $(LIBDIR)
+	$(INSTALL) -m 755 $(TARGET) $(BINDIR)
+	$(INSTALL) -m 644 ../include/*.hpp $(INCDIR)
+	$(INSTALL) -m 644 $(LIBTARGET) $(LIBDIR)

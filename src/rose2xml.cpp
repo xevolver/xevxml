@@ -384,8 +384,8 @@ static bool hasInode(SgNode* node)
 
 static SgType* hasType(SgNode* node)
 {
-  if(isSgInitializer(node))
-    return isSgInitializer(node)->get_type();
+  if(isSgContructorInitializer(node))
+    return isSgConstructorInitializer(node)->get_type();
   else if (isSgInitializedName(node))
     return isSgInitializedName(node)->get_typeptr();
   else if (isSgFunctionDeclaration(node)) {
@@ -393,6 +393,8 @@ static SgType* hasType(SgNode* node)
   }
   else if (isSgCastExp(node))
     return isSgCastExp(node)->get_type();
+  else if (isSgPointerDeref(node))
+    return isSgPointerDeref(node)->get_type();
   return NULL;
 }
 
