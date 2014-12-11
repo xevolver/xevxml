@@ -1,0 +1,38 @@
+XSLT translation Rules Test Cases
+
+
+1. Input src files
+
+*.f90
+
+2. xevolver dir
+
+*.f90.xev.d
+
+3. src file translation
+
+*.f90
+-> src2xml -> *.f90.xev.d/src2xml/*.xml -> dir2xml -> *.f90.xev.d/dir2xml/*.xml
+
+4. xsl translatoin and unparse to src file
+
+input xml file: *.f90.xev.d/dir2xml/*.xml
+current directory: *.f90.xev.d/test-(test rule name)
+
+{input xml file} + {test-(test rule name).xsl} -> test-(test rule name).xev.xsl 
+test-(test rule name).xev.xsl  -> test-(test rule name).xev.f90
+
+
+for test use
+
+5. expected src code
+
+test-(test rule name).target.f90 -> (src2xml) -> test-(test rule name).target..xml -> (xml2src) -> test-(test rule name).target-xml2src.f90
+
+6. comparing translation result with expected src
+
+diff  test-(test rule name).xev.f90 test-(test rule name).target-xml2src.f90 > test-(test rule name).diff.f90
+
+
+
+ 
