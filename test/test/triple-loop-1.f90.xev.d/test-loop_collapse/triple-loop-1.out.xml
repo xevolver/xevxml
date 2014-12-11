@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><SgSourceFile filename="triple-loop-1.f90" format="2" language="4">
+  <SgGlobal>
+    <SgProgramHeaderStatement name="triple_loop_1">
+        <SgTypeVoid/>
+      <SgFunctionParameterList/>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration modifier="const">
+            <SgInitializedName name="n">
+                <SgTypeInt/>
+              <SgAssignInitializer>
+                  <SgTypeInt/>
+                <SgIntVal value="139"/>
+              </SgAssignInitializer>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration>
+            <SgInitializedName name="A">
+                <SgArrayType index="" rank="3" type="SgTypeFloat">
+                  <SgTypeFloat/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                </SgArrayType>
+            </SgInitializedName>
+            <SgInitializedName name="B">
+                <SgArrayType index="" rank="3" type="SgTypeFloat">
+                  <SgTypeFloat/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                  <SgVarRefExp name="n"/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <!--
+			SgPragmaDeclaration
+		-->
+          <!--
+					test-loop_collapse.xsl found xev loop_tag
+				--><!--
+					test-loop_collapse.xsl start step1
+				--><!--
+					test-loop_collapse.xsl found firstLoop
+				--><SgFortranDo end="1" nlabel="" slabel="" style="0">
+                <SgAssignOp>
+                  <SgVarRefExp name="j"/>
+                  <SgIntVal value="1"/>
+                </SgAssignOp>
+                <SgSubtractOp>
+                  <SgVarRefExp name="n"/>
+                  <SgIntVal value="1"/>
+                </SgSubtractOp>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                  <!--
+					test-loop_collapse.xsl found secondLoop
+				--><SgFortranDo end="1" nlabel="" slabel="" style="0"><SgAssignOp>
+                      <SgVarRefExp name="i"/>
+                      <SgIntVal value="1"/>
+                    </SgAssignOp><SgMultiplyOp xmlns:exslt="http://exslt.org/common"><SgSubtractOp>
+                      <SgVarRefExp name="n"/>
+                      <SgIntVal value="1"/>
+                    </SgSubtractOp><SgSubtractOp>
+              <SgVarRefExp name="n"/>
+              <SgIntVal value="1"/>
+            </SgSubtractOp></SgMultiplyOp><SgNullExpression/>

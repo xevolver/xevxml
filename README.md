@@ -41,6 +41,13 @@ leads to separation between application requirements and system
 requirements, expecting a lower migration cost of HPC applications to
 new systems.
 
+Requirements
+------------
+
+* ROSE compiler infrastructure -- http://rosecompiler.org/
+* Apache Xerces C++ 3.1.1 -- http://xerces.apache.org/
+* Apache Xalan C++ 1.0 -- http://xml.apache.org/xalan-c/
+
 How to use
 ----------
 
@@ -61,6 +68,13 @@ AST node of Sage III AST classes that are used in the ROSE compiler
 framework. An XML element may have some attributes. For example, an
 AST node of a function declaration, `SgFunctionDefinition`, needs the
 function name at rebuilding.
+
+If a translation rule is written in an XSLT file, `test.xsl`, the rule
+is applied to an AST by
+
+```
+    % src2xml sample.c | xsltexec test.xsl| xml2src sample-equiv.c
+```
 
 To append other information to XML documents, a developer can
 customize two internal C++ classes, `XevSageVisitor` and

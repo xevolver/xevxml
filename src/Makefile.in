@@ -44,7 +44,7 @@ xml2src: $(LIBTARGET)
 -include $(DEPS)
 
 clean:
-	-@rm -fr *~ $(OBJS) src2xml.o xslt.o xml2src.o dir2xml.o $(DEPS) $(TARGET) rose_* a.out
+	-@rm -fr *~ $(OBJS) src2xml.o xslt.o xml2src.o dir2xml.o $(DEPS) $(TARGET) $(LIBTARGET) rose_* a.out
 install:
 	$(INSTALL) -m 775 -d $(BINDIR)
 	$(INSTALL) -m 775 -d $(INCDIR)
