@@ -11,23 +11,19 @@ XSLT_DIR	= .
 ##############################################
 # set default env
 
-ifeq ($(HOSTNAME), hagi-a)
-XEVXML_ENV = . /opt/xevxml/xevxml-20141201-scope/env-xevxml-hagi.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
-else ifeq ($(HOSTNAME), sh-CentOS-MX3)
-XEVXML_ENV = . /home/hirasawa/research-git/xevxml/src/env-xevxml-local-here.sh
-else ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
-XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
-else  
-endif
+#ifeq ($(HOSTNAME), hagi-a)
+#XEVXML_ENV = . /opt/xevxml/xevxml-20141201-scope/env-xevxml-hagi.sh
+#else ifeq ($(HOSTNAME), sh-CentOS-MX3)
+#XEVXML_ENV = . /home/hirasawa/research-git/xevxml/src/env-xevxml-local-here.sh
+#else ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
+#XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
+#else
+#endif
 
 ##############################################
 # xev generated
-SRC2XML_DIR = ../src2xml
-DIR2XML_DIR = ../dir2xml
+SRC2XML_DIR = ../../../src2xml
+DIR2XML_DIR = ../../../dir2xml
 XML2SRC_DIR = .
 EXP_XML_DIR = expected-xml2src
 
@@ -105,11 +101,11 @@ $(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
 %.xev.f90: %.xev.xml
 	$(XEVXML_ENV) ; xml2src < $< $@
 
-# target .xml file 
+# target .xml file
 %.target.xml: %.target.f90
 	$(XEVXML_ENV) ; src2xml $< > $@
 
-# target .f90 source file 
+# target .f90 source file
 %.target-xml2src.f90: %.target.xml
 	$(XEVXML_ENV) ; xml2src < $< $@
 
@@ -117,13 +113,13 @@ $(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
 # diffs
 
 $(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
-	diff $(XML2SRC_DIR)/$*.xml $(EXP_XML_DIR)/$*.xml > $@ 
+	diff $(XML2SRC_DIR)/$*.xml $(EXP_XML_DIR)/$*.xml > $@
 
 %.diff.f90: %.xev.f90 %.target-xml2src.f90
-	diff $^ > $@ 
+	diff $^ > $@
 
 %.diff.xml: %.xev.xml %.target.xml
-	diff $^ > $@ 
+	diff $^ > $@
 
 ##############################################
 # other tests

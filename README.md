@@ -10,7 +10,7 @@ version of the C/Fortran code.
 
 ![Xevolver Logo](./Xevolver_logo.png "Xevolver")
 
-What's this?
+Description
 ------------
   Xevolver XML (XevXml) is one of software products developed by the
 Xevolver project supported by JST "Post-Peta" CREST.  The purpose of
@@ -48,15 +48,15 @@ Requirements
 * Apache Xerces C++ 3.1.1 -- http://xerces.apache.org/
 * Apache Xalan C++ 1.0 -- http://xml.apache.org/xalan-c/
 
-How to use
-----------
+Usage
+-----
 
  XevXml provides two basic commands, `src2xml` and `xml2src`. The
 former converts a C/Fortran code into an XML document, which is output
 to the standard output. The latter reads an XML document from the
 standard input and unparses it to generate a C/Fortran code. For
-example, equivalent transformation of `sample.c` to `sample-quiv.c` is
-as follows.
+example, equivalent transformation of `sample.c` to `sample-equiv.c`
+is as follows.
 
 ```
     % src2xml sample.c | xml2src sample-equiv.c
