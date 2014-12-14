@@ -1,0 +1,14 @@
+SUBDIRS=custom unparse xslt
+SRCDIR=../src
+ROSEROOT = @ROSE_DIR@
+XEROOT = @XERCESC_DIR@
+XAROOT = @XALANC_DIR@
+
+check:
+	list='$(SUBDIRS)';for subdir in $$list; do \
+	make -C $$subdir;\
+	done
+clean:
+	-@list='$(SUBDIRS)';for subdir in $$list; do \
+	make -C $$subdir clean;\
+	done
