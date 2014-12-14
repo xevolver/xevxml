@@ -164,5 +164,5 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([dup2 memset strtoul])
 
-AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([src/Makefile test/Makefile])
 AC_OUTPUT
