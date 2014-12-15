@@ -5,5 +5,6 @@ LIBS  += -L. -lxevxml $(ROSE_LIBS) $(XALANC_LIBS) $(XERCESC_LIBS)
 TARGET=defuse
 all:
 	g++ $(CXXFLAGS) -I../../include defuse.cpp -o $(TARGET) -L../../src/ -lxevxml $(LIBS)
+	./$(TARGET) input_defuse.c
 clean:
 	-@rm -rf a.out $(TARGET)

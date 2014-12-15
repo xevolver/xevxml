@@ -13,6 +13,6 @@ install:
 	make -C $$subdir install;\
 	done
 check:
-	make -C test check
+	make -C test all
 doc:
 	-@doxygen docs/doxygen/Doxygen.conf

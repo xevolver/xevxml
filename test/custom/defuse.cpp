@@ -19,6 +19,7 @@ public:
     bool debug = false;
     defuse = new DefUseAnalysis(p);
     defuse->run(debug);
+    return true;
   }
 
   /* add a new attribute to SgVarRefExp nodes */
