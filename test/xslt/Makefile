@@ -16,6 +16,7 @@ chill_unroll \
 chill_unroll_jam-chill_unroll \
 
 all:
+	@mkdir -p output
 	@($(SRC2XML) input/loop-2.f90 | $(XML2SRC) output/loop-2.f90)
 	@list='$(LOOP2)'; for r in $$list; do \
 	echo "test-$$r.xsl : input/loop2.f90 to output/test-$$r.f90 "; \

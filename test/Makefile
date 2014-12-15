@@ -1,10 +1,6 @@
 SUBDIRS=custom unparse xslt
-SRCDIR=../src
-ROSEROOT = @ROSE_DIR@
-XEROOT = @XERCESC_DIR@
-XAROOT = @XALANC_DIR@
 
-check:
+all:
 	list='$(SUBDIRS)';for subdir in $$list; do \
 	make -C $$subdir;\
 	done

@@ -1,15 +1,8 @@
-INSTALL= @INSTALL@
-ROSEROOT = @ROSE_DIR@
-XEROOT = @XERCESC_DIR@
-XAROOT = @XALANC_DIR@
+include ../build/common.mk
+
 CXXFLAGS= -g -Wall -Wno-deprecated -I../include
-CXXFLAGS += -I../include @ROSE_CFLAGS@ @XALANC_CFLAGS@ @XERCESC_CFLAGS@
-LIBS  += -L. -lxevxml @ROSE_LIBS@ @XALANC_LIBS@ @XERCESC_LIBS@
-
-
-BINDIR=@BINDIR@
-LIBDIR=@LIBDIR@
-INCDIR=@INCDIR@/xevxml
+CXXFLAGS += $(ROSE_CFLAGS) $(XALANC_CFLAGS) $(XERCESC_CFLAGS)
+LIBS  += -L. -lxevxml $(ROSE_LIBS) $(XALANC_LIBS) $(XERCESC_LIBS)
 
 SRCS    =  xmlutils.cpp type.cpp rose2xml.cpp xml2rose.cpp \
 	preproc.cpp unparse.cpp expr.cpp stmt.cpp decl.cpp supp.cpp value.cpp
