@@ -4,6 +4,7 @@
 **/*.target-*.*
 **/*.target.xml
 **/*.diff.*
+**/*.~1~
 
 # old
 **/*.out.xml

@@ -5,6 +5,7 @@ default:
 	@echo "useage: make {check-env, input-src, check-all}"
 
 check-env:
+	@hostname
 	@$(XEVXML_ENV) ; which src2xml
 
 
