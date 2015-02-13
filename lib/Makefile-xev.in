@@ -47,6 +47,7 @@ XML_DIFFS	= ${SRCS:$(INPUT_DIR)/%.f90=$(XML2SRC_DIR)/%.xmldiff}
 
 #.PRECIOUS: $(SRC2XMLS) $(DIR2XMLS) $(TRANS_XMLS) $(XML2SRCS) $(EXP_XMLS) $(EXP_SRCS) $(XML_DIFFS) %.xev.f90 %.xev.xml %.target-xml2src.f90 %.target.xml %.diff.xml  %.diff.f90
 .PRECIOUS:  %.xev.f90 %.xev.xml %.target-xml2src.f90 %.target.xml %.diff.xml  %.diff.f90 # for debug
+.PRECIOUS:  %.xev2.f90 %.xev2.xml %.diff2.xml  %.diff2.f90 # for debug2
 
 ##############################################
 # targets
@@ -120,6 +121,15 @@ $(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
 	diff $(XML2SRC_DIR)/$*.xml $(EXP_XML_DIR)/$*.xml > $@ 
 
 %.diff.f90: %.target-xml2src.f90 %.xev.f90
+	diff $^ > $@ 
+
+# reset indentation
+%.xev2.f90: %.xev.f90
+	$(XEVXML_ENV) ; src2xml $< | xml2src $@ 
+#	$(XEVXML_ENV) ; src2xml $<  > $.xev2.xml
+#	$(XEVXML_ENV) ; xml2src < $.xev2.xml $@ 
+
+%.diff2.f90: %.xev2.f90 %.target-xml2src.f90
 	diff $^ > $@ 
 
 %.diff.xml: %.xev.xml %.target.xml

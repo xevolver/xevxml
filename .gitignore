@@ -1,11 +1,19 @@
-# new
-**/*.xev.xml
-**/*.xev.f90
-**/*.target-*.*
-**/*.target.xml
-**/*.diff.*
-**/*.~1~
-**/*.verify
+
+# general
+*.~1~
+.ptp-sync
+.ptp-sync-folder
+**/.gitignore
+
+# generated files
+*.xev.xml
+*.xev.f90
+*.xev2.f90
+*.target-*.*
+*.target.xml
+*.diff.*
+*.diff2.*
+*.verify
 
 # old
 **/*.out.xml
@@ -16,8 +24,5 @@
 **/xev-src2xml/*
 **/xev-xml2src/*
 **/a.out
-**/.gitignore
-**/.ptp-sync
-**/.ptp-sync-folder
+#**/.gitignore
 ~$*.pptx
-/.ptp-sync

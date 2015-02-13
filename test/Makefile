@@ -16,7 +16,7 @@ input-src: $(XEV_DIRS:%.xev.d=%.input-src)
 
 check-all: input-src
 	@$(foreach dir,$(TEST_DIRS),echo $(dir); cd $(dir); make check; cd ../..)
-	@wc *.xev.d/test-*/*.diff.*
+	@wc *.xev.d/test-*/*.diff.* *.xev.d/test-*/*.diff2.*
 
 clean-translated-all:
 	@$(foreach dir,$(TEST_DIRS),echo $(dir); cd $(dir); make clean-translated; cd ../..)

@@ -25,7 +25,6 @@ program TileLoop
 
     call cpu_time(t2)
     ta=real(t2-t1)/100
-    !    print *,  ta
 
     if (a(1,1) == 2.53530120E+30) then
         print *, "OK: ", a(1,1)
