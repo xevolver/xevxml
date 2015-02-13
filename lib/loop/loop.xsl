@@ -14,5 +14,6 @@
 
 	<!-- Undo transformations -->
 	<xsl:import href="tile_undo.xsl" />
+	<xsl:import href="unroll_undo.xsl" />
 
 </xsl:stylesheet>

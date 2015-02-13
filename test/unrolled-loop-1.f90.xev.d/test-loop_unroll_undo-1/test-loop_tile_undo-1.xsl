@@ -11,9 +11,9 @@
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>
-					xev loop_tag loop_tile_undo
+					xev loop_tag loop_unroll_undo
 				</xsl:comment>
-				<xsl:apply-templates select="." mode="loop_tile_undo">
+				<xsl:apply-templates select="." mode="loop_unroll_undo">
 					<xsl:with-param name="loopName1" select="'j'" />
 					<xsl:with-param name="start1" select="'1'" />
 					<xsl:with-param name="end1" select="'N'" />
