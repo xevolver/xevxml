@@ -119,7 +119,7 @@ $(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
 $(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
 	diff $(XML2SRC_DIR)/$*.xml $(EXP_XML_DIR)/$*.xml > $@ 
 
-%.diff.f90: %.xev.f90 %.target-xml2src.f90
+%.diff.f90: %.target-xml2src.f90 %.xev.f90
 	diff $^ > $@ 
 
 %.diff.xml: %.xev.xml %.target.xml

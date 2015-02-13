@@ -16,6 +16,7 @@ program TileLoop
     call cpu_time(t1)
 
     do k=1,100
+        !$xev loop_tag
         do j1=1,floor(real(N-1)/1)*1+1,1
             do i1=1,floor(real(N-1)/1)*1+1,1
                 do j=max(1,j1),min(N,j1+0)

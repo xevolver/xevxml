@@ -150,7 +150,10 @@
       <SgIntVal value="100"  string="100" />
       <SgNullExpression/>
       <SgBasicBlock>
-       <SgFortranDo style="0"  end="1"  slabel="" >
+       <SgPragmaDeclaration >
+  <SgPragma pragma="xev loop_tag" />
+</SgPragmaDeclaration >
+<SgFortranDo style="0"  end="1"  slabel="" >
         <SgAssignOp>
          <SgVarRefExp name="j1" lvalue="1"/>
          <SgIntVal value="1"  string="1" />
@@ -299,6 +302,7 @@
           </SgBasicBlock>
          </SgFortranDo>
         </SgBasicBlock>
+<PreprocessingInfo pos="2">        !$xev loop_tag</PreprocessingInfo>
        </SgFortranDo>
       </SgBasicBlock>
      </SgFortranDo>

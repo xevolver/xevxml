@@ -13,6 +13,8 @@ END DO
 END DO
 CALL cpu_time(t1)
 DO k = 1, 100
+!pragma xev loop_tag
+        !$xev loop_tag
 DO j1 = 1, floor(real(N - 1) / 1) * 1 + 1, 1
 DO i1 = 1, floor(real(N - 1) / 1) * 1 + 1, 1
 DO j = max(1,j1), min(N,j1 + 0)
