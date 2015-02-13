@@ -29,6 +29,12 @@ input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple
 	$(XEVXML_ENV) ; xml2src < $*.f90.xev.d/dir2xml/$*.xml	 $*.f90.xev.d/dir2xml/$*.f90
 	
 ####################
+# verify
+
+verify:
+	gfortran -o  tiled-loop-1.verify tiled-loop-1.f90 && ./tiled-loop-1.verify 
+
+####################
 # tags
 
 test: 

@@ -14,6 +14,7 @@ program TileLoop
     end do
 
     call cpu_time(t1)
+
     do k=1,100
         do j1=1,floor(real(N-1)/1)*1+1,1
             do i1=1,floor(real(N-1)/1)*1+1,1
@@ -25,9 +26,17 @@ program TileLoop
             end do
         end do
     end do
+
+
     call cpu_time(t2)
     ta=real(t2-t1)/100
-    print *,  ta
+    !    print *,  ta
+
+    if (a(1,1) == 2.53530120E+30) then
+        print *, "OK: ", a(1,1)
+    else
+        print *, "NG", a(1,1)
+    endif
 
 end program TileLoop
 
