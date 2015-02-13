@@ -9,20 +9,24 @@ check-env:
 	@$(XEVXML_ENV) ; which src2xml
 
 
-DIRS = $(wildcard *.f90.xev.d/test-*)
+TEST_DIRS = $(wildcard *.f90.xev.d/test-*)
 XEV_DIRS = $(wildcard *.xev.d)
+
+input-src: $(XEV_DIRS:%.xev.d=%.input-src)
+
 check-all: input-src
-	@$(foreach dir,$(DIRS),echo $(dir); cd $(dir); make check; cd ../..)
+	@$(foreach dir,$(TEST_DIRS),echo $(dir); cd $(dir); make check; cd ../..)
 	@wc *.xev.d/test-*/*.diff.*
 
 clean-translated-all:
-	@$(foreach dir,$(DIRS),echo $(dir); cd $(dir); make clean-translated; cd ../..)
+	@$(foreach dir,$(TEST_DIRS),echo $(dir); cd $(dir); make clean-translated; cd ../..)
 
 #clean-generated-all: clean-translated-all
 clean-generated-all:
 	@$(foreach dir, $(XEV_DIRS), cd $(dir); rm -rf src2xml dir2xml; cd ..)
 
-input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple-loop-1.f90.input-src
+#input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple-loop-1.f90.input-src
+input-src: $(INPUTS)
 
 %.f90.input-src:
 	@-mkdir $*.f90.xev.d
@@ -44,8 +48,9 @@ verify:
 ####################
 # tags
 
-test: 
-	triple-loop-1.f90
+test:
+	echo $(INPUTS) 
+#	triple-loop-1.f90
 
 
 test-5:
