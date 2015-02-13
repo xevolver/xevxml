@@ -9,10 +9,11 @@ check-env:
 	@$(XEVXML_ENV) ; which src2xml
 
 
+TEST_SRCS = $(wildcard *.f90)
+XEV_DIRS = $(TEST_SRCS:%.f90=%.f90.xev.d)
 TEST_DIRS = $(wildcard *.f90.xev.d/test-*)
-XEV_DIRS = $(wildcard *.xev.d)
 
-input-src: $(XEV_DIRS:%.xev.d=%.input-src)
+input-src: $(TEST_SRCS:%.f90=%.f90.input-src)
 
 check-all: input-src
 	@$(foreach dir,$(TEST_DIRS),echo $(dir); cd $(dir); make check; cd ../..)
@@ -26,7 +27,7 @@ clean-generated-all:
 	@$(foreach dir, $(XEV_DIRS), cd $(dir); rm -rf src2xml dir2xml; cd ..)
 
 #input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple-loop-1.f90.input-src
-input-src: $(INPUTS)
+#input-src: $(INPUTS)
 
 %.f90.input-src:
 	@-mkdir $*.f90.xev.d

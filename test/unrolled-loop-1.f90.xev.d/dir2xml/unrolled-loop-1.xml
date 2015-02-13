@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile file="unrolled-loop-1.f90" fmt="2" lang="4">
+ <SgGlobal>
+    <SgProgramHeaderStatement end_name="1" name="UnrollTest">
+     <SgFunctionParameterList/>
+     <SgFunctionDefinition>
+        <SgBasicBlock>
+         <SgImplicitStatement/>
+         <SgVariableDeclaration access_modifier="4" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="loopUpperBound">
+             <SgTypeInt/>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgVariableDeclaration access_modifier="4" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="i">
+             <SgTypeInt/>
+      </SgInitializedName>
+            <SgInitializedName name="j">
+             <SgTypeInt/>
+      </SgInitializedName>
+            <SgInitializedName name="k">
+             <SgTypeInt/>
+      </SgInitializedName>
+            <SgInitializedName name="m">
+             <SgTypeInt/>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgVariableDeclaration access_modifier="4" cv_modifier="2" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="N">
+             <SgAssignInitializer>
+                <SgIntVal string="512" value="512"/>
+                <SgTypeInt/>
+       </SgAssignInitializer>
+             <SgTypeInt/>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgVariableDeclaration access_modifier="4" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="a">
+             <SgArrayType rank="2">
+                <SgTypeFloat/>
+                <SgExprListExp>
+                 <SgVarRefExp name="N"/>
+                 <SgVarRefExp name="N"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+            <SgInitializedName name="b">
+             <SgArrayType rank="2">
+                <SgTypeFloat/>
+                <SgExprListExp>
+                 <SgVarRefExp name="N"/>
+                 <SgVarRefExp name="N"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+            <SgInitializedName name="c">
+             <SgArrayType rank="2">
+                <SgTypeFloat/>
+                <SgExprListExp>
+                 <SgVarRefExp name="N"/>
+                 <SgVarRefExp name="N"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgVariableDeclaration access_modifier="4" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="t1">
+             <SgTypeFloat/>
+      </SgInitializedName>
+            <SgInitializedName name="t2">
+             <SgTypeFloat/>
+      </SgInitializedName>
+            <SgInitializedName name="ta">
+             <SgTypeFloat/>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgFortranDo end="1" slabel="" style="0">
+            <SgAssignOp>
+             <SgVarRefExp lvalue="1" name="j"/>
+             <SgIntVal string="1" value="1"/>
+      </SgAssignOp>
+            <SgVarRefExp name="N"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+             <SgFortranDo end="1" slabel="" style="0">
+                <SgAssignOp>
+                 <SgVarRefExp lvalue="1" name="i"/>
+                 <SgIntVal string="1" value="1"/>
+        </SgAssignOp>
+                <SgVarRefExp name="N"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                 <SgExprStatement>
+                    <SgAssignOp>
+                     <SgPntrArrRefExp lvalue="1">
+                        <SgVarRefExp name="a"/>
+                        <SgExprListExp>
+                         <SgVarRefExp name="i"/>
+                         <SgVarRefExp name="j"/>
+            </SgExprListExp>
+           </SgPntrArrRefExp>
+                     <SgAddOp>
+                        <SgVarRefExp name="i"/>
+                        <SgVarRefExp name="j"/>
+           </SgAddOp>
+          </SgAssignOp>
+         </SgExprStatement>
+                 <SgExprStatement>
+                    <SgAssignOp>
+                     <SgPntrArrRefExp lvalue="1">
+                        <SgVarRefExp name="b"/>
+                        <SgExprListExp>
+                         <SgVarRefExp name="i"/>
+                         <SgVarRefExp name="j"/>
+            </SgExprListExp>
+           </SgPntrArrRefExp>
+                     <SgMultiplyOp>
+                        <SgVarRefExp name="i"/>
+                        <SgVarRefExp name="j"/>
+           </SgMultiplyOp>
+          </SgAssignOp>
+         </SgExprStatement>
+        </SgBasicBlock>
+       </SgFortranDo>
+      </SgBasicBlock>
+     </SgFortranDo>
+         <SgExprStatement>
+            <SgFunctionCallExp>
+             <SgFunctionRefExp kind="2" name="cpu_time"/>
+             <SgExprListExp>
+                <SgVarRefExp name="t1"/>
+       </SgExprListExp>
+      </SgFunctionCallExp>
+     </SgExprStatement>
+         <SgFortranDo end="1" slabel="" style="0">
+            <SgAssignOp>
+             <SgVarRefExp lvalue="1" name="m"/>
+             <SgIntVal string="1" value="1"/>
+      </SgAssignOp>
+            <SgIntVal string="100" value="100"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+             <SgFortranDo end="1" slabel="" style="0">
+                <SgAssignOp>
+                 <SgVarRefExp lvalue="1" name="i"/>
+                 <SgIntVal string="1" value="1"/>
+        </SgAssignOp>
+                <SgVarRefExp name="N"/>
+                <SgNullExpression/>
+                <SgBasicBlock>
+                 <SgFortranDo end="1" slabel="" style="0">
+                    <SgAssignOp>
+                     <SgVarRefExp lvalue="1" name="j"/>
+                     <SgIntVal string="1" value="1"/>
+          </SgAssignOp>
+                    <SgVarRefExp name="N"/>
+                    <SgNullExpression/>
+                    <SgBasicBlock>
+                     <SgExprStatement>
+                        <SgAssignOp>
+                         <SgPntrArrRefExp lvalue="1">
+                            <SgVarRefExp name="c"/>
+                            <SgExprListExp>
+                             <SgVarRefExp name="i"/>
+                             <SgVarRefExp name="j"/>
+              </SgExprListExp>
+             </SgPntrArrRefExp>
+                         <SgFloatVal string="0.0" value="0"/>
+            </SgAssignOp>
+           </SgExprStatement>
+                     <SgExprStatement>
+                        <SgAssignOp>
+                         <SgVarRefExp lvalue="1" name="loopUpperBound"/>
+                         <SgVarRefExp name="N"/>
+            </SgAssignOp>
+           </SgExprStatement>
+                     <SgPragmaDeclaration>
+                        <SgPragma pragma="xev loop_tag"/>
+</SgPragmaDeclaration>
+                      <SgFortranDo end="1" slabel="" style="0">
+                        <SgAssignOp>
+                         <SgVarRefExp lvalue="1" name="k"/>
+                         <SgIntVal string="1" value="1"/>
+            </SgAssignOp>
+                        <SgVarRefExp name="loopUpperBound"/>
+                        <SgIntVal string="4" value="4"/>
+                        <SgBasicBlock>
+                         <SgExprStatement>
+                            <SgAssignOp>
+                             <SgPntrArrRefExp lvalue="1">
+                                <SgVarRefExp name="c"/>
+                                <SgExprListExp>
+                                 <SgVarRefExp name="i"/>
+                                 <SgVarRefExp name="j"/>
+                </SgExprListExp>
+               </SgPntrArrRefExp>
+                             <SgAddOp>
+                                <SgPntrArrRefExp>
+                                 <SgVarRefExp name="c"/>
+                                 <SgExprListExp>
+                                    <SgVarRefExp name="i"/>
+                                    <SgVarRefExp name="j"/>
+                 </SgExprListExp>
+                </SgPntrArrRefExp>
+                                <SgMultiplyOp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="b"/>
+                                    <SgExprListExp>
+                                     <SgVarRefExp name="k"/>
+                                     <SgVarRefExp name="j"/>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="a"/>
+                                    <SgExprListExp>
+                                     <SgVarRefExp name="i"/>
+                                     <SgVarRefExp name="k"/>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                </SgMultiplyOp>
+               </SgAddOp>
+              </SgAssignOp>
+             </SgExprStatement>
+                         <SgExprStatement>
+                            <SgAssignOp>
+                             <SgPntrArrRefExp lvalue="1">
+                                <SgVarRefExp name="c"/>
+                                <SgExprListExp>
+                                 <SgVarRefExp name="i"/>
+                                 <SgVarRefExp name="j"/>
+                </SgExprListExp>
+               </SgPntrArrRefExp>
+                             <SgAddOp>
+                                <SgPntrArrRefExp>
+                                 <SgVarRefExp name="c"/>
+                                 <SgExprListExp>
+                                    <SgVarRefExp name="i"/>
+                                    <SgVarRefExp name="j"/>
+                 </SgExprListExp>
+                </SgPntrArrRefExp>
+                                <SgMultiplyOp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="b"/>
+                                    <SgExprListExp>
+                                     <SgAddOp paren="1">
+                                        <SgVarRefExp name="k"/>
+                                        <SgIntVal string="1" value="1"/>
+                   </SgAddOp>
+                                     <SgVarRefExp name="j"/>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="a"/>
+                                    <SgExprListExp>
+                                     <SgVarRefExp name="i"/>
+                                     <SgAddOp paren="1">
+                                        <SgVarRefExp name="k"/>
+                                        <SgIntVal string="1" value="1"/>
+                   </SgAddOp>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                </SgMultiplyOp>
+               </SgAddOp>
+              </SgAssignOp>
+             </SgExprStatement>
+                         <SgExprStatement>
+                            <SgAssignOp>
+                             <SgPntrArrRefExp lvalue="1">
+                                <SgVarRefExp name="c"/>
+                                <SgExprListExp>
+                                 <SgVarRefExp name="i"/>
+                                 <SgVarRefExp name="j"/>
+                </SgExprListExp>
+               </SgPntrArrRefExp>
+                             <SgAddOp>
+                                <SgPntrArrRefExp>
+                                 <SgVarRefExp name="c"/>
+                                 <SgExprListExp>
+                                    <SgVarRefExp name="i"/>
+                                    <SgVarRefExp name="j"/>
+                 </SgExprListExp>
+                </SgPntrArrRefExp>
+                                <SgMultiplyOp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="b"/>
+                                    <SgExprListExp>
+                                     <SgAddOp paren="1">
+                                        <SgVarRefExp name="k"/>
+                                        <SgIntVal string="2" value="2"/>
+                   </SgAddOp>
+                                     <SgVarRefExp name="j"/>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="a"/>
+                                    <SgExprListExp>
+                                     <SgVarRefExp name="i"/>
+                                     <SgAddOp paren="1">
+                                        <SgVarRefExp name="k"/>
+                                        <SgIntVal string="2" value="2"/>
+                   </SgAddOp>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                </SgMultiplyOp>
+               </SgAddOp>
+              </SgAssignOp>
+             </SgExprStatement>
+                         <SgExprStatement>
+                            <SgAssignOp>
+                             <SgPntrArrRefExp lvalue="1">
+                                <SgVarRefExp name="c"/>
+                                <SgExprListExp>
+                                 <SgVarRefExp name="i"/>
+                                 <SgVarRefExp name="j"/>
+                </SgExprListExp>
+               </SgPntrArrRefExp>
+                             <SgAddOp>
+                                <SgPntrArrRefExp>
+                                 <SgVarRefExp name="c"/>
+                                 <SgExprListExp>
+                                    <SgVarRefExp name="i"/>
+                                    <SgVarRefExp name="j"/>
+                 </SgExprListExp>
+                </SgPntrArrRefExp>
+                                <SgMultiplyOp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="b"/>
+                                    <SgExprListExp>
+                                     <SgAddOp paren="1">
+                                        <SgVarRefExp name="k"/>
+                                        <SgIntVal string="3" value="3"/>
+                   </SgAddOp>
+                                     <SgVarRefExp name="j"/>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                                 <SgPntrArrRefExp>
+                                    <SgVarRefExp name="a"/>
+                                    <SgExprListExp>
+                                     <SgVarRefExp name="i"/>
+                                     <SgAddOp paren="1">
+                                        <SgVarRefExp name="k"/>
+                                        <SgIntVal string="3" value="3"/>
+                   </SgAddOp>
+                  </SgExprListExp>
+                 </SgPntrArrRefExp>
+                </SgMultiplyOp>
+               </SgAddOp>
+              </SgAssignOp>
+             </SgExprStatement>
+            </SgBasicBlock>
+                        <PreprocessingInfo pos="2">                !$xev loop_tag</PreprocessingInfo>
+           </SgFortranDo>
+          </SgBasicBlock>
+         </SgFortranDo>
+        </SgBasicBlock>
+       </SgFortranDo>
+      </SgBasicBlock>
+     </SgFortranDo>
+         <SgExprStatement>
+            <SgFunctionCallExp>
+             <SgFunctionRefExp kind="2" name="cpu_time"/>
+             <SgExprListExp>
+                <SgVarRefExp name="t2"/>
+       </SgExprListExp>
+      </SgFunctionCallExp>
+     </SgExprStatement>
+         <SgExprStatement>
+            <SgAssignOp>
+             <SgVarRefExp lvalue="1" name="ta"/>
+             <SgDivideOp>
+                <SgFunctionCallExp>
+                 <SgFunctionRefExp kind="1" name="real"/>
+                 <SgExprListExp>
+                    <SgSubtractOp>
+                     <SgVarRefExp name="t2"/>
+                     <SgVarRefExp name="t1"/>
+          </SgSubtractOp>
+         </SgExprListExp>
+        </SgFunctionCallExp>
+                <SgIntVal string="100" value="100"/>
+       </SgDivideOp>
+      </SgAssignOp>
+     </SgExprStatement>
+         <SgPrintStatement>
+            <SgExprListExp>
+             <SgVarRefExp name="ta"/>
+      </SgExprListExp>
+            <SgAsteriskShapeExp/>
+     </SgPrintStatement>
+    </SgBasicBlock>
+   </SgFunctionDefinition>
+     <SgTypeVoid/>
+  </SgProgramHeaderStatement>
+ </SgGlobal>
+</SgSourceFile>
