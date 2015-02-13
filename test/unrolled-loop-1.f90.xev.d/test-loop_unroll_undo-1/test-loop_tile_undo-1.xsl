@@ -14,12 +14,7 @@
 					xev loop_tag loop_unroll_undo
 				</xsl:comment>
 				<xsl:apply-templates select="." mode="loop_unroll_undo">
-					<xsl:with-param name="loopName1" select="'j'" />
-					<xsl:with-param name="start1" select="'1'" />
-					<xsl:with-param name="end1" select="'N'" />
-					<xsl:with-param name="loopName2" select="'i'" />
-					<xsl:with-param name="start2" select="'1'" />
-					<xsl:with-param name="end2" select="'N'" />
+					<xsl:with-param name="factor" select="'4'" />
 				</xsl:apply-templates>
 			</xsl:when>
 
