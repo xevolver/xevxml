@@ -99,6 +99,18 @@ void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* b
     si::attachArbitraryText(isSgLocatedNode(blk),remain,PreprocessingInfo::inside);
 }
 
+
+static void attribSgIOStatement(std::ostream& str,SgNode* node)
+{
+  SgIOStatement*      n = isSgIOStatement(node);
+
+  if(n) {
+    str << " unit=\"" << (n->get_unit()!=0) << "\" ";
+    str << " iostat=\"" << (n->get_iostat()!=0) << "\" ";
+    str << " err=\"" << (n->get_err()!=0) << "\" ";
+  }
+}
+
 static void attribSgStatement(std::ostream& str,SgNode* node)
 {
   SgStatement*    stmt = isSgStatement(node);
@@ -108,6 +120,7 @@ static void attribSgStatement(std::ostream& str,SgNode* node)
     if(l)
       str << " nlabel=\"" << l->get_numeric_label_value() << "\" ";
   }
+  attribSgIOStatement(str,node);
 }
 
 #define ATTRIB_STMT_DEFAULT(x)                          \
@@ -216,17 +229,23 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
   SgBackspaceStatement*   ret =
     new SgBackspaceStatement(DEFAULT_FILE_INFO);
   SgExpression*           unt = 0;
-  SgLabelRefExp*          err = 0;
+  SgExpression*           err = 0;
+  SgExpression*           ist = 0;
+  bool f_ist, f_unt, f_err;
 
-  string                  nlabel;
+  XmlGetAttributeValue(node,"iostat",&f_ist);
+  XmlGetAttributeValue(node,"unit",  &f_unt);
+  XmlGetAttributeValue(node,"err",   &f_err);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       //assuming these stmts appear in this order
-      if( unt==0 )
+      if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
-      else if( err==0 )
-        err = isSgLabelRefExp(astchild);
+      else if( f_ist && ist==0 )
+        ist = isSgExpression(astchild);
+      else if( f_err && err==0 )
+        err = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -240,6 +259,9 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
     ret->set_err( err );
     err->set_parent(ret);
     err->set_startOfConstruct(DEFAULT_FILE_INFO);
+  }
+  if( ist ) {
+    ret->set_iostat( ist );
   }
 
   return ret;
@@ -378,19 +400,51 @@ XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgCloseStatement*     ret = new SgCloseStatement(DEFAULT_FILE_INFO);
   SgExpression*         unt = 0;
+  SgExpression*         err = 0;
+  SgExpression*         ist = 0;
+  SgExpression*         stt = 0;
+  bool f_ist, f_unt, f_err,f_stt;
+
+  XmlGetAttributeValue(node,"iostat",&f_ist);
+  XmlGetAttributeValue(node,"unit",  &f_unt);
+  XmlGetAttributeValue(node,"err",   &f_err);
+  XmlGetAttributeValue(node,"status",&f_stt);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( unt==0 )
+      if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
+      else if( f_ist && ist==0 )
+        ist = isSgExpression(astchild);
+      else if( f_err && err==0 )
+        err = isSgExpression(astchild);
+      else if( f_stt && stt==0 )
+        stt = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
-  ret->set_unit(unt);
+  if(unt)
+    ret->set_unit(unt);
+  if(err)
+    ret->set_err(err);
+  if(ist)
+    ret->set_iostat(ist);
+  if(stt)
+    ret->set_status(stt);
   ret->set_parent(astParent);
   return ret;
 }
-STMT_DEFAULT(CloseStatement);
+/** XML attribute writer of SgClassDefinition */
+void XevSageVisitor::attribSgCloseStatement(SgNode* node)
+{
+  SgCloseStatement*      n = isSgCloseStatement(node);
+
+  if(n) {
+    sstr() << " status=\"" << (n->get_status()!=0) << "\" ";
+  }
+  attribSgStatement(sstr(),node);
+}
+INODE_STMT_DEFAULT(CloseStatement);
 
 // ===============================================================================
 /// Visitor of a SgComputedGotoStatement element in an XML document
@@ -550,15 +604,23 @@ XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEndfileStatement*     ret =
     new SgEndfileStatement(DEFAULT_FILE_INFO);
-  SgExpression*           unt = 0;
-  SgLabelRefExp*          err = 0;
+  SgExpression*          unt = 0;
+  SgExpression*          err = 0;
+  SgExpression*          ist = 0;
+  bool f_ist, f_unt, f_err;
+
+  XmlGetAttributeValue(node,"iostat",&f_ist);
+  XmlGetAttributeValue(node,"unit",  &f_unt);
+  XmlGetAttributeValue(node,"err",   &f_err);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( unt==0 )
+      if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
-      else if( err==0 )
-        err = isSgLabelRefExp(astchild);
+      else if( f_ist && ist==0 )
+        ist = isSgExpression(astchild);
+      else if( f_err && err==0 )
+        err = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -573,6 +635,8 @@ XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
     err->set_parent(ret);
     err->set_startOfConstruct(DEFAULT_FILE_INFO);
   }
+  if( ist )
+    ret->set_iostat( ist );
 
   return ret;
 }
