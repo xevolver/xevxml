@@ -1,0 +1,11 @@
+
+! =================================================================================== 
+! <<Automatically generated for Rose Fortran Separate Compilation, DO NOT MODIFY IT>> 
+! =================================================================================== 
+
+MODULE s11
+INTEGER :: a
+private 
+INTEGER :: b
+END MODULE s11
+

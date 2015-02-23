@@ -1,0 +1,13 @@
+
+! =================================================================================== 
+! <<Automatically generated for Rose Fortran Separate Compilation, DO NOT MODIFY IT>> 
+! =================================================================================== 
+
+MODULE f05_check
+CONTAINS
+SUBROUTINE ca203(s,t,m,n)
+COMPLEX(kind=4) :: s(m,n), t(m,n)
+END SUBROUTINE ca203
+
+END MODULE f05_check
+

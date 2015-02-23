@@ -2,6 +2,7 @@
 int main()
 {
   int x = 9;
+  #pragma hoge
   if(x>0)
     x = x + 1;
   else

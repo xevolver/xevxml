@@ -1,0 +1,12 @@
+
+! =================================================================================== 
+! <<Automatically generated for Rose Fortran Separate Compilation, DO NOT MODIFY IT>> 
+! =================================================================================== 
+
+MODULE mod
+TYPE , PUBLIC :: t1
+INTEGER :: i
+CHARACTER(len=7) :: ch
+END TYPE t1
+END MODULE mod
+
