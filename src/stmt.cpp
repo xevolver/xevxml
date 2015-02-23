@@ -580,6 +580,7 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
     new SgElseWhereStatement(DEFAULT_FILE_INFO);
   SgExpression*         cond  = 0;
   SgBasicBlock*         body  = 0;
+  ret->set_parent(astParent);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -592,7 +593,6 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
 
   ret->set_condition( cond );
   ret->set_body( body );
-  ret->set_parent(astParent);
   return ret;
 }
 STMT_DEFAULT(ElseWhereStatement);
