@@ -43,8 +43,12 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
+extern void attribSgStatement(std::ostream& str,SgNode* node);
+
 static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
 {
+  attribSgStatement(istr,node);
+
   SgDeclarationStatement* decl = isSgDeclarationStatement(node);
   if(decl==NULL) return;
 
@@ -69,6 +73,7 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
     istr << " access_modifier=\"" <<  modifier.get_accessModifier().get_modifier()<< "\" ";
   if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default)
     istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
+
 }
 
 #define INODE_DECL_DEFAULT(x)                           \
@@ -78,7 +83,8 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
 #define ATTRIB_DECL_DEFAULT(x)                          \
   /** XML attribute writer of Sg##x */                  \
   void XevSageVisitor::attribSg##x(SgNode* node)        \
-  { return; }
+  { attribSgDeclarationStatement(sstr(),node);          \
+    return; }
 
 #define DECL_DEFAULT(x)                         \
   ATTRIB_DECL_DEFAULT(x)                        \

@@ -111,7 +111,7 @@ static void attribSgIOStatement(std::ostream& str,SgNode* node)
   }
 }
 
-static void attribSgStatement(std::ostream& str,SgNode* node)
+void attribSgStatement(std::ostream& str,SgNode* node)
 {
   SgStatement*    stmt = isSgStatement(node);
 
