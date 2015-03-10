@@ -151,6 +151,7 @@ XevXmlVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParen
 {
   SgAllocateStatement*    ret=0;
   SgExprListExp*          exp=0;
+  SgExpression*           stt=0;
 
   ret = new SgAllocateStatement(DEFAULT_FILE_INFO);
 
@@ -158,11 +159,15 @@ XevXmlVisitor::visitSgAllocateStatement(xercesc::DOMNode* node, SgNode* astParen
     {
       if( exp==0 )
         exp = isSgExprListExp(astchild);
+      else if( stt==0 )
+        stt = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
   ret->set_parent(astParent);
   ret->set_expr_list(exp);
+  if(stt)
+    ret->set_stat_expression(stt);
 
   return ret;
 }
@@ -506,6 +511,7 @@ XevXmlVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astPar
 {
   SgDeallocateStatement*    ret=0;
   SgExprListExp*          exp=0;
+  SgExpression*           stt=0;
 
   ret = new SgDeallocateStatement(DEFAULT_FILE_INFO);
 
@@ -513,12 +519,16 @@ XevXmlVisitor::visitSgDeallocateStatement(xercesc::DOMNode* node, SgNode* astPar
     {
       if( exp==0 )
         exp = isSgExprListExp(astchild);
+      else if( stt==0 )
+        stt = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
   //printf( "ret=%p,exp=%p\n",ret,exp);
   ret->set_expr_list(exp);
   ret->set_parent(astParent);
+  if(stt)
+    ret->set_stat_expression(stt);
   //exp->set_parent(ret);
 
   return ret;
