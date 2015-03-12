@@ -21,19 +21,19 @@ case ${SRC} in
 	XML=`echo $SRC |sed 's/.f90$/.xml/'`
 	DIF=`echo $SRC |sed 's/.f90$/.dif/'`
 	LOG=`echo $SRC |sed 's/.f90$/.log/'`
-	echo -n "\"\t\t\t r" 1>&2
+	echo -ne "\"\t\t\t r" 1>&2
 	;;
     *.c)
 	XML=`echo $SRC |sed 's/.c$/.xml/'`
 	DIF=`echo $SRC |sed 's/.c$/.dif/'`
 	LOG=`echo $SRC |sed 's/.c$/.log/'`
-	echo -n "\"\t\t\t   r" 1>&2
+	echo -ne "\"\t\t\t   r" 1>&2
 	;;
     *.F)
 	XML=`echo $SRC |sed 's/.F$/.xml/'`
 	DIF=`echo $SRC |sed 's/.F$/.dif/'`
 	LOG=`echo $SRC |sed 's/.F$/.log/'`
-	echo -n "\"\t\t\t   r" 1>&2
+	echo -ne "\"\t\t\t   r" 1>&2
 	;;
 esac
 OUT=../output
