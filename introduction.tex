@@ -54,11 +54,18 @@ using only those standard tools.  This chapter briefly describes an
 overview of code transformation with XevXML.
 
 \section{An overview of XevXML}
+\begin{figure}[htb]
+ \includegraphics[width=\textwidth]{overview.eps}
+ \caption{An overview of intercoversion between ROSE ASTs and XML
+ ASTs.}\label{fig:overview}
+\end{figure}
+
 XevXML has so far been developed on top of the ROSE compiler
 infrastructure~\cite{rose}.  XevXML provides the interconversion between
-an ROSE AST and an XML AST.  XevXML converts a ROSE AST to an XML
-representation of the AST, called an \emph{XML AST}. In XevXML, an XML
-AST is exposed to users.  After user-defined transformations, the
+an ROSE AST and its XML representation. Figure~\ref{fig:overview} shows
+an overview of the interconversion.  XevXML converts a ROSE AST to an
+XML representation of the AST, called an \emph{XML AST}. In XevXML, an
+XML AST is exposed to users.  After user-defined transformations, the
 transformed XML AST is again converted back to a ROSE AST so that ROSE
 can unparse it to a C or Fortran code.
 
