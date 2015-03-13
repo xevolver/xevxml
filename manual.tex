@@ -1,0 +1,47 @@
+\documentclass[10pt]{book}
+\usepackage{url}
+\usepackage{geometry}
+\usepackage{framed}
+\usepackage{fancybox}
+\newenvironment{src}
+{%begin
+\VerbatimEnvironment
+\begin{quote}
+%\begin{screen}
+\begin{Verbatim}
+}
+{%end
+\end{Verbatim}
+%\end{screen}
+\end{quote}
+}
+
+\begin{document}
+\title{ {\bf {Xevolver XML Framework}}\\ 
+A Framework for XML-Based AST Transformations \\
+~\\
+\bf{Draft User Manual} \\
+{(version @VERSION@)}}  
+
+\author{ {\bf Hiroyuki Takizawa} \\
+Graduate School of Information Sciences\\
+Tohoku University\\
+Sendai 980-8579 Japan\\
++81-22-795-7010 (office)  +81-22-795-7011 (fax) \\
+takizawa@cc.tohoku.ac.jp
+       }
+\date{\today}
+
+\maketitle
+
+\input{preface}
+\input{acknowledgments}
+
+\tableofcontents
+\input{introduction}
+\input{json}
+\input{xslt}
+\input{internal}
+
+\input{install}
+\end{document}

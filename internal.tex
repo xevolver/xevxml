@@ -1,0 +1,14 @@
+\chapter{Internal Structures and Behaviors}\label{chap:internal}
+
+Since ROSE already has various features of code analyses and
+transformations to implement custom code transformation programs, XevXML
+provides some C++ classes and functions, which are helpful to read and
+write XML ASTs. As a result, code transformation programs developed with
+ROSE can handle XML ASTs. 
+
+This chapter describes XevXML classes and functions that allows ROSE to
+handle XML ASTs. By inheriting the classes, users can develop customized
+versions of \texttt{src2xml} and \texttt{xml2src} commands. For example,
+\texttt{src2xml} would be customized so that some additional XML
+attributes are written in an XML AST.
+
