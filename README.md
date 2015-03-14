@@ -47,6 +47,7 @@ Requirements
 * ROSE compiler infrastructure -- http://rosecompiler.org/
 * Apache Xerces C++ 3.1.1 -- http://xerces.apache.org/
 * Apache Xalan C++ 1.0 -- http://xml.apache.org/xalan-c/
+* PicoJSON -- https://github.com/kazuho/picojson
 
 Usage
 -----
@@ -76,7 +77,7 @@ is applied to an AST by
     % src2xml sample.c | xsltexec test.xsl| xml2src sample-equiv.c
 ```
 
-To append other information to XML documents, a developer can
+To append additional information to XML documents, a developer can
 customize two internal C++ classes, `XevSageVisitor` and
 `XevXmlVisitor`. The former class traverses an AST of Sage III classes
 used in ROSE, and translates it to an XML AST. The latter traverses an
@@ -99,7 +100,7 @@ License
 -------
 This project is released under the BSD 2-clause license
 
-Copyright (C) 2010-2014 Hiroyuki TAKIZAWA. All rights reserved.
+Copyright (C) 2010-2015 Hiroyuki TAKIZAWA. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
