@@ -16,8 +16,8 @@
 
 				<xsl:variable name="step1">
 					<xsl:apply-templates select="." mode="chill_unroll_jam">
-						<xsl:with-param name="max" select="4" />
-						<xsl:with-param name="var" select="'k'" />
+						<xsl:with-param name="factor" select="4" />
+						<xsl:with-param name="loopName" select="'k'" />
 					</xsl:apply-templates>
 				</xsl:variable>
 
@@ -40,8 +40,8 @@
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
 				<xsl:apply-templates select="." mode="chill_unroll">
-					<xsl:with-param name="max" select="2" />
-					<xsl:with-param name="var" select="'i'" />
+					<xsl:with-param name="factor" select="2" />
+					<xsl:with-param name="loopName" select="'i'" />
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
