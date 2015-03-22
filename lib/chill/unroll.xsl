@@ -6,8 +6,8 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:template match="SgFortranDo" mode="chill_unroll">
-		<xsl:param name="max" />
-		<xsl:param name="var" />
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
 		<xsl:comment>
 			libCHiLL.xsl chill_unroll
 		</xsl:comment>
@@ -20,14 +20,14 @@
 			<!-- 刻み幅 -->
 			<xsl:element name="SgIntVal">
 				<xsl:attribute name="value">
-							<xsl:value-of select="$max" />
+							<xsl:value-of select="$factor" />
 						</xsl:attribute>
 			</xsl:element>
 
 			<xsl:apply-templates select="./SgBasicBlock"
 				mode="loop_unroll">
-				<xsl:with-param name="max" select="$max" />
-				<xsl:with-param name="var" select="$var" />
+				<xsl:with-param name="factor" select="$factor" />
+				<xsl:with-param name="loopName" select="$loopName" />
 			</xsl:apply-templates>
 
 		</xsl:copy>
