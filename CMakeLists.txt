@@ -26,3 +26,6 @@ ADD_CUSTOM_TARGET(apidoc_forced
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 endif (DOXYGEN_FOUND)
+
+install_files( /lib FILES ${PROJECT_SOURCE_DIR}/test/xslt/rule)
+install_files( /include FILES ${PROJECT_SOURCE_DIR}/include/)

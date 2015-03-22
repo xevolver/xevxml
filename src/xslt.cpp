@@ -48,7 +48,7 @@
 #include <stdexcept>
 #include <getopt.h>
 
-const char* DEFAULT_LIBRARY_PATH="/usr/local/xevxml/""lib";
+const char* DEFAULT_LIBRARY_PATH=XEVXML_PREFIX"lib";
 const char* XEVXML_LIB_ENV="XEVXML_LIBRARY_PATH";
 
 using namespace std;
@@ -222,12 +222,16 @@ void ProcessOpts(int argc,char** argv, string& xslt)
       libdir = optarg;
       break;
     case 'h':
-      cerr <<"help" <<endl;
+      cerr << "USAGE:" << argv[0] << " [OPTION]... FILENAME " << endl;
+      cerr << "OPTIONS:" << endl;
+      cerr << "-L, --libdir <path>\t Specify the library path\n";
+      cerr << "-h, --help         \t Print this message\n";
+      cerr << libdir;
       exit(0);
       break;
     case ':':
     case '?':
-      exit(1);
+      exit(-1);
     }
   }
 }
@@ -240,7 +244,7 @@ int main(int argc,char** argv)
   string fn;
   ProcessOpts(argc,argv,fn);
   if( argc < 2 || fn.size()==0) {
-    cerr << "USAGE:" << argv[0] << " [options] xslt_file_name " << endl;
+    cerr << "Try option `--help' for more information" <<endl;
     return -1;
   }
 

@@ -1,0 +1,6 @@
+#ifndef ___CONFIG_H___
+#define ___CONFIG_H___
+
+#define XEVXML_PREFIX "@CMAKE_XEVXML_PREFIX@"
+
+#endif /* ___CONFIG_H___ */
