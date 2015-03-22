@@ -21,6 +21,7 @@ link_directories(${CMAKE_ROSE_DIR}/lib)
 add_executable(src2xml  src2xml.cpp)
 add_executable(xml2src  xml2src.cpp)
 add_executable(xsltexec xslt.cpp)
+add_executable(xsltgen xsltgen.cpp)
 
 target_link_libraries(src2xml xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})
 target_link_libraries(xml2src xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})

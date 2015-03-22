@@ -186,13 +186,19 @@ void WriteXslt(const picojson::value::object& root)
     /* for each directive */
     for(k=dirs->begin();k!=dirs->end();++k){
       if((*k)->second.is<picojson::object>()){
-        std::cout << xslttmpl[3];
-        std::cout << (*k)->first;
-        std::cout << xslttmpl[4];
+        if((*k)->first != "*" ){
+          std::cout << xslttmpl[3];
+          std::cout << (*k)->first;
+          std::cout << xslttmpl[4];
+        }
+        else {
+          // directive name is *. don't check if a directive exists.
+          std::cout << "      <xsl:when test=\"true()\">\n";
+        }
         /* for each directive */
         WriteApplyTemplates((*k)->second.get<picojson::object>());
+        std::cout << xslttmpl[5];
       }
-      std::cout << xslttmpl[5];
     }
     /* otherwise element */
     for(int m(6);m<14;++m)
