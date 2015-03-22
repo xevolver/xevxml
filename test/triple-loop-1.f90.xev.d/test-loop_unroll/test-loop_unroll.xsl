@@ -30,8 +30,8 @@
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
 				<xsl:apply-templates select="." mode="loop_unroll">
-					<xsl:with-param name="max" select="3" />
-					<xsl:with-param name="var" select="'i'" />
+					<xsl:with-param name="factor" select="3" />
+					<xsl:with-param name="loopName" select="'i'" />
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
