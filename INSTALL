@@ -3,12 +3,14 @@ INSTALLATION GUIDE
 1. Some environmental variables such as LD_LIBRARY_PATH, JAVA_HOME,
    and CXX must be correctly set so as to use ROSE, Xerces, and Xalan.
    Moreover, ROSE_HOME and PICOJSON_HOME are used to specify where
-   they are.
+   ROSE and PicoJSON are installed.
+
+   ex) export ROSE_HOME=/usr/local/rose/
 
 2. At the top diretocy of the source tree, make a directory for
    building the package.
 
-   % make mybuild
+   % mkdir mybuild
    % cd mybuild
 
 3. Run the cmake command
