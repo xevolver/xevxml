@@ -8,7 +8,7 @@
  \item ROSE compiler infrastructure -- \url{http://rosecompiler.org/}
  \item Apache Xerces C++ 3.1.1 -- \url{http://xerces.apache.org/}
  \item Apache Xalan C++ 1.0 -- \url{http://xml.apache.org/xalan-c/}
- \item PisoJSON -- \url{https://github.com/kazuho/picojson/}
+ \item PicoJSON -- \url{https://github.com/kazuho/picojson/}
 \end{itemize}
 
 
@@ -16,29 +16,56 @@
 
 \section{Installation guide}
 \begin{enumerate}
- \item Generate a configure script file using the autoconf command\\
+ \item Fist of all, some environmental variables such as
+       \texttt{LD\_LIBRARY\_PATH}, \texttt{JAVA\_HOME}, and \texttt{CXX}
+       must be correctly set so as to use ROSE, Xerces, and Xalan. Use
+       \texttt{ROSE\_HOME} and \texttt{PICOJSON\_HOME} for specifying
+       the diretories of ROSE and PicoJSON, respectively.
 
-       \texttt{\% autoconf}
+       For example, if \texttt{picojson.h} is located in
+       \texttt{/usr/local/include}, \texttt{PICOJSON\_HOME} needs be set
+       to \texttt{/usr/local}.
 
- \item Some environmental variables such as \texttt{LD\_LIBRARY\_PATH},
-       \texttt{JAVA\_HOME}, and \texttt{CXX} must be correctly set so as to
-       use ROSE, Xerces, and Xalan.
-
- \item Run the configure script\\
+ \item Create a new directory at the top diretocry for building the package.
        
-       \texttt{\% ./configure --prefix=/path/to/somewhere $\backslash$}\\
-       \hspace{75pt}\texttt{--with-rosedir=/usr/local/    $\backslash$}\\
-       \hspace{75pt}\texttt{--with-xercescdir=/usr/local  $\backslash$}\\
-       \hspace{75pt}\texttt{--with-xalancdir=/usr/local}
+       \texttt{\% mkdir mybuild}
+
+       \texttt{\% cd mybuild}
+
+ \item Run the \texttt{cmake} command to generate Makefile and copy necessary files.
+
+       \texttt{\% cmake ../}
+
+       The \texttt{cmake} command accepts various options. For example,
+       the install diretory is changed by using the
+       \texttt{-DCMAKE\_INSTALL\_PREFIX} option.
+
+       \texttt{\% cmake -DCMAKE\_INSTALL\_PREFIX=/usr/local/xevxml ../}
+
+       See the \texttt{cmake} manual for more details\cite{cmake}.
+% \item Generate a configure script file using the autoconf command\\
+
+%       \texttt{\% autoconf}
+
+% \item Some environmental variables such as \texttt{LD\_LIBRARY\_PATH},
+%       \texttt{JAVA\_HOME}, and \texttt{CXX} must be correctly set so as to
+%       use ROSE, Xerces, and Xalan.
+
+% \item Run the configure script\\
+       
+%       \texttt{\% ./configure --prefix=/path/to/somewhere $\backslash$}\\
+%       \hspace{75pt}\texttt{--with-rosedir=/usr/local/    $\backslash$}\\
+%       \hspace{75pt}\texttt{--with-xercescdir=/usr/local  $\backslash$}\\
+%       \hspace{75pt}\texttt{--with-xalancdir=/usr/local}
 
  \item Run the GNU make command.
 
    To compile the package,\\
        \texttt{\% make}
-
+       
    To install the package,\\
        \texttt{\% make install}
 
-   To test the package,\\
-       \texttt{\% make check}
+%   To test the package,\\
+%       \texttt{\% make check}
 \end{enumerate}

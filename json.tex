@@ -13,19 +13,19 @@ In practice, code modifications for performance optimizations are often
 expressed by combinations of well-known loop transformations.  Moreover,
 text insertion and deletion based on code pattern matching are also
 frequently required for practical performance optimizations.
-Nonetheless, it is not very easy to correctly define their XSLT
-rules. 
+Nonetheless, it is not very easy to correctly define their XSLT rules
+manually.
 
 In this chapter, a high-level interface for user-defined code
 transformations is described. The interface is designed only for some
 specific purposes.  Although the interface is less flexible than the
-XSLT approach of dictating AST transformations, it offers an easy way to
-quickly define a custom compiler directive that is associated with a
-composite of predefined rules. Such a directive can also be associated
-with text insertion and deletion. Therefore, the high-level interface is
-useful for generating a lot of transformation rules and also for
-mechanically inserting some texts into a code, which are frequently
-required in practical performance optimizations.
+XSLT approach of straightforwardly dictating AST transformations, it
+offers an easy way to quickly define a custom compiler directive that is
+associated with a composite of predefined rules. Such a directive can
+also be associated with text insertion and deletion. Therefore, the
+high-level interface is useful for generating a lot of transformation
+rules and also for mechanically inserting some texts into a code, which
+are frequently required in practical performance optimizations.
 
 \section{XSLT rule generation}
 XevXML provides the \texttt{xsltgen} command that reads a simple
@@ -113,6 +113,7 @@ done by compilers. Typical loop optimization techniques are as follows.
  \item Loop tiling
  \item Loop interchange
  \item Loop permutation
+ \item Loop collapse
  \item Loop fusion
  \item Loop fission~(aka. loop distribution)
  \item Unroll and jam~(aka. outer loop unrolling)
@@ -196,7 +197,7 @@ AST subtree whose root is \texttt{SgForStatement}. Therefore, the
 function call of \texttt{endLoop();} is inserted right after the loop
 body of every \texttt{for} loop.
 
-If a pair of \texttt{"replace"} and an empry string is given in the
+If a pair of \texttt{"replace"} and an empty string is given in the
 directive definition, the directive will simply remove the target
 statement. Namely, such a directive can be used to remove the statement
 for a particular platform.

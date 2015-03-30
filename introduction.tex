@@ -325,13 +325,13 @@ directory from the root diretory. For example, the root directory is
 expressed by \texttt{/}, its sub-directory named ``sub'' is expressed by
 \texttt{/sub}, and a file named ``xfile'' that is located in the ``sub''
 directory is expressed by \texttt{/sub/xfile}.  Note that \texttt{/}
-represents the root direstory and is also used as a delimiting
+represents the root directory and is also used as a delimiting
 character.  On the other hand, a relative path indicates the path from
 the working directory where a user or an application is located. When
 the working diretory is \texttt{/sub}, a relative path to a
 \texttt{xfile} can be represented as \texttt{xfile}, \texttt{./xfile},
 \texttt{../sub/xfile}, etc.  Of course, those relative paths point to
-the same location bebause \texttt{.} and \texttt{..} denote the working
+the same location because \texttt{.} and \texttt{..} denote the working
 diretory and its parent directory, respectively.
 
 As well as a UNIX file path, an XPath expression also points to a
@@ -393,6 +393,7 @@ another SgForStatement element exists in the subtree of the matched
 element.  Only if it exists, text data are inserted before and after the
 matched element.
 
+
 If the above XSLT rules are applied to an XML AST, two function calls,
 \texttt{startLoopNest()} and \texttt{endLoopNest()}, are inserted before
 and after each nested loop, and a single loop is unchanged as shown
@@ -418,6 +419,53 @@ transformations can be achieved by writing XSLT rules because XSLT can
 change the structure of an XML AST.  Chapter~\ref{chap:xslt} will
 describe how to write XSLT rules for AST transformation.
 
+Although users can use any XSLT processor for code transformation,
+XevXML provides the \texttt{xsltexec} command for XSLT-based code
+transformation. In general, an XSLT file can import XSLT rules defined
+in other XSLT files. If a specified file written in an XSLT file for
+importing rules does not exist in the working directory, the
+\texttt{xsltexec} command looks for the file in the XevXML
+transformation library path specified by an environment variable,
+\texttt{XEVOLVER\_LIBRARY\_PATH}. The library path would usually be
+specified so that the command uses predefined XSLT rules offered by
+XevXML.  The command also has a command line option to specify the
+library path.
+
+\begin{framed}
+\begin{description}
+ \item[NAME]~\\
+	    \texttt{xsltexec} -- a simple XSLT processor for XevXML
+
+ \item[SYNOPSIS]~\\
+	    \texttt{xsltexec [OPTIONS] XSLT-FILE}
+
+ \item[DESCRIPTION]~\\ \texttt{xsltexec} applies XSLT rules to an XML
+	    representation of an AST, called an XML AST. XSLT rules are
+	    defined in a file given by the command-line argument. In the
+	    XSLT file, predefined XSLT rules offered by XevXML are also
+	    available without specifying the absolute paths of the XSLT
+	    files installed to the system.
+
+	    The command reads an input XML AST from the standard input,
+	    and prints an output XML AST to the standard output. The
+	    command-line options are as follows.
+
+	    \begin{tabular}{ll}
+	     {\bf -L, --libdir $<$path$>$} & specify the library path.\\
+	     {\bf -h, --help} &  prints the usage\\
+	    \end{tabular}
+
+	    An environment variable, \texttt{XEVOLVER\_LIBRARY\_PATH},
+	    is used to configure the default path of the transformation
+	    library.
+ \item[EXAMPLES]~\\ \texttt{xsltexec sample.xsl $<$ hello.xml}\\ This
+	    command will read an XML AST in \texttt{hello.xml} and
+	    transform the AST based on the XSLT rules defined in
+	    \texttt{sample.xsl}. The transformed AST is printed out to
+	    the standard output.
+\end{description}
+\end{framed}
+
 %It is hence necessary to easily define such specific code
 %transformations.
 
@@ -425,4 +473,11 @@ describe how to write XSLT rules for AST transformation.
 %translators using compiler tools such as ROSE.
 
 \section{Summary}
-To be described.
+This chapter describes an overview of the XevXML framework. Then, three
+basic commands, \texttt{src2xml}, \texttt{xml2src}, and
+\texttt{xsltexec}, are introduced for user-defined code transformations
+with XML specifications and tools. Using some simple examples,
+interconversion between ROSE ASTs and XML ASTs is explained, and also
+simple transformations are shown in this chapter.
+
+%To be described.
