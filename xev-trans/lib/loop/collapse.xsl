@@ -58,7 +58,6 @@
 				</xsl:comment>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<!-- 変数 初期値 -->
 					<xsl:copy-of select="./*[1]" />
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />

@@ -14,8 +14,8 @@
 					test-1.xsl xev loop_tag
 				</xsl:comment>
 				<xsl:apply-templates select="." mode="chill_unroll_jam">
-					<xsl:with-param name="max" select="4" />
-					<xsl:with-param name="var" select="'k'" />
+					<xsl:with-param name="factor" select="4" />
+					<xsl:with-param name="loopName" select="'k'" />
 				</xsl:apply-templates>
 			</xsl:when>
 
