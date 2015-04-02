@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="c_03of11tips.c" format="2" language="2">
+  <SgGlobal>
+    <SgFunctionDeclaration name="TEST03">
+        <SgTypeVoid/>
+      <SgFunctionParameterList>
+        <SgInitializedName name="M">
+            <SgTypeInt/>
+        </SgInitializedName>
+        <SgInitializedName name="N">
+            <SgTypeInt/>
+        </SgInitializedName>
+      </SgFunctionParameterList>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="A">
+                <SgArrayType index="100" rank="0" type="SgArrayType">
+                  <SgArrayType index="100" rank="0" type="SgTypeInt">
+                    <SgTypeInt/>
+                  </SgArrayType>
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="i">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="j">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev dir append ( copy ( A ) )">
+              <DIRECTIVE name="dir">
+                <CLAUSE name="add" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="dir">
+                <CLAUSE name="replace" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="dir">
+                <CLAUSE name="append" specified="true">
+                  <VARARG specified="true">
+                    <ARG specified="true" value="copy( A )"/>
+                  </VARARG>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="dir">
+                <CLAUSE name="remove" specified="false">
+                  <VARARG specified="false"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="acc kernels loop"/>
+          </SgPragmaDeclaration>
+          <SgForStatement>
+            <SgForInitStatement>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="i"/>
+                  <SgIntVal value="0"/>
+                </SgAssignOp>
+              </SgExprStatement>
+            </SgForInitStatement>
+            <SgExprStatement>
+              <SgLessThanOp>
+                <SgVarRefExp name="i"/>
+                <SgVarRefExp name="M"/>
+              </SgLessThanOp>
+            </SgExprStatement>
+            <SgPlusPlusOp mode="1">
+              <SgVarRefExp name="i"/>
+            </SgPlusPlusOp>
+            <SgBasicBlock>
+              <SgForStatement>
+                <SgForInitStatement>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="j"/>
+                      <SgVarRefExp name="i"/>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgForInitStatement>
+                <SgExprStatement>
+                  <SgLessThanOp>
+                    <SgVarRefExp name="j"/>
+                    <SgVarRefExp name="N"/>
+                  </SgLessThanOp>
+                </SgExprStatement>
+                <SgPlusPlusOp mode="1">
+                  <SgVarRefExp name="j"/>
+                </SgPlusPlusOp>
+                <SgBasicBlock>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgPntrArrRefExp>
+                          <SgVarRefExp name="A"/>
+                          <SgVarRefExp name="i"/>
+                        </SgPntrArrRefExp>
+                        <SgVarRefExp name="j"/>
+                      </SgPntrArrRefExp>
+                      <SgAddOp>
+                        <SgVarRefExp name="i"/>
+                        <SgVarRefExp name="j"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+              </SgForStatement>
+            </SgBasicBlock>
+          </SgForStatement>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+    </SgFunctionDeclaration>
+  </SgGlobal>
+
+</SgSourceFile>

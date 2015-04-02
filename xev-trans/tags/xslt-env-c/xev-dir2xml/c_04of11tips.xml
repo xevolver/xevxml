@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile filename="c_04of11tips.c" format="2" language="2">
+  <SgGlobal>
+    <SgFunctionDeclaration name="TEST04">
+        <SgTypeVoid/>
+      <SgFunctionParameterList>
+        <SgInitializedName name="M">
+            <SgTypeInt/>
+        </SgInitializedName>
+        <SgInitializedName name="N">
+            <SgTypeInt/>
+        </SgInitializedName>
+      </SgFunctionParameterList>
+      <SgFunctionDefinition>
+        <SgBasicBlock>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev array1to2 type ( A, 25, 25 )">
+              <DIRECTIVE name="array1to2">
+                <CLAUSE name="type" specified="true">
+                  <ARG specified="true" value="A"/>
+                  <ARG specified="true" value="25"/>
+                  <ARG specified="true" value="25"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="idx">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="A">
+                <SgArrayType index="625" rank="0" type="SgTypeInt">
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="B">
+                <SgArrayType index="25" rank="0" type="SgArrayType">
+                  <SgArrayType index="25" rank="0" type="SgTypeInt">
+                    <SgTypeInt/>
+                  </SgArrayType>
+                  <SgTypeInt/>
+                </SgArrayType>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="i">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgVariableDeclaration modifier="auto">
+            <SgInitializedName name="j">
+                <SgTypeInt/>
+            </SgInitializedName>
+          </SgVariableDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="acc kernels loop"/>
+          </SgPragmaDeclaration>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev array1to2 - varref start ( A, i, j )">
+              <DIRECTIVE name="array1to2">
+                <CLAUSE name="type" specified="false">
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+          <SgForStatement>
+            <SgForInitStatement>
+              <SgExprStatement>
+                <SgAssignOp>
+                  <SgVarRefExp name="i"/>
+                  <SgIntVal value="0"/>
+                </SgAssignOp>
+              </SgExprStatement>
+            </SgForInitStatement>
+            <SgExprStatement>
+              <SgLessThanOp>
+                <SgVarRefExp name="i"/>
+                <SgVarRefExp name="M"/>
+              </SgLessThanOp>
+            </SgExprStatement>
+            <SgPlusPlusOp mode="1">
+              <SgVarRefExp name="i"/>
+            </SgPlusPlusOp>
+            <SgBasicBlock>
+              <SgForStatement>
+                <SgForInitStatement>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="j"/>
+                      <SgIntVal value="0"/>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgForInitStatement>
+                <SgExprStatement>
+                  <SgLessThanOp>
+                    <SgVarRefExp name="j"/>
+                    <SgVarRefExp name="N"/>
+                  </SgLessThanOp>
+                </SgExprStatement>
+                <SgPlusPlusOp mode="1">
+                  <SgVarRefExp name="j"/>
+                </SgPlusPlusOp>
+                <SgBasicBlock>
+                  <SgPragmaDeclaration>
+                    <SgPragma pragma="xev statement remove">
+                      <DIRECTIVE name="statement">
+                        <CLAUSE name="add" specified="false">
+                          <VARARG specified="false"/>
+                        </CLAUSE>
+                      </DIRECTIVE>
+                      <DIRECTIVE name="statement">
+                        <CLAUSE name="remove" specified="true"></CLAUSE>
+                      </DIRECTIVE>
+                    </SgPragma>
+                  </SgPragmaDeclaration>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgVarRefExp name="idx"/>
+                      <SgAddOp>
+                        <SgMultiplyOp>
+                          <SgSubtractOp>
+                            <SgVarRefExp name="i"/>
+                            <SgIntVal value="1"/>
+                          </SgSubtractOp>
+                          <SgVarRefExp name="M"/>
+                        </SgMultiplyOp>
+                        <SgVarRefExp name="j"/>
+                      </SgAddOp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                  <SgExprStatement>
+                    <SgAssignOp>
+                      <SgPntrArrRefExp>
+                        <SgVarRefExp name="A"/>
+                        <SgVarRefExp name="idx"/>
+                      </SgPntrArrRefExp>
+                      <SgPntrArrRefExp>
+                        <SgPntrArrRefExp>
+                          <SgVarRefExp name="B"/>
+                          <SgVarRefExp name="i"/>
+                        </SgPntrArrRefExp>
+                        <SgVarRefExp name="j"/>
+                      </SgPntrArrRefExp>
+                    </SgAssignOp>
+                  </SgExprStatement>
+                </SgBasicBlock>
+              </SgForStatement>
+            </SgBasicBlock>
+          </SgForStatement>
+          <SgPragmaDeclaration>
+            <SgPragma pragma="xev end array1to2 - varref ( A, i, j )">
+              <DIRECTIVE name="end">
+                <CLAUSE name="scalar2array1-varref" specified="false">
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                </CLAUSE>
+              </DIRECTIVE>
+              <DIRECTIVE name="end">
+                <CLAUSE name="array1to2-varref" specified="false">
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                  <ARG specified="false" value="default"/>
+                </CLAUSE>
+              </DIRECTIVE>
+            </SgPragma>
+          </SgPragmaDeclaration>
+        </SgBasicBlock>
+      </SgFunctionDefinition>
+    </SgFunctionDeclaration>
+  </SgGlobal>
+
+</SgSourceFile>

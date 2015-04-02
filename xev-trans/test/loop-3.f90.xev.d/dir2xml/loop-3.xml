@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<SgSourceFile file="loop-3.f90" fmt="2" lang="4">
+ <SgGlobal>
+    <SgProgramHeaderStatement end_name="1" name="triple_loop_1">
+     <SgFunctionParameterList/>
+     <SgFunctionDefinition>
+        <SgBasicBlock>
+         <SgVariableDeclaration access_modifier="4" cv_modifier="2" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="n">
+             <SgAssignInitializer>
+                <SgIntVal string="139" value="139"/>
+                <SgTypeInt/>
+       </SgAssignInitializer>
+             <SgTypeInt/>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgVariableDeclaration access_modifier="4" declaration_modifier="2" type_modifier="2">
+            <SgInitializedName name="A">
+             <SgArrayType rank="1">
+                <SgTypeFloat kind="8"/>
+                <SgExprListExp>
+                 <SgVarRefExp name="n"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+            <SgInitializedName name="B">
+             <SgArrayType rank="1">
+                <SgTypeFloat kind="8"/>
+                <SgExprListExp>
+                 <SgVarRefExp name="n"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+            <SgInitializedName name="C">
+             <SgArrayType rank="1">
+                <SgTypeFloat kind="8"/>
+                <SgExprListExp>
+                 <SgVarRefExp name="n"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+            <SgInitializedName name="D">
+             <SgArrayType rank="1">
+                <SgTypeFloat kind="8"/>
+                <SgExprListExp>
+                 <SgVarRefExp name="n"/>
+        </SgExprListExp>
+       </SgArrayType>
+      </SgInitializedName>
+     </SgVariableDeclaration>
+         <SgPragmaDeclaration>
+            <SgPragma pragma="xev loop_tag"/>
+</SgPragmaDeclaration>
+          <SgFortranDo end="1" slabel="" style="0">
+            <SgAssignOp>
+             <SgVarRefExp lvalue="1" name="i"/>
+             <SgIntVal string="1" value="1"/>
+      </SgAssignOp>
+            <SgVarRefExp name="n"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+             <SgExprStatement>
+                <SgAssignOp>
+                 <SgPntrArrRefExp lvalue="1">
+                    <SgVarRefExp name="B"/>
+                    <SgExprListExp>
+                     <SgVarRefExp name="i"/>
+          </SgExprListExp>
+         </SgPntrArrRefExp>
+                 <SgPntrArrRefExp>
+                    <SgVarRefExp name="A"/>
+                    <SgExprListExp>
+                     <SgVarRefExp name="i"/>
+          </SgExprListExp>
+         </SgPntrArrRefExp>
+        </SgAssignOp>
+       </SgExprStatement>
+      </SgBasicBlock>
+            <PreprocessingInfo pos="2">    !$xev loop_tag</PreprocessingInfo>
+     </SgFortranDo>
+         <SgFortranDo end="1" slabel="" style="0">
+            <SgAssignOp>
+             <SgVarRefExp lvalue="1" name="i"/>
+             <SgIntVal string="1" value="1"/>
+      </SgAssignOp>
+            <SgVarRefExp name="n"/>
+            <SgNullExpression/>
+            <SgBasicBlock>
+             <SgExprStatement>
+                <SgAssignOp>
+                 <SgPntrArrRefExp lvalue="1">
+                    <SgVarRefExp name="D"/>
+                    <SgExprListExp>
+                     <SgVarRefExp name="i"/>
+          </SgExprListExp>
+         </SgPntrArrRefExp>
+                 <SgPntrArrRefExp>
+                    <SgVarRefExp name="C"/>
+                    <SgExprListExp>
+                     <SgVarRefExp name="i"/>
+          </SgExprListExp>
+         </SgPntrArrRefExp>
+        </SgAssignOp>
+       </SgExprStatement>
+      </SgBasicBlock>
+     </SgFortranDo>
+    </SgBasicBlock>
+   </SgFunctionDefinition>
+     <SgTypeVoid/>
+  </SgProgramHeaderStatement>
+ </SgGlobal>
+</SgSourceFile>

@@ -1,0 +1,149 @@
+<DEFS>
+  <DIRECTIVE name="nt_opt">
+    <CLAUSE name="label">
+      <ARG value="defLabel" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="nt_opt2">
+    <CLAUSE name="param">
+      <ARG value="ArrayNum" />
+      <ARG value="StartIndex" />
+      <ARG value="EndIndex" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="loop">
+    <CLAUSE name="interchange">
+      <ARG value="1" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="var">
+    <CLAUSE name="replace">
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="dir">
+    <CLAUSE name="add">
+      <VARARG />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="dir">
+    <CLAUSE name="replace">
+      <VARARG />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="dir">
+    <CLAUSE name="append">
+      <VARARG />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="dir">
+    <CLAUSE name="remove">
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="statement">
+    <CLAUSE name="add">
+      <VARARG />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="statement">
+    <CLAUSE name="remove">
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="while2do">
+    <CLAUSE name="replace">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="scalar2array1_varref">
+    <CLAUSE name="start">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="end">
+    <CLAUSE name="scalar2array1_varref">
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="array1to2">
+    <CLAUSE name="type">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="array1to2_varref">
+    <CLAUSE name="start">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="end">
+    <CLAUSE name="array1to2_varref">
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="one_loop_copy">
+    <CLAUSE name="flag">
+      <VARARG />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="loop_unroll">
+    <CLAUSE name="step">
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="loop_roll">
+    <CLAUSE name="dim">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="blocking">
+    <CLAUSE name="block">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="fortrando">
+    <CLAUSE name="replace">
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="var_replace">
+    <CLAUSE name="var">
+      <ARG value="default" />
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="end">
+    <CLAUSE name="var_replace">
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="array_dim_chg">
+    <CLAUSE name="start">
+      <ARG value="default" />
+      <VARARG />
+    </CLAUSE>
+  </DIRECTIVE>
+  <DIRECTIVE name="end">
+    <CLAUSE name="array_dim_chg">
+      <ARG value="default" />
+    </CLAUSE>
+  </DIRECTIVE>
+</DEFS>

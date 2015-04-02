@@ -1,0 +1,28 @@
+
+# general
+*.~1~
+.ptp-sync
+.ptp-sync-folder
+**/.gitignore
+
+# generated files
+*.xev.xml
+*.xev.f90
+*.xev2.f90
+*.target-*.*
+*.target.xml
+*.diff.*
+*.diff2.*
+*.verify
+
+# old
+**/*.out.xml
+**/*.out.f90
+**/expected-xml2src
+**/expected-xml2src/*
+**/xev-dir2xml/*
+**/xev-src2xml/*
+**/xev-xml2src/*
+**/a.out
+#**/.gitignore
+~$*.pptx

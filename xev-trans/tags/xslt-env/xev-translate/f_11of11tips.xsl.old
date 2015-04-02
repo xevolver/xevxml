@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:output method="xml" encoding="UTF-8" />
+
+	<xsl:template match="/">
+		<xsl:apply-templates />
+	</xsl:template>
+
+	<xsl:template match="*">
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates />
+		</xsl:copy>
+	</xsl:template>
+
+	<!-- SgFunctionParameterList -->
+	<xsl:template match="SgFunctionParameterList">
+		<xsl:copy>
+                <xsl:copy-of select="./SgInitializedName"></xsl:copy-of>
+		<!--親ノードの直近の兄ノードが【!$xev parameter add】ならパラメータを追加する-->
+		<xsl:if test="parent::node()/preceding-sibling::SgPragmaDeclaration[1]/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']">
+                        <xsl:element name="SgInitializedName">
+				<xsl:attribute name="name">
+			        	<xsl:value-of select="parent::node()/preceding-sibling::SgPragmaDeclaration[1]/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']/LI/@value"/>
+			        </xsl:attribute>
+				<xsl:element name="SgTypeFloat"/>
+                        </xsl:element>
+
+        	</xsl:if>
+		</xsl:copy>
+	</xsl:template>
+
+	<!-- SgVariableDeclaration -->
+	<xsl:template match="SgVariableDeclaration">
+		<xsl:choose>
+			<!--子ノードに【!$xev parameter add】が存在する場合、パラメータを追加する-->
+			<xsl:when test="./SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']" >
+				<xsl:copy>
+                			<xsl:copy-of select="./SgInitializedName"></xsl:copy-of>
+                        		<xsl:element name="SgInitializedName">
+						<xsl:attribute name="name">
+			        			<xsl:value-of select="./SgPragmaDeclaration/SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']/LI/@value"/>
+			        		</xsl:attribute>
+						<xsl:element name="SgTypeFloat"/>
+                        		</xsl:element>
+
+				</xsl:copy>
+			</xsl:when>
+                	<xsl:otherwise>
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+                	</xsl:otherwise>
+        	</xsl:choose>
+	</xsl:template>
+
+	<!-- remove PreprocessingInfo -->
+	<xsl:template match="PreprocessingInfo">
+		<xsl:choose>
+			<!--'!$xev'で始まる行を削除する -->
+			<xsl:when test="contains(.,'!$xev')" >
+				<xsl:comment>
+					PreprocessingInfo
+				</xsl:comment>
+			</xsl:when>
+
+			<!--直前に'!$xev dir del'がある場合、この行を削除する -->
+			<xsl:when test="contains(preceding-sibling::PreprocessingInfo[1],'delete')">
+				<xsl:comment>
+					PreprocessingInfo
+				</xsl:comment>
+			</xsl:when>
+                	<xsl:otherwise>
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+                	</xsl:otherwise>
+        	</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="SgExprStatement">
+		<xsl:choose>
+			<!-- statement delete
+			     !$xev statement-del ptn-001
+			-->
+			<!--直前に'statement-del'がある場合、この statement を削除する -->
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-del']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					remove statement
+				</xsl:comment>
+			</xsl:when>
+
+			<!-- statement replace
+			     !$xev statement-rep ptn-001
+			-->
+			<!--直前に'statement-rep'がある場合、この statement を置き換える -->
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					remove statement
+				</xsl:comment>
+                        	<xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']/LI[1]/@value" /><xsl:text>,</xsl:text>
+                                <xsl:value-of select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']/LI[2]/@value" /><xsl:text>)=B(i,j)</xsl:text>
+			</xsl:when>
+
+			<!-- function call copy
+
+			     !$xev function-call copy-001(zz)
+
+			     【処理概要】
+				直下の関数呼び出しを複写して、
+				指定したパラメータに書き換える			     　
+			-->
+			<!--直前に'function-call copy-001'がある場合、この statement を複写する  -->
+			<xsl:when test="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='function-call']/CLAUSE[@name='copy-001']">
+                        	<!-- 既存の【function call】をそのままコピーする -->
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+
+                        	<!-- 既存の【function call】をそのままコピーする -->
+                        	<xsl:copy>
+					<SgFunctionCallExp>
+                        			<!-- 関数名をそのままコピーする -->
+                        			<xsl:copy-of select="./SgFunctionCallExp/SgFunctionRefExp"/>
+                        			<!-- 関数の引数を、指定内容で作成する -->
+                        			<SgExprListExp>
+			        				<xsl:for-each select="preceding-sibling::*[1]/SgPragma/DIRECTIVE[@name='function-call']/CLAUSE[@name='copy-001']/LI">
+                        						<SgVarRefExp>
+										<xsl:attribute name="name">
+											<xsl:value-of select="@value" />
+			        						</xsl:attribute>
+                        						</SgVarRefExp>
+			        				</xsl:for-each>
+                        			</SgExprListExp>
+					</SgFunctionCallExp>
+                        	</xsl:copy>
+			</xsl:when>
+
+                	<xsl:otherwise>
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+                	</xsl:otherwise>
+        	</xsl:choose>
+        </xsl:template>
+	
+
+	<xsl:template match="SgPragmaDeclaration">
+		<xsl:choose>
+			<!-- remove SgPragmaDeclaration
+			     !$xev function-call copy-001(zz)
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='function-call']/CLAUSE[@name='copy-001']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+			<!-- remove SgPragmaDeclaration
+			     !$xev parameter add(zz)
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='parameter']/CLAUSE[@name='add']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+			<!-- directive add
+			     !$xev dir ,add()
+			-->
+			<xsl:when test="not(contains(./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='add']/LI[1]/@value,'default'))">
+				<xsl:element name="SgPragmaDeclaration">
+					<xsl:element name="SgPragma">
+						<xsl:attribute name="pragma">
+							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='add']/LI">
+								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
+							</xsl:for-each>
+						</xsl:attribute>
+					</xsl:element>
+				</xsl:element>
+			</xsl:when>
+
+			<!-- directive replace
+			     !$xev dir replace(acc, kernels, loop)
+			-->
+			<xsl:when test="not(contains(./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='replace']/LI[1]/@value,'default'))">
+				<xsl:element name="SgPragmaDeclaration">
+					<xsl:element name="SgPragma">
+						<xsl:attribute name="pragma">
+							<xsl:for-each select="./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='replace']/LI">
+								<xsl:value-of select="@value" /><xsl:text> </xsl:text>
+							</xsl:for-each>
+						</xsl:attribute>
+					</xsl:element>
+				</xsl:element>
+			</xsl:when>
+
+			<!-- directive deletee
+			     !$xev dir del(delete)
+			-->
+			<xsl:when test="not(contains(./SgPragma/DIRECTIVE[@name='dir']/CLAUSE[@name='del']/LI[1]/@value,'default'))">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+                        <!--
+                                !$xev statement-add ptn-000( )
+                        -->
+                        <xsl:when test="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-000']">
+				<xsl:for-each select="./SgPragma/DIRECTIVE[@name='statement-add']/CLAUSE[@name='ptn-000']/LI">
+					<xsl:value-of select="@value" /><xsl:text> </xsl:text>
+				</xsl:for-each>
+			</xsl:when>
+
+			<!-- remove SgPragmaDeclaration
+			     !$xev statement-del ptn-001
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='statement-del']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+			<!-- remove SgPragmaDeclaration
+			     !$xev statement-rep ptn-001
+			-->
+			<xsl:when test="./SgPragma/DIRECTIVE[@name='statement-rep']/CLAUSE[@name='ptn-001']">
+				<xsl:comment>
+					SgPragmaDeclaration
+				</xsl:comment>
+			</xsl:when>
+
+
+                	<xsl:otherwise>
+                        	<xsl:copy>
+                                	<xsl:copy-of select="@*"></xsl:copy-of>
+                                	<xsl:apply-templates></xsl:apply-templates>
+                        	</xsl:copy>
+                	</xsl:otherwise>
+        	</xsl:choose>
+        </xsl:template>
+
+</xsl:stylesheet>
