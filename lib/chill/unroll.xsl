@@ -13,11 +13,11 @@
 		</xsl:comment>
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
-			<!-- 変数 初期値 -->
+			<!-- start value -->
 			<xsl:copy-of select="./*[1]" />
-			<!-- 最終値 -->
+			<!-- end value -->
 			<xsl:copy-of select="./*[2]" />
-			<!-- 刻み幅 -->
+			<!-- stride value -->
 			<xsl:element name="SgIntVal">
 				<xsl:attribute name="value">
 							<xsl:value-of select="$factor" />

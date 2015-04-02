@@ -7,7 +7,8 @@
 		<xsl:param name="loopName" />
 
 		<xsl:choose>
-			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
+			<xsl:when
+				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
 				<xsl:apply-templates select="." mode="unroll_target_loop">
 					<xsl:with-param name="factor" select="$factor" />
 					<xsl:with-param name="loopName" select="$loopName" />
@@ -33,11 +34,11 @@
 		<xsl:param name="loopName" />
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
-			<!-- 変数 初期値 -->
+			<!-- start value -->
 			<xsl:copy-of select="./*[1]" />
-			<!-- 最終値 -->
+			<!-- end value -->
 			<xsl:copy-of select="./*[2]" />
-			<!-- 刻み幅 -->
+			<!-- stride -->
 			<xsl:element name="SgIntVal">
 				<xsl:attribute name="value">
 							<xsl:value-of select="$factor" />
@@ -55,21 +56,21 @@
 
 	<!-- TODO: ExprStatement -> BasicBlock -->
 	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
-		<xsl:param name="factor" />		<!-- STEP数 -->
-		<xsl:param name="loopName" />		<!-- 置き換える変数 -->
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
 
-		<!-- 自分を出力する -->
+		<!-- self -->
 		<xsl:apply-templates select="." />
 
 
-		<!-- コピーする【SgExprStatement】行を設定 -->
+		<!-- target statement -->
 		<!-- <xsl:param name="copy_stm" select="../SgExprStatement" /> OK for libxml -->
 		<xsl:variable name="copy_stm" select="../SgExprStatement" />
 		<!-- <xsl:variable name="copy_stm" select="." /> -->
 
 		<!-- <xsl:apply-templates select="$copy_stm" /> -->
 
-		<!-- コピーする【SgExprStatement】行を設定 -->
+		<!-- target statement -->
 		<xsl:for-each select="(//*)[position() &lt; $factor]">
 			<xsl:apply-templates select="$copy_stm" mode="loop_unroll_body">
 				<xsl:with-param name="factor" select="$factor" />
@@ -117,14 +118,13 @@
 	</xsl:template>
 
 
-	<!-- SgPragmaDeclaration 削除 -->
+	<!-- remove SgPragmaDeclaration -->
 	<xsl:template match="SgPragmaDeclaration" mode="loop_unroll_Epilog">
 	</xsl:template>
-	<!-- PreprocessingInfo 削除 -->
 	<xsl:template match="PreprocessingInfo" mode="loop_unroll_Epilog">
 	</xsl:template>
 
-	<!-- その他は全て出力する -->
+	<!-- epilog -->
 	<xsl:template match="*" mode="loop_unroll_Epilog">
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
