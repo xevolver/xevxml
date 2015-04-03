@@ -16,7 +16,7 @@
 
 \section{Installation guide}
 \begin{enumerate}
- \item Fist of all, some environmental variables such as
+ \item Fist of all, some environment variables such as
        \texttt{LD\_LIBRARY\_PATH}, \texttt{JAVA\_HOME}, and \texttt{CXX}
        must be correctly set so as to use ROSE, Xerces, and Xalan. Use
        \texttt{ROSE\_HOME} and \texttt{PICOJSON\_HOME} for specifying
@@ -26,21 +26,42 @@
        \texttt{/usr/local/include}, \texttt{PICOJSON\_HOME} needs be set
        to \texttt{/usr/local}.
 
+
  \item Create a new directory at the top diretocry for building the package.
        
+       \vspace{5mm}
        \texttt{\% mkdir mybuild}
 
        \texttt{\% cd mybuild}
+       \vspace{5mm}
 
- \item Run the \texttt{cmake} command to generate Makefile and copy necessary files.
+ \item Run the \texttt{cmake} command at the created directory to
+       generate Makefile and copy necessary files.
 
+       \vspace{5mm}
        \texttt{\% cmake ../}
+       \vspace{5mm}
 
        The \texttt{cmake} command accepts various options. For example,
        the install diretory is changed by using the
        \texttt{-DCMAKE\_INSTALL\_PREFIX} option.
 
+       \vspace{5mm}
        \texttt{\% cmake -DCMAKE\_INSTALL\_PREFIX=/usr/local/xevxml ../}
+       \vspace{5mm}
+
+       If you need to use a specific version of a library or a header
+       file, you can also use environment variables
+       \texttt{CMAKE\_LIBRARY\_PATH} and \texttt{CMAKE\_INCLUDE\_PATH}.
+       For example, if you need to use a library or a header file in
+       \texttt{/home/user/local}, define those enviromnent variables as
+       follows.
+
+       \vspace{5mm}
+       \texttt{\% export CMAKE\_LIBRARY\_PATH=/home/user/local/lib:\$CMAKE\_LIBRARY\_PATH}
+
+       \texttt{\% export CMAKE\_INCLUDE\_PATH=/home/user/local/include:\$CMAKE\_INCLUDE\_PATH}
+       \vspace{5mm}
 
        See the \texttt{cmake} manual for more details\cite{cmake}.
 % \item Generate a configure script file using the autoconf command\\
@@ -60,11 +81,17 @@
 
  \item Run the GNU make command.
 
-   To compile the package,\\
+   To compile the package,
+
+       \vspace{5mm}
        \texttt{\% make}
-       
-   To install the package,\\
+       \vspace{5mm}
+
+   To install the package,
+
+       \vspace{5mm}
        \texttt{\% make install}
+       \vspace{5mm}
 
 %   To test the package,\\
 %       \texttt{\% make check}
