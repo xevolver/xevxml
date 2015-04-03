@@ -196,7 +196,7 @@ XevXmlVisitor::checkStatement(xe::DOMNode* node, SgNode* astNode)
 {
   int ino = 0;
   SgStatement* stmt = isSgStatement(astNode);
-  if(stmt && XmlGetAttributeValue(node,"nlabel",&ino)) {
+  if(stmt && XmlGetAttributeValue(node,"label",&ino)) {
     SgNode* astParent = astNode->get_parent();
     SgLabelSymbol*  s = new SgLabelSymbol();
     s->set_parent(stmt);

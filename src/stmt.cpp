@@ -123,7 +123,7 @@ void attribSgStatement(std::ostream& str,SgNode* node)
   if( stmt ) {
     SgLabelRefExp*  l = stmt->get_numeric_label();
     if(l)
-      str << " nlabel=\"" << l->get_numeric_label_value() << "\" ";
+      str << " label=\"" << l->get_numeric_label_value() << "\" ";
   }
   attribSgIOStatement(str,node);
 }
@@ -302,7 +302,7 @@ XevXmlVisitor::visitSgBreakStmt(xercesc::DOMNode* node, SgNode* astParent)
   SgBreakStmt* ret = 0;
   ret = sb::buildBreakStmt();
 
-  if(XmlGetAttributeValue(node,"label",&do_label)){
+  if(XmlGetAttributeValue(node,"slabel",&do_label)){
     ret->set_do_string_label(do_label);
   }
 
@@ -314,7 +314,7 @@ void XevSageVisitor::attribSgBreakStmt(SgNode* node)
   SgBreakStmt*  n = isSgBreakStmt(node);
   if(n) {
     if(n->get_do_string_label().size())
-      sstr() << " label=\"" << n->get_do_string_label() << "\"";
+      sstr() << " slabel=\"" << n->get_do_string_label() << "\"";
   }
   attribSgStatement(sstr(),node);
 }
@@ -492,7 +492,7 @@ XevXmlVisitor::visitSgContinueStmt(xercesc::DOMNode* node, SgNode* astParent)
   string do_label;
   SgContinueStmt* ret = sb::buildContinueStmt();
 
-  if(XmlGetAttributeValue(node,"label",&do_label)){
+  if(XmlGetAttributeValue(node,"slabel",&do_label)){
     ret->set_do_string_label(do_label);
   }
 
@@ -504,7 +504,7 @@ void XevSageVisitor::attribSgContinueStmt(SgNode* node)
   SgContinueStmt*  n = isSgContinueStmt(node);
   if(n) {
     if(n->get_do_string_label().size())
-      sstr() << " label=\"" << n->get_do_string_label() << "\"";
+      sstr() << " slabel=\"" << n->get_do_string_label() << "\"";
   }
   attribSgStatement(sstr(),node);
 }
@@ -826,7 +826,7 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"style",&style);
   XmlGetAttributeValue(node,"end",&enddo);
   XmlGetAttributeValue(node,"slabel",&slabel);
-  XmlGetAttributeValue(node,"enlabel",&nlabel);
+  XmlGetAttributeValue(node,"elabel",&nlabel);
 
   Sg_File_Info* info = DEFAULT_FILE_INFO;
 
@@ -894,7 +894,7 @@ void XevSageVisitor::attribSgFortranDo(SgNode* node)
     sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
     l = n->get_end_numeric_label();
     if(l){
-      sstr() << " enlabel=\"" << l->get_numeric_label_value() << "\" ";
+      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
     }
     else {
       sstr() << " slabel=\"" << n->get_string_label() << "\" ";
@@ -976,7 +976,7 @@ XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
 
   if(XmlGetAttributeValue(node,"slabel",&s_name))
     label = sb::buildLabelStatement( s_name.c_str(), body, scope );
-  if(XmlGetAttributeValue(node,"label",&n_name)){
+  if(XmlGetAttributeValue(node,"nlabel",&n_name)){
     label = sb::buildLabelStatement( n_name.c_str(), body, scope );
     s = new SgLabelSymbol();
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
@@ -1020,7 +1020,7 @@ void XevSageVisitor::attribSgGotoStatement(SgNode* node)
       sstr() << " slabel=" << n->get_label()->get_label();
 
     if( n->get_label_expression() )                 // add (0826)
-      sstr() << " label=\"" << n->get_label_expression()->get_numeric_label_value() << "\" ";
+      sstr() << " nlabel=\"" << n->get_label_expression()->get_numeric_label_value() << "\" ";
 
   }
 }
@@ -1362,7 +1362,7 @@ XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
   int                       ino   = 0;
 
   XmlGetAttributeValue(node,"slabel",&slabel);
-  XmlGetAttributeValue(node,"label",&nlabel);
+  XmlGetAttributeValue(node,"nlabel",&nlabel);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -1846,7 +1846,7 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"end",&enddo);
   XmlGetAttributeValue(node,"slabel",&slabel);
-  XmlGetAttributeValue(node,"enlabel",&nlabel);
+  XmlGetAttributeValue(node,"elabel",&nlabel);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -1892,7 +1892,7 @@ void XevSageVisitor::attribSgWhileStmt(SgNode* node)
     sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
     l = n->get_end_numeric_label();
     if(l){
-      sstr() << " enlabel=\"" << l->get_numeric_label_value() << "\" ";
+      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
     }
     else {
       sstr() << " slabel=\"" << n->get_string_label() << "\" ";
@@ -1917,7 +1917,7 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 
   //xe::DOMNamedNodeMap*  amap = node->getAttributes();
   //xe::DOMNode*          nameatt = 0;
-  string                nlabel;
+  //string                nlabel;
 
   int f_fmt = 0;
   int f_ios = 0;

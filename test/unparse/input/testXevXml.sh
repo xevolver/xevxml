@@ -1,9 +1,9 @@
 #!/bin/sh -
 
-FC=identityTranslator
+FC=/usr/local/rose-devel/bin/identityTranslator
 SRC2XML=../../../mybuild/src/src2xml
 XML2SRC=../../../mybuild/src/xml2src
-ROSECOMP=identityTranslator
+ROSECOMP=/usr/local/rose-devel/bin/identityTranslator
 
 export XEV_ENCODE="EUC-JP" # for testing h024.f90
 
