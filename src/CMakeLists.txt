@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -g")
 set(CMAKE_ROSE_DIR $ENV{ROSE_HOME})
 set(CMAKE_JSON_DIR $ENV{PICOJSON_HOME})
 set(CMAKE_XEVXML_PREFIX "${CMAKE_INSTALL_PREFIX}")

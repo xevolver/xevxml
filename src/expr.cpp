@@ -472,7 +472,7 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
   }
   else
     ret = sb::buildFunctionRefExp( functionSymbol );
-
+#if 0 // this should be done by visitSgProcedureHeaderStatement
   if(XmlGetAttributeValue(node,"kind",&kind )){
     // set subprogram_kind (2014.04.14)
     SgFunctionRefExp* functionRefExp = ret;
@@ -490,6 +490,7 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
       //XEV_ABORT();
     }
   }
+#endif
   return ret;
 }
 /** XML attribute writer of SgFunctionRefExp */
@@ -497,11 +498,13 @@ void XevSageVisitor::attribSgFunctionRefExp(SgNode* node){
   SgFunctionRefExp* n = isSgFunctionRefExp(node);
   if(n){
     sstr() << " name=" << n->get_symbol()->get_name() << " ";
+#if 0 // this should be done by visitSgProcedureHeaderStatement
     SgProcedureHeaderStatement* h =
       isSgProcedureHeaderStatement( n->get_symbol()->get_declaration() );
     if(h){
       sstr() << " kind=\"" << h->get_subprogram_kind () << "\" ";
     }
+#endif
   }
   attribSgExpression(sstr(),node);
 }

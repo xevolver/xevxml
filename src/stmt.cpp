@@ -105,9 +105,14 @@ static void attribSgIOStatement(std::ostream& str,SgNode* node)
   SgIOStatement*      n = isSgIOStatement(node);
 
   if(n) {
-    str << " unit=\"" << (n->get_unit()!=0) << "\" ";
-    str << " iostat=\"" << (n->get_iostat()!=0) << "\" ";
-    str << " err=\"" << (n->get_err()!=0) << "\" ";
+    // print the attribute only if it should be 1.
+    // (assuming the default value is 0)
+    if(n->get_unit())
+      str << " unit=\"1\" ";
+    if(n->get_iostat())
+      str << " iostat=\"1\" ";
+    if(n->get_err())
+      str << " err=\"1\" ";
   }
 }
 
@@ -383,7 +388,8 @@ void XevSageVisitor::attribSgClassDefinition(SgNode* node)
 {
   SgClassDefinition*      n = isSgClassDefinition(node);
 
-  if(n) {
+  // the following attributes will be required only for Fortran
+  if(n && si::is_Fortran_language()==true) {
     /*
     if( n->get_declaration()->get_isUnNamed() )
       sstr() << " tag_name=\"\" ";
@@ -408,7 +414,7 @@ XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpression*         err = 0;
   SgExpression*         ist = 0;
   SgExpression*         stt = 0;
-  bool f_ist, f_unt, f_err,f_stt;
+  bool f_ist=false, f_unt=false, f_err=false,f_stt=false;
 
   XmlGetAttributeValue(node,"iostat",&f_ist);
   XmlGetAttributeValue(node,"unit",  &f_unt);
@@ -684,6 +690,9 @@ XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
   SgFlushStatement* ret = new SgFlushStatement(DEFAULT_FILE_INFO);
   SgExpression*     unt = 0;
 
+  // The attributes by attribSgIOStatement() are simply ignored
+  // because unit is always required and the others are not used.
+
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( unt==0 )
@@ -809,8 +818,9 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
 
   int                       style = 0;
   int                       enddo = 0;
-  int                       ino   = 0;
-  string                    slabel,nlabel;
+  //int                       ino   = 0;
+  string                    slabel;
+  int                       nlabel= 0;
   stringstream              val;
 
   XmlGetAttributeValue(node,"style",&style);
@@ -858,17 +868,17 @@ XevXmlVisitor::visitSgFortranDo(xercesc::DOMNode* node, SgNode* astParent)
   // they are special labels of SgFortranDo
   if( slabel.size() )
     ret->set_string_label( slabel );
-  else if( nlabel.size() ) {
+  if( nlabel != 0 ) {
     SgLabelSymbol*  s = new SgLabelSymbol();
     //s->set_label_type( SgLabelSymbol::label_type_enum.e_non_numeric_label_type );
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
     s->get_fortran_statement()->set_parent(s);
     s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
-    val.str("");
-    val.clear(iostream::goodbit);
-    val << nlabel;
-    val >> ino;
-    s->set_numeric_label_value( ino );
+    //val.str("");
+    //val.clear(iostream::goodbit);
+    //val << nlabel;
+    //val >> ino;
+    s->set_numeric_label_value( nlabel );
     ret->set_end_numeric_label( new SgLabelRefExp( s ) );
   }
 
@@ -961,25 +971,26 @@ XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
   SgLabelSymbol*        s     = 0;
   SgLabelRefExp*        l     = 0;
 
-  string                s_name,n_name;
-  int                   ino = 0;
+  string                s_name;
+  int                   n_name = 0;
+  //int                   ino = 0;
 
   if(XmlGetAttributeValue(node,"slabel",&s_name))
     label = sb::buildLabelStatement( s_name.c_str(), body, scope );
-  if(XmlGetAttributeValue(node,"nlabel",&n_name)){
+  if(XmlGetAttributeValue(node,"label",&n_name)){
     label = sb::buildLabelStatement( n_name.c_str(), body, scope );
     s = new SgLabelSymbol();
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
     s->set_label_type(SgLabelSymbol::e_start_label_type);
     // s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
-    ino = atoi(n_name.c_str());
-    s->set_numeric_label_value( ino );
+    //ino = atoi(n_name.c_str());
+    s->set_numeric_label_value( n_name );
     l = new SgLabelRefExp( s );
     s->set_parent(l);
     label->set_numeric_label( l );
   }
 
-  if( n_name.size() ){
+  if( n_name != 0 ){
     /**/
     ret = sb::buildGotoStatement( label );
     ret->set_label_expression(l);
@@ -1010,7 +1021,7 @@ void XevSageVisitor::attribSgGotoStatement(SgNode* node)
       sstr() << " slabel=" << n->get_label()->get_label();
 
     if( n->get_label_expression() )                 // add (0826)
-      sstr() << " nlabel=\"" << n->get_label_expression()->get_numeric_label_value() << "\" ";
+      sstr() << " label=\"" << n->get_label_expression()->get_numeric_label_value() << "\" ";
 
   }
 }
@@ -1352,7 +1363,7 @@ XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
   int                       ino   = 0;
 
   XmlGetAttributeValue(node,"slabel",&slabel);
-  XmlGetAttributeValue(node,"nlabel",&nlabel);
+  XmlGetAttributeValue(node,"label",&nlabel);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -1394,7 +1405,7 @@ void XevSageVisitor::attribSgLabelStatement(SgNode* node)
 
   if(n) {
     if( n->get_numeric_label() )
-      sstr() << " nlabel=" << n->get_numeric_label()->get_name()  << " ";
+      sstr() << " label=" << n->get_numeric_label()->get_name()  << " ";
     sstr() << " slabel=" << n->get_label() ;
   }
 }
@@ -1577,6 +1588,9 @@ XevXmlVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
   SgExprListExp*        exp = 0;
   SgExpression*         fmt = 0;
 
+  // The attributes by attribSgIOStatement() are simply ignored
+  // because they are not used.
+
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==0 )
@@ -1700,6 +1714,9 @@ XevXmlVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgRewindStatement*      ret =  new SgRewindStatement(DEFAULT_FILE_INFO);
   SgExpression*           unt = 0;
+
+  // The attributes by attribSgIOStatement() are simply ignored
+  // because unit is always required and the others are not used.
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -1830,7 +1847,7 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"end",&enddo);
   XmlGetAttributeValue(node,"slabel",&slabel);
-  XmlGetAttributeValue(node,"nlabel",&nlabel);
+  XmlGetAttributeValue(node,"enlabel",&nlabel);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -1876,7 +1893,7 @@ void XevSageVisitor::attribSgWhileStmt(SgNode* node)
     sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
     l = n->get_end_numeric_label();
     if(l){
-      sstr() << " nlabel=\"" << l->get_numeric_label_value() << "\" ";
+      sstr() << " enlabel=\"" << l->get_numeric_label_value() << "\" ";
     }
     else {
       sstr() << " slabel=\"" << n->get_string_label() << "\" ";
@@ -1909,6 +1926,7 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   int f_err = 0;
   int f_nml = 0;
 
+  // ignore unit attribute written by attribSgIOStatement
   XmlGetAttributeValue(node,"fmt",   &f_fmt);
   XmlGetAttributeValue(node,"iostat",&f_ios);
   XmlGetAttributeValue(node,"rec",   &f_rec);

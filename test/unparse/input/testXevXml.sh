@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/sh -
 
 FC=identityTranslator
-SRC2XML=../../../src/src2xml
-XML2SRC=../../../src/xml2src
+SRC2XML=../../../mybuild/src/src2xml
+XML2SRC=../../../mybuild/src/xml2src
 ROSECOMP=identityTranslator
 
 export XEV_ENCODE="EUC-JP" # for testing h024.f90
@@ -21,19 +21,19 @@ case ${SRC} in
 	XML=`echo $SRC |sed 's/.f90$/.xml/'`
 	DIF=`echo $SRC |sed 's/.f90$/.dif/'`
 	LOG=`echo $SRC |sed 's/.f90$/.log/'`
-	echo -ne "\"\t\t\t r" 1>&2
+	echo -n "\"\t\t\t r" 1>&2
 	;;
     *.c)
 	XML=`echo $SRC |sed 's/.c$/.xml/'`
 	DIF=`echo $SRC |sed 's/.c$/.dif/'`
 	LOG=`echo $SRC |sed 's/.c$/.log/'`
-	echo -ne "\"\t\t\t   r" 1>&2
+	echo -n "\"\t\t\t   r" 1>&2
 	;;
     *.F)
 	XML=`echo $SRC |sed 's/.F$/.xml/'`
 	DIF=`echo $SRC |sed 's/.F$/.dif/'`
 	LOG=`echo $SRC |sed 's/.F$/.log/'`
-	echo -ne "\"\t\t\t   r" 1>&2
+	echo -n "\"\t\t\t   r" 1>&2
 	;;
 esac
 OUT=../output

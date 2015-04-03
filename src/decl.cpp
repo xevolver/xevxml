@@ -451,8 +451,12 @@ XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
   string                      name;
   int                         typ=0;
 
-  XmlGetAttributeValue(node,"name",&name);
-  XmlGetAttributeValue(node,"type",&typ);
+  if(XmlGetAttributeValue(node,"name",&name)==false){
+    // name attribute is mandatory
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  //XmlGetAttributeValue(node,"type",&typ); // not used
 
   ret = new SgDerivedTypeStatement(DEFAULT_FILE_INFO,
                                    name,SgClassDeclaration::e_struct,NULL,NULL );
@@ -924,7 +928,7 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
   SgModuleStatement*    non=0;
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"type",&typ);
-
+  
   SgModuleStatement* ret = buildModuleStatementAndDefinition(
                 SgName( name.c_str() ), sb::topScopeStack());
   Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
@@ -1488,11 +1492,11 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   //SgClassDeclaration*                       cls  = 0;
   SgDeclarationStatement*                   cls  = 0;
   Rose_STL_Container<SgInitializedName*>    varList;
-  unsigned long     storage=0U;
+  //unsigned long     storage=0U;
   string            bitstr;
   unsigned long     bit = 0;
 
-  XmlGetAttributeValue(node,"modifier",&storage);
+  //XmlGetAttributeValue(node,"modifier",&storage);
   XmlGetAttributeValue(node,"bitfield",&bitstr);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)

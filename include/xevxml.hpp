@@ -140,6 +140,7 @@ namespace XevXml {
   public:
     void setXmlOption(XevXmlOption* o)  {opt_ = o;}
     XevXmlOption* getXmlOption(){return opt_;}
+    std::ostream& getOutputStream() {return sstr();}
 
     XevSageVisitor (XevXmlOption* o=NULL):opt_(o),ostr_(NULL),depth_(0){}
     ~XevSageVisitor() {}
