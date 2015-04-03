@@ -1,0 +1,557 @@
+\chapter{XML elements and their attributes}\label{sec:attrib}
+
+\section{Class hierarchy}
+\begin{verbatim}
+SgNode -+- SgStatement   -+- SgDeclarationStatement
+        |
+        +- SgExpression  -+- SgBinaryOp
+        |                 |
+        |                 +- SgUnaryOp
+        +- SgType         |
+        |                 +- SgValueExp
+        +- SgSupport 
+\end{verbatim}
+\section{Statements}
+This section describes XML elements of \texttt{SgStatement} subclasses
+currently supported by XevXML.  
+
+\subsection{XML elements}
+All XML elements of \texttt{SgStatement} subclasses are described below.
+If an XML element of a \texttt{SgStatement} subclass has its own XML
+attributes, the attributes are also listed in the description.
+\begin{longtable}[l]{l|p{10cm}}
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endfirsthead
+ \multicolumn{2}{l} {(continued)}\\
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endhead
+ \hline
+ \multicolumn{2}{r} {(continue to next page)}\\
+ \endfoot
+ \hline
+ \endlastfoot
+ \multicolumn{2}{l}{Declarations}\\
+ \hline
+ \texttt{SgAsmStmt}& asm statement (not tested)\\
+ & ~\texttt{code} (string): assembly code \\
+ & ~\texttt{volatile} (int): 0 (not volatile) or 1 (volatile)\\
+\texttt{SgAttributeSpecificationStatement}& attribute specification (Fortran only)\\
+ & ~\texttt{kind} (int): See Section~\ref{sec:stmtatt}.\\
+ %& ~~~\texttt{SgAttributeSpecificationStatement::attribute\_spec\_enum}\\
+ \texttt{SgClassDeclaration}& declaration of a class or a structure\\
+ & ~\texttt{name} (string): class name\\
+ & ~\texttt{type} (int): 0 (class), 1 (struct), or 2 (union)\\
+ \texttt{SgCommonBlock}& COMMON block (Fortran only)\\
+ \texttt{SgContainsStatement}& CONTAINS statement (Fortran only)\\
+ \texttt{SgDerivedTypeStatement}& derived type declaration (Fortran only)\\
+ & ~\texttt{name} (string): derived type name\\
+ & ~\texttt{type} (int): 0 (class), 1 (struct), or 2 (union)\\
+ \texttt{SgEntryStatement}& ENTRY statement (Fortran only)\\
+ & ~\texttt{name} (string): entry name\\
+ & ~\texttt{result} (string): result variable name\\
+ \texttt{SgEnumDeclaration}& enum declaration\\
+ & ~\texttt{name} (string): enum name\\
+ \texttt{SgEquivalenceStatement}& EQUIVALENCE statement (Fortran only)\\
+ \texttt{SgFormatStatement}& FORMAT statement (Fortran only)\\
+ \texttt{SgFortranIncludeLine}& INCLUDE (Fortran only)\\
+ & ~\texttt{filename} (string): filename name\\
+ \texttt{SgFunctionDeclaration}& function declaration \\
+ & ~\texttt{name} (string): function name\\
+ & ~\texttt{end\_name} (int): \texttt{set\_named\_in\_end\_statement()}\\
+ \texttt{SgFunctionParameterList}& function parameter list\\
+ \texttt{SgImplicitStatement}& IMPLICIT statement (Fortran only)\\
+ \texttt{SgInterfaceStatement}& INTERFACE statement (Fortran only)\\
+ & ~\texttt{name} (string): interface name\\
+ & ~\texttt{type} (int): \texttt{SgInterfaceStatement::generic\_spec\_enum}\\
+ \texttt{SgModuleStatement}& MODULE statement (Fortran only)\\
+ & ~\texttt{name} (string): module name\\
+ & ~\texttt{type} (int): 0 (class), 1 (struct), or 2 (union)\\
+ \texttt{SgNamelistStatement}& NAMELIST statement (Fortran only)\\
+ & ~\texttt{group} (string): group name\\
+ \texttt{SgPragmaDeclaration}& pragma declaration\\
+ \texttt{SgProcedureHeaderStatement}& procedure declaration (Fortran only)\\
+ & ~\texttt{name} (string): procedure name\\
+ & ~\texttt{kind} (int): subprogram kind\\
+ & ~\texttt{result} (string): result variable name\\
+ & ~\texttt{pure} (int): 0 (not pure) or 1 (pure)\\
+ & ~\texttt{elemental} (int): 0 (not elemental) or 1 (elemental)\\
+ & ~\texttt{recursive} (int): 0 (not recursive) or 1 (recursive)\\
+ \texttt{SgProgramHeaderStatement}& program header (Fortran only)\\
+ & ~\texttt{name} (string): program name\\
+ \texttt{SgTypedefDeclaration}& typedef declaration\\
+ & ~\texttt{name} (string): typedef name\\
+ \texttt{SgUseStatement}& USE statement (Fortran only)\\
+ & ~\texttt{name} (string): module name\\
+ & ~\texttt{only} (int): 0 (no only option) or 1 (only option)\\
+ \texttt{SgVariableDeclaration}& variable declaration \\
+ & ~\texttt{name} (string): variable name\\
+ & ~\texttt{bitfield} (int): bit field\\
+ & ~\texttt{modifier} (int): modifier\\
+ \hline
+ \multicolumn{2}{l}{Other statements}\\
+ \hline
+ \texttt{SgAllocateStatement}& ALLOCATE statement (Fortran only)\\
+ \texttt{SgArithmeticIfStatement}& arithmetic IF statement (Fortran only)\\
+ \texttt{SgBackspaceStatement}& BACKSPACE statement (Fortran only)\\
+ & \texttt{err} (int): \texttt{set\_err()}\\
+ & \texttt{iostat} (int): \texttt{set\_iostat()}\\
+ & \texttt{unit} (int): \texttt{set\_unit()}\\
+ \texttt{SgBasicBlock}& basic block\\
+ \texttt{SgBreakStmt}& break statement\\
+ & \texttt{label} (string): Fortran \texttt{DO} string label\\
+ \texttt{SgCaseOptionStmt}& case option of switch statement \\
+ \texttt{SgClassDefinition}& class definition\\
+ & \texttt{sequence} (int): 1 for \texttt{SEQUENCE} ketword\\
+ & \texttt{private} (int):  1 for \texttt{PRIVATE} keyword\\
+ & \texttt{abstract} (int): 1 for \texttt{ABSTRACT} keyword\\
+ \texttt{SgCloseStatement}& CLOSE statement (Fortran only)\\
+ & \texttt{err} (int): \texttt{set\_err()}\\
+ & \texttt{iostat} (int): \texttt{set\_iostat()}\\
+ & \texttt{status} (int): \texttt{set\_status()}\\
+ & \texttt{unit} (int): \texttt{set\_unit()}\\
+ \texttt{SgComputedGotoStatement}& computed GO TO statement (Fortran only)\\
+ \texttt{SgContinueStmt}& continue statement\\
+ & \texttt{label} (string): Fortran \texttt{DO} string label\\
+ \texttt{SgDeallocateStatement}& DEALLOCATE statement (Fortran only)\\
+ \texttt{SgDefaultOptionStmt}& default option of switch statement\\
+ \texttt{SgDoWhileStmt}& do-while statement\\
+ \texttt{SgElseWhereStatement}& ELSEWHERE statement (Fortran only)\\
+ \texttt{SgEndfileStatement}& ENDFILE statement (Fortran only)\\
+ & \texttt{err} (int): \texttt{set\_err()}\\
+ & \texttt{iostat} (int): \texttt{set\_iostat()}\\
+ & \texttt{unit} (int): \texttt{set\_unit()}\\
+ \texttt{SgExprStatement}& statement of an expression\\
+ \texttt{SgFlushStatement}& FLUSH statement (Fortran only)\\
+ \texttt{SgForAllStatement}& FORALL statement (Fortran95)\\
+ \texttt{SgForInitStatement}& initial condition of for statement\\
+ \texttt{SgForStatement}& for statement\\
+ \texttt{SgFortranDo}& DO statement (Fortran only)\\
+ & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
+ & \texttt{slabel} (string): \texttt{set\_string\_label()}\\
+ & \texttt{style} (int): \texttt{set\_old\_style()}\\
+ & \texttt{enlabel} (int): \texttt{set\_end\_numeric\_label()}\\
+ \texttt{SgFunctionDefinition}& function definition\\
+ \texttt{SgGlobal}& global scope\\
+ \texttt{SgGotoStatement}& goto statement\\
+ & \texttt{slabel} (string): string label\\
+ & \texttt{label} (string): numeric label\\
+ \texttt{SgIfStmt}& if statement\\
+ & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
+ & \texttt{then} (int):\texttt{set\_use\_then\_keyword()}\\
+ \texttt{SgInquireStatement}& INQUIRE statemtent (Fortran only)\\
+ & *** TODO *** \\
+ \texttt{SgLabelStatement}& label statement\\
+ & \texttt{slabel} (string): string label\\
+ & \texttt{nlabel} (string): numeric label\\
+ \texttt{SgNullStatement}& empty statement (for(...){;})\\
+ \texttt{SgNullifyStatement}& NULLIFY statement (Fortran only)\\
+ \texttt{SgOpenStatement}& OPEN statement (Fortran only)\\
+ & *** TODO *** \\
+ \texttt{SgPrintStatement}& PRINT statement (Fortran only)\\
+ & *** TODO *** \\
+ \texttt{SgReadStatement}& READ statement (Fortran only)\\
+ & *** TODO *** \\
+ \texttt{SgReturnStmt}& return statement\\
+ \texttt{SgRewindStatement}& REWIND statement (Fortran only)\\
+ & *** TODO *** \\
+ \texttt{SgStopOrPauseStatement}& STOP and PAUSE statements (Fortran only)\\
+ & ~\texttt{type} (int): 0 (unknown), 1 (stop), or 2 (pause)\\
+ \texttt{SgSwitchStatement}& switch statement\\
+ \texttt{SgWhereStatement}& WHERE statement (Fortran only)\\
+ \texttt{SgWhileStmt}& while statement\\
+ & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
+ & \texttt{slabel} (string): \texttt{set\_string\_label()}\\
+ & \texttt{nlabel} (string): \texttt{set\_end\_numeric\_label()}\\
+ \texttt{SgWriteStatement}& WRITE statement (Fortran only)\\
+ & \texttt{err} (int): \texttt{set\_err()}\\
+ & \texttt{fmt} (int): \texttt{set\_format()}\\
+ & \texttt{iostat} (int): \texttt{set\_iostat()}\\
+ & \texttt{nml} (int): \texttt{set\_namelist()}\\
+ & \texttt{rec} (int): \texttt{set\_rec()}\\
+ & \texttt{unit} (int): \texttt{set\_unit()}\\
+ \end{longtable}
+
+\subsection{XML attributes}\label{sec:stmtatt}
+All XML elements of \texttt{SgStatament} subclasses have \texttt{nlabel}
+attribute to keep the numeric label number because Fortran allows every
+statement to have a numetic label. 
+
+In addition, XML elements of \texttt{SgDeclarationStatament} subclasses
+have the following attributes for modifiers.
+\begin{itemize}
+ \item \texttt{declaration\_modifier} 
+
+       In an XML AST, only one of the following flags can be specified
+       by a decimal number to indicate the kind of a declaration.
+       \begin{description}
+	\item[0x01]: unknown 
+	\item[0x02]: default
+	\item[0x04]: friend
+	\item[0x08]: typedef
+	\item[0x10]: export
+       \end{description}
+ \item \texttt{type\_modifier} 
+
+       Multiple flags might be combined by using logical OR. The value
+       of this XML attribute (combination of the following flags) is
+       written as a decimal number to indicate the type information.
+       \begin{description}
+	\item[0x00001]: unknown value (error)
+	\item[0x00002]: unknown value (default)
+	\item[0x00004]: restrict qualifier (for C/C++)
+	\item[0x00008]: allocatable attribute specifier (for Fortran 90)
+	\item[0x00010]: asynchronous attribute specifier (for Fortran 2003)
+	\item[0x00020]: bind attribute specifier (for Fortran 2003)
+	\item[0x00040]: data attribute specifier (for Fortran 77)
+	\item[0x00080]: dimension attribute specifier (for Fortran 77)
+	\item[0x00100]: intent(in) attribute specifier (for Fortran 90)
+	\item[0x00200]: intent(out) attribute specifier (for Fortran 90)
+	\item[0x00400]: intent(inout) attribute specifier (for Fortran 90)
+	\item[0x00800]: intrinsic attribute specifier (for Fortran 90)
+	\item[0x01000]: optional attribute specifier (for Fortran 90)
+	\item[0x02000]: optional attribute specifier (for Fortran 90)
+	\item[0x04000]: optional attribute specifier (for Fortran 90)
+	\item[0x08000]: save attribute specifier (for Fortran 77)
+	\item[0x10000]: target attribute specifier (for Fortran 90)
+	\item[0x20000]: value attribute specifier (for Fortran 2003)
+       \end{description}
+ \item \texttt{cv\_modifier}
+
+        Must be either const, volatile, or neither.
+       \begin{description}
+	\item[0x1]: unknown value (error)
+	\item[0x2]: default value
+	\item[0x4]: constant qualifier
+	\item[0x8]: volatile qualifier
+       \end{description}
+ \item \texttt{access\_modifier}
+
+       Only one of the following flags can be specified by a decimal
+       number to indicate the accessibility.
+       \begin{description}
+	\item[0x01]: error value
+	\item[0x02]: private access (local to class members)
+	\item[0x04]: protected access (local to class members and membrs of derived classes)
+	\item[0x08]: public access (access within enclosing namespace)
+	\item[0x10]: default value (public access)
+	\item[0x20]: fortran default value
+       \end{description}
+ \item \texttt{storage\_modifier}
+
+       Only one of the following flags can be specified by a decimal
+       number to location or properties of declarations.
+       \begin{description}
+	\item[0x01]: error value
+	\item[0x02]: default value
+	\item[0x04]: extern storage modifier 
+	\item[0x08]: static storage modifier 
+	\item[0x10]: auto storage value 
+	\item[0x20]: (not used)
+	\item[0x40]: register storage modifier
+	\item[0x80]: mutable storage modifier
+       \end{description}
+\end{itemize}
+
+The \texttt{$<$SgAttributeSpecificationStatement$>$} element requires
+the \texttt{kind} attribute below.
+ %& ~~~\texttt{SgAttributeSpecificationStatement::attribute\_spec\_enum}\\
+\begin{itemize}
+ \item \texttt{kind}
+
+       One of the following values can be specified (Fortran).
+       \begin{description}
+	\item[0]: unknown 
+	\item[1]: private
+	\item[2]: public
+	\item[3]: allocatable
+	\item[4]: asynchronous
+	\item[5]: bind
+	\item[6]: data
+	\item[7]: dimension
+	\item[8]: external
+	\item[9]: intent
+	\item[10]: intrinsic
+	\item[11]: optional
+	\item[12]: parameter
+	\item[13]: pointer
+	\item[14]: protected
+	\item[15]: save
+	\item[16]: target
+	\item[17]: value
+	\item[18]: volatile
+       \end{description}
+\end{itemize}
+\section{Expressions}
+
+%In the Sage III class library, expressions are represented with
+%\texttt{SgExpression} subclasses. XevXML supports \texttt{SgExpression}
+%subclasses in the table below.
+
+This section describes XML elements of \texttt{SgExpression} subclasses
+currently supported by XevXML.  XML elements of most
+\texttt{SgExpression} subclasses have \texttt{paren} and \texttt{lvalue}
+attributes whose values are integers.  Their values are given to
+\texttt{SgExpression::set\_need\_paren()} and
+\texttt{SgExpression::set\_lvalue()}, respectively.  If an XML element
+of a \texttt{SgExpression} subclass has its own XML attributes, the
+attributes are also listed in the description.
+
+\begin{longtable}[l]{l|p{10cm}}
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endfirsthead
+ \multicolumn{2}{l} {(continued)}\\
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endhead
+ \hline
+ \multicolumn{2}{r} {(continue to next page)}\\
+ \endfoot
+ \hline
+ \endlastfoot
+ \multicolumn{2}{l}{Binary operators}\\
+ \hline
+ \texttt{SgAddOp} & + operator (addition)\\
+ \texttt{SgAndAssignOp} & \&= operator (bitwise AND assignment)\\
+ \texttt{SgAndOp} & \&\& operator (logical AND)\\
+ \texttt{SgArrowExp} & -$>$ operator (sturcture derefence (pointer))\\
+ \texttt{SgAssignOp} & = operator (assignment)\\
+ \texttt{SgBitAndOp} & \& operator (bitwise AND)\\
+ \texttt{SgBitOrOp} & \texttt{|} operator (bitwise OR)\\
+ \texttt{SgBitXorOp} & \^{} operator (bitwise XOR)\\
+ \texttt{SgCommaOpExp} & , operator (comma)\\
+ \texttt{SgConcatenationOp} & Fortran // operator (string concatenation)\\
+ \texttt{SgDivAssignOp} & /= operator (division assignment)\\
+ \texttt{SgDivideOp} & / operator (division)\\
+ \texttt{SgEqualityOp} & == operator (equal to)\\
+ \texttt{SgExponentiationOp} & Fortran ** operator (exponential) \\
+ \texttt{SgGreaterOrEqualOp} & $>$= operator (greater than or equal to)\\
+ \texttt{SgGreaterThanOp} & $>$ operator (greater than) \\
+ \texttt{SgIorAssignOp} &  \texttt{|}= operator (bitwise OR assignment) \\
+ \texttt{SgLessOrEqualOp} & $<$= operator (less than or equal to)\\
+ \texttt{SgLessThanOp} & $<$ operator (less than)\\
+ \texttt{SgLshiftAssignOp} & $<<$= operator (bitwise left shift assignment) \\
+ \texttt{SgLshiftOp} & $<<$ operator (bitwise left shift) \\
+ \texttt{SgMinusAssignOp} & -= operator (subtraction assignment) \\
+ \texttt{SgModAssignOp} & \%= operator (modulo assignment)\\
+ \texttt{SgModOp} & \% operator (modulo) \\
+ \texttt{SgMultAssignOp} & *= operator (multiplication assignment)\\
+ \texttt{SgMultiplyOp} & * operator (multiplication)\\
+ \texttt{SgNotEqualOp} & != operator (not equal to)\\
+ \texttt{SgPlusAssignOp} & += operator (addition assignment)\\
+ \texttt{SgPointerAssignOp} & Fortran =$>$ operator (pointer assignment) \\
+ \texttt{SgPntrArrRefExp} & array subscript (\texttt{a[b]})\\
+ \texttt{SgRshiftAssignOp} & $>>$= operator (bitwise right shift assignment)\\
+ \texttt{SgRshiftOp} & $>>$ operator (bitwise right shift)\\
+ \texttt{SgSubtractOp} & - operator (subtraction)\\
+ \texttt{SgXorAssignOp} & \^{}= operator (bitwise XOR assignment)\\
+ \hline
+ \multicolumn{2}{l}{Unary operators}\\
+ \hline
+ \texttt{SgAddressOfOp} & \& operator (address)\\
+ \texttt{SgBitComplementOp} & \textasciitilde operator (bitwise NOT)\\
+ \texttt{SgMinusMinusOp} & \texttt{--} operator (decrement)\\
+ & ~\texttt{mode} (int): 0 (prefix) or 1 (postfix)\\
+ \texttt{SgMinusOp} & Unary - operator (minus)\\
+ & ~\texttt{mode} (int): 0 (prefix) or 1 (postfix)\\
+ \texttt{SgNotOp} & ! operator (logical NOT)\\
+ \texttt{SgOrOp} & \texttt{||} operator (logical OR)\\
+ \texttt{SgPlusPlusOp} & ++ operator (increment)\\
+ & ~\texttt{mode} (int): 0 (prefix) or 1 (postfix)\\
+ \texttt{SgUnaryAddOp} & Unary + operator (plus)\\    
+ \hline
+ \multicolumn{2}{l}{Values}\\
+ \hline
+ \texttt{SgBoolValExp}& boolean value \\
+ & ~\texttt{value} (int) \\
+ \texttt{SgCharVal}& character \\
+ & ~\texttt{value} (char) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgComplexVal}& complex number value \\
+ \texttt{SgDoubleVal}& double-precision float value \\
+ & ~\texttt{value} (double) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgEnumVal}& enum value \\
+ & ~\texttt{value} (int) \\
+ \texttt{SgFloatVal}& float value \\
+ & ~\texttt{value} (float) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgIntVal}& integer value\\
+ & ~\texttt{value} (int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgLongDoubleVal}& long double value\\
+ & ~\texttt{value} (long double) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgLongIntVal}& long int value \\
+ & ~\texttt{value} (long int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgLongLongIntVal}& long long int value\\
+ & ~\texttt{value} (long long int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgShortVal}& short int value\\
+ & ~\texttt{value} (short int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgStringVal}& a string literal\\
+ & ~\texttt{value} (string) \\
+ & ~\texttt{single} (int): 0 (double quote) or 1 (single quote)\\
+ \texttt{SgUnsignedCharVal}& unsigned character\\
+ & ~\texttt{value} (unsigned char) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgUnsignedIntVal}& unsigned int value\\
+ & ~\texttt{value} (unsigned int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgUnsignedLongLongIntVal}& unsigned long long int value\\
+ & ~\texttt{value} (unsigned long long int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgUnsignedLongVal}& unsigned long int value\\
+ & ~\texttt{value} (unsigned long int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgUnsignedShortVal}& unsigned short int value\\
+ & ~\texttt{value} (unsigned short int) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \texttt{SgWcharVal}& whar\_t value\\
+ & ~\texttt{value} (unsigned short) \\
+ & ~\texttt{string} (string): the value as a string \\
+ \hline
+ \multicolumn{2}{l}{Other expressions}\\
+ \hline
+ \texttt{SgAggregateInitializer} & initialization with aggregated data (struct complex x=\{1,2\}) \\
+ \texttt{SgAssignInitializer} & initialization (i=0)\\
+ \texttt{SgAsteriskShapeExp} & Fortran * expression (write(*,*))\\
+ \texttt{SgCastExp} & type cast ((int*)x)\\
+ \texttt{SgColonShapeExp} & Fortran colons for separating array dimensions (x(0:1))\\
+ \texttt{SgCompoundInitializer} & \\
+ \texttt{SgConditionalExp} & ternary conditional (a?b:c)\\
+ \texttt{SgConstructorInitializer} & initialization with a constructor (x=myclass(0,1))\\
+ & ~\texttt{name} (int): \texttt{set\_need\_name()}. \\
+ & ~\texttt{qual} (int): \texttt{set\_need\_qualifier()}.\\
+ & ~\texttt{paren\_after\_name} (int): \texttt{set\_need\_parenthesis\_after\_name()}.\\
+ & ~\texttt{unknown} (int): \texttt{set\_associated\_class\_unknown()}.\\
+ \texttt{SgDotExp} & structure member access (x.y)\\
+ \texttt{SgExprListExp} & list of expressions \\
+ \texttt{SgFunctionCallExp} & function call  (f())\\
+ \texttt{SgFunctionRefExp} & function reference\\
+ & ~\texttt{name} (string): function name. \\
+ % & ~\texttt{kind} (int): subprogram kind (Fortran). \\
+ \texttt{SgImpliedDo} & Fortran implied loop expression (\texttt{(/ /)})\\
+ \texttt{SgLabelRefExp} & label refernce\\
+ & ~\texttt{nlabel} (int): numeric label value\\
+ & ~\texttt{type} (int): label type\\
+ \texttt{SgNullExpression} & null expression \\
+ \texttt{SgPointerDerefExp} & pointer dereference (*x, x is a pointer)\\
+ \texttt{SgSizeOfOp} & sizeof operator (sizeof(int))\\
+ \texttt{SgSubscriptExpression} & Fortran subscript expressions \\
+ \texttt{SgVarArgEndOp} & end of vararg\\
+ \texttt{SgVarArgOp} & variable length list of arguments \\
+ \texttt{SgVarArgStartOp} & beginning of vararg\\
+ \texttt{SgVarRefExp} & variable reference \\
+ & ~\texttt{name} (string): variable name \\
+\end{longtable}
+
+
+\section{Types}
+
+This section describes XML elements of \texttt{SgType} subclasses
+currently supported by XevXML.  XML elements of most \texttt{SgType}
+subclasses have the \texttt{kind} attribute whose value is an
+integer. The attribute value is used as a type kind paremeter used in
+Fortran.
+
+\begin{longtable}[l]{l|p{10cm}}
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endfirsthead
+ \multicolumn{2}{l} {(continued)}\\
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endhead
+ \hline
+ \multicolumn{2}{r} {(continue to next page)}\\
+ \endfoot
+ \hline
+ \endlastfoot
+ \texttt{SgArrayType}& array type\\
+ \texttt{SgClassType}& class type\\
+ \texttt{SgEnumType}& enum type\\
+ \texttt{SgFunctionType}& function type\\
+ \texttt{SgModifierType}& modifiers\\
+ \texttt{SgPointerType}& pointer type\\
+ \texttt{SgTypeBool}& boolean type\\
+ \texttt{SgTypeChar}& character type\\
+ \texttt{SgTypeComplex}& complex type (in C99, \texttt{double \_Complex x;})\\
+ \texttt{SgTypeDefault}& unknown type (internal use)\\
+ \texttt{SgTypeDouble}& double-precision floating-point type\\
+ \texttt{SgTypeEllipse}& ellipse type (a variable number of parameters, ``\texttt{...}'')\\
+ \texttt{SgTypeFloat}& single-precision floating-point type\\
+ \texttt{SgTypeImaginary}& imaginary type (in C99, \texttt{float \_Imaginary x;})\\
+ \texttt{SgTypeInt}& integer type\\
+ \texttt{SgTypeLong}& long integer type\\
+ \texttt{SgTypeLongDouble}& long double type\\
+ \texttt{SgTypeLongLong}& long long integer type\\
+ \texttt{SgTypeShort}& short integer type\\
+ \texttt{SgTypeSignedChar}& signed character type\\
+ \texttt{SgTypeSignedInt}& signed integer type\\
+ \texttt{SgTypeSignedLong}& signed long integer type\\
+ \texttt{SgTypeSignedLongLong}& signed long long integer type\\
+ \texttt{SgTypeSignedShort}& signed short integer type\\
+ \texttt{SgTypeString}& string type\\
+ \texttt{SgTypeUnsignedChar}&unsigned character type\\
+ \texttt{SgTypeUnsignedInt}&unsigned integer type\\
+ \texttt{SgTypeUnsignedLong}&unsigned long integer type\\
+ \texttt{SgTypeUnsignedLongLong}&unsigned long long integer type\\
+ \texttt{SgTypeUnsignedShort}&unsigned short integer type\\
+ \texttt{SgTypeVoid}&void type\\
+ \texttt{SgTypedefType}&typedef type\\
+\end{longtable}
+
+\section{Other elements}
+\begin{longtable}[l]{l|p{10cm}}
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endfirsthead
+ \multicolumn{2}{l} {(continued)}\\
+ \hline
+ XML element name & Description \\
+ \hline\hline
+ \endhead
+ \hline
+ \multicolumn{2}{r} {(continue to next page)}\\
+ \endfoot
+ \hline
+ \endlastfoot
+\texttt{SgDataStatementGroup}& a group of data statement objects (Fortran only)\\
+\texttt{SgDataStatementObject}& data statement object (Fortran only)\\
+\texttt{SgDataStatementValue}& data statement value (Fortran only)\\
+ & ~\texttt{fmt} (int): \\
+ & 0(unknown), 1(default), 2(explicit), 3(implicit), or 4(implied do)\\
+\texttt{SgFormatItem}& item of FORMAT statement (Fortran only)\\
+ & ~\texttt{fmt} (string): format data \\
+ & ~\texttt{single} (int): 0 (double quote) or 1 (single quote) \\
+ %& ~\texttt{double} (int): use double quotes \\
+\texttt{SgFunctionParameterTypeList}& type lists of function parameters\\
+\texttt{SgPragma}& prama in a pragma declaration\\
+ & ~\texttt{pragma} (string): string(s) of a pragma \\
+\texttt{SgSourceFile}& source file (root elemement of an XML AST)\\
+ & ~\texttt{file} (string): filename of the original code \\
+ & ~\texttt{lang} (int): 0 (error), 1 (unknown), 2 (C), 3 (C++), or 4 (Fortran)\\
+ & ~\texttt{fmt} (int): 0 (unknown), 1 (fixed), or 2 (free) (for Fortran)\\
+\texttt{SgTypedefSeq}& list of typedefs, for which the current SgType is the base type\\
+\texttt{SgCommonBlockObject}& object in a COMMON block (Fortran only)\\
+ & ~\texttt{name} (string): name of the COMMON block object \\
+\texttt{SgInitializedName}& initialized name (declared symbols)\\
+ & ~\texttt{name} (string): name of the symbol \\
+\texttt{SgInterfaceBody}& body of INTERFACE statement (Fortran only)\\
+ & ~\texttt{name} (string): name of the INTERFACE function \\
+ \texttt{SgRenamePair}& alias of a variable defined USE statement (Fortran only)\\  
+ & ~\texttt{lname} (string): local name\\
+ & ~\texttt{uname} (string): use name\\
+\end{longtable}
