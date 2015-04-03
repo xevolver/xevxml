@@ -190,22 +190,20 @@ XevXmlVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
   //SgExpression*         val;
   string             fmt;
   int                sgl=0;
-  //int                dbl=0;
+  int                dbl=0;
   //xe::DOMNamedNodeMap*  amap = node->getAttributes();
   //xe::DOMNode*          nameatt = 0;
 
   XmlGetAttributeValue(node,"fmt",&fmt);
   XmlGetAttributeValue(node,"single",&sgl);
-  //XmlGetAttributeValue(node,"double",&dbl);
+  XmlGetAttributeValue(node,"double",&dbl);
   //cerr << "SgFormatItem |" << fmt << "| end" << endl;
   val = sb::buildStringVal( fmt );
 
-  if( sgl == 1 ) {                                 // add (0821)
+  if( sgl == 1 ) {                            // add (0821)
     val->set_usesSingleQuotes(true);
-    val->set_usesDoubleQuotes(false);
   }
-  else { //if( dbl == 1 )                             // add (0821)
-    val->set_usesSingleQuotes(false);
+  if( dbl == 1 ) {                            // add (0821)
     val->set_usesDoubleQuotes(true);
   }
 
@@ -226,8 +224,8 @@ void XevSageVisitor::attribSgFormatItem(SgNode* node)
       sstr() << " fmt=\"" << XevXml::XmlStr2Entity(v->get_value()) << "\" ";
     if( v->get_usesSingleQuotes() == true )
       sstr() << " single=\"1\" ";
-    //if( v->get_usesDoubleQuotes() == true )
-    // sstr() << " double=\"1\" ";
+    if( v->get_usesDoubleQuotes() == true )
+      sstr() << " double=\"1\" ";
   }
 }
 INODE_SUPP_DEFAULT(FormatItem);

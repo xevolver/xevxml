@@ -197,9 +197,12 @@ XevXmlVisitor::visitSgColonShapeExp(xe::DOMNode* node, SgNode* astParent)
 }
 EXPR_DEFAULT(ColonShapeExp);
 
-
+#if 0
 // ===============================================================================
 /// Visitor of a SgCompoundInitializer element in an XML document
+// SgCompoundInitializer seems an AST node for OpenCL vector initialization.
+// e.g. float2 x = float2(1.0f,1.0f).
+// XevXML does not support OpenCL. So the following methods are commented out.
 SgNode*
 XevXmlVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
 {
@@ -220,7 +223,7 @@ XevXmlVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
   return ret;
 }
 EXPR_DEFAULT(CompoundInitializer);
-
+#endif
 
 // ===============================================================================
 /// Visitor of a SgConditionalExp element in an XML document

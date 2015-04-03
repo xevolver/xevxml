@@ -145,7 +145,7 @@ SAGE3_EXPR(AssignInitializer);
 SAGE3_EXPR(AsteriskShapeExp);
 SAGE3_EXPR(CastExp);
 SAGE3_EXPR(ColonShapeExp);
-SAGE3_EXPR(CompoundInitializer);
+//SAGE3_EXPR(CompoundInitializer);
 SAGE3_EXPR(ConditionalExp);
 SAGE3_EXPR(ConstructorInitializer);
 SAGE3_EXPR(DotExp);
