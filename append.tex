@@ -9,11 +9,11 @@ SgNode -+- SgStatement   -+- SgDeclarationStatement
         |                 +- SgUnaryOp
         +- SgType         |
         |                 +- SgValueExp
-        +- SgSupport 
+        +- SgSupport
 \end{verbatim}
 \section{Statements}
 This section describes XML elements of \texttt{SgStatement} subclasses
-currently supported by XevXML.  
+currently supported by XevXML.
 
 \subsection{XML elements}
 All XML elements of \texttt{SgStatement} subclasses are described below.
@@ -102,7 +102,7 @@ attributes, the attributes are also listed in the description.
  & \texttt{unit} (int): \texttt{set\_unit()}\\
  \texttt{SgBasicBlock}& basic block\\
  \texttt{SgBreakStmt}& break statement\\
- & \texttt{label} (string): Fortran \texttt{DO} string label\\
+ & \texttt{slabel} (string): Fortran \texttt{DO} string label\\
  \texttt{SgCaseOptionStmt}& case option of switch statement \\
  \texttt{SgClassDefinition}& class definition\\
  & \texttt{sequence} (int): 1 for \texttt{SEQUENCE} ketword\\
@@ -115,7 +115,7 @@ attributes, the attributes are also listed in the description.
  & \texttt{unit} (int): \texttt{set\_unit()}\\
  \texttt{SgComputedGotoStatement}& computed GO TO statement (Fortran only)\\
  \texttt{SgContinueStmt}& continue statement\\
- & \texttt{label} (string): Fortran \texttt{DO} string label\\
+ & \texttt{slabel} (string): Fortran \texttt{DO} string label\\
  \texttt{SgDeallocateStatement}& DEALLOCATE statement (Fortran only)\\
  \texttt{SgDefaultOptionStmt}& default option of switch statement\\
  \texttt{SgDoWhileStmt}& do-while statement\\
@@ -133,12 +133,12 @@ attributes, the attributes are also listed in the description.
  & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
  & \texttt{slabel} (string): \texttt{set\_string\_label()}\\
  & \texttt{style} (int): \texttt{set\_old\_style()}\\
- & \texttt{enlabel} (int): \texttt{set\_end\_numeric\_label()}\\
+ & \texttt{elabel} (int): \texttt{set\_end\_numeric\_label()}\\
  \texttt{SgFunctionDefinition}& function definition\\
  \texttt{SgGlobal}& global scope\\
  \texttt{SgGotoStatement}& goto statement\\
  & \texttt{slabel} (string): string label\\
- & \texttt{label} (string): numeric label\\
+ & \texttt{nlabel} (string): numeric label\\
  \texttt{SgIfStmt}& if statement\\
  & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
  & \texttt{then} (int):\texttt{set\_use\_then\_keyword()}\\
@@ -165,7 +165,7 @@ attributes, the attributes are also listed in the description.
  \texttt{SgWhileStmt}& while statement\\
  & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
  & \texttt{slabel} (string): \texttt{set\_string\_label()}\\
- & \texttt{nlabel} (string): \texttt{set\_end\_numeric\_label()}\\
+ & \texttt{elabel} (string): \texttt{set\_end\_numeric\_label()}\\
  \texttt{SgWriteStatement}& WRITE statement (Fortran only)\\
  & \texttt{err} (int): \texttt{set\_err()}\\
  & \texttt{fmt} (int): \texttt{set\_format()}\\
@@ -176,25 +176,25 @@ attributes, the attributes are also listed in the description.
  \end{longtable}
 
 \subsection{XML attributes}\label{sec:stmtatt}
-All XML elements of \texttt{SgStatament} subclasses have \texttt{nlabel}
-attribute to keep the numeric label number because Fortran allows every
-statement to have a numetic label. 
+All XML elements of \texttt{SgStatament} subclasses have \texttt{label}
+attribute to keep the numeric label number because Fortran allows a
+statement to have a numetic label.
 
 In addition, XML elements of \texttt{SgDeclarationStatament} subclasses
 have the following attributes for modifiers.
 \begin{itemize}
- \item \texttt{declaration\_modifier} 
+ \item \texttt{declaration\_modifier}
 
        In an XML AST, only one of the following flags can be specified
        by a decimal number to indicate the kind of a declaration.
        \begin{description}
-	\item[0x01]: unknown 
+	\item[0x01]: unknown
 	\item[0x02]: default
 	\item[0x04]: friend
 	\item[0x08]: typedef
 	\item[0x10]: export
        \end{description}
- \item \texttt{type\_modifier} 
+ \item \texttt{type\_modifier}
 
        Multiple flags might be combined by using logical OR. The value
        of this XML attribute (combination of the following flags) is
@@ -247,9 +247,9 @@ have the following attributes for modifiers.
        \begin{description}
 	\item[0x01]: error value
 	\item[0x02]: default value
-	\item[0x04]: extern storage modifier 
-	\item[0x08]: static storage modifier 
-	\item[0x10]: auto storage value 
+	\item[0x04]: extern storage modifier
+	\item[0x08]: static storage modifier
+	\item[0x10]: auto storage value
 	\item[0x20]: (not used)
 	\item[0x40]: register storage modifier
 	\item[0x80]: mutable storage modifier
@@ -264,7 +264,7 @@ the \texttt{kind} attribute below.
 
        One of the following values can be specified (Fortran).
        \begin{description}
-	\item[0]: unknown 
+	\item[0]: unknown
 	\item[1]: private
 	\item[2]: public
 	\item[3]: allocatable
@@ -344,6 +344,7 @@ attributes are also listed in the description.
  \texttt{SgMultAssignOp} & *= operator (multiplication assignment)\\
  \texttt{SgMultiplyOp} & * operator (multiplication)\\
  \texttt{SgNotEqualOp} & != operator (not equal to)\\
+ \texttt{SgOrOp} & \texttt{||} operator (logical OR)\\
  \texttt{SgPlusAssignOp} & += operator (addition assignment)\\
  \texttt{SgPointerAssignOp} & Fortran =$>$ operator (pointer assignment) \\
  \texttt{SgPntrArrRefExp} & array subscript (\texttt{a[b]})\\
@@ -361,10 +362,9 @@ attributes are also listed in the description.
  \texttt{SgMinusOp} & Unary - operator (minus)\\
  & ~\texttt{mode} (int): 0 (prefix) or 1 (postfix)\\
  \texttt{SgNotOp} & ! operator (logical NOT)\\
- \texttt{SgOrOp} & \texttt{||} operator (logical OR)\\
  \texttt{SgPlusPlusOp} & ++ operator (increment)\\
  & ~\texttt{mode} (int): 0 (prefix) or 1 (postfix)\\
- \texttt{SgUnaryAddOp} & Unary + operator (plus)\\    
+ \texttt{SgUnaryAddOp} & Unary + operator (plus)\\
  \hline
  \multicolumn{2}{l}{Values}\\
  \hline
@@ -426,7 +426,8 @@ attributes are also listed in the description.
  \texttt{SgAsteriskShapeExp} & Fortran * expression (write(*,*))\\
  \texttt{SgCastExp} & type cast ((int*)x)\\
  \texttt{SgColonShapeExp} & Fortran colons for separating array dimensions (x(0:1))\\
- \texttt{SgCompoundInitializer} & \\
+ % This is for OpenCL vector initialization. e.g.  float2 x = float2(1,0f,2.0f);
+ %\texttt{SgCompoundInitializer} & \\
  \texttt{SgConditionalExp} & ternary conditional (a?b:c)\\
  \texttt{SgConstructorInitializer} & initialization with a constructor (x=myclass(0,1))\\
  & ~\texttt{name} (int): \texttt{set\_need\_name()}. \\
@@ -438,7 +439,7 @@ attributes are also listed in the description.
  \texttt{SgFunctionCallExp} & function call  (f())\\
  \texttt{SgFunctionRefExp} & function reference\\
  & ~\texttt{name} (string): function name. \\
- % & ~\texttt{kind} (int): subprogram kind (Fortran). \\
+ & ~\texttt{kind} (int): 1(function(default)) or 2(subroutine) (for Fortran)\\
  \texttt{SgImpliedDo} & Fortran implied loop expression (\texttt{(/ /)})\\
  \texttt{SgLabelRefExp} & label refernce\\
  & ~\texttt{nlabel} (int): numeric label value\\
@@ -535,8 +536,8 @@ Fortran.
  & 0(unknown), 1(default), 2(explicit), 3(implicit), or 4(implied do)\\
 \texttt{SgFormatItem}& item of FORMAT statement (Fortran only)\\
  & ~\texttt{fmt} (string): format data \\
- & ~\texttt{single} (int): 0 (double quote) or 1 (single quote) \\
- %& ~\texttt{double} (int): use double quotes \\
+ & ~\texttt{single} (int): non-zero to use single quotes \\
+ & ~\texttt{double} (int): non-zero to use double quotes \\
 \texttt{SgFunctionParameterTypeList}& type lists of function parameters\\
 \texttt{SgPragma}& prama in a pragma declaration\\
  & ~\texttt{pragma} (string): string(s) of a pragma \\
@@ -551,7 +552,7 @@ Fortran.
  & ~\texttt{name} (string): name of the symbol \\
 \texttt{SgInterfaceBody}& body of INTERFACE statement (Fortran only)\\
  & ~\texttt{name} (string): name of the INTERFACE function \\
- \texttt{SgRenamePair}& alias of a variable defined USE statement (Fortran only)\\  
+ \texttt{SgRenamePair}& alias of a variable defined USE statement (Fortran only)\\
  & ~\texttt{lname} (string): local name\\
  & ~\texttt{uname} (string): use name\\
 \end{longtable}
