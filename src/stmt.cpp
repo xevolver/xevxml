@@ -971,9 +971,8 @@ XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
   SgLabelSymbol*        s     = 0;
   SgLabelRefExp*        l     = 0;
 
-  string                s_name;
-  int                   n_name = 0;
-  //int                   ino = 0;
+  string                s_name, n_name;
+  int                   ino = 0;
 
   if(XmlGetAttributeValue(node,"slabel",&s_name))
     label = sb::buildLabelStatement( s_name.c_str(), body, scope );
@@ -982,15 +981,15 @@ XevXmlVisitor::visitSgGotoStatement(xe::DOMNode* node, SgNode* astParent)
     s = new SgLabelSymbol();
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
     s->set_label_type(SgLabelSymbol::e_start_label_type);
-    // s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
-    //ino = atoi(n_name.c_str());
-    s->set_numeric_label_value( n_name );
+    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+    ino = atoi(n_name.c_str());
+    s->set_numeric_label_value( ino );
     l = new SgLabelRefExp( s );
     s->set_parent(l);
     label->set_numeric_label( l );
   }
 
-  if( n_name != 0 ){
+  if( n_name.size() ){
     /**/
     ret = sb::buildGotoStatement( label );
     ret->set_label_expression(l);
