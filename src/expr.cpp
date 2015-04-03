@@ -1036,6 +1036,7 @@ VISIT_BOP(ModOp);
 VISIT_BOP(MultAssignOp);
 VISIT_BOP(MultiplyOp);
 VISIT_BOP(NotEqualOp);
+VISIT_BOP(OrOp);
 VISIT_BOP(PlusAssignOp);
 //VISIT_BOP(PointerAssignOp);
 // ===============================================================================
@@ -1076,6 +1077,5 @@ VISIT_UOP(BitComplementOp);
 VISIT_UOP_MODE(MinusMinusOp);
 VISIT_UOP_MODE(MinusOp);
 VISIT_UOP(NotOp);
-VISIT_UOP(OrOp);
 VISIT_UOP_MODE(PlusPlusOp);
 VISIT_UOP(UnaryAddOp);

@@ -103,9 +103,11 @@ SAGE3_BOP(ModOp);
 SAGE3_BOP(MultAssignOp);
 SAGE3_BOP(MultiplyOp);
 SAGE3_BOP(NotEqualOp);
+SAGE3_BOP(OrOp);
 SAGE3_BOP(PlusAssignOp);
 SAGE3_BOP(PointerAssignOp);
 SAGE3_BOP(PntrArrRefExp);
+
 SAGE3_BOP(RshiftAssignOp);
 SAGE3_BOP(RshiftOp);
 SAGE3_BOP(SubtractOp);
@@ -116,7 +118,6 @@ SAGE3_UOP(BitComplementOp);
 SAGE3_UOP(MinusMinusOp);
 SAGE3_UOP(MinusOp);
 SAGE3_UOP(NotOp);
-SAGE3_UOP(OrOp);
 SAGE3_UOP(PlusPlusOp);
 SAGE3_UOP(UnaryAddOp);
 
