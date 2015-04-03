@@ -229,6 +229,7 @@ SAGE3_STMT(ReturnStmt);
 SAGE3_STMT(RewindStatement);
 SAGE3_STMT(StopOrPauseStatement);
 SAGE3_STMT(SwitchStatement);
+SAGE3_STMT(WaitStatement);
 SAGE3_STMT(WhereStatement);
 SAGE3_STMT(WhileStmt);
 SAGE3_STMT(WriteStatement);

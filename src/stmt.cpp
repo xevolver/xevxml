@@ -1800,6 +1800,54 @@ XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
 STMT_DEFAULT(SwitchStatement);
 
 // ===============================================================================
+/// Visitor of a SgWaitStatement element in an XML document
+SgNode*
+XevXmlVisitor::visitSgWaitStatement(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgWaitStatement*     ret = new SgWaitStatement(DEFAULT_FILE_INFO);
+  SgExpression*           iost = 0;
+  SgExpression*           err = 0;
+  SgExpression*           unt = 0;
+
+  int f_ios = 0;
+  int f_err = 0;
+
+  XmlGetAttributeValue(node,"iostat",&f_ios);
+  XmlGetAttributeValue(node,"err",   &f_err);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      //assuming these stmts appear in this order
+      if( unt==0 )
+        unt = isSgExpression(astchild);
+      else if( f_ios && iost==0 )
+        iost = isSgExpression(astchild);
+      else if( f_err && err==0 )
+        err = isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  ret->set_parent(astParent);
+  if(unt){
+    unt->set_parent(ret);
+    unt->set_startOfConstruct(DEFAULT_FILE_INFO);
+    ret->set_unit(unt);
+  }
+  if(iost){
+    iost->set_parent(ret);
+    iost->set_startOfConstruct(DEFAULT_FILE_INFO);
+    ret->set_iostat(iost);
+  }
+  if(err){
+    err->set_parent(ret);
+    err->set_startOfConstruct(DEFAULT_FILE_INFO);
+    ret->set_err(err);
+  }
+  return ret;
+}
+STMT_DEFAULT(WaitStatement);
+
+// ===============================================================================
 /// Visitor of a SgWhereStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
