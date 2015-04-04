@@ -226,6 +226,25 @@ static bool isInSameFile(SgNode* node, SgFile* file){
   return isCompilerGenerated || isRightFile || isCode;
 }
 
+static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
+{
+  if(isSgType(node)==NULL){
+    for(size_t i(0);i<node->get_numberOfTraversalSuccessors();i++){
+      SgNode* succ = node->get_traversalSuccessorByIndex(i);
+      if(succ!= NULL)
+        visitor->visit(succ);
+    }
+  }
+  else {
+    SgType* t = isSgType(node);
+    Rose_STL_Container<SgType*> types = t->getInternalTypes();
+    for(size_t i(0);i<types.size();++i){
+      if(types[i]!=NULL && types[i]!=t)
+        visitor->visit(types[i]);
+    }
+  }
+}
+
 void XevSageVisitor::visit(SgNode* node)
 {
   if(isSgFile(node)!=NULL)
@@ -233,10 +252,23 @@ void XevSageVisitor::visit(SgNode* node)
   if(node==NULL||isInSameFile(node,this->getSgFileToVisit())==false )
     return;
 
+  if(getXmlOption()->getSkipCompilerGeneratedFlag()){
+    Sg_File_Info* info = node->get_file_info();
+    if(info && info->isCompilerGenerated()){
+      // skip the current node and visit its successors.
+      visitSuccessors(node,this);
+      return;
+    }
+  }
+
   writeIndent();
   if(getXmlOption()->getFortranPragmaFlag())
     writeFortranPragma(sstr(),node,PreprocessingInfo::before);
+
+  // --- write the element name ---
   sstr() << "<" << node->class_name();
+
+  // --- write attributes of this node ---
   switch((int)node->variantT()) {
 #define SAGE3(x)                                                        \
     case V_Sg##x:                                                       \
@@ -255,22 +287,10 @@ void XevSageVisitor::visit(SgNode* node)
     return;
   }
 
+
+  // --- write successor nodes and inodes ---
   depth_  = depth_ + 1;
-  if(isSgType(node)==NULL){
-    for(size_t i(0);i<node->get_numberOfTraversalSuccessors();i++){
-      SgNode* succ = node->get_traversalSuccessorByIndex(i);
-      if(succ!= NULL)
-        this->visit(succ);
-    }
-  }
-  else {
-    SgType* t = isSgType(node);
-    Rose_STL_Container<SgType*> types = t->getInternalTypes();
-    for(size_t i(0);i<types.size();++i){
-      if(types[i]!=NULL && types[i]!=t)
-        visit(types[i]);
-    }
-  }
+  visitSuccessors(node,this);
   switch((int)node->variantT()) {
 #define SAGE3(x)                                                        \
     case V_Sg##x:                                                       \

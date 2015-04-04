@@ -92,7 +92,7 @@ namespace XevXml {
   {
     int  lang_;    /// output language
     bool faddr_;   /// print address attribute
-    bool fparen_;  /// remove compiler-generated parentheses
+    bool fscg_;    /// skip compiler-generated nodes
     bool fpragma_; /// analyze Fortran pragmas
 
 
@@ -100,17 +100,17 @@ namespace XevXml {
     void init() {
       lang_    = 0;
       faddr_   = false;
-      fparen_  = false;
+      fscg_    = false;
       fpragma_ = false;
     }
   public:
     XevXmlOption(){init();}
     ~XevXmlOption() {}
 
-    int    getOutoutLanguage()     {return lang_;}
-    bool&  getPrintAddressFlag()   {return faddr_;}
-    bool&  getRemoveParenFlag()    {return fparen_;}
-    bool&  getFortranPragmaFlag()  {return fpragma_;}
+    int    getOutoutLanguage()             {return lang_;}
+    bool&  getPrintAddressFlag()           {return faddr_;}
+    bool&  getSkipCompilerGeneratedFlag()  {return fscg_;}
+    bool&  getFortranPragmaFlag()          {return fpragma_;}
   };
 
 

@@ -1017,7 +1017,13 @@ INODE_EXPR_DEFAULT(VarRefExp);
   }                                                                     \
   /** XML attribute writer of Sg##op */                                 \
   void XevSageVisitor::attribSg##op(SgNode* node)                       \
-  {attribSgExpression(sstr(),node);}                                    \
+  {                                                                     \
+    SgUnaryOp* uop = isSgUnaryOp(node);                                 \
+    if(uop){                                                            \
+      sstr() << " mode=\""<< uop->get_mode() << "\" ";                  \
+    }                                                                   \
+    attribSgExpression(sstr(),node);                                    \
+  }                                                                     \
   /** XML internal node writer of Sg##op */                             \
   void XevSageVisitor::inodeSg##op(SgNode* node)                        \
   {return;}

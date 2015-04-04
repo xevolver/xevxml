@@ -71,9 +71,9 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
     istr << " cv_modifier=\"" <<  modifier.get_typeModifier().get_constVolatileModifier().get_modifier()<< "\" ";
   if( SageInterface::is_C_language() == false )
     istr << " access_modifier=\"" <<  modifier.get_accessModifier().get_modifier()<< "\" ";
-  if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default)
+  if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default){
     istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
-
+  }
 }
 
 #define INODE_DECL_DEFAULT(x)                           \

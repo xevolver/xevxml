@@ -65,6 +65,7 @@ int main(int argc, char** argv)
   XevXml::XmlInitialize();
   XevXml::XevXmlOption opt;
   opt.getFortranPragmaFlag() = true;
+  opt.getSkipCompilerGeneratedFlag() = true;
   fflush(stdout);
   dup2(fd,1); // printf messages are written to stdout
   clearerr(stdout);
