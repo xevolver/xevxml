@@ -156,6 +156,9 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   SgCastExp*     ret   = 0;
   SgType*        typ   = 0;
   SgExpression*  exp   = 0;
+  int            cty   = 0;
+
+  XmlGetAttributeValue(node,"ctype",&cty);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -169,6 +172,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ);
     ret->set_parent(astParent);
+    ret->set_cast_type((SgCastExp::cast_type_enum)cty);
   }
   else if(exp){
     // ignore implicit type conversions
@@ -179,9 +183,19 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
+
   return ret;
 }
-ATTRIB_EXPR_DEFAULT(CastExp);
+//ATTRIB_EXPR_DEFAULT(CastExp);
+void XevSageVisitor::attribSgCastExp(SgNode* node)
+{
+  SgCastExp* cast = isSgCastExp(node);
+  if(cast){
+    sstr() << " ctype=\"" << cast->get_cast_type() << "\" ";
+  }
+  attribSgExpression(sstr(),node);
+}
+
 INODE_EXPR_TYPE(CastExp);
 
 

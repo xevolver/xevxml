@@ -202,7 +202,7 @@ void XevSageVisitor::attribSgStringVal(SgNode* node)
 {
   SgStringVal* n = isSgStringVal(node);
   if(n) {
-    sstr() << " value=\"" << n->get_value() << "\" ";
+    sstr() << " value=\"" << XmlStr2Entity(n->get_value()) << "\" ";
     if(n->get_usesSingleQuotes()==true)
       sstr() << " single=\"1\" ";
   }
