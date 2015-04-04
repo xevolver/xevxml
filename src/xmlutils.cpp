@@ -31,6 +31,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "common.hpp"
+#include "xmlparser.hpp"
+
 #include <xmlutils.hpp>
 
 #include <xercesc/dom/DOM.hpp>
@@ -145,10 +147,19 @@ bool XmlGetAttributeValue( xercesc::DOMNode* node, const char* name, std::string
   return false;
 }
 
+
+
 string XmlGetNodePosition(xercesc::DOMNode* node)
 {
   char* buf;
   string path;
+  stringstream pos;
+
+  const XevDOMParser::XmlLoc* loc = XevDOMParser::getXmlLoc(node);
+  if(loc){
+    pos << "LINE = " << loc->line << std::endl;
+    pos << "COL  = " << loc->col  << std::endl;
+  }
 
   while(node!=NULL){
     buf = xercesc::XMLString::transcode(node->getNodeName());
@@ -157,8 +168,65 @@ string XmlGetNodePosition(xercesc::DOMNode* node)
     xercesc::XMLString::release(&buf);
     node = node->getParentNode();
   }
-  return path;
+  path = "NODE = " + path;
+  return pos.str() + path;
 }
 
-}
+static XMLCh* attKey = 0;
 
+class XevDOMParser::XevDataHandler : public xe::DOMUserDataHandler {
+private:
+  XevDOMParser* parser_;
+
+public:
+  XevDataHandler():parser_(0) {}
+  virtual ~XevDataHandler(){}
+
+  void setParser(XevDOMParser* p){
+    parser_ = p;
+  }
+
+  void handle(DOMOperationType operation,
+              const XMLCh* const key,
+              void* data,
+              const xe::DOMNode* src,
+              xe::DOMNode* dst) {
+    XmlLoc* loc = (XmlLoc*)data;
+    switch(operation){
+    case NODE_IMPORTED:
+    case NODE_CLONED: loc->inc(); break;
+    case NODE_DELETED:
+      loc->dec();
+      if(loc->cnt <= 0 ) delete loc;
+      break;
+    case NODE_RENAMED:
+      break;
+    }
+  }
+};
+  XevDOMParser::XevDOMParser() : handler_(new XevDataHandler()){ handler_->setParser(this); }
+
+  void XevDOMParser::startElement( const xe::XMLElementDecl &elemDecl,
+                                   const unsigned int uriId, const XMLCh *const prefixName,
+                                   const xe::RefVectorOf< xe::XMLAttr > &attrList,
+                                   const XMLSize_t attrCount, const bool isEmpty, const bool isRoot ) {
+
+    XercesDOMParser::startElement(elemDecl, uriId, prefixName, attrList, attrCount, isEmpty, isRoot);
+
+    if(!isEmpty){
+      XmlLoc* loc = new XmlLoc();
+      const xe::Locator* locator = getScanner()->getLocator();
+      loc->line = locator->getLineNumber();
+      loc->col  = locator->getColumnNumber();
+      if(attKey==0){
+        attKey = xe::XMLString::transcode("LocAttrib1");
+      }
+      XercesDOMParser::fCurrentNode->setUserData(attKey, loc, handler_);
+      loc->inc();
+    }
+  }
+
+  const XevDOMParser::XmlLoc* XevDOMParser::getXmlLoc(const xe::DOMNode* node){
+    return (XevDOMParser::XmlLoc*)(node->getUserData(attKey));
+  }
+}

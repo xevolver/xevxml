@@ -928,7 +928,7 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
   SgModuleStatement*    non=0;
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"type",&typ);
-  
+
   SgModuleStatement* ret = buildModuleStatementAndDefinition(
                 SgName( name.c_str() ), sb::topScopeStack());
   Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();

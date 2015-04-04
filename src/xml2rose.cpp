@@ -39,7 +39,7 @@
 #include "Cxx_Grammar.h"
 #include "StorageClasses.h"
 #include "fortran_support.h"
-
+#include "xmlparser.hpp"
 namespace sb=SageBuilder;
 namespace si=SageInterface;
 namespace xe=xercesc;
@@ -81,7 +81,8 @@ bool XevXmlVisitor::read(std::istream& is, SgProject** prj) {
 
   try {
     xe::DOMDocument* doc = 0;
-    xe::XercesDOMParser parser;
+    //xe::XercesDOMParser parser;
+    XevDOMParser parser;
     std::istreambuf_iterator<char> begin(is);
     std::istreambuf_iterator<char> end;
     std::string buf(begin,end);

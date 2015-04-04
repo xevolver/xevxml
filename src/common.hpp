@@ -60,8 +60,8 @@
 #define XEV_ASSERT(x)            {if(!(x)) XEV_ABORT();}
 
 #define XEV_DEBUG_INFO(x) {                                     \
-    std::cerr << "NODE = "                                      \
-              << XevXml::XmlGetNodePosition(x) << std::endl;    \
+    std::cerr << "XML Location Information:" << std::endl;      \
+    std::cerr << XevXml::XmlGetNodePosition(x) << std::endl;    \
   }
 
 #define DEFAULT_FILE_INFO (Sg_File_Info::generateDefaultFileInfoForTransformationNode())
