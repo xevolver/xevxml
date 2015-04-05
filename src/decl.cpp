@@ -251,12 +251,15 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
       for (size_t i = 0; i<localList.size(); i++)
         ret->get_data_statement_group_list().push_back(localList[i]);
       break;
+    case SgAttributeSpecificationStatement::e_accessStatement_private:
+    case SgAttributeSpecificationStatement::e_accessStatement_public:
     case SgAttributeSpecificationStatement::e_intentStatement:
     case SgAttributeSpecificationStatement::e_intrinsicStatement:
     case SgAttributeSpecificationStatement::e_optionalStatement:
     case SgAttributeSpecificationStatement::e_pointerStatement:
     case SgAttributeSpecificationStatement::e_saveStatement :
     case SgAttributeSpecificationStatement::e_targetStatement :
+
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
       ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
       SUBTREE_VISIT_BEGIN(node,astchild,0)
@@ -271,13 +274,6 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
 
       if(XmlGetAttributeValue(node,"intent",&intent))
         ret->set_intent(intent);
-      break;
-
-    case SgAttributeSpecificationStatement::e_accessStatement_private:
-    case SgAttributeSpecificationStatement::e_accessStatement_public:
-      ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
-      ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-
       break;
     default:
       XEV_DEBUG_INFO(node);

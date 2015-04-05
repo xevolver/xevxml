@@ -253,10 +253,10 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
       //assuming these stmts appear in this order
       if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
-      else if( f_ist && ist==0 )
-        ist = isSgExpression(astchild);
       else if( f_err && err==0 )
         err = isSgExpression(astchild);
+      else if( f_ist && ist==0 )
+        ist = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -1117,7 +1117,10 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
     SgLabelRefExp*  l = new SgLabelRefExp( s );
     ret->set_else_numeric_label( l );
   }
-
+  string slabel;
+  if(XmlGetAttributeValue(node,"slabel",&slabel)){
+    ret->set_string_label(slabel);
+  }
   return ret;
 }
 /** XML attribute writer of SgIfStmt */
@@ -1133,6 +1136,8 @@ void XevSageVisitor::attribSgIfStmt(SgNode* node)
     l = n->get_else_numeric_label();
     if(l)
       sstr() << " ellabel=\"" << l->get_numeric_label_value() << "\" ";
+    if(n->get_string_label().size())
+      sstr() << " slabel=\"" << n->get_string_label() << "\" ";
   }
   attribSgStatement(sstr(),node);
 }
@@ -1682,19 +1687,31 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpression*           rec = 0;
   SgExpression*           end = 0;
   SgExpression*           err = 0;
+  SgExpression*           eor = 0;
   SgExpression*           unt = 0;
+  SgExpression*           asy = 0;
+  SgExpression*           adv = 0;
+  SgExpression*           nml = 0;
 
   int f_fmt = 0;
   int f_ios = 0;
   int f_rec = 0;
   int f_end = 0;
   int f_err = 0;
+  int f_eor = 0;
+  int f_asy = 0;
+  int f_adv = 0;
+  int f_nml = 0;
 
+  XmlGetAttributeValue(node,"async" ,&f_asy);
+  XmlGetAttributeValue(node,"advance",&f_adv);
   XmlGetAttributeValue(node,"fmt"   ,&f_fmt);
   XmlGetAttributeValue(node,"iostat",&f_ios);
   XmlGetAttributeValue(node,"rec",   &f_rec);
   XmlGetAttributeValue(node,"end",   &f_end);
   XmlGetAttributeValue(node,"err",   &f_err);
+  XmlGetAttributeValue(node,"eor",   &f_eor);
+  XmlGetAttributeValue(node,"nml",   &f_nml);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -1703,16 +1720,24 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
         exp = isSgExprListExp(astchild);
       else if( unt==0 )
         unt = isSgExpression(astchild);
-      else if( f_fmt && fmt==0 )
-        fmt = isSgExpression(astchild);
       else if( f_ios && iost==0 )
         iost = isSgExpression(astchild);
       else if( f_rec && rec==0 )
         rec = isSgExpression(astchild);
-      else if( f_end && end==0 )
-        end = isSgExpression(astchild);
       else if( f_err && err==0 )
         err = isSgExpression(astchild);
+      else if( f_fmt && fmt==0 )
+        fmt = isSgExpression(astchild);
+      else if( f_end && end==0 )
+        end = isSgExpression(astchild);
+      else if( f_nml && nml==0 )
+        nml = isSgExpression(astchild);
+      else if( f_adv && adv==0)
+        adv = isSgExpression(astchild);
+      else if( f_eor && eor==0 )
+        eor = isSgExpression(astchild);
+      else if( f_asy && asy==0 )
+        asy = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -1741,6 +1766,18 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
     ret->set_err(err);
     err->set_parent(ret);
   }
+  if(asy){
+    ret->set_asynchronous(asy);
+    asy->set_parent(ret);
+  }
+  if(adv){
+    ret->set_advance(adv);
+    adv->set_parent(ret);
+  }
+  if(nml){
+    ret->set_namelist(nml);
+    nml->set_parent(ret);
+  }
   return ret;
 }
 /** XML attribute writer of SgReadStatement */
@@ -1758,6 +1795,12 @@ void XevSageVisitor::attribSgReadStatement(SgNode* node)
       sstr() << " end=\"1\"";
     //if( n->get_err() )
     //sstr() << " err=\"1\"";
+    if( n->get_asynchronous() )
+      sstr() << " async=\"1\"";
+    if( n->get_advance() )
+      sstr() << " advance=\"1\"";
+    if( n->get_namelist() )
+      sstr() << " nml=\"1\"";
   }
   attribSgStatement(sstr(),node);
 }
@@ -1830,7 +1873,7 @@ XevXmlVisitor::visitSgStopOrPauseStatement(xercesc::DOMNode* node, SgNode* astPa
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( cod )
+      if( cod==0 )
         cod = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
@@ -1851,7 +1894,13 @@ void XevSageVisitor::attribSgStopOrPauseStatement(SgNode* node)
   }
   attribSgStatement(sstr(),node);
 }
-INODE_STMT_DEFAULT(StopOrPauseStatement);
+void XevSageVisitor::inodeSgStopOrPauseStatement(SgNode* node)
+{
+  SgStopOrPauseStatement* n = isSgStopOrPauseStatement(node);
+  if( n && n->get_code() ){
+    this->visit(n->get_code());
+  }
+}
 
 // ===============================================================================
 /// Visitor of a SgSwitchStatement element in an XML document
@@ -1983,7 +2032,10 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_body( body );
   ret->set_elsewhere( elsw );
   ret->set_has_end_statement(endw);
-
+  string slabel;
+  if(XmlGetAttributeValue(node,"slabel",&slabel)){
+    ret->set_string_label(slabel);
+  }
   return ret;
 }
 /** XML attribute writer of SgWhereStmt */
@@ -1993,6 +2045,12 @@ void XevSageVisitor::attribSgWhereStatement(SgNode* node)
 
   if(n) {
     sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
+    if(n->get_string_label().size())
+      sstr() << " slabel=\"" << n->get_string_label() << "\" ";
+    SgLabelRefExp* l = n->get_end_numeric_label();
+    if(l){
+      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
+    }
   }
   attribSgStatement(sstr(),n);
 }

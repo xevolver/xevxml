@@ -179,6 +179,7 @@ bool XevSageVisitor::hasInode(SgNode* node)
   case V_SgNamelistStatement:
   case V_SgPointerDerefExp:
   case V_SgSizeOfOp:
+  case V_SgStopOrPauseStatement:
   case V_SgTypedefDeclaration:
   case V_SgVarArgOp:
     return true;
