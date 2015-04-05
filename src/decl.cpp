@@ -159,6 +159,8 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     SgStringVal*                    str = 0;
     Rose_STL_Container<std::string> slst;
 
+    int intent = 0;
+
     switch (kind){
     case SgAttributeSpecificationStatement::e_parameterStatement:
     case SgAttributeSpecificationStatement::e_externalStatement:
@@ -249,6 +251,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
       for (size_t i = 0; i<localList.size(); i++)
         ret->get_data_statement_group_list().push_back(localList[i]);
       break;
+    case SgAttributeSpecificationStatement::e_intentStatement:
     case SgAttributeSpecificationStatement::e_intrinsicStatement:
     case SgAttributeSpecificationStatement::e_optionalStatement:
     case SgAttributeSpecificationStatement::e_pointerStatement:
@@ -264,6 +267,9 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
         }
       SUBTREE_VISIT_END();
       ret->get_name_list() = slst;
+
+      if(XmlGetAttributeValue(node,"intent",&intent))
+        ret->set_intent(intent);
       break;
 
     case SgAttributeSpecificationStatement::e_accessStatement_private:
@@ -292,8 +298,8 @@ void XevSageVisitor::attribSgAttributeSpecificationStatement(SgNode* node)
     sstr() << " kind=\"" << kind << "\" ";
     if( n->get_bind_list() )
       sstr() << " bind_list=\"1\" ";
-    else
-      sstr() << " bind_list=\"0\" ";
+    if( n->get_intent() )
+      sstr() << " intent=\"" << n->get_intent() << "\" ";
   }
 }
 /** XML internal node writer of SgAttributeSpecificationStatement */
