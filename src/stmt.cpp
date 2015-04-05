@@ -1066,6 +1066,25 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
   //ret = sb::buildIfStmt(cond,tstmt,fstmt);
   ret->set_has_end_statement(estmt);
   ret->set_use_then_keyword(ukey);
+  int elabel = 0;
+  if(XmlGetAttributeValue(node,"elabel",&elabel)){
+    SgLabelSymbol*  s = new SgLabelSymbol();
+    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
+    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+    s->set_numeric_label_value( elabel );
+    SgLabelRefExp*  l = new SgLabelRefExp( s );
+    ret->set_end_numeric_label( l );
+  }
+  if(XmlGetAttributeValue(node,"ellabel",&elabel)){
+    SgLabelSymbol*  s = new SgLabelSymbol();
+    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
+    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+    s->set_numeric_label_value( elabel );
+    SgLabelRefExp*  l = new SgLabelRefExp( s );
+    ret->set_else_numeric_label( l );
+  }
 
   return ret;
 }
@@ -1076,7 +1095,14 @@ void XevSageVisitor::attribSgIfStmt(SgNode* node)
   if(n) {
     sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
     sstr() << " then=\"" << n->get_use_then_keyword() << "\" ";
+    SgLabelRefExp* l = n->get_end_numeric_label();
+    if(l)
+      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
+    l = n->get_else_numeric_label();
+    if(l)
+      sstr() << " ellabel=\"" << l->get_numeric_label_value() << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(IfStmt);
 
