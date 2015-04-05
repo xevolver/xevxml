@@ -77,7 +77,6 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   ATTRIB_EXPR_DEFAULT(x)                        \
   INODE_EXPR_DEFAULT(x)
 
-
 // ===============================================================================
 /// Visitor of a SgAggregateInitializer element in an XML document
 SgNode*
@@ -157,8 +156,10 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   SgType*        typ   = 0;
   SgExpression*  exp   = 0;
   int            cty   = 0;
+  int            imp   = 0;
 
   XmlGetAttributeValue(node,"ctype",&cty);
+  XmlGetAttributeValue(node,"implicit",&imp);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -169,6 +170,10 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
+  if(imp && exp ){
+    // ignore implicit type conversions
+    return exp;
+  }
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ);
     ret->set_parent(astParent);
@@ -192,7 +197,12 @@ void XevSageVisitor::attribSgCastExp(SgNode* node)
   SgCastExp* cast = isSgCastExp(node);
   if(cast){
     sstr() << " ctype=\"" << cast->get_cast_type() << "\" ";
+    Sg_File_Info* info = cast->get_file_info();
+    if(info && info->isCompilerGenerated()){
+      sstr() << " implicit=\"1\" ";
+    }
   }
+
   attribSgExpression(sstr(),node);
 }
 

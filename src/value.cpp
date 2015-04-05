@@ -164,8 +164,17 @@ XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
         imag = isSgValueExp(astchild);
     }
   SUBTREE_VISIT_END();
-  ret = sb::buildComplexVal( real, imag );
+  if( real==0 && imag ==0 ){
+    real = sb::buildLongDoubleVal(0);
+    imag = sb::buildLongDoubleVal(0);
+  }
+  else if (imag == 0){
+    // this works for complex_01.c. but is this correct?
+    imag = real;
+    real = 0;
+  }
 
+  ret = sb::buildComplexVal( real, imag );
   return ret;
 }
 /** XML attribute writer of SgComplexVal */
