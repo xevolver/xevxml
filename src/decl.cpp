@@ -807,6 +807,7 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 /** XML internal node writer of SgFunctionDeclaration */
 void XevSageVisitor::inodeSgFunctionDeclaration(SgNode* node)
@@ -1279,6 +1280,7 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
   SgFunctionParameterList*      lst = 0;
 
   string              name;
+  int elabel = 0;
 
   if(XmlGetAttributeValue(node,"name",&name)==false){
     XEV_DEBUG_INFO(node);
@@ -1334,11 +1336,27 @@ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParen
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
+
+  if(XmlGetAttributeValue(node,"elabel",&elabel)){
+    SgLabelSymbol*  s = new SgLabelSymbol();
+    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
+    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+    s->set_numeric_label_value( elabel );
+    SgLabelRefExp*  l = new SgLabelRefExp( s );
+    ret->set_end_numeric_label( l );
+  }
   return ret;
 }
 /** XML attribute writer of SgProgramHeaderStatement */
 void XevSageVisitor::attribSgProgramHeaderStatement(SgNode* node)
 {
+  SgProgramHeaderStatement* p = isSgProgramHeaderStatement(node);
+  if(p){
+    SgLabelRefExp* l = p->get_end_numeric_label();
+    if(l)
+      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
+  }
   attribSgFunctionDeclaration(node);
 }
 /** XML internal node writer of SgProgramHeaderStatement */

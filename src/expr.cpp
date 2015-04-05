@@ -78,6 +78,46 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   INODE_EXPR_DEFAULT(x)
 
 // ===============================================================================
+/// Visitor of a SgActualArgumentExpression element in an XML document
+SgNode*
+XevXmlVisitor::visitSgActualArgumentExpression(xe::DOMNode* node, SgNode* astParent)
+{
+  SgActualArgumentExpression* ret = 0;
+  SgExpression*               exp = 0;
+  std::string                 name;
+
+  XmlGetAttributeValue(node,"name",&name);
+  SUBTREE_VISIT_BEGIN(node,astchild,0)
+    {
+      if( exp==0 )
+        exp = isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  if(exp!=NULL)
+    ret = sb::buildActualArgumentExpression( name,exp );
+  else {
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+
+  ret->set_parent(astParent);
+  exp->set_parent(ret);
+  return ret;
+}
+//ATTRIB_EXPR_DEFAULT(CastExp);
+void XevSageVisitor::attribSgActualArgumentExpression(SgNode* node)
+{
+  SgActualArgumentExpression* actual = isSgActualArgumentExpression(node);
+  if(actual){
+    sstr() << " name=" << actual->get_argument_name() << " ";
+  }
+
+  attribSgExpression(sstr(),node);
+}
+INODE_EXPR_DEFAULT(ActualArgumentExpression);
+
+// ===============================================================================
 /// Visitor of a SgAggregateInitializer element in an XML document
 SgNode*
 XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
