@@ -1177,12 +1177,12 @@ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astPar
     }
     cld_=cld_->getNextSibling();
   }
-  if( kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
+  if( fdf==0&&kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
     fdf = new SgFunctionDefinition( info,def );
-    def->set_parent(fdf);
+    if(def)
+      def->set_parent(fdf);
     fdf->set_parent(ret);
   }
-
   if(fdf){
     //si::replaceStatement( ret->get_definition()->get_body(),def,true );
     ret->set_definition(fdf);
