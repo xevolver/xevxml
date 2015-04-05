@@ -256,6 +256,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     case SgAttributeSpecificationStatement::e_optionalStatement:
     case SgAttributeSpecificationStatement::e_pointerStatement:
     case SgAttributeSpecificationStatement::e_saveStatement :
+    case SgAttributeSpecificationStatement::e_targetStatement :
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
       ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
       SUBTREE_VISIT_BEGIN(node,astchild,0)
