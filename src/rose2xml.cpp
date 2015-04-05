@@ -218,12 +218,14 @@ static bool isInSameFile(SgNode* node, SgFile* file){
     isCompilerGenerated = info->isCompilerGenerated()
       || info->isTransformation()
       || info->isOutputInCodeGeneration();
-  bool isCode = node->get_parent() != NULL
-    && !isSgGlobal(node->get_parent())
-    && !isSgNamespaceDefinitionStatement(node->get_parent());
+  //bool isCode = node->get_parent() != NULL
+  //&& !isSgGlobal(node->get_parent())
+  //&& !isSgNamespaceDefinitionStatement(node->get_parent());
   bool isRightFile = info->isSameFile(file);
 
-  return isCompilerGenerated || isRightFile || isCode;
+  // isCode is not used to avoid printing the code included by SgFortranIncludeLine
+  //return isCompilerGenerated || isRightFile || isCode;
+  return isCompilerGenerated || isRightFile ;
 }
 
 static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
@@ -276,7 +278,7 @@ void XevSageVisitor::visit(SgNode* node)
       break;
 #include "sgnode.hpp"
   default:
-    XEV_WARN("unknown Sage AST node found");
+    XEV_WARN("unknown Sage AST node found \"" << node->class_name() << "\"");
     XEV_ABORT();
   }
 

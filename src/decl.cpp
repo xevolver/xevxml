@@ -740,7 +740,8 @@ void XevSageVisitor::attribSgFortranIncludeLine(SgNode* node)
 {
   SgFortranIncludeLine* n = isSgFortranIncludeLine(node);
   if(n) {
-    sstr() << " filename=\"" << (strrchr( (char*)n->get_filename().c_str(), '/')+1) << "\" "; // File Name
+    //sstr() << " filename=\"" << (strrchr( (char*)n->get_filename().c_str(), '/')+1) << "\" "; // File Name
+    sstr() << " filename=\"" << n->get_filename() << "\" "; // File Name
   }
 }
 INODE_DECL_DEFAULT(FortranIncludeLine);
