@@ -250,6 +250,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
         ret->get_data_statement_group_list().push_back(localList[i]);
       break;
     case SgAttributeSpecificationStatement::e_intrinsicStatement:
+    case SgAttributeSpecificationStatement::e_optionalStatement:
     case SgAttributeSpecificationStatement::e_pointerStatement:
     case SgAttributeSpecificationStatement::e_saveStatement :
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
