@@ -1054,6 +1054,7 @@ void XevSageVisitor::attribSgGotoStatement(SgNode* node)
       sstr() << " nlabel=\"" << n->get_label_expression()->get_numeric_label_value() << "\" ";
 
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(GotoStatement);
 
@@ -1362,6 +1363,7 @@ void XevSageVisitor::attribSgInquireStatement(SgNode* node)
     if( n->get_size() )         sstr() << " size=\"1\" ";
     if( n->get_pending() )      sstr() << " pending=\"1\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 /** XML interanal node writer of SgInquireStatement */
 void XevSageVisitor::inodeSgInquireStatement(SgNode* node)
@@ -1464,6 +1466,7 @@ void XevSageVisitor::attribSgLabelStatement(SgNode* node)
       sstr() << " label=" << n->get_numeric_label()->get_name()  << " ";
     sstr() << " slabel=" << n->get_label() ;
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(LabelStatement);
 
@@ -1632,6 +1635,7 @@ void XevSageVisitor::attribSgOpenStatement(SgNode* node)
     if( n->get_sign() )         sstr() << " sign=\"1\" ";
     if( n->get_asynchronous() ) sstr() << " asynchronous=\"1\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(OpenStatement)
 
@@ -1754,6 +1758,7 @@ void XevSageVisitor::attribSgReadStatement(SgNode* node)
     if( n->get_err() )
       sstr() << " err=\"1\"";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(ReadStatement);
 
@@ -1843,6 +1848,7 @@ void XevSageVisitor::attribSgStopOrPauseStatement(SgNode* node)
   if(n) {
     sstr() << " type=\"" << n->get_stop_or_pause () << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(StopOrPauseStatement);
 
@@ -2058,6 +2064,7 @@ void XevSageVisitor::attribSgWhileStmt(SgNode* node)
       sstr() << " slabel=\"" << n->get_string_label() << "\" ";
     }
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(WhileStmt)
 
@@ -2144,5 +2151,6 @@ void XevSageVisitor::attribSgWriteStatement(SgNode* node)
     if( n->get_namelist() )
       sstr() << " nml=\"1\"";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_STMT_DEFAULT(WriteStatement);

@@ -125,7 +125,7 @@ void XevSageVisitor::attribSgAsmStmt(SgNode* node)
     sstr() << " volatile=\"" << n->get_isVolatile() << "\"";
     sstr() << " code=\"" << str << "\"";
   }
-
+  attribSgStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(AsmStmt);
 
@@ -302,6 +302,7 @@ void XevSageVisitor::attribSgAttributeSpecificationStatement(SgNode* node)
     if( n->get_intent() )
       sstr() << " intent=\"" << n->get_intent() << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 /** XML internal node writer of SgAttributeSpecificationStatement */
 void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
@@ -426,6 +427,7 @@ void XevSageVisitor::attribSgClassDeclaration(SgNode* node)
       sstr() << " name=" << n->get_name() << " ";
     sstr() << " type=\"" << n->get_class_type() << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(ClassDeclaration);
 
@@ -673,6 +675,7 @@ void XevSageVisitor::attribSgEnumDeclaration(SgNode* node)
     else
       sstr() << " name=" << n->get_name() << " ";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(EnumDeclaration);
 
@@ -777,6 +780,7 @@ void XevSageVisitor::attribSgFortranIncludeLine(SgNode* node)
     //sstr() << " filename=\"" << (strrchr( (char*)n->get_filename().c_str(), '/')+1) << "\" "; // File Name
     sstr() << " filename=\"" << n->get_filename() << "\" "; // File Name
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(FortranIncludeLine);
 
@@ -948,6 +952,7 @@ void XevSageVisitor::attribSgInterfaceStatement(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " type=\"" << n->get_generic_spec() << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(InterfaceStatement);
 
@@ -1064,6 +1069,7 @@ void XevSageVisitor::attribSgNamelistStatement(SgNode* node)
     SgNameGroup* nam = isSgNameGroup(grp[0]);
     sstr() << " group=\"" << nam->get_group_name() << "\" ";
   }
+  attribSgStatement(sstr(),node);
 }
 /** XML internal node writer of SgNamelistStatement */
 void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
@@ -1464,6 +1470,7 @@ void XevSageVisitor::attribSgTypedefDeclaration(SgNode* node)
   if(n) {
     sstr() << " name=" << n->get_name() << " ";
   }
+  attribSgStatement(sstr(),node);
 }
 /** XML internal node writer of SgTypedefDeclaration */
 void XevSageVisitor::inodeSgTypedefDeclaration(SgNode* node)
@@ -1530,6 +1537,7 @@ void XevSageVisitor::attribSgUseStatement(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " only=\"" << n->get_only_option() << "\"";
   }
+  attribSgStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(UseStatement);
 
