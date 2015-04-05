@@ -162,13 +162,11 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     switch (kind){
     case SgAttributeSpecificationStatement::e_parameterStatement:
     case SgAttributeSpecificationStatement::e_externalStatement:
-    case SgAttributeSpecificationStatement::e_dimensionStatement:
     case SgAttributeSpecificationStatement::e_allocatableStatement:
       SUBTREE_VISIT_BEGIN(node,astchild,0)
         {
           exp = isSgExpression(astchild);
           if( exp ) {
-
             // search SgVariableDeclaration            add (0828)
             if( (aref=isSgPntrArrRefExp(exp)) != 0 ){
               if( (vref=isSgVarRefExp(aref->get_lhs_operand())) != 0 ){
@@ -199,6 +197,33 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
             }
             lst.push_back(exp);
             //ret->get_parameter_list()->prepend_expression(exp);
+          }
+        }
+      SUBTREE_VISIT_END();
+      ret = sb::buildAttributeSpecificationStatement( (SgAttributeSpecificationStatement::attribute_spec_enum)  kind  );
+      elst = sb::buildExprListExp( lst );
+      elst->set_parent(ret);
+      ret->set_parameter_list( elst );
+      break;
+
+    case SgAttributeSpecificationStatement::e_dimensionStatement:
+      SUBTREE_VISIT_BEGIN(node,astchild,0)
+        {
+          exp = isSgExpression(astchild);
+          if( exp ) {
+            // search SgVariableDeclaration            add (0828)
+            if( (aref=isSgPntrArrRefExp(exp)) != 0 ){
+              if( (vref=isSgVarRefExp(aref->get_lhs_operand())) != 0 ){
+                if( (simb=vref->get_symbol() ) != 0 ){
+                  inam = simb->get_declaration();
+                  prnt = inam->get_parent();
+                  if( prnt == 0 ){
+                    // variable with no located declatation stmt is listed in this stmt.
+                    lst.push_back(exp);
+                  }
+                }
+              }
+            }
           }
         }
       SUBTREE_VISIT_END();
