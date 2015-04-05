@@ -1685,11 +1685,26 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   ret->set_format( fmt );
   ret->set_unit(unt);
   if(exp)exp->set_parent(ret);
-  if(fmt)fmt->set_parent(ret);
-  if(iost)iost->set_parent(ret);
-  if(rec)rec->set_parent(ret);
-  if(end)end->set_parent(ret);
-  if(err)err->set_parent(ret);
+  if(fmt){
+    ret->set_format(fmt);
+    fmt->set_parent(ret);
+  }
+  if(iost){
+    ret->set_iostat(iost);
+    iost->set_parent(ret);
+  }
+  if(rec){
+    ret->set_rec(rec);
+    rec->set_parent(ret);
+  }
+  if(end){
+    ret->set_end(end);
+    end->set_parent(ret);
+  }
+  if(err){
+    ret->set_err(err);
+    err->set_parent(ret);
+  }
   return ret;
 }
 /** XML attribute writer of SgReadStatement */
