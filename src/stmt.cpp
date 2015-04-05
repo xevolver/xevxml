@@ -194,31 +194,32 @@ XevXmlVisitor::visitSgArithmeticIfStatement(xe::DOMNode* node, SgNode* astParent
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       //assuming these stmts appear in this order
-      if( les==NULL )
+      if( cnd==NULL )
+        cnd = isSgExpression(astchild);
+      else if( les==NULL )
         les = isSgLabelRefExp(astchild);
       else if( eql==NULL )
         eql = isSgLabelRefExp(astchild);
       else if( grt==NULL )
         grt = isSgLabelRefExp(astchild);
-      else if( cnd==NULL )
-        cnd = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
   ret->set_parent(astParent);
-
-  ret->set_less_label( les );
-  les->set_parent( ret );
-
-  ret->set_equal_label( eql );
-  eql->set_parent( ret );
-
-  ret->set_greater_label( grt );
-  grt->set_parent( ret );
-
-  ret->set_conditional( cnd );
-  cnd->set_parent( ret );
-
+  if(cnd&&les&&eql&&grt){
+    ret->set_conditional( cnd );
+    cnd->set_parent( ret );
+    ret->set_less_label( les );
+    les->set_parent( ret );
+    ret->set_equal_label( eql );
+    eql->set_parent( ret );
+    ret->set_greater_label( grt );
+    grt->set_parent( ret );
+  }
+  else {
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
   return ret;
 }
 ATTRIB_STMT_DEFAULT(ArithmeticIfStatement);
@@ -339,9 +340,25 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret = sb::buildCaseOptionStmt(key,body);
+
+  string c;
+  if(XmlGetAttributeValue(node,"construct",&c)){
+    ret->set_case_construct_name(c);
+  }
   return ret;
 }
-STMT_DEFAULT(CaseOptionStmt);
+/** XML attribute writer of SgCaseOptionStmt */
+void XevSageVisitor::attribSgCaseOptionStmt(SgNode* node)
+{
+  SgCaseOptionStmt*      n = isSgCaseOptionStmt(node);
+  if(n){
+    if(n->get_case_construct_name().size()){
+      sstr() << " construct=\""<<n->get_case_construct_name()<<"\" ";
+    }
+  }
+  attribSgStatement(sstr(),node);
+}
+INODE_STMT_DEFAULT(CaseOptionStmt);
 
 // ===============================================================================
 /// Visitor of a SgClassDefinition element in an XML document
@@ -557,10 +574,24 @@ XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParen
   SUBTREE_VISIT_END();
 
   ret = sb::buildDefaultOptionStmt(body);
-
+  string c;
+  if(XmlGetAttributeValue(node,"construct",&c)){
+    ret->set_default_construct_name(c);
+  }
   return ret;
 }
-STMT_DEFAULT(DefaultOptionStmt);
+/** XML attribute writer of SgDefaultOptionStmt */
+void XevSageVisitor::attribSgDefaultOptionStmt(SgNode* node)
+{
+  SgDefaultOptionStmt* n = isSgDefaultOptionStmt(node);
+  if(n){
+    if(n->get_default_construct_name().size()){
+      sstr() << " construct=\"" << n->get_default_construct_name() << "\" ";
+    }
+  }
+  attribSgStatement(sstr(),node);
+}
+INODE_STMT_DEFAULT(DefaultOptionStmt);
 
 // ===============================================================================
 /// Visitor of a SgDoWhileStmt element in an XML document
@@ -896,7 +927,7 @@ void XevSageVisitor::attribSgFortranDo(SgNode* node)
     if(l){
       sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
     }
-    else {
+    if(n->get_string_label().size()) {
       sstr() << " slabel=\"" << n->get_string_label() << "\" ";
     }
   }
@@ -1836,9 +1867,36 @@ XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
 
   ret = sb::buildSwitchStatement(item,body);
 
+  int elabel=0;
+  string slabel;
+  if(XmlGetAttributeValue(node,"elabel",&elabel)){
+    SgLabelSymbol*  s = new SgLabelSymbol();
+    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+    s->get_fortran_statement()->set_parent(s);
+    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+    s->set_numeric_label_value( elabel );
+    SgLabelRefExp*  l = new SgLabelRefExp( s );
+    ret->set_end_numeric_label( l );
+  }
+  if(XmlGetAttributeValue(node,"slabel",&slabel)){
+    ret->set_string_label(slabel);
+  }
   return ret;
 }
-STMT_DEFAULT(SwitchStatement);
+/** XML attribute writer of SgSwidthStatement */
+void XevSageVisitor::attribSgSwitchStatement(SgNode* node)
+{
+  SgSwitchStatement* n = isSgSwitchStatement(node);
+  if(n) {
+    SgLabelRefExp* l = n->get_end_numeric_label();
+    if(l)
+      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
+    if(n->get_string_label().size())
+      sstr() << " slabel=\"" << n->get_string_label() << "\" ";
+  }
+  attribSgStatement(sstr(),node);
+}
+INODE_STMT_DEFAULT(SwitchStatement);
 
 // ===============================================================================
 /// Visitor of a SgWaitStatement element in an XML document
