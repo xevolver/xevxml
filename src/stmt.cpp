@@ -1856,7 +1856,10 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*         cond = 0;
   SgBasicBlock*         body = 0;
   SgElseWhereStatement* elsw = 0;
+  int                   endw = 0;
+
   ret->set_parent(astParent);
+  XmlGetAttributeValue(node,"end",&endw);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -1873,11 +1876,21 @@ XevXmlVisitor::visitSgWhereStatement(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_condition( cond );
   ret->set_body( body );
   ret->set_elsewhere( elsw );
-  ret->set_has_end_statement(true);
+  ret->set_has_end_statement(endw);
 
   return ret;
 }
-STMT_DEFAULT(WhereStatement);
+/** XML attribute writer of SgWhereStmt */
+void XevSageVisitor::attribSgWhereStatement(SgNode* node)
+{
+  SgWhereStatement*   n = isSgWhereStatement(node);
+
+  if(n) {
+    sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
+  }
+  attribSgStatement(sstr(),n);
+}
+INODE_STMT_DEFAULT(WhereStatement)
 
 // ===============================================================================
 /// Visitor of a SgWhileStmt element in an XML document
