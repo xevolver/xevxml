@@ -1331,9 +1331,9 @@ void XevSageVisitor::attribSgInquireStatement(SgNode* node)
 
   if(n) {
     if( n->get_iolengthExp() )  sstr() << " iolength=\"1\" ";
-    if( n->get_unit() )         sstr() << " unit=\"1\" ";
-    if( n->get_iostat() )       sstr() << " iostat=\"1\" ";
-    if( n->get_err() )          sstr() << " err=\"1\" ";
+    //if( n->get_unit() )         sstr() << " unit=\"1\" ";
+    //if( n->get_iostat() )       sstr() << " iostat=\"1\" ";
+    //if( n->get_err() )          sstr() << " err=\"1\" ";
     if( n->get_iomsg() )        sstr() << " iomsg=\"1\" ";
     if( n->get_file() )         sstr() << " file=\"1\" ";
     if( n->get_access() )       sstr() << " access=\"1\" ";
@@ -1463,10 +1463,11 @@ void XevSageVisitor::attribSgLabelStatement(SgNode* node)
 
   if(n) {
     if( n->get_numeric_label() )
-      sstr() << " label=" << n->get_numeric_label()->get_name()  << " ";
-    sstr() << " slabel=" << n->get_label() ;
+      sstr() << " nlabel=" << n->get_numeric_label()->get_name()  << " ";
+    else
+      sstr() << " slabel=" << n->get_label() << " ";
   }
-  attribSgStatement(sstr(),node);
+  // don't call attribSgStatement
 }
 INODE_STMT_DEFAULT(LabelStatement);
 
@@ -1617,9 +1618,9 @@ void XevSageVisitor::attribSgOpenStatement(SgNode* node)
   SgOpenStatement*      n = isSgOpenStatement(node);
 
   if(n) {
-    if( n->get_unit() )         sstr() << " unit=\"1\" ";
-    if( n->get_iostat() )       sstr() << " iostat=\"1\" ";
-    if( n->get_err() )          sstr() << " err=\"1\" ";
+    //if( n->get_unit() )         sstr() << " unit=\"1\" ";
+    //if( n->get_iostat() )       sstr() << " iostat=\"1\" ";
+    //if( n->get_err() )          sstr() << " err=\"1\" ";
     if( n->get_file() )         sstr() << " file=\"1\" ";
     if( n->get_status() )       sstr() << " status=\"1\" ";
     if( n->get_access() )       sstr() << " access=\"1\" ";
@@ -1749,14 +1750,14 @@ void XevSageVisitor::attribSgReadStatement(SgNode* node)
   if(n) {
     if( n->get_format() )
       sstr() << " fmt=\"1\"";
-    if( n->get_iostat() )
-      sstr() << " iostat=\"1\"";
+    //if( n->get_iostat() )
+    //sstr() << " iostat=\"1\"";
     if( n->get_rec() )
       sstr() << " rec=\"1\"";
     if( n->get_end() )
       sstr() << " end=\"1\"";
-    if( n->get_err() )
-      sstr() << " err=\"1\"";
+    //if( n->get_err() )
+    //sstr() << " err=\"1\"";
   }
   attribSgStatement(sstr(),node);
 }
@@ -2142,12 +2143,12 @@ void XevSageVisitor::attribSgWriteStatement(SgNode* node)
   if(n) {
     if( n->get_format() )
       sstr() << " fmt=\"1\"";
-    if( n->get_iostat() )
-      sstr() << " iostat=\"1\"";
+    //if( n->get_iostat() )
+    //sstr() << " iostat=\"1\"";
     if( n->get_rec() )
       sstr() << " rec=\"1\"";
-    if( n->get_err() )
-      sstr() << " err=\"1\"";
+    //if( n->get_err() )
+    //sstr() << " err=\"1\"";
     if( n->get_namelist() )
       sstr() << " nml=\"1\"";
   }
