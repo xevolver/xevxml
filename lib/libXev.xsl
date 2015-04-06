@@ -5,11 +5,15 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<!-- loop/* -->
-	<xsl:import href="loop/loop.xsl" />
+	<!-- find/* -->
+	<xsl:import href="find/find.xsl" />
 
 	<!-- move/* -->
 	<xsl:import href="move/move.xsl" />
+
+	<!-- loop/* -->
+	<xsl:import href="loop/loop.xsl" />
+
 
 	<xsl:output method="xml" encoding="UTF-8" />
 

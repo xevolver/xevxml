@@ -7,24 +7,17 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
-	<xsl:template match="SgFortranDo">
-		<xsl:choose>
-			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 
-				<xsl:apply-templates select="." mode="move_loop">
-					<xsl:with-param name="loopName" select="'j'" />
-				</xsl:apply-templates>
+	<xsl:template match="*">
+		<xsl:apply-templates select="." mode="find_directive">
+			<xsl:with-param name="directiveName" select="'xev loop_tag'" />
+		</xsl:apply-templates>
+	</xsl:template>
 
-			</xsl:when>
-
-			<xsl:otherwise>
-				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates />
-				</xsl:copy>
-			</xsl:otherwise>
-
-		</xsl:choose>
+	<xsl:template match="*" mode="xev_move_hook">
+		<xsl:apply-templates select="." mode="move_loop">
+			<xsl:with-param name="loopName" select="'j'" />
+		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="SgFortranDo" mode="xev_transformation_hook">
