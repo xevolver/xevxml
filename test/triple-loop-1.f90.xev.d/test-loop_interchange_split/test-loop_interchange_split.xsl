@@ -9,20 +9,19 @@
 
 
 	<xsl:template match="*">
-		<xsl:apply-templates select="." mode="xev_find_directive">
+		<xsl:apply-templates select="." mode="xevFindDirective">
 			<xsl:with-param name="directiveName" select="'xev loop_tag'" />
 		</xsl:apply-templates>
 	</xsl:template>
 
-	<xsl:template match="*" mode="xev_move_hook">
-		<xsl:apply-templates select="." mode="xev_move_loop">
+	<xsl:template match="*" mode="xevMoveHook">
+		<xsl:apply-templates select="." mode="xevMoveLoop">
 			<xsl:with-param name="loopName" select="'j'" />
 		</xsl:apply-templates>
 	</xsl:template>
 
-	<xsl:template match="SgFortranDo" mode="xev_transformation_hook">
-		<xsl:apply-templates select="."
-			mode="loop_interchange_trans" />
+	<xsl:template match="SgFortranDo" mode="xevTransformationHook">
+		<xsl:apply-templates select="." mode="xevLoopInterchange" />
 	</xsl:template>
 
 </xsl:stylesheet>

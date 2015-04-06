@@ -4,17 +4,17 @@
 
 	<xsl:import href="../loop/loop.xsl" />
 
-	<xsl:template match="*" mode="xev_move_loop">
+	<xsl:template match="*" mode="xevMoveLoop">
 		<xsl:param name="loopName" />
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
-				<xsl:apply-templates select="." mode="xev_transformation_hook" />
+				<xsl:apply-templates select="." mode="xevTransformationHook" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="xev_move_loop">
+					<xsl:apply-templates mode="xevMoveLoop">
 						<xsl:with-param name="loopName" select="$loopName" />
 					</xsl:apply-templates>
 				</xsl:copy>

@@ -2,20 +2,20 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="xev_find_directive">
+	<xsl:template match="*" mode="xevFindDirective">
 		<xsl:param name="directiveName" />
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/preceding-sibling::*[1]/SgPragma/@pragma = $directiveName">
 
-				<xsl:apply-templates select="." mode="xev_move_hook" />
+				<xsl:apply-templates select="." mode="xevMoveHook" />
 
 			</xsl:when>
 
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="xev_find_directive">
+					<xsl:apply-templates mode="xevFindDirective">
 						<xsl:with-param name="directiveName" select="$directiveName" />
 					</xsl:apply-templates>
 				</xsl:copy>
