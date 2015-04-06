@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="find_directive">
+	<xsl:template match="*" mode="xev_find_directive">
 		<xsl:param name="directiveName" />
 		<xsl:choose>
 			<xsl:when
@@ -15,7 +15,7 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="find_directive">
+					<xsl:apply-templates mode="xev_find_directive">
 						<xsl:with-param name="directiveName" select="$directiveName" />
 					</xsl:apply-templates>
 				</xsl:copy>

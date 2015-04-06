@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="SgFortranDo" mode="loop_interchange_rule">
+	<xsl:template match="SgFortranDo" mode="loop_interchange_trans">
 		<xsl:element name="SgFortranDo">
 			<xsl:copy-of select="SgBasicBlock/SgFortranDo/@*" />
 			<xsl:copy-of select="SgBasicBlock/SgFortranDo/*[1]" />
@@ -26,7 +26,7 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
-				<xsl:apply-templates select="." mode="loop_interchange_rule" />
+				<xsl:apply-templates select="." mode="loop_interchange_trans" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
