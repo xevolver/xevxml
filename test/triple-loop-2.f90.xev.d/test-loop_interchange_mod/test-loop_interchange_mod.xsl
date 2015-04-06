@@ -20,10 +20,10 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		<xsl:apply-templates select="." mode="xevLoopInterchange" />
+		<xsl:apply-templates select="." mode="xevLoopInterchangeMod" />
 	</xsl:template>
 
-	<xsl:template match="SgFortranDo" mode="xevLoopInterchange">
+	<xsl:template match="SgFortranDo" mode="xevLoopInterchangeMod">
 		<xsl:element name="SgFortranDo">
 			<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/@*" />
 			<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/*[1]" />
