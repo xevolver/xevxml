@@ -2,6 +2,8 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+	<xsl:import href="../loop/loop.xsl" />
+
 	<xsl:template match="*" mode="move_loop">
 		<xsl:param name="loopName" />
 		<xsl:param name="nextMode" />

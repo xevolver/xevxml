@@ -9,7 +9,7 @@
 	<xsl:import href="loop/loop.xsl" />
 
 	<!-- move/* -->
-	<xsl:import href="move/loop.xsl" />
+	<xsl:import href="move/move.xsl" />
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
