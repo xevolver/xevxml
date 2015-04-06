@@ -18,13 +18,13 @@
 	<xsl:output method="xml" encoding="UTF-8" />
 
 	<xsl:template match="/">
-		<xsl:apply-templates />
+		<xsl:apply-templates mode="xevInitHook" />
 	</xsl:template>
 
-	<xsl:template match="*">
+	<xsl:template match="*" mode="xevInitHook">
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
-			<xsl:apply-templates />
+			<xsl:apply-templates mode="xevInitHook" />
 		</xsl:copy>
 	</xsl:template>
 
