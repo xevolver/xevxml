@@ -8,6 +8,9 @@
 	<!-- loop/* -->
 	<xsl:import href="loop/loop.xsl" />
 
+	<!-- move/* -->
+	<xsl:import href="move/loop.xsl" />
+
 	<xsl:output method="xml" encoding="UTF-8" />
 
 	<xsl:template match="/">
