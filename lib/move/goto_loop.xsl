@@ -4,7 +4,7 @@
 
 	<xsl:import href="../loop/loop.xsl" />
 
-	<xsl:template match="*" mode="xevMoveLoop">
+	<xsl:template match="*" mode="xevGoToLoop">
 		<xsl:param name="loopName" />
 		<xsl:choose>
 			<xsl:when
@@ -14,7 +14,7 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="xevMoveLoop">
+					<xsl:apply-templates mode="xevGoToLoop">
 						<xsl:with-param name="loopName" select="$loopName" />
 					</xsl:apply-templates>
 				</xsl:copy>

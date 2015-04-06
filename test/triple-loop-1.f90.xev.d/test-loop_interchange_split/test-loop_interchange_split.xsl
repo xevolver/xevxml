@@ -15,12 +15,12 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevMoveLoop">
+		<xsl:apply-templates select="." mode="xevGoToLoop">
 			<xsl:with-param name="loopName" select="'j'" />
 		</xsl:apply-templates>
 	</xsl:template>
 
-	<xsl:template match="SgFortranDo" mode="xevTransformationHook">
+	<xsl:template match="*" mode="xevTransformationHook">
 		<xsl:apply-templates select="." mode="xevLoopInterchange" />
 	</xsl:template>
 

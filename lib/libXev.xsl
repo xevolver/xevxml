@@ -29,8 +29,6 @@
 	</xsl:template>
 
 
-
-
 	<!-- remove PreprocessingInfo -->
 	<xsl:template match="PreprocessingInfo">
 		<xsl:comment>
