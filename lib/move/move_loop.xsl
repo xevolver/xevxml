@@ -3,6 +3,8 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:import href="../loop/loop.xsl" />
+	
+	
 
 	<xsl:template match="*" mode="move_loop">
 		<xsl:param name="loopName" />
@@ -10,7 +12,7 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
-				<xsl:apply-templates mode="$nextMode" />
+				<xsl:apply-templates select="." mode="xev_transformation_hook" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>

@@ -13,7 +13,6 @@
 
 				<xsl:apply-templates select="." mode="move_loop">
 					<xsl:with-param name="loopName" select="'j'" />
-					<xsl:with-param name="nextMode" select="'loop_interchange_split'" />
 				</xsl:apply-templates>
 
 			</xsl:when>
@@ -28,6 +27,10 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<xsl:template match="SgFortranDo" mode="xev_transformation_hook">
+		<xsl:apply-templates select="."
+			mode="loop_interchange_rule" />
+	</xsl:template>
 
 </xsl:stylesheet>
 	

@@ -3,6 +3,6 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:import href="loop.xsl" />
+	<xsl:import href="move_loop.xsl" />
 
 </xsl:stylesheet>
