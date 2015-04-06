@@ -8,9 +8,9 @@ program triple_loop_1
     !$xev loop_tag
     do k=1,n-1
         do j=1,n-1
-            if (DNPOLD(J,M).GE.SMALL) then
+            if (DNPOLD(j,m).GE.SMALL) then
                 do i=1,n-1
-                    IF (DNPOLD(I,L).GE.SMALL) then
+                    IF (DNPOLD(i,l).GE.SMALL) then
                         B(i,j,k) = A(i,j,k)
                     end if
                 end do

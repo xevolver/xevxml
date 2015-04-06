@@ -5,9 +5,9 @@ REAL(kind=8) :: A(n,n,n), B(n,n,n)
     !$xev loop_tag
 DO k = 1, n - 1
 DO j = 1, n - 1
-IF (DNPOLD(j,M) >= SMALL) THEN
+IF (DNPOLD(j,m) >= SMALL) THEN
 DO i = 1, n - 1
-IF (DNPOLD(i,L) >= SMALL) THEN
+IF (DNPOLD(i,l) >= SMALL) THEN
 B(i,j,k) = A(i,j,k)
 END IF
 END DO

@@ -23,5 +23,39 @@
 		<xsl:apply-templates select="." mode="xevLoopInterchange" />
 	</xsl:template>
 
+	<xsl:template match="SgFortranDo" mode="xevLoopInterchange">
+		<xsl:element name="SgFortranDo">
+			<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/@*" />
+			<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/*[1]" />
+			<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/*[2]" />
+			<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/*[3]" />
+			<xsl:element name="SgBasicBlock">
+				<xsl:copy-of select="SgBasicBlock/@*" />
+				<xsl:element name="SgIfStmt">
+					<xsl:copy-of select="SgBasicBlock/SgIfStmt/@*" />
+					<xsl:copy-of
+						select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock/SgIfStmt/SgExprStatement" />
+					<xsl:element name="SgBasicBlock">
+						<xsl:copy>
+							<xsl:copy-of select="@*" />
+							<xsl:copy-of select="./*[1]" />
+							<xsl:copy-of select="./*[2]" />
+							<xsl:copy-of select="./*[3]" />
+							<xsl:element name="SgBasicBlock">
+								<xsl:copy-of
+									select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock/@*" />
+								<xsl:element name="SgIfStmt">
+									<xsl:copy-of select="SgBasicBlock/SgIfStmt/SgExprStatement" />
+									<xsl:copy-of
+										select="SgBasicBlock/SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock/SgIfStmt/SgBasicBlock" />
+								</xsl:element>
+							</xsl:element>
+						</xsl:copy>
+					</xsl:element>
+				</xsl:element>
+			</xsl:element>
+		</xsl:element>
+	</xsl:template>
+
 </xsl:stylesheet>
 	

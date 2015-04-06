@@ -68,7 +68,7 @@
                          <SgFunctionRefExp kind="1" name="DNPOLD"/>
                          <SgExprListExp>
                             <SgVarRefExp name="j"/>
-                            <SgVarRefExp name="M"/>
+                            <SgVarRefExp name="m"/>
              </SgExprListExp>
             </SgFunctionCallExp>
                         <SgVarRefExp name="SMALL"/>
@@ -93,7 +93,7 @@
                                  <SgFunctionRefExp kind="1" name="DNPOLD"/>
                                  <SgExprListExp>
                                     <SgVarRefExp name="i"/>
-                                    <SgVarRefExp name="L"/>
+                                    <SgVarRefExp name="l"/>
                  </SgExprListExp>
                 </SgFunctionCallExp>
                                 <SgVarRefExp name="SMALL"/>
