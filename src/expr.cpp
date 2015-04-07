@@ -929,17 +929,11 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
         name1 = vsym->get_declaration();
       }
       else{
-        if (isSgClassDefinition(scope)){
-          // unknown class member variables
-          // -- take a bottomup approach to building this AST
-          name1 = sb::buildInitializedName(name,SgTypeUnknown::createType());
-        }
-        else{
-          // implicit variables
-          scope = si::getEnclosingProcedure (sb::topScopeStack());
-          if(scope==NULL) scope = _file->get_globalScope();
-          name1  = sb::buildInitializedName(name,generateImplicitType(name));
-        }
+        // implicit variables
+        scope = si::getEnclosingProcedure (sb::topScopeStack());
+        if(scope==NULL) scope = _file->get_globalScope();
+        name1  = sb::buildInitializedName(name,generateImplicitType(name));
+
         name1->set_scope(scope);
         vsym= new SgVariableSymbol(name1);
         vsym->set_parent(scope);

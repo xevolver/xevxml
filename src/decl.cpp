@@ -1693,7 +1693,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
           break;
         }
       }
-      // this will never be true because "result" is not set yet.
+      // TODO: this will never be true because "result" is not set yet.
       if(prc->get_result_name() && prc->get_result_name()->get_definition()==NULL ){
         for(size_t i(0);i<varList.size();i++){
           if(prc->get_result_name()->get_name() == varList[i]->get_name().getString()){
