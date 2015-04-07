@@ -939,7 +939,10 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
     }
   }
   else {
-    ret= sb::buildVarRefExp(name);
+    //ret= sb::buildVarRefExp(name);
+    //vsym could be SgAliasSymbol but SageBuilder cannot handle it.
+    ret= new SgVarRefExp(vsym); // don't use SageBuilder.
+    si::setOneSourcePositionForTransformation(ret);
   }
   ret->set_parent(astParent);
 

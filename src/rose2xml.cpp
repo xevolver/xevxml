@@ -161,6 +161,8 @@ bool XevSageVisitor::hasInode(SgNode* node)
   if(t && t->containsInternalTypes())
     // such as SgArrayTYpe, SgPointerType, ...
     return true;
+  if(t && t->get_type_kind())
+    return true;
   if( t==NULL && node->get_numberOfTraversalSuccessors()>0)
     return true;
   if( getPreprocessingInfo(node) )

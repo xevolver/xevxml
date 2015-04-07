@@ -213,11 +213,22 @@ XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
 
 static void attribSgType(std::ostream& str, SgNode* node)
 {
+  // type kind is now written as an inode
+#if 0
   SgType* t = isSgType(node);
   if( t && t->get_type_kind() ){
     SgIntVal* v = isSgIntVal( t->get_type_kind() );
     if( v )
       str << " kind=\"" << v->get_valueString() << "\" ";
+  }
+#endif
+}
+
+static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
+{
+  SgType* t = isSgType(node);
+  if( t && t->get_type_kind() ){
+    v->visit(t->get_type_kind());
   }
 }
 
@@ -227,26 +238,26 @@ static void attribSgType(std::ostream& str, SgNode* node)
   visitSg##Type(xercesc::DOMNode* node, SgNode* astParent)              \
   {                                                                     \
     SgType* ret=NULL;                                                   \
-    string  kind;                                                       \
     SgExpression* kexp = NULL;                                          \
-    XmlGetAttributeValue(node,"kind",&kind);                            \
-    if( kind.size()>0 ) {                                               \
-      int val = atoi(kind.c_str());                                     \
-      kexp = new SgIntVal(val,kind);                                    \
-      kexp->set_startOfConstruct(DEFAULT_FILE_INFO );                   \
-      kexp->set_parent(ret);                                            \
-    }                                                                   \
+    SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
+      {                                                                 \
+        kexp = isSgExpression(astchild);                                \
+      }                                                                 \
+    SUBTREE_VISIT_END();                                                \
     ret= Sg##Type::createType(kexp);                                    \
+    if( kexp )                                                          \
+      kexp->set_parent(ret);                                            \
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
   /** XML attribute writer of Sg##Type */                               \
-  void XevSageVisitor::attribSg##Type(SgNode* node)                     \
-  {                                                                     \
+  void XevSageVisitor::attribSg##Type(SgNode* node){                    \
     attribSgType(sstr(),node);                                          \
   }                                                                     \
   /** XML interanal node writer of Sg##Type */                          \
-  void XevSageVisitor::inodeSg##Type(SgNode* node){}
+  void XevSageVisitor::inodeSg##Type(SgNode* node){                     \
+    inodeSgType(this,node);                                             \
+  }
 
 #define VISIT_TYPE2(Type)                                               \
   /** Visitor of a Sg##Type element in an XML document */               \
@@ -259,8 +270,7 @@ static void attribSgType(std::ostream& str, SgNode* node)
     return ret;                                                         \
   }                                                                     \
   /** XML attribute writer of Sg##Type */                               \
-  void XevSageVisitor::attribSg##Type(SgNode* node)                     \
-  {                                                                     \
+  void XevSageVisitor::attribSg##Type(SgNode* node) {                   \
     attribSgType(sstr(),node);                                          \
   }                                                                     \
   /** XML interanal node writer of Sg##Type */                          \
@@ -273,20 +283,13 @@ static void attribSgType(std::ostream& str, SgNode* node)
   {                                                                     \
     SgType* ret=NULL;                                                   \
     SgType* typ=NULL;                                                   \
-    string  kind;                                                       \
     SgExpression* kexp = NULL;                                          \
-    XmlGetAttributeValue(node,"kind",&kind);                            \
     SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
       {                                                                 \
-          typ = isSgType(astchild);                                     \
+        if(typ==0) typ = isSgType(astchild);                            \
+        if(kexp==0) kexp = isSgExpression(astchild);                    \
       }                                                                 \
     SUBTREE_VISIT_END();                                                \
-    if( kind.size()>0 ) {                                               \
-      int val = atoi(kind.c_str());                                     \
-      kexp = new SgIntVal(val,kind);                                    \
-      kexp->set_startOfConstruct(DEFAULT_FILE_INFO );                   \
-      kexp->set_parent(ret);                                            \
-    }                                                                   \
     if(typ)                                                             \
       ret = Sg##Type::createType(typ,kexp);                             \
     ret->set_parent(astParent);                                         \
@@ -297,8 +300,10 @@ static void attribSgType(std::ostream& str, SgNode* node)
   {                                                                     \
     attribSgType(sstr(),node);                                          \
   }                                                                     \
-  /** XML internal node writer of Sg##Type */                           \
-  void XevSageVisitor::inodeSg##Type(SgNode* node){}
+  /** XML interanal node writer of Sg##Type */                          \
+  void XevSageVisitor::inodeSg##Type(SgNode* node){                     \
+    inodeSgType(this,node);                                             \
+  }
 
 //VISIT_TYPE(ArrayType);
 //VISIT_TYPE(ClassType);
@@ -638,16 +643,17 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeString* ret = 0;
   int len=0;
-  string kind;
   SgExpression *kexp=0,*lexp=0;
 
-  XmlGetAttributeValue(node,"kind",&kind);
   XmlGetAttributeValue(node,"len",&len);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if(len && lexp==0){
         lexp = isSgExpression(astchild);
+      }
+      else if(kexp==0){
+        kexp = isSgExpression(astchild);
       }
     }
   SUBTREE_VISIT_END();
@@ -666,11 +672,8 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-  if(kind.size()>0){
-    kexp = new SgIntVal(atoi(kind.c_str()),kind);
-    kexp->set_startOfConstruct(DEFAULT_FILE_INFO);
+  if(kexp){
     ret->set_type_kind( kexp );
-    //kexp->set_parent(ret);
   }
   ret->set_parent(astParent);
   return ret;
@@ -687,6 +690,7 @@ void XevSageVisitor::attribSgTypeString(SgNode* node){
 void XevSageVisitor::inodeSgTypeString(SgNode* node){
   if(isSgTypeString(node)->get_lengthExpression())
     this->visit(isSgTypeString(node)->get_lengthExpression());
+  inodeSgType(this,node);
 }
 
 // ===============================================================================
@@ -740,13 +744,14 @@ XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeComplex*    ret = 0;
   SgType*           typ = 0;
-  string              kind;
+  SgExpression*    kexp = 0;
 
-  XmlGetAttributeValue(node,"kind",&kind);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
+      if(kexp==NULL)
+        kexp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
   if(typ==NULL){
@@ -759,11 +764,8 @@ XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
     XEV_ABORT();
   }
 
-  if( kind.size() ) {
-    int ival = atoi(kind.c_str());
-    SgExpression* v = new SgIntVal(ival,kind );
-    v->set_startOfConstruct(DEFAULT_FILE_INFO );
-    ret->set_type_kind( v );
+  if( kexp ) {
+    ret->set_type_kind( kexp );
   }
   ret->set_parent(astParent);
   return ret;
@@ -774,6 +776,7 @@ void XevSageVisitor::attribSgTypeComplex(SgNode* node){
 }
 /** XML internal node writer of SgTypeComplex */
 void XevSageVisitor::inodeSgTypeComplex(SgNode* node){
+  inodeSgType(this,node);
   this->visit(isSgTypeComplex(node)->get_base_type());
 }
 
@@ -785,13 +788,14 @@ XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
 {
   SgTypeImaginary*  ret = 0;
   SgType*           typ = 0;
-  string              kind;
+  SgExpression*     kexp = 0;
 
-  XmlGetAttributeValue(node,"kind",&kind);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
+      if(kexp==0)
+        kexp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
   if(typ==NULL){
@@ -804,11 +808,8 @@ XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
     XEV_ABORT();
   }
 
-  if( kind.size() ) {
-    int ival = atoi(kind.c_str());
-    SgExpression* v = new SgIntVal(ival,kind );
-    v->set_startOfConstruct(DEFAULT_FILE_INFO );
-    ret->set_type_kind( v );
+  if( kexp ) {
+    ret->set_type_kind( kexp );
   }
   ret->set_parent(astParent);
   return ret;
@@ -819,6 +820,7 @@ void XevSageVisitor::attribSgTypeImaginary(SgNode* node){
 }
 /** XML internal node writer of SgTypeImaginary */
 void XevSageVisitor::inodeSgTypeImaginary(SgNode* node){
+  inodeSgType(this,node);
   this->visit(isSgTypeImaginary(node)->get_base_type());
 }
 
@@ -829,15 +831,15 @@ SgNode*
 XevXmlVisitor::visitSgTypeInt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgType* ret=NULL;
-  string  kind;
   SgExpression* kexp = NULL;
-  XmlGetAttributeValue(node,"kind",&kind);
-  if( kind.size()>0 ) {
-    int val = atoi(kind.c_str());
-    kexp = new SgIntVal(val,kind);
-    kexp->set_startOfConstruct(DEFAULT_FILE_INFO );
-    kexp->set_parent(ret);
-  }
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(kexp==0)
+        kexp = isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+
   ret= SgTypeInt::createType(0,kexp);
   ret->set_parent(astParent);
   return ret;
@@ -847,7 +849,9 @@ void XevSageVisitor::attribSgTypeInt(SgNode* node){
   attribSgType(sstr(),node);
 }
 /** XML internal node writer of SgTypeInt */
-void XevSageVisitor::inodeSgTypeInt(SgNode* node){}
+void XevSageVisitor::inodeSgTypeInt(SgNode* node){
+  inodeSgType(this,node);
+}
 
 
 // ===============================================================================
@@ -882,4 +886,3 @@ void XevSageVisitor::attribSgPointerType(SgNode* node){
 /** XML interanal node writer of SgPointerType */
 void XevSageVisitor::inodeSgPointerType(SgNode* node){
 }
-
