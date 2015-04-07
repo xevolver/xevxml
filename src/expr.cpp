@@ -918,20 +918,32 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
     }
     else {
       SgInitializedName * name1 =0;
-      if (isSgClassDefinition(scope)){
-        // unknown class member variables
-        // -- take a bottomup approach to building this AST
-        name1 = sb::buildInitializedName(name,SgTypeUnknown::createType());
+      SgSymbol* sym  = si::lookupSymbolInParentScopes(name);
+      if(isSgAliasSymbol(sym)){
+        SgAliasSymbol* asym = isSgAliasSymbol(sym);
+        vsym = isSgVariableSymbol(asym->get_alias());
+        if(vsym==0) {
+          XEV_DEBUG_INFO(node);
+          XEV_ABORT();
+        }
+        name1 = vsym->get_declaration();
       }
       else{
-        // implicit variables
-        scope = si::getEnclosingProcedure (sb::topScopeStack());
-        if(scope==NULL) scope = _file->get_globalScope();
-        name1  = sb::buildInitializedName(name,generateImplicitType(name));
+        if (isSgClassDefinition(scope)){
+          // unknown class member variables
+          // -- take a bottomup approach to building this AST
+          name1 = sb::buildInitializedName(name,SgTypeUnknown::createType());
+        }
+        else{
+          // implicit variables
+          scope = si::getEnclosingProcedure (sb::topScopeStack());
+          if(scope==NULL) scope = _file->get_globalScope();
+          name1  = sb::buildInitializedName(name,generateImplicitType(name));
+        }
+        name1->set_scope(scope);
+        vsym= new SgVariableSymbol(name1);
+        vsym->set_parent(scope);
       }
-      name1->set_scope(scope);
-      vsym= new SgVariableSymbol(name1);
-      vsym->set_parent(scope);
       ret = new SgVarRefExp(vsym);
       ret->set_symbol(vsym);
       ret->get_symbol()->set_declaration(name1);
