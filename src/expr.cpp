@@ -511,7 +511,8 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     if( isSgClassDefinition(scope) == NULL ){
       scope = TransformationSupport::getClassDefinition(sb::topScopeStack());
       if( scope == NULL ){
-        scope = TransformationSupport::getGlobalScope(sb::topScopeStack());
+        scope = _file->get_globalScope();
+        //scope = TransformationSupport::getGlobalScope(sb::topScopeStack());
       }
     }
     if(scope==NULL) {
