@@ -1363,7 +1363,7 @@ void XevSageVisitor::attribSgInquireStatement(SgNode* node)
     if( n->get_delim() )        sstr() << " delim=\"1\" ";
     if( n->get_pad() )          sstr() << " pad=\"1\" ";
     if( n->get_asynchronous() ) sstr() << " asynchronous=\"1\" ";
-    if( n->get_stream() )       sstr() << " decimal=\"1\" ";
+    if( n->get_decimal() )      sstr() << " decimal=\"1\" ";
     if( n->get_stream() )       sstr() << " stream=\"1\" ";
     if( n->get_size() )         sstr() << " size=\"1\" ";
     if( n->get_pending() )      sstr() << " pending=\"1\" ";
@@ -1376,9 +1376,9 @@ void XevSageVisitor::inodeSgInquireStatement(SgNode* node)
   if(isSgInquireStatement(node)){
     SgInquireStatement* inq = isSgInquireStatement(node);
     TRAVERSE_IF_EXISTS(inq->get_iolengthExp());
-    TRAVERSE_IF_EXISTS(inq->get_unit());
-    TRAVERSE_IF_EXISTS(inq->get_iostat());
-    TRAVERSE_IF_EXISTS(inq->get_err());
+    //TRAVERSE_IF_EXISTS(inq->get_unit());
+    //TRAVERSE_IF_EXISTS(inq->get_iostat());
+    //TRAVERSE_IF_EXISTS(inq->get_err());
     TRAVERSE_IF_EXISTS(inq->get_iomsg());
     TRAVERSE_IF_EXISTS(inq->get_file());
     TRAVERSE_IF_EXISTS(inq->get_access());
