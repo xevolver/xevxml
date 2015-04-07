@@ -192,6 +192,11 @@ bool XevSageVisitor::hasInode(SgNode* node)
   case V_SgInterfaceBody:
     if(isSgInterfaceBody(node)->get_use_function_name()==false)
       return true;
+    else return false;
+    break;
+  case V_SgFormatItem:
+    if(isSgFormatItem(node)->get_format_item_list())
+      return true;
   default:
     return false;
   }
