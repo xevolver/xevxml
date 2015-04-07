@@ -1140,6 +1140,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    bool                            f_pure  = false;
    bool                            f_elem  = false;
    bool                            f_recur = false;
+   bool                            f_old   = false;
    Sg_File_Info* info = DEFAULT_FILE_INFO;
    info->setOutputInCodeGeneration();
 
@@ -1148,6 +1149,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    XmlGetAttributeValue(node,"recursive",&f_recur);
    XmlGetAttributeValue(node,"pure",&f_pure);
    XmlGetAttributeValue(node,"elemental",&f_elem);
+   XmlGetAttributeValue(node,"old",&f_old);
 
    // the scope must be SgGlobal of this SgProject.
    //scope = isSgScopeStatement(_file->get_globalScope());
@@ -1181,6 +1183,8 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
        ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
                                                 (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
+       //SgNode::get_globalFunctionTypeTable()->print_functypetable(std::cerr);
+       //std::cerr << "--------------------" << ret->get_type() -> get_return_type() -> class_name() << std::endl;
      }
      else {
        // add (block data) 0828
@@ -1202,7 +1206,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    }
    ret->set_scope(scope);
    ret->set_parent(astParent);
-
+   ret->set_oldStyleDefinition(f_old);
    cld_ = (node)->getFirstChild();
    while(cld_) {
      if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
@@ -1235,8 +1239,10 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
      if(ini){
        ini->set_declptr(ret);
-       // This will remove type description before the function name
-       ret->get_type()->set_return_type(SgTypeVoid::createType());
+       if(ret->isFunction() == false || ret->get_oldStyleDefinition()){
+         // This will remove type description before the function name
+         ret->get_type()->set_return_type(SgTypeVoid::createType());
+       }
      }
      var->set_scope(fdf);
 
@@ -1267,7 +1273,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
        SgClassType* ctyp = isSgClassType(typ);
        SgClassSymbol* csym
          = si::lookupClassSymbolInParentScopes(ctyp->get_name(),body);
-       body->get_symbol_table()->print();
+       //body->get_symbol_table()->print();
        if(csym!=NULL){
          ctyp->set_declaration(csym->get_declaration());
        }
@@ -1301,6 +1307,8 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
        sstr() << " elemental=\"1\"";
      if(n->get_functionModifier().isRecursive())
        sstr() << " recursive=\"1\"";
+     if(n->get_oldStyleDefinition())
+       sstr() << " old=\"1\"";
    }
    attribSgFunctionDeclaration(node);
  }
@@ -1674,6 +1682,28 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     val->set_parent(ret);
   }
 
+  // check the result variable
+  if( si::is_Fortran_language() ){
+    SgProcedureHeaderStatement* prc = isSgProcedureHeaderStatement(si::getEnclosingFunctionDeclaration(ret));
+    if(prc) {
+      for(size_t i(0);i<varList.size();i++){
+        if(prc->get_name() == varList[i]->get_name()){
+          prc->set_result_name(varList[i]);
+          prc->get_result_name()->set_definition(varList[i]->get_definition());
+          break;
+        }
+      }
+      // this will never be true because "result" is not set yet.
+      if(prc->get_result_name() && prc->get_result_name()->get_definition()==NULL ){
+        for(size_t i(0);i<varList.size();i++){
+          if(prc->get_result_name()->get_name() == varList[i]->get_name().getString()){
+            prc->get_result_name()->set_definition(varList[i]->get_definition());
+            break;
+          }
+        }
+      }
+    }
+  }
   return ret;
 }
 /** XML attribute writer of SgVariableDeclaration */
