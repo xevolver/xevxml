@@ -264,6 +264,58 @@ void XevSageVisitor::inodeSgFunctionParameterTypeList(SgNode* node)
     this->visit(lst[i]);
 }
 
+// ===============================================================================
+/// Visitor of a SgNameGroup element in an XML document
+SgNode*
+XevXmlVisitor::visitSgNameGroup(xe::DOMNode* node, SgNode* astParent)
+{
+  SgNameGroup* ret = new SgNameGroup();
+  string names;
+  string gname;
+
+  if(XmlGetAttributeValue(node,"group",&gname) && XmlGetAttributeValue(node,"names",&names)){
+    char* str = (char*)names.c_str();
+    char* c;
+    SgStringList slst;
+    ret->set_group_name( gname );;
+
+    c = strtok(str,",");
+    if(c) slst.push_back(c);
+    while(c){
+      c = strtok(NULL,",");
+      if(c) slst.push_back(c);
+    }
+    ret->get_name_list() = slst;
+  }
+  else{
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+
+  ret->set_parent(NULL);//parent must be set to NULL.
+  return ret;
+}
+/** XML attribute writer of SgNameGroup */
+void XevSageVisitor::attribSgNameGroup(SgNode* node)
+{
+  SgNameGroup* n = isSgNameGroup(node);
+  if(n) {
+    sstr() << " group=\"" << n->get_group_name() << "\" ";;
+
+    SgStringList& nl = n->get_name_list();
+    if(nl.size()){ // this should be true.
+      sstr() << " names=\"";
+      for(size_t i(0);i<nl.size();i++){
+        sstr() << nl[i];
+        if( i < nl.size()-1)
+          sstr() << ",";
+      }
+      sstr() << "\" ";
+    }
+  }
+}
+INODE_SUPP_DEFAULT(NameGroup);
+
 
 // ===============================================================================
 /// Visitor of a SgPragma element in an XML document

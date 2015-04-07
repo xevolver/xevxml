@@ -241,6 +241,7 @@ SAGE3_SUPP(DataStatementObject);
 SAGE3_SUPP(DataStatementValue);
 SAGE3_SUPP(FormatItem);
 SAGE3_SUPP(FunctionParameterTypeList);
+SAGE3_SUPP(NameGroup);
 SAGE3_SUPP(Pragma);
 SAGE3_SUPP(SourceFile);
 SAGE3_SUPP(TypedefSeq);

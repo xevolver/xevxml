@@ -1025,28 +1025,30 @@ SgNode*
 XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgNamelistStatement*    ret = new SgNamelistStatement(DEFAULT_FILE_INFO);
-  SgNameGroup*            grp = new SgNameGroup();
-  SgNameGroupPtrList      glst;
+  //SgNameGroup*            grp = new SgNameGroup();
+  SgNameGroup*            grp = 0;
+  //SgNameGroupPtrList      glst;
   SgStringVal*            str = 0;
 
-  string                  name;
+  //string                  name;
   SgNamelistStatement* nondefn = new SgNamelistStatement(DEFAULT_FILE_INFO);
-  XmlGetAttributeValue(node,"group",&name);
+  //XmlGetAttributeValue(node,"group",&name);
 
-  Rose_STL_Container<std::string> slst;
+  //Rose_STL_Container<std::string> slst;
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      str = isSgStringVal(astchild);
-      if( str ) {
-        slst.push_back(  str->get_value() );
+      grp = isSgNameGroup(astchild);
+      if( grp ) {
+        grp->set_parent(NULL);//parent must be set to NULL.
+        ret->get_group_list().push_back( grp );
       }
     }
   SUBTREE_VISIT_END();
 
-  grp->set_group_name( name );
-  grp->get_name_list() = slst;
-  grp->set_parent(NULL);//parent must be set to NULL.
-  ret->get_group_list().push_back( grp );
+  //grp->set_group_name( name );
+  //grp->get_name_list() = slst;
+  //grp->set_parent(NULL);
+  //ret->get_group_list().push_back( grp );
   ret->set_parent(astParent);
   ret->set_firstNondefiningDeclaration(nondefn);
   ret->set_definingDeclaration(ret);
@@ -1058,6 +1060,7 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
 /** XML attribute writer of SgNamelistStatement */
 void XevSageVisitor::attribSgNamelistStatement(SgNode* node)
 {
+#if 0
   SgNamelistStatement*    nlst = isSgNamelistStatement(node);
 
   if( nlst ) {
@@ -1065,6 +1068,7 @@ void XevSageVisitor::attribSgNamelistStatement(SgNode* node)
     SgNameGroup* nam = isSgNameGroup(grp[0]);
     sstr() << " group=\"" << nam->get_group_name() << "\" ";
   }
+#endif
   attribSgStatement(sstr(),node);
 }
 /** XML internal node writer of SgNamelistStatement */
@@ -1073,6 +1077,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
   SgNameGroupPtrList & grp = isSgNamelistStatement(node)->get_group_list();
   for(size_t i=0;i<grp.size();i++) {
     SgNameGroup* nam = isSgNameGroup(grp[i]);
+    /*
     SgStringList & nl = nam->get_name_list();
     string s;
     for(size_t j=0;j<nl.size();j++) {
@@ -1081,418 +1086,420 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
       SgStringVal *sv = SageBuilder::buildStringVal(s);
       this->visit(sv);
     }
-  }
-}
+    */
+     if(nam) this->visit(nam);
+   }
+ }
 
 
 
-// =====================================================================
-/// Visitor of a SgPragmaDeclaration element in an XML document
-SgNode*
-XevXmlVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
-{
-  SgPragmaDeclaration* ret = 0;
-  SgPragma* pr = 0;
+ // =====================================================================
+ /// Visitor of a SgPragmaDeclaration element in an XML document
+ SgNode*
+ XevXmlVisitor::visitSgPragmaDeclaration(xe::DOMNode* node, SgNode* astParent)
+ {
+   SgPragmaDeclaration* ret = 0;
+   SgPragma* pr = 0;
 
-  SUBTREE_VISIT_BEGIN(node,child,0)
-    {
-      if(pr==0)
-        pr = isSgPragma(child);
-    }
-  SUBTREE_VISIT_END();
+   SUBTREE_VISIT_BEGIN(node,child,0)
+     {
+       if(pr==0)
+         pr = isSgPragma(child);
+     }
+   SUBTREE_VISIT_END();
 
-  if(pr) {
-    ret = sb::buildPragmaDeclaration(pr->get_pragma());
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  return ret;
-}
-DECL_DEFAULT(PragmaDeclaration);
-
-
-
-// =====================================================================
-/// Visitor of a SgProcedureHeaderStatement element in an XML document
-SgNode*
-XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astParent)
-{
-  SgProcedureHeaderStatement*     ret = 0;
-  //SgFunctionType*                 typ = 0;
-  SgType*                         typ = 0;
-  SgFunctionParameterList*        lst = 0;
-  SgScopeStatement*               scope = 0;
-  SgBasicBlock*                   def = 0;
-  SgFunctionDefinition*           fdf = 0;
-  SgInitializedName*              var = 0;
-
-  string                          name,rname;
-  int                             kind=0;
-  bool                            f_pure  = false;
-  bool                            f_elem  = false;
-  bool                            f_recur = false;
-  Sg_File_Info* info = DEFAULT_FILE_INFO;
-  info->setOutputInCodeGeneration();
-
-  XmlGetAttributeValue(node,"name",&name);
-  XmlGetAttributeValue(node,"kind",&kind);
-  XmlGetAttributeValue(node,"recursive",&f_recur);
-  XmlGetAttributeValue(node,"pure",&f_pure);
-  XmlGetAttributeValue(node,"elemental",&f_elem);
-
-  // the scope must be SgGlobal of this SgProject.
-  //scope = isSgScopeStatement(_file->get_globalScope());
-  scope = sb::topScopeStack();
-  while(scope && scope->containsOnlyDeclarations()==false){
-    //cerr << scope->class_name() <<"->";;
-    scope = isSgStatement(scope->get_parent())->get_scope();
-    //cerr << scope->class_name() << endl;
-  }
-  xe::DOMNode* cld_ = (node)->getFirstChild();
-  while(cld_) {
-    if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
-      char* buf = xe::XMLString::transcode(cld_->getNodeName());
-      string nname = buf;
-      xe::XMLString::release(&buf);
-      if(nname != "SgFunctionDefinition" && nname != "SgBasicBlock"){
-        SgNode* astchild = this->visit(cld_,0);
-        if(typ==0)
-          typ = isSgType(astchild);
-        //typ = isSgFunctionType(astchild);
-        if(lst==0)
-          lst = isSgFunctionParameterList(astchild);
-        if(var==0)
-          var = isSgInitializedName(astchild);
-      }
-    }
-    cld_=cld_->getNextSibling();
-  }
-
-  if(lst && typ){
-    if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-      ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
-                                               (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
-    }
-    else {
-      // add (block data) 0828
-      SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
-      ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf/*=NULL*/ );
-      ret->set_type(functionType);
-      ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
-    }
-    lst->set_parent(ret);
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  if(var){
-    var->set_parent(ret);
-    var->set_scope(scope); // is this OK??
-    //var->set_scope(sb::topScopeStack());
-  }
-  ret->set_scope(scope);
-  ret->set_parent(astParent);
-
-  cld_ = (node)->getFirstChild();
-  while(cld_) {
-    if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
-      char* buf = xe::XMLString::transcode(cld_->getNodeName());
-      string nname = buf;
-      xe::XMLString::release(&buf);
-      if(nname == "SgFunctionDefinition" || nname == "SgBasicBlock"){
-        SgNode* astchild = this->visit(cld_,ret);
-        if(fdf==0)
-          fdf = isSgFunctionDefinition(astchild);
-        // for block data
-        if(kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind && def==0)
-          def = isSgBasicBlock(astchild);
-      }
-    }
-    cld_=cld_->getNextSibling();
-  }
-  if( fdf==0&&kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-    fdf = new SgFunctionDefinition( info,def );
-    if(def)
-      def->set_parent(fdf);
-    fdf->set_parent(ret);
-  }
-  if(fdf){
-    //si::replaceStatement( ret->get_definition()->get_body(),def,true );
-    ret->set_definition(fdf);
-    fdf->set_declaration(ret);
-    fdf->set_parent(ret);
-    VardefSearch search(name);
-    SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
-    if(ini){
-      ini->set_declptr(ret);
-      // This will remove type description before the function name
-      ret->get_type()->set_return_type(SgTypeVoid::createType());
-    }
-    var->set_scope(fdf);
-
-#if 1
-    SgBasicBlock* body = fdf->get_body();
-    XEV_ASSERT(body!=NULL);
-    if(lst && si::is_Fortran_language()==true){
-      for(size_t i(0);i<lst->get_args().size();i++){
-        ini = lst->get_args()[i];
-        ini->set_parent(fdf);
-        XEV_ASSERT(body!=NULL);
-        SgVariableSymbol* sym = body->lookup_variable_symbol(ini->get_name());
-        if(sym!=NULL){
-          ini->set_scope(body);
-          ini->set_type(sym->get_type());
-          ini->set_declptr(sym->get_declaration()->get_declptr());
-        }
-        else{
-          SgVariableSymbol* vsym = new SgVariableSymbol(ini);
-          fdf->insert_symbol(ini->get_name(),vsym);
-          ini->set_scope(fdf);
-          //ini->set_type(sym->get_type());
-        }
-      }
-    } // if lst
-#endif
-    if( isSgClassType(typ) ){
-      SgClassType* ctyp = isSgClassType(typ);
-      SgClassSymbol* csym
-        = si::lookupClassSymbolInParentScopes(ctyp->get_name(),body);
-      body->get_symbol_table()->print();
-      if(csym!=NULL){
-        ctyp->set_declaration(csym->get_declaration());
-      }
-    }
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  if(f_pure)
-    ret->get_functionModifier().setPure();
-  if(f_elem)
-    ret->get_functionModifier().setElemental();
-  if(f_recur)
-    ret->get_functionModifier().setRecursive();
-  ret->set_parent(astParent);
-
-  return ret;
-}
-/** XML attribute writer of SgProcedureHeaderStatement */
-void XevSageVisitor::attribSgProcedureHeaderStatement(SgNode* node)
-{
-  SgProcedureHeaderStatement* n = isSgProcedureHeaderStatement(node);
-  if(n) {
-    sstr() << " kind=\"" << n->get_subprogram_kind () << "\" ";
-    if(n->get_result_name()->get_name() != n->get_name())
-      sstr() << " result=\"" << n->get_result_name()->get_name().getString() << "\" ";
-    if(n->get_functionModifier().isPure())
-      sstr() << " pure=\"1\"";
-    if(n->get_functionModifier().isElemental())
-      sstr() << " elemental=\"1\"";
-    if(n->get_functionModifier().isRecursive())
-      sstr() << " recursive=\"1\"";
-  }
-  attribSgFunctionDeclaration(node);
-}
-/** XML internal node writer of SgProcedureHeaderStatement */
-void XevSageVisitor::inodeSgProcedureHeaderStatement(SgNode* node)
-{
-  inodeSgFunctionDeclaration(node);
-}
+   if(pr) {
+     ret = sb::buildPragmaDeclaration(pr->get_pragma());
+   }
+   else {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   return ret;
+ }
+ DECL_DEFAULT(PragmaDeclaration);
 
 
 
-// =====================================================================
-/// Visitor of a SgProgramHeaderStatement element in an XML document
-SgNode*
-XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParent)
-{
-  SgType*               typ = 0;
-  SgFunctionDefinition* fdf = 0;
-  SgBasicBlock*         def = 0;
-  SgFunctionParameterList*      lst = 0;
+ // =====================================================================
+ /// Visitor of a SgProcedureHeaderStatement element in an XML document
+ SgNode*
+ XevXmlVisitor::visitSgProcedureHeaderStatement(xe::DOMNode* node, SgNode* astParent)
+ {
+   SgProcedureHeaderStatement*     ret = 0;
+   //SgFunctionType*                 typ = 0;
+   SgType*                         typ = 0;
+   SgFunctionParameterList*        lst = 0;
+   SgScopeStatement*               scope = 0;
+   SgBasicBlock*                   def = 0;
+   SgFunctionDefinition*           fdf = 0;
+   SgInitializedName*              var = 0;
 
-  string              name;
-  int elabel = 0;
+   string                          name,rname;
+   int                             kind=0;
+   bool                            f_pure  = false;
+   bool                            f_elem  = false;
+   bool                            f_recur = false;
+   Sg_File_Info* info = DEFAULT_FILE_INFO;
+   info->setOutputInCodeGeneration();
 
-  if(XmlGetAttributeValue(node,"name",&name)==false){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  SgFunctionType* ftyp = new SgFunctionType(SgTypeVoid::createType(), false);
-  SgProgramHeaderStatement* ret
-    = new SgProgramHeaderStatement(astParent->get_file_info(),SgName(name), ftyp, NULL);
+   XmlGetAttributeValue(node,"name",&name);
+   XmlGetAttributeValue(node,"kind",&kind);
+   XmlGetAttributeValue(node,"recursive",&f_recur);
+   XmlGetAttributeValue(node,"pure",&f_pure);
+   XmlGetAttributeValue(node,"elemental",&f_elem);
 
-  ret->set_definingDeclaration(ret);
-  ret->set_scope(sb::topScopeStack());
-  ret->set_parent(astParent);
+   // the scope must be SgGlobal of this SgProject.
+   //scope = isSgScopeStatement(_file->get_globalScope());
+   scope = sb::topScopeStack();
+   while(scope && scope->containsOnlyDeclarations()==false){
+     //cerr << scope->class_name() <<"->";;
+     scope = isSgStatement(scope->get_parent())->get_scope();
+     //cerr << scope->class_name() << endl;
+   }
+   xe::DOMNode* cld_ = (node)->getFirstChild();
+   while(cld_) {
+     if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
+       char* buf = xe::XMLString::transcode(cld_->getNodeName());
+       string nname = buf;
+       xe::XMLString::release(&buf);
+       if(nname != "SgFunctionDefinition" && nname != "SgBasicBlock"){
+         SgNode* astchild = this->visit(cld_,0);
+         if(typ==0)
+           typ = isSgType(astchild);
+         //typ = isSgFunctionType(astchild);
+         if(lst==0)
+           lst = isSgFunctionParameterList(astchild);
+         if(var==0)
+           var = isSgInitializedName(astchild);
+       }
+     }
+     cld_=cld_->getNextSibling();
+   }
 
-  //SgGlobal* globalScope = isSgGlobal(sb::topScopeStack());
-  //globalScope->append_statement(ret);
-  //SgFunctionSymbol* symbol = new SgFunctionSymbol(ret);
-  //globalScope->insert_symbol(SgName(name.c_str()), symbol);
+   if(lst && typ){
+     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
+       ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
+                                                (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
+     }
+     else {
+       // add (block data) 0828
+       SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
+       ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf/*=NULL*/ );
+       ret->set_type(functionType);
+       ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
+     }
+     lst->set_parent(ret);
+   }
+   else {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   if(var){
+     var->set_parent(ret);
+     var->set_scope(scope); // is this OK??
+     //var->set_scope(sb::topScopeStack());
+   }
+   ret->set_scope(scope);
+   ret->set_parent(astParent);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
-    {
-      if( typ==0 )
-        typ = isSgType(astchild);
-      if( fdf==0 )
-        fdf = isSgFunctionDefinition(astchild);
-      if(def==0) {
-        def = isSgBasicBlock(astchild);
-      }
-      if(lst==0)
-        lst = isSgFunctionParameterList(astchild);
-    }
-  SUBTREE_VISIT_END();
+   cld_ = (node)->getFirstChild();
+   while(cld_) {
+     if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
+       char* buf = xe::XMLString::transcode(cld_->getNodeName());
+       string nname = buf;
+       xe::XMLString::release(&buf);
+       if(nname == "SgFunctionDefinition" || nname == "SgBasicBlock"){
+         SgNode* astchild = this->visit(cld_,ret);
+         if(fdf==0)
+           fdf = isSgFunctionDefinition(astchild);
+         // for block data
+         if(kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind && def==0)
+           def = isSgBasicBlock(astchild);
+       }
+     }
+     cld_=cld_->getNextSibling();
+   }
+   if( fdf==0&&kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
+     fdf = new SgFunctionDefinition( info,def );
+     if(def)
+       def->set_parent(fdf);
+     fdf->set_parent(ret);
+   }
+   if(fdf){
+     //si::replaceStatement( ret->get_definition()->get_body(),def,true );
+     ret->set_definition(fdf);
+     fdf->set_declaration(ret);
+     fdf->set_parent(ret);
+     VardefSearch search(name);
+     SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
+     if(ini){
+       ini->set_declptr(ret);
+       // This will remove type description before the function name
+       ret->get_type()->set_return_type(SgTypeVoid::createType());
+     }
+     var->set_scope(fdf);
 
-  //SgFunctionDefinition* programDefinition = new SgFunctionDefinition(ret, def);
-  if(fdf==0 && def){
-    fdf = new SgFunctionDefinition(ret, def);
-    fdf->setCaseInsensitive(true);
-    def->setCaseInsensitive(true);
-    def->set_parent(fdf);
-  }
-  fdf->set_parent(ret);
+ #if 1
+     SgBasicBlock* body = fdf->get_body();
+     XEV_ASSERT(body!=NULL);
+     if(lst && si::is_Fortran_language()==true){
+       for(size_t i(0);i<lst->get_args().size();i++){
+         ini = lst->get_args()[i];
+         ini->set_parent(fdf);
+         XEV_ASSERT(body!=NULL);
+         SgVariableSymbol* sym = body->lookup_variable_symbol(ini->get_name());
+         if(sym!=NULL){
+           ini->set_scope(body);
+           ini->set_type(sym->get_type());
+           ini->set_declptr(sym->get_declaration()->get_declptr());
+         }
+         else{
+           SgVariableSymbol* vsym = new SgVariableSymbol(ini);
+           fdf->insert_symbol(ini->get_name(),vsym);
+           ini->set_scope(fdf);
+           //ini->set_type(sym->get_type());
+         }
+       }
+     } // if lst
+ #endif
+     if( isSgClassType(typ) ){
+       SgClassType* ctyp = isSgClassType(typ);
+       SgClassSymbol* csym
+         = si::lookupClassSymbolInParentScopes(ctyp->get_name(),body);
+       body->get_symbol_table()->print();
+       if(csym!=NULL){
+         ctyp->set_declaration(csym->get_declaration());
+       }
+     }
+   }
+   else {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   if(f_pure)
+     ret->get_functionModifier().setPure();
+   if(f_elem)
+     ret->get_functionModifier().setElemental();
+   if(f_recur)
+     ret->get_functionModifier().setRecursive();
+   ret->set_parent(astParent);
 
-  Sg_File_Info* info = DEFAULT_FILE_INFO;
-  info->setOutputInCodeGeneration();
-  fdf->set_file_info(info);
-
-  ret->set_name(SgName(name.c_str()));
-  ret->set_definition(fdf);
-  if(fdf->get_file_info()==0) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  if(def && def->get_file_info()==0) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-
-  if(XmlGetAttributeValue(node,"elabel",&elabel)){
-    SgLabelSymbol*  s = new SgLabelSymbol();
-    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
-    s->get_fortran_statement()->set_parent(s);
-    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
-    s->set_numeric_label_value( elabel );
-    SgLabelRefExp*  l = new SgLabelRefExp( s );
-    ret->set_end_numeric_label( l );
-  }
-  return ret;
-}
-/** XML attribute writer of SgProgramHeaderStatement */
-void XevSageVisitor::attribSgProgramHeaderStatement(SgNode* node)
-{
-  SgProgramHeaderStatement* p = isSgProgramHeaderStatement(node);
-  if(p){
-    SgLabelRefExp* l = p->get_end_numeric_label();
-    if(l)
-      sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
-  }
-  attribSgFunctionDeclaration(node);
-}
-/** XML internal node writer of SgProgramHeaderStatement */
-void XevSageVisitor::inodeSgProgramHeaderStatement(SgNode* node)
-{
-  inodeSgFunctionDeclaration(node);
-}
-
-
-
-// =====================================================================
-/// Visitor of a SgTypedefDeclaration element in an XML document
-SgNode*
-XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
-{
-  SgTypedefDeclaration*     ret = 0;
-  SgClassDeclaration*       cls = 0;
-  SgType*                   typ = 0;
-
-  //xe::DOMNamedNodeMap* amap = node->getAttributes();
-  //xe::DOMNode* satt = 0;
-  string name;
-
-  XmlGetAttributeValue(node,"name",&name);
-
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
-    {
-      if(typ==0)
-        typ = isSgType(astchild);
-      if(cls==0)
-        cls = isSgClassDeclaration(astchild);
-    }
-  SUBTREE_VISIT_END();
-
-  if(cls) {
-    SgType * type = cls->get_type();
-    SgNamedType *namedType = isSgNamedType(type->findBaseType());
-    namedType->get_declaration()->set_definingDeclaration(cls);
-    // for s010.c  to pass runAllTests
-    namedType->set_declaration (cls->get_firstNondefiningDeclaration());
-    ret = sb::buildTypedefDeclaration( name.c_str(),
-                                       namedType,
-                                       sb::topScopeStack());
-    XEV_ASSERT(ret!=NULL);
-    cls->set_parent(ret);
-    ret->set_declaration( isSgDeclarationStatement(cls->get_firstNondefiningDeclaration()) );
-    ret->set_requiresGlobalNameQualificationOnType(true);
-    if(cls->get_definingDeclaration() == cls )
-      ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
-    SgClassType* ctyp = isSgClassType(typ);
-    XEV_ASSERT(ctyp!=NULL);
-    ctyp->set_declaration(cls->get_firstNondefiningDeclaration());
-  }
-  else if(typ) {                                         // add (0819)
-    ret = sb::buildTypedefDeclaration( name.c_str(),
-                                       typ,
-                                       sb::topScopeStack());
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  ret->set_parent(astParent);
-  return ret;
-}
-/** XML attribute writer of SgTypedefDeclaration */
-void XevSageVisitor::attribSgTypedefDeclaration(SgNode* node)
-{
-  SgTypedefDeclaration*      n = isSgTypedefDeclaration(node);
-
-  if(n) {
-    sstr() << " name=" << n->get_name() << " ";
-  }
-  attribSgStatement(sstr(),node);
-}
-/** XML internal node writer of SgTypedefDeclaration */
-void XevSageVisitor::inodeSgTypedefDeclaration(SgNode* node)
-{
-  this->visit(isSgTypedefDeclaration(node)->get_base_type());
-}
+   return ret;
+ }
+ /** XML attribute writer of SgProcedureHeaderStatement */
+ void XevSageVisitor::attribSgProcedureHeaderStatement(SgNode* node)
+ {
+   SgProcedureHeaderStatement* n = isSgProcedureHeaderStatement(node);
+   if(n) {
+     sstr() << " kind=\"" << n->get_subprogram_kind () << "\" ";
+     if(n->get_result_name()->get_name() != n->get_name())
+       sstr() << " result=\"" << n->get_result_name()->get_name().getString() << "\" ";
+     if(n->get_functionModifier().isPure())
+       sstr() << " pure=\"1\"";
+     if(n->get_functionModifier().isElemental())
+       sstr() << " elemental=\"1\"";
+     if(n->get_functionModifier().isRecursive())
+       sstr() << " recursive=\"1\"";
+   }
+   attribSgFunctionDeclaration(node);
+ }
+ /** XML internal node writer of SgProcedureHeaderStatement */
+ void XevSageVisitor::inodeSgProcedureHeaderStatement(SgNode* node)
+ {
+   inodeSgFunctionDeclaration(node);
+ }
 
 
-// =====================================================================
-/// Visitor of a SgUseStatement element in an XML document
-SgNode*
-XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
-{
-  SgUseStatement* ret = 0;
-  string name;
-  int only=0;
-  SgRenamePair* rn = 0;
 
-  XEV_ASSERT(astParent!=0);
-  if(XmlGetAttributeValue(node,"name",&name) && XmlGetAttributeValue(node,"only",&only))
-    ret = new SgUseStatement(DEFAULT_FILE_INFO,name,only);
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+ // =====================================================================
+ /// Visitor of a SgProgramHeaderStatement element in an XML document
+ SgNode*
+ XevXmlVisitor::visitSgProgramHeaderStatement(xe::DOMNode* node, SgNode* astParent)
+ {
+   SgType*               typ = 0;
+   SgFunctionDefinition* fdf = 0;
+   SgBasicBlock*         def = 0;
+   SgFunctionParameterList*      lst = 0;
+
+   string              name;
+   int elabel = 0;
+
+   if(XmlGetAttributeValue(node,"name",&name)==false){
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   SgFunctionType* ftyp = new SgFunctionType(SgTypeVoid::createType(), false);
+   SgProgramHeaderStatement* ret
+     = new SgProgramHeaderStatement(astParent->get_file_info(),SgName(name), ftyp, NULL);
+
+   ret->set_definingDeclaration(ret);
+   ret->set_scope(sb::topScopeStack());
+   ret->set_parent(astParent);
+
+   //SgGlobal* globalScope = isSgGlobal(sb::topScopeStack());
+   //globalScope->append_statement(ret);
+   //SgFunctionSymbol* symbol = new SgFunctionSymbol(ret);
+   //globalScope->insert_symbol(SgName(name.c_str()), symbol);
+
+   SUBTREE_VISIT_BEGIN(node,astchild,ret)
+     {
+       if( typ==0 )
+         typ = isSgType(astchild);
+       if( fdf==0 )
+         fdf = isSgFunctionDefinition(astchild);
+       if(def==0) {
+         def = isSgBasicBlock(astchild);
+       }
+       if(lst==0)
+         lst = isSgFunctionParameterList(astchild);
+     }
+   SUBTREE_VISIT_END();
+
+   //SgFunctionDefinition* programDefinition = new SgFunctionDefinition(ret, def);
+   if(fdf==0 && def){
+     fdf = new SgFunctionDefinition(ret, def);
+     fdf->setCaseInsensitive(true);
+     def->setCaseInsensitive(true);
+     def->set_parent(fdf);
+   }
+   fdf->set_parent(ret);
+
+   Sg_File_Info* info = DEFAULT_FILE_INFO;
+   info->setOutputInCodeGeneration();
+   fdf->set_file_info(info);
+
+   ret->set_name(SgName(name.c_str()));
+   ret->set_definition(fdf);
+   if(fdf->get_file_info()==0) {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   if(def && def->get_file_info()==0) {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+
+   if(XmlGetAttributeValue(node,"elabel",&elabel)){
+     SgLabelSymbol*  s = new SgLabelSymbol();
+     s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+     s->get_fortran_statement()->set_parent(s);
+     s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+     s->set_numeric_label_value( elabel );
+     SgLabelRefExp*  l = new SgLabelRefExp( s );
+     ret->set_end_numeric_label( l );
+   }
+   return ret;
+ }
+ /** XML attribute writer of SgProgramHeaderStatement */
+ void XevSageVisitor::attribSgProgramHeaderStatement(SgNode* node)
+ {
+   SgProgramHeaderStatement* p = isSgProgramHeaderStatement(node);
+   if(p){
+     SgLabelRefExp* l = p->get_end_numeric_label();
+     if(l)
+       sstr() << " elabel=\"" << l->get_numeric_label_value() << "\" ";
+   }
+   attribSgFunctionDeclaration(node);
+ }
+ /** XML internal node writer of SgProgramHeaderStatement */
+ void XevSageVisitor::inodeSgProgramHeaderStatement(SgNode* node)
+ {
+   inodeSgFunctionDeclaration(node);
+ }
+
+
+
+ // =====================================================================
+ /// Visitor of a SgTypedefDeclaration element in an XML document
+ SgNode*
+ XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
+ {
+   SgTypedefDeclaration*     ret = 0;
+   SgClassDeclaration*       cls = 0;
+   SgType*                   typ = 0;
+
+   //xe::DOMNamedNodeMap* amap = node->getAttributes();
+   //xe::DOMNode* satt = 0;
+   string name;
+
+   XmlGetAttributeValue(node,"name",&name);
+
+   SUBTREE_VISIT_BEGIN(node,astchild,0)
+     {
+       if(typ==0)
+         typ = isSgType(astchild);
+       if(cls==0)
+         cls = isSgClassDeclaration(astchild);
+     }
+   SUBTREE_VISIT_END();
+
+   if(cls) {
+     SgType * type = cls->get_type();
+     SgNamedType *namedType = isSgNamedType(type->findBaseType());
+     namedType->get_declaration()->set_definingDeclaration(cls);
+     // for s010.c  to pass runAllTests
+     namedType->set_declaration (cls->get_firstNondefiningDeclaration());
+     ret = sb::buildTypedefDeclaration( name.c_str(),
+                                        namedType,
+                                        sb::topScopeStack());
+     XEV_ASSERT(ret!=NULL);
+     cls->set_parent(ret);
+     ret->set_declaration( isSgDeclarationStatement(cls->get_firstNondefiningDeclaration()) );
+     ret->set_requiresGlobalNameQualificationOnType(true);
+     if(cls->get_definingDeclaration() == cls )
+       ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
+     SgClassType* ctyp = isSgClassType(typ);
+     XEV_ASSERT(ctyp!=NULL);
+     ctyp->set_declaration(cls->get_firstNondefiningDeclaration());
+   }
+   else if(typ) {                                         // add (0819)
+     ret = sb::buildTypedefDeclaration( name.c_str(),
+                                        typ,
+                                        sb::topScopeStack());
+   }
+   else {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   ret->set_parent(astParent);
+   return ret;
+ }
+ /** XML attribute writer of SgTypedefDeclaration */
+ void XevSageVisitor::attribSgTypedefDeclaration(SgNode* node)
+ {
+   SgTypedefDeclaration*      n = isSgTypedefDeclaration(node);
+
+   if(n) {
+     sstr() << " name=" << n->get_name() << " ";
+   }
+   attribSgStatement(sstr(),node);
+ }
+ /** XML internal node writer of SgTypedefDeclaration */
+ void XevSageVisitor::inodeSgTypedefDeclaration(SgNode* node)
+ {
+   this->visit(isSgTypedefDeclaration(node)->get_base_type());
+ }
+
+
+ // =====================================================================
+ /// Visitor of a SgUseStatement element in an XML document
+ SgNode*
+ XevXmlVisitor::visitSgUseStatement(xe::DOMNode* node, SgNode* astParent)
+ {
+   SgUseStatement* ret = 0;
+   string name;
+   int only=0;
+   SgRenamePair* rn = 0;
+
+   XEV_ASSERT(astParent!=0);
+   if(XmlGetAttributeValue(node,"name",&name) && XmlGetAttributeValue(node,"only",&only))
+     ret = new SgUseStatement(DEFAULT_FILE_INFO,name,only);
+   else {
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if((rn=isSgRenamePair(astchild))!=0){
         ret->get_rename_list().push_back(rn);
