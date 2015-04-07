@@ -1693,6 +1693,7 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpression*           adv = 0;
   SgExpression*           nml = 0;
 
+  int f_unt = 0;
   int f_fmt = 0;
   int f_ios = 0;
   int f_rec = 0;
@@ -1712,13 +1713,14 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"err",   &f_err);
   XmlGetAttributeValue(node,"eor",   &f_eor);
   XmlGetAttributeValue(node,"nml",   &f_nml);
+  XmlGetAttributeValue(node,"unit",  &f_unt);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       //assuming these stmts appear in this order
       if( exp==0 )
         exp = isSgExprListExp(astchild);
-      else if( unt==0 )
+      else if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
       else if( f_ios && iost==0 )
         iost = isSgExpression(astchild);
@@ -1742,10 +1744,16 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret->set_parent(astParent);
-  ret->set_io_stmt_list(exp);
-  ret->set_format( fmt );
-  ret->set_unit(unt);
-  if(exp)exp->set_parent(ret);
+
+  //ret->set_format( fmt );
+  if(unt){
+    ret->set_unit(unt);
+    unt->set_parent(ret);
+  }
+  if(exp){
+    ret->set_io_stmt_list(exp);
+    exp->set_parent(ret);
+  }
   if(fmt){
     ret->set_format(fmt);
     fmt->set_parent(ret);
