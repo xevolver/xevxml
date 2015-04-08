@@ -4,7 +4,7 @@
 
 	<xsl:import href="../loop/loop.xsl" />
 
-	<xsl:template match="*" mode="xevVarReplace">
+	<xsl:template match="*" mode="xevEmitVar">
 		<xsl:param name="varName" />
 		<xsl:choose>
 			<xsl:when test="self::SgVarRefExp">
@@ -17,7 +17,7 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="xevVarReplace">
+					<xsl:apply-templates mode="xevEmitVar">
 						<xsl:with-param name="varName" select="$varName" />
 					</xsl:apply-templates>
 				</xsl:copy>
