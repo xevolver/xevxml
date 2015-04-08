@@ -71,7 +71,7 @@ attributes, the attributes are also listed in the description.
  & ~\texttt{name} (string): module name\\
  & ~\texttt{type} (int): 0 (class), 1 (struct), or 2 (union)\\
  \texttt{SgNamelistStatement}& NAMELIST statement (Fortran only)\\
- & ~\texttt{group} (string): group name\\
+% & ~\texttt{group} (string): group name\\
  \texttt{SgPragmaDeclaration}& pragma declaration\\
  \texttt{SgProcedureHeaderStatement}& procedure declaration (Fortran only)\\
  & ~\texttt{name} (string): procedure name\\
@@ -82,6 +82,7 @@ attributes, the attributes are also listed in the description.
  & ~\texttt{recursive} (int): 0 (not recursive) or 1 (recursive)\\
  \texttt{SgProgramHeaderStatement}& program header (Fortran only)\\
  & ~\texttt{name} (string): program name\\
+ & \texttt{elabel} (int): \texttt{set\_end\_numeric\_label()}\\
  \texttt{SgTypedefDeclaration}& typedef declaration\\
  & ~\texttt{name} (string): typedef name\\
  \texttt{SgUseStatement}& USE statement (Fortran only)\\
@@ -104,6 +105,7 @@ attributes, the attributes are also listed in the description.
  \texttt{SgBreakStmt}& break statement\\
  & \texttt{slabel} (string): Fortran \texttt{DO} string label\\
  \texttt{SgCaseOptionStmt}& case option of switch statement \\
+ & ~\texttt{construct} (string): case construct name\\
  \texttt{SgClassDefinition}& class definition\\
  & \texttt{sequence} (int): 1 for \texttt{SEQUENCE} ketword\\
  & \texttt{private} (int):  1 for \texttt{PRIVATE} keyword\\
@@ -118,6 +120,7 @@ attributes, the attributes are also listed in the description.
  & \texttt{slabel} (string): Fortran \texttt{DO} string label\\
  \texttt{SgDeallocateStatement}& DEALLOCATE statement (Fortran only)\\
  \texttt{SgDefaultOptionStmt}& default option of switch statement\\
+ & ~\texttt{construct} (string): default construct name\\
  \texttt{SgDoWhileStmt}& do-while statement\\
  \texttt{SgElseWhereStatement}& ELSEWHERE statement (Fortran only)\\
  \texttt{SgEndfileStatement}& ENDFILE statement (Fortran only)\\
@@ -142,6 +145,8 @@ attributes, the attributes are also listed in the description.
  \texttt{SgIfStmt}& if statement\\
  & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
  & \texttt{then} (int):\texttt{set\_use\_then\_keyword()}\\
+ & \texttt{elabel} (int):\texttt{set\_end\_numeric\_label()}\\
+ & \texttt{ellabel} (int):\texttt{set\_else\_numeric\_label()}\\
  \texttt{SgInquireStatement}& INQUIRE statemtent (Fortran only)\\
  & *** TODO *** \\
  \texttt{SgLabelStatement}& label statement\\
@@ -161,6 +166,8 @@ attributes, the attributes are also listed in the description.
  \texttt{SgStopOrPauseStatement}& STOP and PAUSE statements (Fortran only)\\
  & ~\texttt{type} (int): 0 (unknown), 1 (stop), or 2 (pause)\\
  \texttt{SgSwitchStatement}& switch statement\\
+ & ~\texttt{slabel} (string): string label\\
+ & ~\texttt{elabel} (string): end numeric label\\
  \texttt{SgWhereStatement}& WHERE statement (Fortran only)\\
  \texttt{SgWhileStmt}& while statement\\
  & \texttt{end} (int): \texttt{set\_has\_end\_statement()}\\
@@ -192,7 +199,7 @@ have the following attributes for modifiers.
 	\item[0x02]: default
 	\item[0x04]: friend
 	\item[0x08]: typedef
-	\item[0x10]: export
+%	\item[0x10]: export
        \end{description}
  \item \texttt{type\_modifier}
 
@@ -285,6 +292,9 @@ the \texttt{kind} attribute below.
 	\item[18]: volatile
        \end{description}
 \end{itemize}
+In the case of \texttt{kind=\"9\"}, the \texttt{intent} attribute is
+required to be set to 600 (IN), 601 (OUT), or 602 (INOUT)
+
 \section{Expressions}
 
 %In the Sage III class library, expressions are represented with
@@ -425,6 +435,8 @@ attributes are also listed in the description.
  \texttt{SgAssignInitializer} & initialization (i=0)\\
  \texttt{SgAsteriskShapeExp} & Fortran * expression (write(*,*))\\
  \texttt{SgCastExp} & type cast ((int*)x)\\
+ & ~\texttt{ctype} (int): cast type (\texttt{set\_cast\_type()}) \\
+ & ~\texttt{implicit} (int): 0 (explicit cast) or 1 (implicit cast)\\
  \texttt{SgColonShapeExp} & Fortran colons for separating array dimensions (x(0:1))\\
  % This is for OpenCL vector initialization. e.g.  float2 x = float2(1,0f,2.0f);
  %\texttt{SgCompoundInitializer} & \\
@@ -539,6 +551,9 @@ Fortran.
  & ~\texttt{single} (int): non-zero to use single quotes \\
  & ~\texttt{double} (int): non-zero to use double quotes \\
 \texttt{SgFunctionParameterTypeList}& type lists of function parameters\\
+\texttt{SgNameGroup}& group of names for SgNamelistStatement (Fortran only)\\
+ & ~\texttt{group} (string) : group name \\
+ & ~\texttt{names} (string) : comma-separated names (e.g. "a,b,c,...") \\
 \texttt{SgPragma}& prama in a pragma declaration\\
  & ~\texttt{pragma} (string): string(s) of a pragma \\
 \texttt{SgSourceFile}& source file (root elemement of an XML AST)\\
