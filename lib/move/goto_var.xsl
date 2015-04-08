@@ -4,21 +4,18 @@
 
 	<xsl:import href="../loop/loop.xsl" />
 
-	<xsl:template match="*" mode="xevVarReplace">
+	<xsl:template match="*" mode="xevGoToVar">
 		<xsl:param name="varName" />
 		<xsl:choose>
-			<xsl:when test="self::SgVarRefExp">
-				<xsl:element name="SgVarRefExp">
-					<xsl:attribute name="name">
-					  <xsl:value-of select="$varName" />
-					</xsl:attribute>
-				</xsl:element>
+			<xsl:when test="self::SgVarRefExp/@name = $loopName">
+				<xsl:apply-templates select="."
+					mode="xevTransformationHook" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="xevVarReplace">
-						<xsl:with-param name="varName" select="$Name" />
+					<xsl:apply-templates mode="xevGoToVar">
+						<xsl:with-param name="varName" select="$varName" />
 					</xsl:apply-templates>
 				</xsl:copy>
 			</xsl:otherwise>

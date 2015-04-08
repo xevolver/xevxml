@@ -14,15 +14,14 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevGoToVar">
-			<xsl:with-param name="varName" select="'B'" />
+		<xsl:apply-templates select="." mode="xevGoToLoop">
+			<xsl:with-param name="loopName" select="'j'" />
 		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		<xsl:apply-templates select="." mode="xevVarReplace">
-			<xsl:with-param name="varName" select="'C'" />
-		</xsl:apply-templates>
+		<xsl:apply-templates select="."
+			mode="xevLoopInterchange" />
 	</xsl:template>
 
 </xsl:stylesheet>
