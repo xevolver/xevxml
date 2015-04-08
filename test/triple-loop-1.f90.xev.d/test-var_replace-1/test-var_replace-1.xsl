@@ -20,9 +20,11 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		<xsl:apply-templates select="." mode="xevVarReplace">
-			<xsl:with-param name="varName" select="'C'" />
-		</xsl:apply-templates>
+		<xsl:element name="SgVarRefExp">
+			<xsl:attribute name="name">
+					  <xsl:value-of select="'C'" />
+					</xsl:attribute>
+		</xsl:element>
 	</xsl:template>
 
 </xsl:stylesheet>

@@ -7,11 +7,8 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/preceding-sibling::*[1]/SgPragma/@pragma = $directiveName">
-
 				<xsl:apply-templates select="." mode="xevMoveHook" />
-
 			</xsl:when>
-
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
@@ -20,7 +17,6 @@
 					</xsl:apply-templates>
 				</xsl:copy>
 			</xsl:otherwise>
-
 		</xsl:choose>
 	</xsl:template>
 </xsl:stylesheet>

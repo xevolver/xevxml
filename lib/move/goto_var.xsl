@@ -7,7 +7,7 @@
 	<xsl:template match="*" mode="xevGoToVar">
 		<xsl:param name="varName" />
 		<xsl:choose>
-			<xsl:when test="self::SgVarRefExp/@name = $loopName">
+			<xsl:when test="self::SgVarRefExp/@name = $varName">
 				<xsl:apply-templates select="."
 					mode="xevTransformationHook" />
 			</xsl:when>

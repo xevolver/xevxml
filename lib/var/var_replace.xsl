@@ -18,7 +18,7 @@
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates mode="xevVarReplace">
-						<xsl:with-param name="varName" select="$Name" />
+						<xsl:with-param name="varName" select="$varName" />
 					</xsl:apply-templates>
 				</xsl:copy>
 			</xsl:otherwise>

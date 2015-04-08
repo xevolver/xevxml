@@ -4,5 +4,6 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:import href="goto_loop.xsl" />
+	<xsl:import href="goto_var.xsl" />
 
 </xsl:stylesheet>
