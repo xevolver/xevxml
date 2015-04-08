@@ -14,6 +14,9 @@
 	<!-- loop/* -->
 	<xsl:import href="loop/loop.xsl" />
 
+	<!-- var/* -->
+	<xsl:import href="var/var.xsl" />
+
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
