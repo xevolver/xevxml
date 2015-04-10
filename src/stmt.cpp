@@ -368,6 +368,7 @@ XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
   SgClassDefinition*        ret = 0;
   SgClassDeclaration*       dec = isSgClassDeclaration( astParent );
   SgDeclarationStatement*   fld = 0;
+  std::vector<SgInterfaceStatement*> iflst;
   int seq=0;
   int pri=0;
   int abs=0;
@@ -393,9 +394,40 @@ XevXmlVisitor::visitSgClassDefinition(xercesc::DOMNode* node, SgNode* astParent)
       if( fld ) {
         ret->append_member(fld);
         fld->set_parent(ret);
+        SgInterfaceStatement* ifs = isSgInterfaceStatement(fld);
+        if(ifs)
+          iflst.push_back(ifs);
       }
     }
   SUBTREE_VISIT_END();
+
+  if(si::is_Fortran_language() && iflst.size() > 0 ){
+    std::vector<SgRenameSymbol*> rsym;
+    for(size_t ii(0);ii<iflst.size();ii++){
+      SgInterfaceStatement* ifs = iflst[ii];
+      SgInterfaceBodyPtrList &lst = ifs->get_interface_body_list();
+
+      for(size_t i(0);i<lst.size();i++){
+        if(lst[i]->get_functionDeclaration()==NULL){
+          SgSymbol* sym = ret->first_any_symbol();
+          while(sym){
+            SgFunctionSymbol* fsym = isSgFunctionSymbol(sym);
+            if(fsym){
+              SgFunctionDeclaration* fdecl = isSgFunctionDeclaration(fsym->get_declaration());
+              if(fdecl && fdecl->get_name() == lst[i]->get_function_name())
+                lst[i]->set_functionDeclaration(fdecl);
+              rsym.push_back(new SgRenameSymbol(fdecl,fsym,ifs->get_name()));
+            }
+            sym = ret->next_any_symbol();
+          }
+        }
+      }
+    }
+    for(size_t i(0);i<rsym.size();i++){
+      ret->insert_symbol(rsym[i]->get_name(),rsym[i]);
+    }
+    //ret->get_symbol_table()->print();
+  }
   sb::popScopeStack();
 
   return ret;

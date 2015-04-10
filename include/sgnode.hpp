@@ -111,6 +111,8 @@ SAGE3_BOP(PntrArrRefExp);
 SAGE3_BOP(RshiftAssignOp);
 SAGE3_BOP(RshiftOp);
 SAGE3_BOP(SubtractOp);
+SAGE3_BOP(UserDefinedBinaryOp);
+SAGE3_BOP(UserDefinedUnaryOp);
 SAGE3_BOP(XorAssignOp);
 
 SAGE3_UOP(AddressOfOp);

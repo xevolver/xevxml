@@ -480,6 +480,33 @@ XevXmlVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent)
 }
 EXPR_DEFAULT(FunctionCallExp);
 
+static SgFunctionSymbol* generateImplicitFunctionSymbol(xe::DOMNode* node, string& name, SgSourceFile* file)
+{
+    // see generateFunctionRefExp() in fortran_support.C
+  SgFunctionType* ftype = new SgFunctionType(generateImplicitType(name),false);
+  SgProcedureHeaderStatement* decl =  new SgProcedureHeaderStatement(name,ftype,NULL);
+  SgScopeStatement* scope = sb::topScopeStack();
+  decl->set_firstNondefiningDeclaration(decl);
+  decl->set_definingDeclaration(NULL);
+  if( isSgClassDefinition(scope) == NULL ){
+    scope = TransformationSupport::getClassDefinition(sb::topScopeStack());
+    if( scope == NULL ){
+      scope = file->get_globalScope();
+      //scope = TransformationSupport::getGlobalScope(sb::topScopeStack());
+    }
+  }
+  if(scope==NULL) {
+    XEV_DEBUG_INFO(node);XEV_ABORT();
+  }
+  decl->set_scope(scope);
+  decl->set_parent(scope);
+  decl->set_subprogram_kind(SgProcedureHeaderStatement::e_function_subprogram_kind);
+  decl->set_file_info(DEFAULT_FILE_INFO);
+  SgFunctionSymbol * fsym = new SgFunctionSymbol(decl);
+  scope->insert_symbol(name,fsym);
+
+  return fsym;
+}
 
 // ===============================================================================
 /// Visitor of a SgFunctionRefExp element in an XML document
@@ -503,27 +530,9 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
   if(functionSymbol==0 && si::is_Fortran_language()==true){
     // function symbol is not found. this means the function is not declared yet.
     // see generateFunctionRefExp() in fortran_support.C
-    SgFunctionType* ftype = new SgFunctionType(generateImplicitType(name),false);
-    SgProcedureHeaderStatement* decl =  new SgProcedureHeaderStatement(name,ftype,NULL);
-    SgScopeStatement* scope = sb::topScopeStack();
-    decl->set_firstNondefiningDeclaration(decl);
-    decl->set_definingDeclaration(NULL);
-    if( isSgClassDefinition(scope) == NULL ){
-      scope = TransformationSupport::getClassDefinition(sb::topScopeStack());
-      if( scope == NULL ){
-        scope = _file->get_globalScope();
-        //scope = TransformationSupport::getGlobalScope(sb::topScopeStack());
-      }
-    }
-    if(scope==NULL) {
-      XEV_DEBUG_INFO(node);XEV_ABORT();
-    }
-    decl->set_scope(scope);
-    decl->set_parent(scope);
-    decl->set_subprogram_kind(SgProcedureHeaderStatement::e_function_subprogram_kind);
-    decl->set_file_info(DEFAULT_FILE_INFO);
-    functionSymbol = new SgFunctionSymbol(decl);
-    scope->insert_symbol(name,functionSymbol);
+
+    functionSymbol = generateImplicitFunctionSymbol(node,name,_file);
+
 #if 0
     // for debugging
     if( matchAgainstIntrinsicFunctionList(name) == false ){
@@ -1159,3 +1168,111 @@ VISIT_UOP_MODE(MinusOp);
 VISIT_UOP(NotOp);
 VISIT_UOP_MODE(PlusPlusOp);
 VISIT_UOP(UnaryAddOp);
+
+/** Visitor of a SgUserDefinedBinaryOp element in an XML document */
+SgNode*
+XevXmlVisitor::visitSgUserDefinedBinaryOp(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgExpression* lhs = 0;
+  SgExpression* rhs = 0;
+  xe::DOMNode* child=node->getFirstChild();
+  string name,sname;
+
+  if(XmlGetAttributeValue(node,"name",&name) == false){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  //sname = "operator(" + name + ")"; // this is necessary?
+  sname = name;
+  SgFunctionSymbol* fsym= si::lookupFunctionSymbolInParentScopes(sname,sb::topScopeStack());
+  if(fsym==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  SgUserDefinedBinaryOp* ret = new SgUserDefinedBinaryOp(lhs,rhs,NULL,name,fsym);
+  ret->set_parent(astParent);
+  //ret->set_file_info(DEFAULT_FILE_INFO);
+  ret->set_startOfConstruct(DEFAULT_FILE_INFO);
+  while(child) {
+    if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
+      SgNode* astchild = this->visit(child,ret);
+      if(lhs==0)
+        lhs = isSgExpression(astchild);
+      else if(rhs==0)
+        rhs = isSgExpression(astchild);
+    }
+    child=child->getNextSibling();
+  }
+  if( lhs && rhs ){
+    ret->set_lhs_operand(lhs);
+    ret->set_rhs_operand(rhs);
+    return ret;
+  }
+  else {
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+}
+/** XML attribute writer of SgUserDefinedBinaryOp */
+void XevSageVisitor::attribSgUserDefinedBinaryOp(SgNode* node)
+{
+  SgUserDefinedBinaryOp* n =  isSgUserDefinedBinaryOp(node);
+  if(n){
+    sstr() << " name=\"" << n->get_operator_name().getString() << "\" ";
+  }
+  attribSgExpression(sstr(),node);
+}
+/** XML internal node writer of SgUserDefinedBinaryOp */
+void XevSageVisitor::inodeSgUserDefinedBinaryOp(SgNode* node)
+{return;}
+
+
+/** Visitor of a SgUserDefinedUnaryOp element in an XML document */
+SgNode*
+XevXmlVisitor::visitSgUserDefinedUnaryOp(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgExpression* lhs = 0;
+  xe::DOMNode* child=node->getFirstChild();
+  string name, func;
+
+  if(XmlGetAttributeValue(node,"name"    ,&name) == false ){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  SgFunctionSymbol* fsym= si::lookupFunctionSymbolInParentScopes(name);
+  if(fsym==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  SgUserDefinedUnaryOp* ret = new SgUserDefinedUnaryOp(lhs,lhs->get_type(),name,fsym);
+    ret->set_parent(astParent);
+    ret->set_file_info(DEFAULT_FILE_INFO);
+    while(child) {
+      if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
+        SgNode* astchild = this->visit(child,ret);
+        if(lhs==0)
+          lhs = isSgExpression(astchild);
+      }
+      child=child->getNextSibling();
+    }
+    if( lhs ){
+      ret->set_operand(lhs);
+      return ret;
+    }
+    else {
+      XEV_DEBUG_INFO(node);
+      XEV_ABORT();
+    }
+}
+/** XML attribute writer of SgUserDefinedUnaryOp */
+void XevSageVisitor::attribSgUserDefinedUnaryOp(SgNode* node)
+{
+  SgUserDefinedUnaryOp* n =  isSgUserDefinedUnaryOp(node);
+  if(n){
+    sstr() << " name=\"" << n->get_operator_name().getString() << "\" ";
+  }
+  attribSgExpression(sstr(),node);
+}
+/** XML internal node writer of SgUserDefinedUnaryOp */
+void XevSageVisitor::inodeSgUserDefinedUnaryOp(SgNode* node)
+{return;}
