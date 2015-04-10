@@ -253,10 +253,10 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
       //assuming these stmts appear in this order
       if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
-      else if( f_ist && ist==0 )
-        ist = isSgExpression(astchild);
       else if( f_err && err==0 )
         err = isSgExpression(astchild);
+      else if( f_ist && ist==0 )
+        ist = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
