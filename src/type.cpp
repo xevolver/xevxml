@@ -658,23 +658,18 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  if(lexp){
-    ret = sb::buildStringType( lexp );
-  }
-  else{
-    lexp
-      = new SgAsteriskShapeExp(DEFAULT_FILE_INFO);
-    ret = sb::buildStringType( lexp );
-  }
+  if(lexp==0)
+    lexp = new SgAsteriskShapeExp(DEFAULT_FILE_INFO);
   lexp->set_parent(ret);
+  // don't use SageBuilder::buildStringType()
+  // it does not work with Fortran type kind
+  ret = SgTypeString::createType( lexp,kexp );
 
   if(ret==0) {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-  if(kexp){
-    ret->set_type_kind( kexp );
-  }
+
   ret->set_parent(astParent);
   return ret;
 }
