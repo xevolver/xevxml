@@ -242,7 +242,7 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpression*           unt = 0;
   SgExpression*           err = 0;
   SgExpression*           ist = 0;
-  bool f_ist, f_unt, f_err;
+  bool f_ist=false, f_unt=false, f_err=false;
 
   XmlGetAttributeValue(node,"iostat",&f_ist);
   XmlGetAttributeValue(node,"unit",  &f_unt);
@@ -253,10 +253,10 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
       //assuming these stmts appear in this order
       if( f_unt && unt==0 )
         unt = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
       else if( f_ist && ist==0 )
         ist = isSgExpression(astchild);
+      else if( f_err && err==0 )
+        err = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -273,6 +273,8 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
   }
   if( ist ) {
     ret->set_iostat( ist );
+    ist->set_parent(ret);
+    ist->set_startOfConstruct(DEFAULT_FILE_INFO);
   }
 
   return ret;
