@@ -507,6 +507,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName* ret = 0;
   SgInitializer*     ini = 0;
   SgType*            typ = 0;
+  SgScopeStatement* scope = sb::topScopeStack();
 
   string               name;
 
@@ -525,7 +526,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   //  typ = isSgArrayType(typ)->get_base_type();
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
   ret->set_parent(astParent);
-  ret->set_scope(sb::topScopeStack());// This was NG for s009 but needed by s005
+  ret->set_scope(scope);// This was NG for s009 but needed by s005
   if(typ) {
     typ->set_parent(ret); // this must be true
   }

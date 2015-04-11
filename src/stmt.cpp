@@ -978,7 +978,13 @@ XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
   SgBasicBlock* blk = 0;
   Sg_File_Info* info = DEFAULT_FILE_INFO;
   info->setOutputInCodeGeneration();
-  SgFunctionDefinition* ret  = new SgFunctionDefinition(info);
+  //SgFunctionDefinition* ret  = new SgFunctionDefinition(info);
+  SgFunctionDefinition* ret  = 0;
+  SgFunctionDeclaration* decl = isSgFunctionDeclaration(astParent);
+  if(decl==0 ||decl->get_definition()==0)
+    ret = new SgFunctionDefinition(info);
+  else
+    ret = decl->get_definition();
   ret->set_parent(astParent);
   sb::pushScopeStack(ret);
   if(si::is_Fortran_language())
@@ -991,8 +997,10 @@ XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
       }
     }
   SUBTREE_VISIT_END();
-  if(blk)
+  if(blk){
     ret->set_body(blk);
+    blk->set_parent(ret);
+  }
   sb::popScopeStack();
   return ret;
 }
@@ -1864,6 +1872,57 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret = sb::buildReturnStmt(exp);
+
+  // TODO: alternative return is not supported yet.
+  if( si::is_Fortran_language() && isSgLabelRefExp(exp) ){
+    // see return_stmt in FortranParserActionROSE.C
+    size_t retval = isSgLabelRefExp(exp)->get_numeric_label_value()+1;
+    SgInitializedName* aname = NULL;
+    SgFunctionDefinition* def = si::getEnclosingFunctionDefinition(sb::topScopeStack());
+    SgFunctionDeclaration* decl = NULL;
+    if( def == 0 || (decl=def->get_declaration()) == 0){
+      XEV_DEBUG_INFO(node);
+      XEV_ABORT();
+    }
+    SgInitializedNamePtrList& args =decl->get_args();
+    if(retval<1 || retval>args.size() ) {
+      XEV_DEBUG_INFO(node);
+      XEV_ABORT();
+    }
+    size_t counter = 1;
+
+    for (size_t i = 0; i < args.size(); i++) {
+      SgTypeLabel* typ = isSgTypeLabel(args[i]->get_type());
+      if (typ){
+        if(counter == retval)
+          aname = args[i];
+        counter++;
+      }
+    }
+    if(aname){
+      SgSymbol* s = aname->search_for_symbol_from_symbol_table();
+      if(s==0) XEV_ABORT();
+      SgLabelSymbol* sym = isSgLabelSymbol(s);
+      if(sym==0) {
+        SgSymbolTable* st = s->get_scope()->get_symbol_table();
+        st->remove(s);
+        sym = new SgLabelSymbol(aname);
+        sym->set_parent(st);
+        sym->set_label_type(SgLabelSymbol::e_alternative_return_type);
+        sym->set_fortran_alternate_return_parameter(aname);
+        sym->set_numeric_label_value( retval-1 );
+        st->insert(aname->get_name(),sym);
+        delete s;
+        //XEV_DEBUG_INFO(node);
+        //XEV_ABORT();
+      }
+      delete exp;
+      exp = new SgLabelRefExp(sym);
+      si::setSourcePosition(exp);
+      exp->set_parent(ret);
+      ret->set_expression(exp);
+    }
+  }
 
   return ret;
 }

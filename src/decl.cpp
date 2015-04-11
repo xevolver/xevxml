@@ -1207,6 +1207,8 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    ret->set_scope(scope);
    ret->set_parent(astParent);
    ret->set_oldStyleDefinition(f_old);
+
+
    cld_ = (node)->getFirstChild();
    while(cld_) {
      if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){
@@ -1224,6 +1226,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      }
      cld_=cld_->getNextSibling();
    }
+
    if( fdf==0&&kind == SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
      fdf = new SgFunctionDefinition( info,def );
      if(def)
@@ -1254,15 +1257,21 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
          ini = lst->get_args()[i];
          ini->set_parent(fdf);
          XEV_ASSERT(body!=NULL);
-         SgVariableSymbol* sym = body->lookup_variable_symbol(ini->get_name());
+         SgSymbol* sym = fdf->lookup_symbol(ini->get_name());
+
          if(sym!=NULL){
            ini->set_scope(body);
            ini->set_type(sym->get_type());
-           ini->set_declptr(sym->get_declaration()->get_declptr());
+           if(isSgVariableSymbol(sym))
+             ini->set_declptr(isSgVariableSymbol(sym)->get_declaration()->get_declptr());
          }
          else{
-           SgVariableSymbol* vsym = new SgVariableSymbol(ini);
-           fdf->insert_symbol(ini->get_name(),vsym);
+           //SgVariableSymbol* vsym = new SgVariableSymbol(ini);
+           if(ini->get_name().getString() !="*")
+             sym = new SgVariableSymbol(ini);
+           else
+             sym = new SgLabelSymbol(ini);
+           fdf->insert_symbol(ini->get_name(),sym);
            ini->set_scope(fdf);
            //ini->set_type(sym->get_type());
          }
@@ -1639,7 +1648,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-#if 1
+
+#if 0 // this is no longer required
   bool isFortranParameter = false;
   // See buildVariableDeclaration
   if (ret->get_scope() && si::is_Fortran_language()){

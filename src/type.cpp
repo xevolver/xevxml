@@ -320,6 +320,7 @@ VISIT_TYPE2(TypeEllipse);
 VISIT_TYPE(TypeFloat);
 //VISIT_TYPE3(TypeImaginary);
 //VISIT_TYPE(TypeInt);
+//VISIT_TYPE(TypeLabel);
 VISIT_TYPE(TypeLong);
 VISIT_TYPE(TypeLongDouble);
 VISIT_TYPE(TypeLongLong);
@@ -845,6 +846,43 @@ void XevSageVisitor::attribSgTypeInt(SgNode* node){
 }
 /** XML internal node writer of SgTypeInt */
 void XevSageVisitor::inodeSgTypeInt(SgNode* node){
+  inodeSgType(this,node);
+}
+
+// ===============================================================================
+/// Visitor of a SgTypeLabel element in an XML document
+SgNode*
+XevXmlVisitor::visitSgTypeLabel(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgTypeLabel* ret=NULL;
+  string name;
+  SgExpression* kexp = NULL;
+
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(kexp==0)
+        kexp = isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  ret= SgTypeLabel::createType(kexp);
+  if(XmlGetAttributeValue(node,"name",&name))
+    ret->set_name(name);
+  ret->set_parent(astParent);
+  return ret;
+}
+/** XML attribute writer of SgTypeLabel */
+void XevSageVisitor::attribSgTypeLabel(SgNode* node){
+  SgTypeLabel* n = isSgTypeLabel(node);
+
+  if(n){
+    sstr() << " name=" << n->get_name() << " ";
+  }
+  attribSgType(sstr(),node);
+}
+/** XML internal node writer of SgTypeLabel */
+void XevSageVisitor::inodeSgTypeLabel(SgNode* node){
   inodeSgType(this,node);
 }
 

@@ -263,6 +263,7 @@ SAGE3_TYPE(TypeEllipse);
 SAGE3_TYPE(TypeFloat);
 SAGE3_TYPE(TypeImaginary);
 SAGE3_TYPE(TypeInt);
+SAGE3_TYPE(TypeLabel);
 SAGE3_TYPE(TypeLong);
 SAGE3_TYPE(TypeLongDouble);
 SAGE3_TYPE(TypeLongLong);
