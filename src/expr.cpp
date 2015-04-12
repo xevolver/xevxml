@@ -653,8 +653,30 @@ void XevSageVisitor::attribSgLabelRefExp(SgNode* node){
   SgLabelRefExp*      n = isSgLabelRefExp(node);
 
   if(n) {
-    sstr() << " nlabel=\"" << n->get_symbol()->get_numeric_label_value() << "\" ";
     sstr() << " type=\"" << n->get_symbol()->get_label_type() << "\" ";
+    if(n->get_symbol()->get_label_type() != SgLabelSymbol::e_alternative_return_type){
+      sstr() << " nlabel=\"" << n->get_symbol()->get_numeric_label_value() << "\" ";
+    }
+    else {
+      SgFunctionDefinition* fdef = si::getEnclosingFunctionDefinition(node);
+      SgFunctionDeclaration* decl = NULL;
+      if( fdef == 0 || (decl=fdef->get_declaration()) == 0){
+        XEV_WARN("def="<<fdef<<", decl="<<decl<<", parent="<<node->get_parent()->class_name());
+        XEV_ABORT();
+      }
+      SgInitializedNamePtrList& args =decl->get_args();
+      SgInitializedName* ini = n->get_symbol()->get_fortran_alternate_return_parameter();
+      int counter=0;
+      for(size_t i(0);i<args.size();i++){
+        if(isSgTypeLabel(args[i]->get_type())){
+          counter++;
+          if(ini == args[i]){
+            sstr() << " nlabel=\"" << counter << "\" ";
+            break;
+          }
+        }
+      }
+    }
   }
   attribSgExpression(sstr(),node);
 }

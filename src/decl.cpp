@@ -1214,6 +1214,42 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    ret->set_parent(astParent);
    ret->set_oldStyleDefinition(f_old);
 
+   // -----------------------------------------------------------------------
+   // "*" in parameter list is considered an alternative return
+   if(lst && si::is_Fortran_language()==true){
+     int counter=1;
+     SgScopeStatement* scope = ret->get_definition();
+     for(size_t i(0);i<lst->get_args().size();i++){
+       SgInitializedName* ini = lst->get_args()[i];
+       // for each parameter, find its symbol in the function definition scope
+       SgSymbol* sym = scope->lookup_symbol(ini->get_name());
+
+       if(sym!=NULL){
+         //ini->set_scope(fdf); // this was needed but now unnecessary
+         ini->set_type(sym->get_type());
+
+         if(ini->get_name().getString() =="*"){
+           // replace a variable symbol to a label symbol
+           scope->get_symbol_table()->remove(sym);
+           delete sym;
+           SgInitializedName* ini2 = isSgInitializedName(si::deepCopyNode(ini));
+           SgLabelSymbol* lsym = new SgLabelSymbol();
+           lsym->set_fortran_alternate_return_parameter(ini);
+           lsym->set_numeric_label_value(counter);
+           scope->insert_symbol(ini2->get_name(),lsym);
+           counter++;
+         }
+
+         if(isSgVariableSymbol(sym))
+           ini->set_declptr(isSgVariableSymbol(sym)->get_declaration()->get_declptr());
+       }
+       else{ // probably never reach here
+         XEV_DEBUG_INFO(node);
+         XEV_ABORT();
+       }
+     }
+   } // if lst
+   // -----------------------------------------------------------------------
 
    cld_ = (node)->getFirstChild();
    while(cld_) {
@@ -1255,36 +1291,10 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      }
      var->set_scope(fdf);
 
- #if 1
-     if(lst && si::is_Fortran_language()==true){
-       for(size_t i(0);i<lst->get_args().size();i++){
-         ini = lst->get_args()[i];
-         ini->set_parent(fdf);
-         SgSymbol* sym = fdf->lookup_symbol(ini->get_name());
-
-         if(sym!=NULL){
-           ini->set_scope(fdf);
-           ini->set_type(sym->get_type());
-           if(isSgVariableSymbol(sym))
-             ini->set_declptr(isSgVariableSymbol(sym)->get_declaration()->get_declptr());
-         }
-         else{
-           //SgVariableSymbol* vsym = new SgVariableSymbol(ini);
-           if(ini->get_name().getString() !="*")
-             sym = new SgVariableSymbol(ini);
-           else
-             sym = new SgLabelSymbol(ini);
-           fdf->insert_symbol(ini->get_name(),sym);
-           ini->set_scope(fdf);
-           //ini->set_type(sym->get_type());
-         }
-       }
-     } // if lst
- #endif
      if( isSgClassType(typ) ){
        SgClassType* ctyp = isSgClassType(typ);
        SgClassSymbol* csym
-         = si::lookupClassSymbolInParentScopes(ctyp->get_name(),body);
+         = si::lookupClassSymbolInParentScopes(ctyp->get_name(),fdf->get_body());
        //body->get_symbol_table()->print();
        if(csym!=NULL){
          ctyp->set_declaration(csym->get_declaration());

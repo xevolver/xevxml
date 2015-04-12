@@ -1875,10 +1875,10 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
 
   ret = sb::buildReturnStmt(exp);
 
-  // TODO: alternative return is not supported yet.
   if( si::is_Fortran_language() && isSgLabelRefExp(exp) ){
+    // --- Fortran alternative return support ---
     // see return_stmt in FortranParserActionROSE.C
-    size_t retval = isSgLabelRefExp(exp)->get_numeric_label_value()+1;
+    size_t retval = isSgLabelRefExp(exp)->get_numeric_label_value();
     SgInitializedName* aname = NULL;
     SgFunctionDefinition* def = si::getEnclosingFunctionDefinition(sb::topScopeStack());
     SgFunctionDeclaration* decl = NULL;
@@ -1906,17 +1906,8 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
       if(s==0) XEV_ABORT();
       SgLabelSymbol* sym = isSgLabelSymbol(s);
       if(sym==0) {
-        SgSymbolTable* st = s->get_scope()->get_symbol_table();
-        st->remove(s);
-        sym = new SgLabelSymbol(aname);
-        sym->set_parent(st);
-        sym->set_label_type(SgLabelSymbol::e_alternative_return_type);
-        sym->set_fortran_alternate_return_parameter(aname);
-        sym->set_numeric_label_value( retval-1 );
-        st->insert(aname->get_name(),sym);
-        delete s;
-        //XEV_DEBUG_INFO(node);
-        //XEV_ABORT();
+        XEV_DEBUG_INFO(node);
+        XEV_ABORT();
       }
       delete exp;
       exp = new SgLabelRefExp(sym);
