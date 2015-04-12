@@ -209,27 +209,32 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
       break;
 
     case SgAttributeSpecificationStatement::e_dimensionStatement:
-      SUBTREE_VISIT_BEGIN(node,astchild,0)
+      ret = sb::buildAttributeSpecificationStatement( (SgAttributeSpecificationStatement::attribute_spec_enum)  kind  );
+      SUBTREE_VISIT_BEGIN(node,astchild,ret)
         {
           exp = isSgExpression(astchild);
-          if( exp ) {
-            // search SgVariableDeclaration            add (0828)
-            if( (aref=isSgPntrArrRefExp(exp)) != 0 ){
-              if( (vref=isSgVarRefExp(aref->get_lhs_operand())) != 0 ){
-                if( (simb=vref->get_symbol() ) != 0 ){
-                  inam = simb->get_declaration();
-                  prnt = inam->get_parent();
-                  if( prnt == 0 ){
-                    // variable with no located declatation stmt is listed in this stmt.
-                    lst.push_back(exp);
-                  }
+          // search SgVariableDeclaration            add (0828)
+          if( (aref=isSgPntrArrRefExp(exp)) != 0 ){
+            if( (vref=isSgVarRefExp(aref->get_lhs_operand())) != 0 ){
+              if( (simb=vref->get_symbol() ) != 0 ){
+                inam = simb->get_declaration();
+                prnt = inam->get_parent();
+                if( prnt == 0 ){
+                  // variable with no located declatation stmt is listed in this stmt.
+                  lst.push_back(exp);
+                }
+                else if(isSgFunctionParameterList(prnt)){
+                  SgFunctionDefinition * f_def = si::getEnclosingProcedure (sb::topScopeStack());
+                  if(f_def==0) XEV_ABORT();
+                  inam->set_scope(f_def);
+                  inam->set_definition(ret);
+                  lst.push_back(exp);
                 }
               }
             }
           }
         }
       SUBTREE_VISIT_END();
-      ret = sb::buildAttributeSpecificationStatement( (SgAttributeSpecificationStatement::attribute_spec_enum)  kind  );
       elst = sb::buildExprListExp( lst );
       elst->set_parent(ret);
       ret->set_parameter_list( elst );
@@ -864,6 +869,7 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
       if((ini = isSgInitializedName(astchild)) != NULL ){
         si::appendArg(ret,ini);
         ini->set_scope(sb::topScopeStack());
+        ini->set_parent(ret);
       }
     }
   SUBTREE_VISIT_END();
@@ -1250,17 +1256,14 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      var->set_scope(fdf);
 
  #if 1
-     SgBasicBlock* body = fdf->get_body();
-     XEV_ASSERT(body!=NULL);
      if(lst && si::is_Fortran_language()==true){
        for(size_t i(0);i<lst->get_args().size();i++){
          ini = lst->get_args()[i];
          ini->set_parent(fdf);
-         XEV_ASSERT(body!=NULL);
          SgSymbol* sym = fdf->lookup_symbol(ini->get_name());
 
          if(sym!=NULL){
-           ini->set_scope(body);
+           ini->set_scope(fdf);
            ini->set_type(sym->get_type());
            if(isSgVariableSymbol(sym))
              ini->set_declptr(isSgVariableSymbol(sym)->get_declaration()->get_declptr());
@@ -1665,16 +1668,18 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
           SgInitializedName * new_initName = v_symbol->get_declaration();
           SgInitializedNamePtrList&  n_list= ret->get_variables();
           std::replace (n_list.begin(), n_list.end(),default_initName, new_initName );
-          XEV_WARN("replace:" << name->get_name());
           SgNode * old_parent = new_initName->get_parent();
-          if(old_parent==0 || isSgFunctionParameterList(old_parent)==0) XEV_ABORT();
-          new_initName->set_parent(ret);
-          SgVariableDefinition * var_def = isSgVariableDefinition(default_initName->get_declptr()) ;
-          var_def->set_parent(new_initName);
-          var_def->set_vardefn(new_initName);
-          new_initName->set_declptr(var_def);
-          delete (default_initName);
-          isFortranParameter = true;
+          //XEV_WARN("old:" << name->get_name() << " parent="<<old_parent->class_name());
+          //if(old_parent==0 || isSgFunctionParameterList(old_parent)==0) XEV_ABORT();
+          if(isSgFunctionParameterList(old_parent)) {
+            new_initName->set_parent(ret);
+            SgVariableDefinition * var_def = isSgVariableDefinition(default_initName->get_declptr()) ;
+            var_def->set_parent(new_initName);
+            var_def->set_vardefn(new_initName);
+            new_initName->set_declptr(var_def);
+            delete (default_initName);
+            isFortranParameter = true;
+          }
         }
       }
     }

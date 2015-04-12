@@ -979,12 +979,14 @@ XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
   Sg_File_Info* info = DEFAULT_FILE_INFO;
   info->setOutputInCodeGeneration();
   //SgFunctionDefinition* ret  = new SgFunctionDefinition(info);
+#if 1
   SgFunctionDefinition* ret  = 0;
   SgFunctionDeclaration* decl = isSgFunctionDeclaration(astParent);
   if(decl==0 ||decl->get_definition()==0)
     ret = new SgFunctionDefinition(info);
   else
     ret = decl->get_definition();
+#endif
   ret->set_parent(astParent);
   sb::pushScopeStack(ret);
   if(si::is_Fortran_language())

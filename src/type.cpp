@@ -314,6 +314,7 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
 VISIT_TYPE(TypeBool);
 VISIT_TYPE(TypeChar);
 //VISIT_TYPE3(TypeComplex);
+VISIT_TYPE(TypeCrayPointer);
 VISIT_TYPE2(TypeDefault);
 VISIT_TYPE(TypeDouble);
 VISIT_TYPE2(TypeEllipse);

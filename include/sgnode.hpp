@@ -257,6 +257,7 @@ SAGE3_TYPE(PointerType);
 SAGE3_TYPE(TypeBool);
 SAGE3_TYPE(TypeChar);
 SAGE3_TYPE(TypeComplex);
+SAGE3_TYPE(TypeCrayPointer);
 SAGE3_TYPE(TypeDefault);
 SAGE3_TYPE(TypeDouble);
 SAGE3_TYPE(TypeEllipse);

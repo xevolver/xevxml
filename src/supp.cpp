@@ -510,6 +510,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   SgScopeStatement* scope = sb::topScopeStack();
 
   string               name;
+  string               prev;
 
   XmlGetAttributeValue(node,"name",&name);
 
@@ -532,6 +533,18 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   }
   if(ini) ini->set_parent(ret);
 
+  // for SgTypeCrayPointer support
+  if(isSgTypeCrayPointer(typ) && XmlGetAttributeValue(node,"prev",&prev)){
+    SgVariableSymbol* vsym = si::lookupVariableSymbolInParentScopes(SgName(prev.c_str()));
+    if(vsym==0) {
+      XEV_DEBUG_INFO(node);XEV_ABORT();
+    }
+    SgInitializedName* ini = vsym->get_declaration();
+    if(ini==0) {
+      XEV_DEBUG_INFO(node);XEV_ABORT();
+    }
+    ret->set_prev_decl_item(ini);
+  }
   return ret;
 }
 /** XML attribute writer of SgInitializedName */
@@ -539,7 +552,11 @@ void XevSageVisitor::attribSgInitializedName(SgNode* node)
 {
   SgInitializedName* n = isSgInitializedName(node);
   if(n) {
-    sstr() << " name=" << n->get_name();
+    sstr() << " name=" << n->get_name() << " ";
+    if(n->get_prev_decl_item()){
+      // used for SgTypeCrayPointer
+      sstr() << " prev=" << n->get_prev_decl_item()->get_name() << " ";
+    }
   }
 }
 /** XML internal node writer of SgInitializedName */
