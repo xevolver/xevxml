@@ -186,35 +186,58 @@ void XevSageVisitor::inodeSgDataStatementValue(SgNode* node)
 SgNode*
 XevXmlVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
 {
+  SgExpression*         exp=NULL;
   SgStringVal*          val=NULL;
   //SgExpression*         val;
-  string             fmt;
+  //string             fmt;
   int                sgl=0;
   int                dbl=0;
   int                lst=0;
+  int                rpt=0;
   //xe::DOMNamedNodeMap*  amap = node->getAttributes();
   //xe::DOMNode*          nameatt = 0;
 
-  XmlGetAttributeValue(node,"fmt"   ,&fmt);
-  XmlGetAttributeValue(node,"single",&sgl);
-  XmlGetAttributeValue(node,"double",&dbl);
-  XmlGetAttributeValue(node,"list"  ,&lst);
+  //XmlGetAttributeValue(node,"fmt"   ,&fmt);
+  XmlGetAttributeValue(node,"single"  ,&sgl);
+  XmlGetAttributeValue(node,"double"  ,&dbl);
+  XmlGetAttributeValue(node,"list"    ,&lst);
+  XmlGetAttributeValue(node,"repeat"  ,&rpt);
   //cerr << "SgFormatItem |" << fmt << "| end" << endl;
 
   SgFormatItem*     ret = new SgFormatItem();
+  SgFormatItemList* il = new SgFormatItemList();
+  //if(lst==0){
+    SUBTREE_VISIT_BEGIN(node,astchild,ret)
+      {
+        if(exp==0)
+          exp = isSgExpression(astchild);
+        if(isSgFormatItem(astchild))
+          il->get_format_item_list().push_back(isSgFormatItem(astchild));
+      }
+    SUBTREE_VISIT_END();
+    if(exp){
+      ret->set_data(exp);
+    }
+    if(il->get_format_item_list().size()){
+      ret->set_format_item_list(il);
+    }
 
-  if(lst==0){
-    val = sb::buildStringVal( fmt );
-
-    if( sgl == 1 ) {                            // add (0821)
+    if(exp && rpt==0 && il->get_format_item_list().size()==0) {
+      XEV_DEBUG_INFO(node);
+      XEV_ABORT();
+    }
+    val = isSgStringVal( exp );
+    if( val && sgl == 1 ) {                     // add (0821)
       val->set_usesSingleQuotes(true);
     }
-    if( dbl == 1 ) {                            // add (0821)
+    if( val && dbl == 1 ) {                     // add (0821)
       val->set_usesDoubleQuotes(true);
     }
-    ret->set_data( (SgExpression*)val );
-  }
-  else {
+    if( rpt )
+      ret->set_repeat_specification(rpt);
+    //}
+    /*
+    else {
     SgFormatItemList* il = new SgFormatItemList();
     SUBTREE_VISIT_BEGIN(node,astchild,ret)
       {
@@ -223,7 +246,7 @@ XevXmlVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
       }
     SUBTREE_VISIT_END();
     ret->set_format_item_list(il);
-  }
+    }*/
   ret->set_parent(NULL);
   return ret;
 }
@@ -235,28 +258,35 @@ void XevSageVisitor::attribSgFormatItem(SgNode* node)
   if(n) {
     SgStringVal* v = isSgStringVal(n->get_data());
     if(v) {
-      sstr() << " fmt=\"" << XevXml::XmlStr2Entity(v->get_value()) << "\" ";
+      //sstr() << " fmt=\"" << XevXml::XmlStr2Entity(v->get_value()) << "\" ";
       if( v->get_usesSingleQuotes() == true )
         sstr() << " single=\"1\" ";
       if( v->get_usesDoubleQuotes() == true )
         sstr() << " double=\"1\" ";
     }
-    else if (n->get_format_item_list()){
+    if (n->get_format_item_list()){
       sstr() << " list=\"1\" ";
+    }
+    if(n->get_repeat_specification()){
+      sstr() << " repeat=\""<< n->get_repeat_specification() <<"\" ";
     }
   }
 }
-/** XML interanal node writer of SgDataStatementValue */
+/** XML interanal node writer of SgFormatItemValue */
 void XevSageVisitor::inodeSgFormatItem(SgNode* node)
 {
   SgFormatItem* n = isSgFormatItem(node);
   SgFormatItemList* l = n->get_format_item_list();
+
+  if(n->get_data())
+    this->visit(n->get_data());
   if(l){
     SgFormatItemPtrList& pl =l->get_format_item_list();
     for(size_t i(0);i< pl.size();i++){
       this->visit(pl[i]);
     }
   }
+  //else XEV_ABORT();
 }
 //INODE_SUPP_DEFAULT(FormatItem);
 

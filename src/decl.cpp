@@ -74,6 +74,15 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
   if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default){
     istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
   }
+
+  if(si::is_Fortran_language()){
+    if(decl->get_binding_label().size()){
+      istr << " bind=\"" <<decl->get_binding_label() << "\" " << endl;
+    }
+    if(decl->get_linkage().size()){
+      istr << " link=\"" <<decl->get_linkage() << "\" " << endl;
+    }
+  }
 }
 
 #define INODE_DECL_DEFAULT(x)                           \
@@ -846,7 +855,7 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
   }
-  attribSgStatement(sstr(),node);
+  attribSgDeclarationStatement(sstr(),node);
 }
 /** XML internal node writer of SgFunctionDeclaration */
 void XevSageVisitor::inodeSgFunctionDeclaration(SgNode* node)

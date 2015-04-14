@@ -195,8 +195,8 @@ bool XevSageVisitor::hasInode(SgNode* node)
     else return false;
     break;
   case V_SgFormatItem:
-    if(isSgFormatItem(node)->get_format_item_list())
-      return true;
+    //if(isSgFormatItem(node)->get_format_item_list())
+    return true;
   default:
     return false;
   }

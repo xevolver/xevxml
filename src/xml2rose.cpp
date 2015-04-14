@@ -233,11 +233,12 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
 {
   SgDeclarationStatement* decl = isSgDeclarationStatement(astNode);
   int enf=0;
-  unsigned long mod=0;
+  unsigned long mod=0,tmp=0;
   string rname;
   if(decl==0) return;
   SgBitVector vec;
   SgDeclarationModifier& m = decl->get_declarationModifier();
+
   if(XmlGetAttributeValue(node,"declaration_modifier",&mod)){
     vec = m.get_modifierVector();
     for(size_t i(0);i<vec.size();i++){
@@ -246,6 +247,8 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     }
     m.set_modifierVector(vec);
   }
+
+  mod = 0;
   if(XmlGetAttributeValue(node,"type_modifier",&mod)){
     vec = m.get_typeModifier().get_modifierVector();
     for(size_t i(0);i<vec.size();i++){
@@ -254,12 +257,30 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     }
     m.get_typeModifier().set_modifierVector(vec);
   }
-  if(XmlGetAttributeValue(node,"cv_modifier",&mod))
-    m.get_typeModifier().get_constVolatileModifier().set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
-  if(XmlGetAttributeValue(node,"access_modifier",&mod))
-    m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)mod);
-  if(XmlGetAttributeValue(node,"storage_modifier",&mod))
-    m.get_storageModifier().set_modifier((SgStorageModifier::storage_modifier_enum)mod);
+
+  mod=SgConstVolatileModifier::e_default;
+  if(XmlGetAttributeValue(node,"cv_modifier",&tmp))
+    mod = tmp;
+  m.get_typeModifier().get_constVolatileModifier().set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
+
+  mod=SgAccessModifier::e_default;
+  if(XmlGetAttributeValue(node,"access_modifier",&tmp))
+    mod = tmp;
+  m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)tmp);
+
+  mod =SgStorageModifier::e_default;
+  if(XmlGetAttributeValue(node,"storage_modifier",&tmp))
+    mod = tmp;
+  m.get_storageModifier().set_modifier((SgStorageModifier::storage_modifier_enum)mod);
+
+  string bind;
+  if(XmlGetAttributeValue(node,"bind",&bind)){
+    decl->set_binding_label(bind);
+  }
+  string link;
+  if(XmlGetAttributeValue(node,"link",&link)){
+    decl->set_linkage(link);
+  }
 
   SgFunctionDeclaration* fdecl = isSgFunctionDeclaration(decl);
   if(fdecl==NULL)return;
@@ -314,6 +335,8 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     }
   }
 #endif
+
+
 }
 
 void CheckUndeclVars::visit(SgNode* n) {

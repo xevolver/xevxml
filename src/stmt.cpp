@@ -754,6 +754,7 @@ XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgFlushStatement* ret = new SgFlushStatement(DEFAULT_FILE_INFO);
   SgExpression*     unt = 0;
+  SgExpression*     ist = 0;
 
   // The attributes by attribSgIOStatement() are simply ignored
   // because unit is always required and the others are not used.
@@ -762,6 +763,8 @@ XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
     {
       if( unt==0 )
         unt = isSgExpression(astchild);
+      else if( ist==0 )
+        ist = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -769,6 +772,11 @@ XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
     ret->set_unit( unt );
     unt->set_parent(ret);
     unt->set_startOfConstruct(DEFAULT_FILE_INFO);
+  }
+  if( ist ) {
+    ret->set_iostat( ist );
+    ist->set_parent(ret);
+    ist->set_startOfConstruct(DEFAULT_FILE_INFO);
   }
   ret->set_parent(astParent);
   return ret;
@@ -2259,14 +2267,14 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
         exp = isSgExprListExp(astchild);
       else if( unt==0 )
         unt = isSgExpression(astchild);
+      else if( f_err && err==0 )
+        err = isSgExpression(astchild);
       else if( f_fmt && fmt==0 )
         fmt = isSgExpression(astchild);
       else if( f_ios && iost==0 )
         iost = isSgExpression(astchild);
       else if( f_rec && rec==0 )
         rec = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
       else if( f_nml && nml==0 )
         nml = isSgExpression(astchild);
     }
