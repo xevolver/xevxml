@@ -805,6 +805,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgFunctionDefinition*    def = 0;
   //SgBasicBlock*            def = 0;
   SgType*                  typ = 0;
+  int                      old = 0;
 
   string name;
 
@@ -844,6 +845,9 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   def->set_parent(ret);
   ret->set_definition(def);
   ret->set_parent(astParent);
+  if( XmlGetAttributeValue(node,"old"  ,&old) == true )
+    ret->set_oldStyleDefinition(old);
+
   return ret;
 }
 /** XML attribute writer of SgFunctionDeclaration */
@@ -854,6 +858,8 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     SgStorageModifier m = (n->get_declarationModifier()).get_storageModifier();
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
+    if(n->get_oldStyleDefinition())
+      sstr() << " old=\"1\" ";
   }
   attribSgDeclarationStatement(sstr(),node);
 }
@@ -1338,8 +1344,6 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
        sstr() << " elemental=\"1\"";
      if(n->get_functionModifier().isRecursive())
        sstr() << " recursive=\"1\"";
-     if(n->get_oldStyleDefinition())
-       sstr() << " old=\"1\"";
    }
    attribSgFunctionDeclaration(node);
  }
