@@ -563,6 +563,11 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   }
   if(ini) ini->set_parent(ret);
 
+  unsigned long mod = (unsigned long)SgStorageModifier::e_default;
+  if(XmlGetAttributeValue(node,"storage_modifier",&mod)){
+    ret->get_storageModifier().set_modifier((SgStorageModifier::storage_modifier_enum)mod);
+  }
+
   // for SgTypeCrayPointer support
   if(isSgTypeCrayPointer(typ) && XmlGetAttributeValue(node,"prev",&prev)){
     SgVariableSymbol* vsym = si::lookupVariableSymbolInParentScopes(SgName(prev.c_str()));
@@ -587,6 +592,8 @@ void XevSageVisitor::attribSgInitializedName(SgNode* node)
       // used for SgTypeCrayPointer
       sstr() << " prev=" << n->get_prev_decl_item()->get_name() << " ";
     }
+    if(n->get_storageModifier().get_modifier() !=SgStorageModifier::e_default)
+      sstr() << " storage_modifier=\"" << n->get_storageModifier().get_modifier() <<"\" ";
   }
 }
 /** XML internal node writer of SgInitializedName */

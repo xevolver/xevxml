@@ -230,6 +230,9 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
   if( t && t->get_type_kind() ){
     v->visit(t->get_type_kind());
   }
+  if( t && t->get_modifiers() ){
+    v->visit(t->get_modifiers());
+  }
 }
 
 #define VISIT_TYPE(Type) \

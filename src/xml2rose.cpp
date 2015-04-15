@@ -242,7 +242,7 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
 {
   SgDeclarationStatement* decl = isSgDeclarationStatement(astNode);
   int enf=0;
-  unsigned long mod=0,tmp=0;
+  unsigned long mod=0;
   string rname;
   if(decl==0) return;
   SgBitVector vec;
@@ -268,18 +268,15 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
   }
 
   mod=SgConstVolatileModifier::e_default;
-  if(XmlGetAttributeValue(node,"cv_modifier",&tmp))
-    mod = tmp;
+  XmlGetAttributeValue(node,"cv_modifier",&mod);
   m.get_typeModifier().get_constVolatileModifier().set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
 
   mod=SgAccessModifier::e_default;
-  if(XmlGetAttributeValue(node,"access_modifier",&tmp))
-    mod = tmp;
-  m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)tmp);
+  XmlGetAttributeValue(node,"access_modifier",&mod);
+  m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)mod);
 
   mod =SgStorageModifier::e_default;
-  if(XmlGetAttributeValue(node,"storage_modifier",&tmp))
-    mod = tmp;
+  XmlGetAttributeValue(node,"storage_modifier",&mod);
   m.get_storageModifier().set_modifier((SgStorageModifier::storage_modifier_enum)mod);
 
   string bind;

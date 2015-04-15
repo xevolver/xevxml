@@ -163,6 +163,8 @@ bool XevSageVisitor::hasInode(SgNode* node)
     return true;
   if(t && t->get_type_kind())
     return true;
+  if(t && t->get_modifiers())
+    return true;
   if( t==NULL && node->get_numberOfTraversalSuccessors()>0)
     return true;
   if( getPreprocessingInfo(node) )
