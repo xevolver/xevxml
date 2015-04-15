@@ -238,6 +238,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     ret->get_startOfConstruct()->setCompilerGenerated();
     ret->get_operatorPosition()->setCompilerGenerated();
     ret->get_file_info()->setCompilerGenerated();
+    if(isSgCastExp(exp))return exp;
   }
   return ret;
 }
