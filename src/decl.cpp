@@ -709,7 +709,8 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
     ret->set_equivalence_set_list(lst);
     ret->set_definingDeclaration(ret);
     lst->set_parent(ret);
-    lst->set_startOfConstruct(DEFAULT_FILE_INFO);
+    if(lst->get_startOfConstruct()==0)
+      lst->set_startOfConstruct(DEFAULT_FILE_INFO);
   }
   else {
     XEV_DEBUG_INFO(node);
@@ -1715,7 +1716,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   if( bitstr.size() ) {
     bit = strtoul( bitstr.c_str(),0,0 );
     SgUnsignedLongVal* val = new SgUnsignedLongVal( bit,bitstr );
-    val->set_startOfConstruct( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
+    val->set_startOfConstruct(DEFAULT_FILE_INFO);
     ret->set_bitfield (val);
     val->set_parent(ret);
   }

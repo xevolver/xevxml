@@ -49,10 +49,18 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   SgExpression*  n = isSgExpression(node);
   if(n==0)return;
 
-  if(n && n->get_need_paren())
-    istr << " paren=\"" << n->get_need_paren() << "\"";
+  if(n->get_need_paren())
+    istr << " paren=\"1\" ";
+
   if(n->get_lvalue())
-    istr << " lvalue=\"" << n->get_lvalue() << "\"";
+    istr << " lvalue=\"1\" ";
+
+  SgInitializer* ini = isSgInitializer(node);
+  if(ini && ini->get_is_explicit_cast()){
+    SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
+    if(c && c->get_file_info() &&c->get_file_info()->isCompilerGenerated()==false)
+      istr << " explicit=\"1\" ";
+  }
 }
 
 #define ATTRIB_EXPR_DEFAULT(x)                      \
@@ -210,17 +218,14 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  if(imp && exp ){
-    // ignore implicit type conversions
-    return exp;
-  }
   if(typ && exp){
-    ret = sb::buildCastExp(exp,typ);
+    ret = sb::buildCastExp(exp,typ,(SgCastExp::cast_type_enum)cty);
     ret->set_parent(astParent);
-    ret->set_cast_type((SgCastExp::cast_type_enum)cty);
   }
   else if(exp){
     // ignore implicit type conversions
+    XEV_WARN("An SgCastExp node ignored");
+    XEV_DEBUG_INFO(node);
     exp->set_parent(astParent);
     return exp;
   }
@@ -228,7 +233,12 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-
+  if(imp){
+    // ignore implicit type conversions
+    ret->get_startOfConstruct()->setCompilerGenerated();
+    ret->get_operatorPosition()->setCompilerGenerated();
+    ret->get_file_info()->setCompilerGenerated();
+  }
   return ret;
 }
 //ATTRIB_EXPR_DEFAULT(CastExp);
@@ -441,7 +451,9 @@ XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
     {
       if((exp = isSgExpression(astchild))!=0) {
         exp->set_parent(ret);
-        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+        //exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+        if(exp->get_startOfConstruct()==NULL)
+          exp->set_startOfConstruct(DEFAULT_FILE_INFO);
         ret->append_expression(exp);
       }
     }

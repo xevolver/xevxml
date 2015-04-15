@@ -186,10 +186,19 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
   int parenf=0;
   int lvalf=0;
 
-  if(e && XmlGetAttributeValue(node,"paren",&parenf)) // probably paren="1"
-    e->set_need_paren(parenf);
-  if(e && XmlGetAttributeValue(node,"lvalue",&lvalf)) // probably lvalue="1"
-    e->set_lvalue(lvalf);
+  if(e==0) return;
+
+  XmlGetAttributeValue(node,"paren",&parenf);
+  XmlGetAttributeValue(node,"lvalue",&lvalf);
+  e->set_need_paren(parenf);
+  e->set_lvalue(lvalf);
+
+  SgInitializer* ini = isSgInitializer(astNode);
+  int expl = 0;
+  if(ini){
+    XmlGetAttributeValue(node,"explicit",&expl);
+    ini->set_is_explicit_cast(expl);
+  }
 }
 
 void
