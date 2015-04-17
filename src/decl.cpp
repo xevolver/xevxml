@@ -657,36 +657,41 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
 {
   SgEnumDeclaration*    ret = 0;
   SgScopeStatement*     scope = sb::topScopeStack();    //?
-
+  SgEnumSymbol*         esym = 0;
   //xe::DOMNamedNodeMap*  amap = node->getAttributes();
   //xe::DOMNode*          nameatt=0;
   string                name;
 
-  XmlGetAttributeValue(node,"name",&name);
-
-  SgInitializedName*        inam  = 0;
-  SgInitializedNamePtrList  lst;
-
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
-    {
-      if((inam = isSgInitializedName(astchild))!=0)
-        lst.push_back(inam);
-    }
-  SUBTREE_VISIT_END();
-
-  if( name.size() ){
+  if( XmlGetAttributeValue(node,"name",&name) ){
     ret = sb::buildEnumDeclaration( SgName( name.c_str() ), scope );
     ret->set_name(SgName( name.c_str()));
     ret->set_isUnNamed( false );
 
+    esym = si::lookupEnumSymbolInParentScopes(name);
+    if(esym==0){
+      XEV_DEBUG_INFO(node);
+      XEV_ABORT();
+    }
+    //scope->get_symbol_table()->print();
   }
   else {
     ret = sb::buildEnumDeclaration( SgName( name.c_str() ), scope );
     ret->set_isUnNamed( true );
 
   }
-  if(!lst.empty())
-    ret->get_enumerators() = lst;
+  ret->set_parent(astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      SgInitializedName* ini = isSgInitializedName(astchild);
+      if(ini){
+        ret->append_enumerator(ini);
+        ini->set_parent(ret);
+        ret->set_definingDeclaration(ret);
+        esym->set_declaration(ret);
+      }
+    }
+  SUBTREE_VISIT_END();
 
   return ret;
 }
@@ -696,10 +701,8 @@ void XevSageVisitor::attribSgEnumDeclaration(SgNode* node)
   SgEnumDeclaration*      n = isSgEnumDeclaration(node);
 
   if(n) {
-    if( n->get_isUnNamed() )
-      sstr() << " name=\"\" ";
-    else
-      sstr() << " name=" << n->get_name() << " ";
+    //if( n->get_isUnNamed() ==false)
+    sstr() << " name=" << n->get_name() << " ";
   }
   attribSgStatement(sstr(),node);
 }
@@ -1494,9 +1497,9 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
  SgNode*
  XevXmlVisitor::visitSgTypedefDeclaration(xe::DOMNode* node, SgNode* astParent)
  {
-   SgTypedefDeclaration*     ret = 0;
-   SgClassDeclaration*       cls = 0;
-   SgType*                   typ = 0;
+   SgTypedefDeclaration*     ret  = 0;
+   SgDeclarationStatement*   decl = 0;
+   SgType*                   typ  = 0;
 
    //xe::DOMNamedNodeMap* amap = node->getAttributes();
    //xe::DOMNode* satt = 0;
@@ -1508,36 +1511,22 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      {
        if(typ==0)
          typ = isSgType(astchild);
-       if(cls==0)
-         cls = isSgClassDeclaration(astchild);
+       if(decl==0)
+         decl = isSgDeclarationStatement(astchild);
      }
    SUBTREE_VISIT_END();
 
-   if(cls) {
-     SgType * type = cls->get_type();
-     SgNamedType *namedType = isSgNamedType(type->findBaseType());
-     namedType->get_declaration()->set_definingDeclaration(cls);
-     // for s010.c  to pass runAllTests
-     namedType->set_declaration (cls->get_firstNondefiningDeclaration());
+   if(decl) {
+     SgNamedType *namedType = isSgNamedType(typ->findBaseType());
      ret = sb::buildTypedefDeclaration( name.c_str(),
                                         namedType,
                                         sb::topScopeStack());
      XEV_ASSERT(ret!=NULL);
-     cls->set_parent(ret);
-     ret->set_declaration( isSgDeclarationStatement(cls->get_firstNondefiningDeclaration()) );
+     ret->set_declaration(decl->get_firstNondefiningDeclaration());
      ret->set_requiresGlobalNameQualificationOnType(true);
-     if(cls->get_definingDeclaration() == cls )
+     if(si::is_Fortran_language()==false)
        ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
-     SgClassType* ctyp = isSgClassType(typ);
-     //XEV_ASSERT(ctyp!=NULL);
-     if(ctyp==0){
-       ctyp = isSgClassType(si::getElementType(typ));
-       if(ctyp==0){
-         XEV_DEBUG_INFO(node);
-         XEV_ABORT();
-       }
-     }
-     ctyp->set_declaration(cls->get_firstNondefiningDeclaration());
+     decl->set_parent(ret);
    }
    else if(typ) {                                         // add (0819)
      ret = sb::buildTypedefDeclaration( name.c_str(),

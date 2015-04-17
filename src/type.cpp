@@ -530,12 +530,33 @@ void XevSageVisitor::inodeSgClassType(SgNode* node) {}
 SgNode*
 XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
 {
-  SgEnumType* ret =  new SgEnumType(0);
+  string name;
+  SgEnumType* ret =  0;
+  SgEnumSymbol* esym =0;
+
+  if(XmlGetAttributeValue(node,"name",&name)==false){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  esym = si::lookupEnumSymbolInParentScopes(name);
+  if(esym){
+    SgEnumDeclaration* decl = esym->get_declaration();
+    ret = new SgEnumType(decl);
+  }
+  else{
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
   ret->set_parent(astParent);
   return ret;
 }
 /** XML attribute writer of SgEnumType */
-void XevSageVisitor::attribSgEnumType(SgNode*) {}
+void XevSageVisitor::attribSgEnumType(SgNode* node) {
+  SgEnumType* n = isSgEnumType(node);
+  if(n){
+    sstr() << " name=" << n->get_name() << " ";
+  }
+}
 /** XML internal node writer of SgEnumType */
 void XevSageVisitor::inodeSgEnumType (SgNode*) {}
 
