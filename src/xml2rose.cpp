@@ -199,7 +199,7 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
   if(ini){
     int expl = 0;
 
-    XmlGetAttributeValue(node,"explicit",&expl);
+    XmlGetAttributeValue(node,"cast",&expl);
     ini->set_is_explicit_cast(expl);
   }
 }

@@ -59,7 +59,7 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   if(ini && ini->get_is_explicit_cast()){
     SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
     if(c && c->get_file_info() &&c->get_file_info()->isCompilerGenerated()==false)
-      istr << " explicit=\"1\" ";
+      istr << " cast=\"1\" ";
   }
 }
 
@@ -151,20 +151,19 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
   ret->set_parent(astParent);
   lst->set_parent(ret);
 
-  int impl=0;
-  if(XmlGetAttributeValue(node,"implicit",&impl) ){
-    bool need_braces = (impl==0);
-    ret->set_need_explicit_braces(need_braces);
+  int brace=0;
+  if(XmlGetAttributeValue(node,"need_brace",&brace) ){
+    ret->set_need_explicit_braces(brace);
   }
+
   return ret;
 }
-// ===============================================================================
-/// Visitor of a SgAggregateInitializer element in an XML document
 void XevSageVisitor::attribSgAggregateInitializer(SgNode* node)
 {
   SgAggregateInitializer* n = isSgAggregateInitializer(node);
   if(n){
-    sstr() << " implicit=\"" << (n->get_need_explicit_braces()==false) << "\" ";
+    if(n->get_need_explicit_braces())
+      sstr() << " need_brace=\"1\" ";
   }
   attribSgExpression(sstr(),node);
 }
