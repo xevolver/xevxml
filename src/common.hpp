@@ -75,4 +75,30 @@
 
 #define SUBTREE_VISIT_END()     } cld_=cld_->getNextSibling();}}
 
+#define FUNCTION_HEADER_VISIT_BEGIN(X,Y,Z)                              \
+  {                                                                     \
+  xercesc::DOMNode* cld_ = (X)->getFirstChild();                        \
+  while(cld_) {                                                         \
+  if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){            \
+  char* buf = xe::XMLString::transcode(cld_->getNodeName());            \
+  string nname = buf;                                                   \
+  xe::XMLString::release(&buf);                                         \
+  if(nname != "SgFunctionDefinition" && nname != "SgBasicBlock"){       \
+    SgNode* Y = this->visit(cld_,Z);
+
+#define FUNCTION_HEADER_VISIT_END()     }} cld_=cld_->getNextSibling();}}
+
+#define FUNCTION_BODY_VISIT_BEGIN(X,Y,Z)                                \
+  {                                                                     \
+  xercesc::DOMNode* cld_ = (X)->getFirstChild();                        \
+  while(cld_) {                                                         \
+  if(cld_->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){            \
+  char* buf = xe::XMLString::transcode(cld_->getNodeName());            \
+  string nname = buf;                                                   \
+  xe::XMLString::release(&buf);                                         \
+  if(nname == "SgFunctionDefinition" || nname == "SgBasicBlock"){       \
+    SgNode* Y = this->visit(cld_,Z);
+
+#define FUNCTION_BODY_VISIT_END()     }} cld_=cld_->getNextSibling();}}
+
 #endif /* ___COMMON_HPP___ */

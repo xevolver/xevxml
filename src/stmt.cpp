@@ -328,11 +328,13 @@ INODE_STMT_DEFAULT(BreakStmt);
 SgNode*
 XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgCaseOptionStmt*     ret  = 0;
+  SgCaseOptionStmt*     ret  = new SgCaseOptionStmt(DEFAULT_FILE_INFO);
   SgExpression*         key  = 0;
   SgStatement*          body = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret->set_parent(astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(key==0)
         key = isSgExpression(astchild);
@@ -341,8 +343,15 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildCaseOptionStmt(key,body);
-
+  if(key==0||body==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  //ret = sb::buildCaseOptionStmt(key,body);
+  ret->set_key (key);
+  ret->set_body(body);
+  key ->set_parent(ret);
+  body->set_parent(ret);
   string c;
   if(XmlGetAttributeValue(node,"construct",&c)){
     ret->set_case_construct_name(c);
@@ -632,11 +641,12 @@ INODE_STMT_DEFAULT(DefaultOptionStmt);
 SgNode*
 XevXmlVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgDoWhileStmt*        ret  = 0;
+  //SgDoWhileStmt*        ret  = 0;
+  SgDoWhileStmt*        ret  = new SgDoWhileStmt(DEFAULT_FILE_INFO);
   SgStatement*          body = 0;
   SgExprStatement*      cond = 0;
-
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret->set_parent(astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       /* assuming these stmts appear in this order */
       if(body==0)
@@ -645,9 +655,16 @@ XevXmlVisitor::visitSgDoWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
         cond = isSgExprStatement(astchild);
     }
   SUBTREE_VISIT_END();
-  ret = sb::buildDoWhileStmt(body,cond);
-  if(cond)  cond->set_parent(ret);
-  if(body)  body->set_parent(ret);
+  //ret = sb::buildDoWhileStmt(body,cond);
+  if( body==0 || cond==0 ){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  ret->set_body(body);
+  ret->set_condition(cond);
+  body->set_parent(ret);
+  cond->set_parent(ret);
+
   return ret;
 }
 STMT_DEFAULT(DoWhileStmt);
@@ -847,17 +864,18 @@ STMT_DEFAULT(ForInitStatement);
 SgNode*
 XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgForStatement* ret = 0;
-  SgStatement*    ini = 0;
-  SgStatement*    tst = 0;
-  SgExpression*   inc = 0;
-  SgStatement*    bdy = 0;
+  SgForStatement* ret = new SgForStatement(DEFAULT_FILE_INFO);
+  SgForInitStatement*    ini = 0;
+  SgStatement*           tst = 0;
+  SgExpression*          inc = 0;
+  SgStatement*           bdy = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret->set_parent(astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       /* assuming these stmts appear in this order */
       if(ini==0)
-        ini = isSgStatement(astchild);
+        ini = isSgForInitStatement(astchild);
       else if (tst==0)
         tst = isSgStatement(astchild);
       else if (inc==0)
@@ -867,13 +885,28 @@ XevXmlVisitor::visitSgForStatement(xercesc::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildForStatement(ini,tst,inc,bdy);
-  ret->set_parent(astParent);
-  if(ini)ini->set_parent(ret);
-  if(tst)tst->set_parent(ret);
-  if(inc)inc->set_parent(ret);
-  if(bdy)bdy->set_parent(ret);
-
+  //ret = sb::buildForStatement(ini,tst,inc,bdy);
+  //ret->set_parent(astParent);
+  if(ini==0||tst==0||inc==0||bdy==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  if(ini){
+    ret->set_for_init_stmt(ini);
+    ini->set_parent(ret);
+  }
+  if(tst){
+    ret->set_test(tst);
+    tst->set_parent(ret);
+  }
+  if(inc){
+    ret->set_increment(inc);
+    inc->set_parent(ret);
+  }
+  if(bdy){
+    ret->set_loop_body(bdy);
+    bdy->set_parent(ret);
+  }
   return ret;
 }
 STMT_DEFAULT(ForStatement);
@@ -1126,6 +1159,7 @@ XevXmlVisitor::visitSgIfStmt(xercesc::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"end",&estmt);
 
   ret = new SgIfStmt(DEFAULT_FILE_INFO);
+  ret->set_parent(astParent);
   if(si::is_Fortran_language()==true)
     ret->setCaseInsensitive(true);
   ret->set_parent(astParent);
@@ -2009,11 +2043,13 @@ void XevSageVisitor::inodeSgStopOrPauseStatement(SgNode* node)
 SgNode*
 XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgSwitchStatement*    ret  = 0;
+  SgSwitchStatement*    ret  = new SgSwitchStatement(DEFAULT_FILE_INFO);
   SgStatement*          item = 0;
   SgStatement*          body = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret->set_parent(astParent);
+  sb::pushScopeStack(ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       // assuming the order
       if(item==0)
@@ -2022,22 +2058,33 @@ XevXmlVisitor::visitSgSwitchStatement(xercesc::DOMNode* node, SgNode* astParent)
         body = isSgStatement(astchild);
     }
   SUBTREE_VISIT_END();
+  sb::popScopeStack();
 
-  ret = sb::buildSwitchStatement(item,body);
-
-  int elabel=0;
-  string slabel;
-  if(XmlGetAttributeValue(node,"elabel",&elabel)){
-    SgLabelSymbol*  s = new SgLabelSymbol();
-    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
-    s->get_fortran_statement()->set_parent(s);
-    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
-    s->set_numeric_label_value( elabel );
-    SgLabelRefExp*  l = new SgLabelRefExp( s );
-    ret->set_end_numeric_label( l );
+  if(item==0||body==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
   }
-  if(XmlGetAttributeValue(node,"slabel",&slabel)){
-    ret->set_string_label(slabel);
+  ret->set_item_selector(item);
+  ret->set_body(body);
+  item->set_parent(ret);
+  body->set_parent(ret);
+
+  //ret = sb::buildSwitchStatement(item,body);
+  if(si::is_Fortran_language()){
+    int elabel=0;
+    string slabel;
+    if(XmlGetAttributeValue(node,"elabel",&elabel)){
+      SgLabelSymbol*  s = new SgLabelSymbol();
+      s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+      s->get_fortran_statement()->set_parent(s);
+      s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+      s->set_numeric_label_value( elabel );
+      SgLabelRefExp*  l = new SgLabelRefExp( s );
+      ret->set_end_numeric_label( l );
+    }
+    if(XmlGetAttributeValue(node,"slabel",&slabel)){
+      ret->set_string_label(slabel);
+    }
   }
   return ret;
 }
@@ -2163,7 +2210,7 @@ INODE_STMT_DEFAULT(WhereStatement)
 SgNode*
 XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgWhileStmt*          ret   = 0;
+  SgWhileStmt*          ret   = new SgWhileStmt(DEFAULT_FILE_INFO);
   SgExprStatement*      cond  = 0;
   SgStatement*          tstmt = 0;
   SgStatement*          fstmt = 0;
@@ -2171,11 +2218,9 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
   int nlabel=0;
   string slabel;
 
-  XmlGetAttributeValue(node,"end",&enddo);
-  XmlGetAttributeValue(node,"slabel",&slabel);
-  XmlGetAttributeValue(node,"elabel",&nlabel);
+  ret->set_parent(astParent);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       /* assuming these stmts appear in this order */
       if(cond==0)
@@ -2187,26 +2232,40 @@ XevXmlVisitor::visitSgWhileStmt(xercesc::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildWhileStmt(cond,tstmt,fstmt);
-  if(cond)  cond->set_parent(ret);
-  if(tstmt) tstmt->set_parent(ret);
-  if(fstmt) fstmt->set_parent(ret);
-
-  if(enddo){
-    ret->set_has_end_statement(true);
+  //ret = sb::buildWhileStmt(cond,tstmt,fstmt);
+  if(cond) {
+    ret->set_condition(cond);
+    cond->set_parent(ret);
   }
-  if( slabel.size() )
-    ret->set_string_label( slabel );
-  else if( nlabel) {
-    SgLabelSymbol*  s = new SgLabelSymbol();
-    s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
-    s->get_fortran_statement()->set_parent(s);
-    s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
-    s->set_numeric_label_value( nlabel );
-    SgLabelRefExp*  l = new SgLabelRefExp( s );
-    ret->set_end_numeric_label( l );
+  if(tstmt) {
+    ret->set_body(tstmt);
+    tstmt->set_parent(ret);
+  }
+  if(fstmt) {
+    ret->set_else_body(fstmt);
+    fstmt->set_parent(ret);
   }
 
+  if(si::is_Fortran_language()){
+    XmlGetAttributeValue(node,"end",&enddo);
+    XmlGetAttributeValue(node,"slabel",&slabel);
+    XmlGetAttributeValue(node,"elabel",&nlabel);
+
+    if(enddo){
+      ret->set_has_end_statement(true);
+    }
+    if( slabel.size() )
+      ret->set_string_label( slabel );
+    else if( nlabel) {
+      SgLabelSymbol*  s = new SgLabelSymbol();
+      s->set_fortran_statement( new SgStatement(astParent->get_file_info()) );
+      s->get_fortran_statement()->set_parent(s);
+      s->set_label_type( SgLabelSymbol::e_non_numeric_label_type );
+      s->set_numeric_label_value( nlabel );
+      SgLabelRefExp*  l = new SgLabelRefExp( s );
+      ret->set_end_numeric_label( l );
+    }
+  }
   return ret;
 }
 /** XML attribute writer of SgWhileStmt */
@@ -2215,7 +2274,7 @@ void XevSageVisitor::attribSgWhileStmt(SgNode* node)
   SgWhileStmt*   n = isSgWhileStmt(node);
   SgLabelRefExp* l = 0;
 
-  if(n) {
+  if(n&&si::is_Fortran_language()) {
     sstr() << " end=\"" << n->get_has_end_statement() << "\" ";
     l = n->get_end_numeric_label();
     if(l){

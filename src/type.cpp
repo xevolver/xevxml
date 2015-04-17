@@ -513,10 +513,10 @@ void XevSageVisitor::attribSgClassType(SgNode* node)
   SgClassType* n = isSgClassType(node);
   SgDeclarationStatement* ds = n->get_declaration();
   SgClassDeclaration*     cd = isSgClassDeclaration(ds);
-  if( cd->get_isUnNamed() )
-    sstr() << " name=\"\" ";
-  else
-    sstr() << " name=" << n->get_name() << " ";
+  //if( cd->get_isUnNamed() )
+  //sstr() << " name=\"\" ";
+  //else
+  sstr() << " name=" << n->get_name() << " ";
   sstr() << " type=\"" << cd->get_class_type() << "\" ";
 }
 /** XML internal node writer of SgClassType */

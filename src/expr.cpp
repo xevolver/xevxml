@@ -389,21 +389,21 @@ INODE_EXPR_TYPE(ConstructorInitializer);
 SgNode*
 XevXmlVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgDotExp*     ret = 0;
+  SgDotExp*     ret = new SgDotExp(DEFAULT_FILE_INFO);
   SgExpression* lhs = 0;
   SgExpression* rhs = 0;
   SgClassDefinition*   defn=0;
-  ret = sb::buildDotExp( lhs,rhs);
   bool pushed = false;
 
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( lhs==0 ){
         lhs = isSgExpression(astchild);
         if(lhs) {
           SgClassType* ctype = isSgClassType(lhs->get_type());
-          // The following line is needed for h032.f90. I don't know why...
-          if(ctype==0) ctype = isSgClassType(si::getElementType(lhs->get_type()));
+          if(ctype==0)
+            ctype = isSgClassType(si::getElementType(lhs->get_type()));
           if(ctype){
             SgClassDeclaration* decl = isSgClassDeclaration(ctype->get_declaration());
             if(decl->get_definition()==0)
@@ -435,10 +435,98 @@ XevXmlVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
   ret->set_rhs_operand(rhs);
   lhs->set_parent(ret);
   rhs->set_parent(ret);
-  ret->set_parent(astParent);
+
   return ret;
 }
 EXPR_DEFAULT(DotExp);
+
+// ===============================================================================
+/// Visitor of a SgArrowExp element in an XML document
+SgNode*
+XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgArrowExp*     ret = 0;
+  SgExpression* lhs = 0;
+  SgExpression* rhs = 0;
+  SgClassDefinition*   defn=0;
+  ret = sb::buildArrowExp( lhs,rhs);
+  bool pushed = false;
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if( lhs==0 ){
+        lhs = isSgExpression(astchild);
+        if(lhs) {
+          SgClassType    *ctype = 0;
+          SgPointerType  *ptype = isSgPointerType(lhs->get_type());
+
+          if(ptype==0 && isSgTypedefType(lhs->get_type())){
+            SgTypedefType* ttype = isSgTypedefType(lhs->get_type());
+            ptype = isSgPointerType(ttype->get_base_type());
+          }
+          else if(ptype==0 && isSgModifierType(lhs->get_type())){
+            SgModifierType* mtype = isSgModifierType(lhs->get_type());
+            ptype = isSgPointerType(mtype->get_base_type());
+          }
+
+          if(ptype)
+            ctype = isSgClassType(si::getElementType(ptype));
+          else{
+            XEV_WARN(lhs->get_type()->class_name() <<" is given as lhs of SgArrowExp");
+            XEV_DEBUG_INFO(node);
+            XEV_ABORT();
+          }
+
+          if(ctype==0){
+            SgTypedefType* ttype = isSgTypedefType(ptype->get_base_type());
+            SgModifierType* mtype = isSgModifierType(ptype->get_base_type());
+            if(ttype){
+              ctype = isSgClassType(ttype->get_base_type());
+            }
+            else if(mtype){
+              ctype = isSgClassType(mtype->get_base_type());
+            }
+          }
+
+          if(ctype){
+            SgClassDeclaration* decl = isSgClassDeclaration(ctype->get_declaration());
+            if(decl && decl->get_definition()==0)
+              decl = isSgClassDeclaration(decl->get_definingDeclaration());
+
+            // defining declaration is found
+            if(decl && decl->get_definition()){
+              defn = decl->get_definition();
+              sb::pushScopeStack(defn);
+              pushed = true;
+            }
+            // defining declaration is not found
+            else {
+              //XEV_WARN(decl->class_name()<<decl->get_definition()<<decl->get_name());
+              abort();
+            }
+          }
+          else {
+            //XEV_WARN( ptype->get_base_type()->class_name() <<" is found");
+            abort();
+          }
+        }
+      }
+      else if( rhs==0 ){
+        if(pushed==true)
+          sb::popScopeStack();
+        rhs = isSgExpression(astchild);
+      }
+    }
+  SUBTREE_VISIT_END();
+  if(lhs == 0 || rhs == 0) XEV_ABORT();
+  ret->set_lhs_operand(lhs);
+  ret->set_rhs_operand(rhs);
+  lhs->set_parent(ret);
+  rhs->set_parent(ret);
+  ret->set_parent(astParent);
+  return ret;
+}
+EXPR_DEFAULT(ArrowExp);
 
 // ===============================================================================
 /// Visitor of a SgExprListExp element in an XML document
@@ -728,8 +816,11 @@ XevXmlVisitor::visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent)
         exp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
-
-  ret = new SgPointerDerefExp(DEFAULT_FILE_INFO, exp, typ );
+  if(exp==0||typ==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  ret = new SgPointerDerefExp(DEFAULT_FILE_INFO,exp,typ);
   ret->set_parent(astParent);
   exp->set_parent(ret);
   typ->set_parent(ret);
@@ -976,7 +1067,7 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
         }
         name1 = vsym->get_declaration();
       }
-      else{
+      else if(si::is_Fortran_language()){
         // implicit variables
         scope = si::getEnclosingProcedure (sb::topScopeStack());
         if(scope==NULL) scope = _file->get_globalScope();
@@ -986,9 +1077,15 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
         vsym= new SgVariableSymbol(name1);
         vsym->set_parent(scope);
       }
+      else {
+        XEV_WARN("variable " << name << " is not found in any symbol tables.");
+        XEV_DEBUG_INFO(node);
+        XEV_ABORT();
+      }
       ret = new SgVarRefExp(vsym);
       ret->set_symbol(vsym);
-      ret->get_symbol()->set_declaration(name1);
+      if(vsym)
+        ret->get_symbol()->set_declaration(name1);
       si::setOneSourcePositionForTransformation(ret);
     }
   }
@@ -1139,7 +1236,7 @@ INODE_EXPR_DEFAULT(VarRefExp);
 VISIT_BOP(AddOp);
 VISIT_BOP(AndAssignOp);
 VISIT_BOP(AndOp);
-VISIT_BOP(ArrowExp);
+//VISIT_BOP(ArrowExp);
 VISIT_BOP(AssignOp);
 VISIT_BOP(BitAndOp);
 VISIT_BOP(BitOrOp);

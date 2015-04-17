@@ -213,7 +213,8 @@ public:
 
     XercesDOMParser::startElement(elemDecl, uriId, prefixName, attrList, attrCount, isEmpty, isRoot);
 
-    if(!isEmpty){
+    //if(!isEmpty){
+    if(1){
       XmlLoc* loc = new XmlLoc();
       const xe::Locator* locator = getScanner()->getLocator();
       loc->line = locator->getLineNumber();
