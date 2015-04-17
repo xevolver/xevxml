@@ -74,6 +74,9 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
   if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default){
     istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
   }
+  if(modifier.get_storageModifier().get_thread_local_storage() == true ){
+    istr << " thread_local=\"1\" ";
+  }
 
   if(si::is_Fortran_language()){
     if(decl->get_binding_label().size()){

@@ -282,6 +282,10 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
   XmlGetAttributeValue(node,"storage_modifier",&mod);
   m.get_storageModifier().set_modifier((SgStorageModifier::storage_modifier_enum)mod);
 
+  mod=0;
+  XmlGetAttributeValue(node,"thread_local",&mod);
+  m.get_storageModifier().set_thread_local_storage(mod);
+
   string bind;
   if(XmlGetAttributeValue(node,"bind",&bind)){
     decl->set_binding_label(bind);
