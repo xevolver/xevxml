@@ -453,7 +453,7 @@ void XevSageVisitor::attribSgClassDeclaration(SgNode* node)
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " type=\"" << n->get_class_type() << "\" ";
   }
-  attribSgStatement(sstr(),node);
+  attribSgDeclarationStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(ClassDeclaration);
 
@@ -1523,10 +1523,20 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
                                         sb::topScopeStack());
      XEV_ASSERT(ret!=NULL);
      ret->set_declaration(decl->get_firstNondefiningDeclaration());
+     ret->set_definingDeclaration(ret);
      ret->set_requiresGlobalNameQualificationOnType(true);
      if(si::is_Fortran_language()==false)
        ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
      decl->set_parent(ret);
+
+     SgTypedefSymbol* tsym =si::lookupTypedefSymbolInParentScopes(name);
+     if(tsym){
+       tsym->get_declaration()->set_definingDeclaration(ret);
+     }
+     else{
+       XEV_DEBUG_INFO(node);
+       XEV_ABORT();
+     }
    }
    else if(typ) {                                         // add (0819)
      ret = sb::buildTypedefDeclaration( name.c_str(),
@@ -1548,7 +1558,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    if(n) {
      sstr() << " name=" << n->get_name() << " ";
    }
-   attribSgStatement(sstr(),node);
+   attribSgDeclarationStatement(sstr(),node);
  }
  /** XML internal node writer of SgTypedefDeclaration */
  void XevSageVisitor::inodeSgTypedefDeclaration(SgNode* node)
