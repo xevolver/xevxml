@@ -123,14 +123,29 @@ VISIT_VAL(WcharVal,unsigned short);
 SgNode*
 XevXmlVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
 {
-  SgIntVal* ret = 0;
-  int ival;
+  SgEnumSymbol* esym = 0;
+  SgEnumVal*    ret  = 0;
+  int           ival = 0;
+  string        name,ename;
 
-  if(XmlGetAttributeValue(node,"value",&ival))
-    ret = sb::buildIntVal(ival);
-  else {
+  if(XmlGetAttributeValue(node,"name",&name)==false
+     || XmlGetAttributeValue(node,"value",&ival)==false){
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
+  }
+  if(XmlGetAttributeValue(node,"enum",&ename)){
+    esym = si::lookupEnumSymbolInParentScopes(ename);
+    if(esym==0){
+      XEV_WARN("EnumSymbol not found");
+    }
+  }
+  if(esym)
+    ret = new SgEnumVal(ival,esym->get_declaration(),name);
+  else
+    ret = new SgEnumVal(ival,NULL,name);
+  if(ret){
+    ret->set_parent(astParent);
+    ret->set_startOfConstruct(DEFAULT_FILE_INFO);
   }
   return ret;
 }
@@ -139,6 +154,8 @@ void XevSageVisitor::attribSgEnumVal(SgNode* node) {
   SgEnumVal* n = isSgEnumVal(node);
     if(n) {
       sstr() << " value=\"" << n->get_value() << "\" ";
+      sstr() << " name=" << n->get_name() << " ";
+      sstr() << " enum=" << n->get_declaration()->get_name() << " ";
     }
 }
 /** XML internal node writer of SgEnumVal */
