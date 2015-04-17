@@ -360,16 +360,19 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
   string                  str1,str2;
   int                     rnk=0;
   unsigned long           idx=0;
+  SgExpression*           iexp=0;
 
   XmlGetAttributeValue(node,"rank",&rnk);
   if(XmlGetAttributeValue(node,"index",&str2))
     idx = strtoul( str2.c_str(),0,0 );
 
-  if( rnk == 0 ) {
+  //if( rnk == 0 ) {
+  if(1){
     ret = new SgArrayType();
-    sav = ret;
+    //sav = ret;
     SUBTREE_VISIT_BEGIN(node,astchild,ret)
       {
+#if 0
         ary = isSgArrayType(astchild);
         typ = isSgType(astchild);
         ptr = isSgPointerType(astchild);
@@ -385,16 +388,55 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 
         if( ary )
           sav = ary;
+#endif
+        if(typ==NULL)
+          typ = isSgType(astchild);
+        else if(iexp==NULL)
+          iexp = isSgExpression(astchild);
       }
     SUBTREE_VISIT_END();
+    if(typ){
+      ret->set_base_type(typ);
+      typ->set_parent(ret);
+    }
+    else{
+      XEV_DEBUG_INFO(node);
+      XEV_ABORT();
+    }
 
-    if( idx ){
+    if(iexp){
+      SgExprListExp* lst = isSgExprListExp(iexp);
+      if(lst !=NULL){
+        if((size_t)rnk == lst->get_expressions().size()){
+          ret->set_rank(rnk);
+          ret->set_dim_info(lst);
+        }
+        else {
+          XEV_DEBUG_INFO(node);
+          XEV_ABORT();
+        }
+      }
+      else{
+        ret->set_index(iexp);
+        iexp->set_startOfConstruct(DEFAULT_FILE_INFO);
+      }
+      iexp->set_parent(ret);
+    }
+    else { /* this is not an error */ }
+
+    ret->set_parent(astParent);
+
+#if 0
+    // don't use idx for this conditon because it can be 0
+    if( str2.size() ){
       v= new SgUnsignedLongVal( DEFAULT_FILE_INFO, idx);
       v->set_startOfConstruct(DEFAULT_FILE_INFO);
       ret->set_index(v);
       v->set_parent(ret);
     }
+#endif
   }
+#if 0
   else{
     SgExprListExp*                  lst=0;
     //std::vector< SgExpression * >   exprs;
@@ -431,6 +473,7 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
       XEV_ABORT();
     }
   }
+#endif
 
   return ret;
 }
@@ -447,8 +490,16 @@ void XevSageVisitor::attribSgArrayType(SgNode* node) {
 }
 /** XML internal node writer of SgArrayType */
 void XevSageVisitor::inodeSgArrayType(SgNode* node) {
-  SgExprListExp* lste = isSgArrayType(node)->get_dim_info();
-  this->visit(lste);
+  SgArrayType* n = isSgArrayType(node);
+  if(n){
+    this->visit(n->get_base_type());
+    if(n->get_rank()==0)
+      this->visit(n->get_index());
+    else
+      this->visit(n->get_dim_info());
+  }
+  //SgExprListExp* lste = isSgArrayType(node)->get_dim_info();
+  //this->visit(lste);
 }
 
 // ===============================================================================
@@ -614,7 +665,7 @@ void XevSageVisitor::inodeSgFunctionType (SgNode* node)
 SgNode*
 XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
 {
-  SgNode* ret=NULL;
+  SgModifierType* ret=NULL;
   SgType* typ =NULL;
   string modtype;
 
@@ -631,15 +682,15 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
 
   if( modtype == "const" ) {
     //return sb::buildConstType(itype);
-    SgModifierType *result = new SgModifierType(typ);
-    result->get_typeModifier().get_constVolatileModifier().setConst();
-    ret=result;
+    //ret = new SgModifierType(typ);
+    ret = sb::buildConstType(typ);
   }
   else if ( modtype == "volatile" )
     ret = sb::buildVolatileType(typ);
   else if ( modtype == "restrict" )
     ret = sb::buildRestrictType(typ);
   else return NULL;
+  typ->set_parent(ret);
   ret->set_parent(astParent);
   return ret;
 }
@@ -659,7 +710,12 @@ void XevSageVisitor::attribSgModifierType(SgNode* node){
   }
 }
 /** XML interanal node writer of SgModifierType */
-void XevSageVisitor::inodeSgModifierType (SgNode* node) {}
+void XevSageVisitor::inodeSgModifierType (SgNode* node) {
+  SgModifierType* n = isSgModifierType(node);
+  if(n){
+    this->visit(n->get_base_type());
+  }
+}
 
 
 // ===============================================================================
@@ -943,4 +999,8 @@ void XevSageVisitor::attribSgPointerType(SgNode* node){
 }
 /** XML interanal node writer of SgPointerType */
 void XevSageVisitor::inodeSgPointerType(SgNode* node){
+  SgPointerType* n = isSgPointerType(node);
+  if(n){
+    this->visit(n->get_base_type());
+  }
 }

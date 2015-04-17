@@ -152,9 +152,9 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
   lst->set_parent(ret);
 
   int brace=0;
-  if(XmlGetAttributeValue(node,"need_brace",&brace) ){
-    ret->set_need_explicit_braces(brace);
-  }
+  XmlGetAttributeValue(node,"need_brace",&brace);
+  ret->set_need_explicit_braces(brace);
+
 
   return ret;
 }

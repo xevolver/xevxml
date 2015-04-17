@@ -227,7 +227,9 @@ static bool isInSameFile(SgNode* node, SgFile* file){
   if(isFrontendSpecific==false)
     isCompilerGenerated = info->isCompilerGenerated()
       || info->isTransformation()
-      || info->isOutputInCodeGeneration();
+      || info->isOutputInCodeGeneration()
+      // the following is needed for index of SgArrayType
+      || info->isSourcePositionUnavailableInFrontend();
   //bool isCode = node->get_parent() != NULL
   //&& !isSgGlobal(node->get_parent())
   //&& !isSgNamespaceDefinitionStatement(node->get_parent());
@@ -247,6 +249,8 @@ static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
         visitor->visit(succ);
     }
   }
+  // let's use inodeSg*** for internal types
+#if 0
   else {
     SgType* t = isSgType(node);
     Rose_STL_Container<SgType*> types = t->getInternalTypes();
@@ -255,6 +259,7 @@ static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
         visitor->visit(types[i]);
     }
   }
+#endif
 }
 
 void XevSageVisitor::visit(SgNode* node)
@@ -263,7 +268,6 @@ void XevSageVisitor::visit(SgNode* node)
     this->setSgFileToVisit(isSgFile(node));
   if(node==NULL||isInSameFile(node,this->getSgFileToVisit())==false )
     return;
-
   if(getXmlOption()->getSkipCompilerGeneratedFlag()){
     Sg_File_Info* info = node->get_file_info();
     if(info && info->isCompilerGenerated()){
