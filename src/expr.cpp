@@ -150,9 +150,25 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
 
   ret->set_parent(astParent);
   lst->set_parent(ret);
+
+  int impl=0;
+  if(XmlGetAttributeValue(node,"implicit",&impl) ){
+    bool need_braces = (impl==0);
+    ret->set_need_explicit_braces(need_braces);
+  }
   return ret;
 }
-EXPR_DEFAULT(AggregateInitializer);
+// ===============================================================================
+/// Visitor of a SgAggregateInitializer element in an XML document
+void XevSageVisitor::attribSgAggregateInitializer(SgNode* node)
+{
+  SgAggregateInitializer* n = isSgAggregateInitializer(node);
+  if(n){
+    sstr() << " implicit=\"" << (n->get_need_explicit_braces()==false) << "\" ";
+  }
+  attribSgExpression(sstr(),node);
+}
+INODE_EXPR_DEFAULT(AggregateInitializer);
 
 // ===============================================================================
 /// Visitor of a SgAssignInitializer element in an XML document
