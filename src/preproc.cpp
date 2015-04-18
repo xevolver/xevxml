@@ -61,28 +61,35 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
   xe::XMLString::release(&buf);
 
   if(nname!="PreprocessingInfo") return 0;
-  if(astParent==0 || isSgLocatedNode(astParent)==0) return 0;;
-  std::string pos;
+  if(astParent==0 || isSgLocatedNode(astParent)==0) {
+    XEV_WARN("Preprocessing Info ignored");
+    XEV_DEBUG_INFO(node);
+    return 0;;
+  }
+  //std::string pos;
   //std::string typ;
-  XmlGetAttributeValue(node,"pos", &pos);
+  int pval=0;
+  SgLocatedNode* loc = isSgLocatedNode(astParent);
   //XmlGetAttributeValue(node,"type",&typ);
 
-  if(pos.size() /*&& typ.size()*/ ){
-    int pval;
+  if(XmlGetAttributeValue(node,"pos", &pval)){
     std::string content = "";
     if(node->getFirstChild()){
       buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
       content = buf;
       xe::XMLString::release(&buf);
     }
-    //cerr << "#####################" << content;
-    pval = atoi(pos.c_str());
-    //tval = atoi(typ.c_str());
     content = XevXml::XmlEntity2Str(content);
-
-    si::attachArbitraryText(isSgLocatedNode(astParent),content,
-                                       (PreprocessingInfo::RelativePositionType)pval);
-
+#if XEV_DEBUG
+    cerr << "-----------------------------------------\n";
+    cerr << content;
+    cerr << "-----------------------------------------\n";
+    cerr << pval << ":" << astParent->class_name() << endl;
+#endif
+    PreprocessingInfo* info
+      = si::attachArbitraryText(loc,content,
+                                (PreprocessingInfo::RelativePositionType)pval);
+    //si::dumpPreprocInfo(loc);
   }
   else XEV_ABORT();
 

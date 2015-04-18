@@ -182,6 +182,7 @@ bool XevSageVisitor::hasInode(SgNode* node)
   case V_SgInquireStatement:
   case V_SgNamelistStatement:
   case V_SgPointerDerefExp:
+  case V_SgPragma:
   case V_SgSizeOfOp:
   case V_SgStopOrPauseStatement:
   case V_SgTypedefDeclaration:
@@ -240,6 +241,15 @@ static bool isInSameFile(SgNode* node, SgFile* file){
   return isCompilerGenerated || isRightFile ;
 }
 
+/* check if the corresponding element needs indentation */
+static bool needIndent(SgNode* node)
+{
+  if(node->variantT()==V_SgPragma)
+    return false;
+
+  return true;
+}
+
 static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
 {
   if(isSgType(node)==NULL){
@@ -277,7 +287,8 @@ void XevSageVisitor::visit(SgNode* node)
     }
   }
 
-  writeIndent();
+  if(needIndent(node))
+    writeIndent();
   if(getXmlOption()->getFortranPragmaFlag())
     writeFortranPragma(sstr(),node,PreprocessingInfo::before);
 
@@ -323,7 +334,8 @@ void XevSageVisitor::visit(SgNode* node)
   if(getXmlOption()->getFortranPragmaFlag())
     writeFortranPragma(sstr(),node,PreprocessingInfo::inside);
 
-  writeIndent();
+  if(needIndent(node))
+    writeIndent();
   sstr() << "</" << node->class_name() << ">" << std::endl;
   if(getXmlOption()->getFortranPragmaFlag())
     writeFortranPragma(sstr(),node,PreprocessingInfo::after);

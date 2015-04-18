@@ -126,7 +126,7 @@ namespace XevXml {
       return *ostr_;
     }
 
-    void writeIndent()    {
+    void writeIndent() {
       for(int i(0);i<depth_;i++)
         sstr() << ' ';
     }

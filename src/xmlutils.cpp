@@ -81,12 +81,12 @@ void XmlFinalize(void)
 
 string XmlStr2Entity( string str )
 {
-    str = REPLACE( str,"&","&amp;" );
-    str = REPLACE( str,"<","&lt;" );
-    str = REPLACE( str,">","&gt;" );
-    str = REPLACE( str,"\"","&quot;" );
-    str = REPLACE( str,"\'","&apos;" );
-    return str;
+  str = REPLACE( str,"&","&amp;" );
+  str = REPLACE( str,"<","&lt;" );
+  str = REPLACE( str,">","&gt;" );
+  str = REPLACE( str,"\"","&quot;" );
+  str = REPLACE( str,"\'","&apos;" );
+  return str;
 }
 
 string XmlEntity2Str( string str )

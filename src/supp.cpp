@@ -385,7 +385,9 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
   SgPragma* ret = 0;
   string line;
 
+#if 0
   if(XmlGetAttributeValue(node,"pragma",&line)){
+#if 0
     std::string tmp;
     for(size_t i(0);i<line.size();i++){
       if( line[i] != '\\')
@@ -395,14 +397,28 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
     }
 
     ret = sb::buildPragma(tmp);
+#endif
+    //line = XmlEntity2Str(line);
+    ret = sb::buildPragma(line);
   }
   else {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
+#endif
+  line = "";
+  if(node->getFirstChild()){
+    char* buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
+    line = buf+1;
+    *(line.rbegin())='\0';
+    xe::XMLString::release(&buf);
+  }
+  ret = sb::buildPragma(line);
   return ret;
 }
 /** XML attribute writer of SgPragma */
+ATTRIB_SUPP_DEFAULT(Pragma);
+#if 0
 void XevSageVisitor::attribSgPragma(SgNode* node)
 {
   SgPragma* n = isSgPragma(node);
@@ -411,8 +427,14 @@ void XevSageVisitor::attribSgPragma(SgNode* node)
     sstr() << " pragma=\"" << XmlStr2Entity(n->get_pragma()) << "\" ";
   }
 }
-INODE_SUPP_DEFAULT(Pragma);
-
+#endif
+//INODE_SUPP_DEFAULT(Pragma);
+void XevSageVisitor::inodeSgPragma(SgNode* node)
+{
+  SgPragma* n = isSgPragma(node);
+  if(n)
+    sstr() << XmlStr2Entity(n->get_pragma()) << endl;
+}
 
 // ===============================================================================
 /// Visitor of a SgSourceFile element in an XML document
@@ -553,7 +575,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-//  if(isSgArrayType(typ))
+  //  if(isSgArrayType(typ))
   //  typ = isSgArrayType(typ)->get_base_type();
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
   ret->set_parent(astParent);
