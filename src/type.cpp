@@ -986,7 +986,7 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  if(ret==NULL) {
+  if(ret==NULL||typ==NULL) {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }

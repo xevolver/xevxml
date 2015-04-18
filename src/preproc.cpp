@@ -80,16 +80,19 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
       xe::XMLString::release(&buf);
     }
     content = XevXml::XmlEntity2Str(content);
-#if XEV_DEBUG
-    cerr << "-----------------------------------------\n";
-    cerr << content;
-    cerr << "-----------------------------------------\n";
-    cerr << pval << ":" << astParent->class_name() << endl;
-#endif
+    //cerr << "-----------------------------------------\n";
+    //cerr << content;
+    //cerr << "-----------------------------------------\n";
+    //cerr << pval << ":" << astParent->class_name() << endl;
+
     PreprocessingInfo* info
       = si::attachArbitraryText(loc,content,
                                 (PreprocessingInfo::RelativePositionType)pval);
+    //cerr << "-----------------------------------------\n";
     //si::dumpPreprocInfo(loc);
+    //cerr << "-----------------------------------------\n";
+    //info->get_file_info()->display();
+    //loc->get_file_info()->display();
   }
   else XEV_ABORT();
 

@@ -418,7 +418,8 @@ XevXmlVisitor::visitSgDotExp(xercesc::DOMNode* node, SgNode* astParent)
         if(lhs) {
           SgClassType* ctype = isSgClassType(lhs->get_type());
           if(ctype==0)
-            ctype = isSgClassType(si::getElementType(lhs->get_type()));
+            //ctype = isSgClassType(si::getElementType(lhs->get_type()));
+            ctype = isSgClassType(lhs->get_type()->findBaseType());
           if(ctype){
             SgClassDeclaration* decl = isSgClassDeclaration(ctype->get_declaration());
             if(decl->get_definition()==0)
