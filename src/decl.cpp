@@ -1642,14 +1642,10 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName*                        name = 0;
   SgInitializedName*                        tmp  = 0;
   SgDeclarationStatement*                   cls  = 0;
-  SgUnsignedLongVal*                        bit  = 0;
   Rose_STL_Container<SgInitializedName*>    varList;
-  //unsigned long     storage=0U;
   string            bitstr;
-  //unsigned long     bit = 0;
 
-  //XmlGetAttributeValue(node,"modifier",&storage);
-  //XmlGetAttributeValue(node,"bitfield",&bitstr);
+  XmlGetAttributeValue(node,"bitfield",&bitstr);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -1663,126 +1659,83 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       if( cls==0 ) {
         cls = isSgDeclarationStatement(astchild);
       }
-
-      if(bit==0){
-        bit = isSgUnsignedLongVal(astchild);
-      }
     }
   SUBTREE_VISIT_END();
 
 
-  if(name) {
-    if( cls ) {
-      SgType * typ = name->get_type();
-      SgNamedType *namedType = isSgNamedType(typ->findBaseType());
-
-      //cls->set_parent( typ );
-      namedType->set_declaration (cls);
-      namedType->get_declaration()->set_definingDeclaration(cls);
-      ret = sb::buildVariableDeclaration(name->get_name(),
-                                         namedType,
-                                         name->get_initializer());
-
-      ret->set_baseTypeDefiningDeclaration( cls );
-      cls->set_parent(ret);
-    }
-    else{
-      ret = sb::buildVariableDeclaration(name->get_name(),
-                                         name->get_type(),
-                                         name->get_initializer());
-      name->set_definition(ret->get_definition());
-    }
-    if(ret==0) {
-      XEV_DEBUG_INFO(node);XEV_ABORT();
-    }
-    ret->set_parent(astParent);
-    ret->set_definingDeclaration(ret);
-
-    // see buildVariableDeclaration in fortran_support.C
-    if(si::is_Fortran_language())
-      ret->set_variableDeclarationContainsBaseTypeDefiningDeclaration(false);
-
-    if( varList.size() > 0 && si::is_Fortran_language() )
-      // NOTE: in the case of Fortran, append_statement does not work?
-      // So this is necessary to define the second variable and later.
-      ret->get_variables() = varList;
-    for(size_t i(0);i<varList.size();i++){
-      if(i>0 && si::is_Fortran_language() == false )
-        ret->append_variable(varList[i],varList[i]->get_initializer());
-      varList[i]->set_parent(ret);
-      varList[i]->set_declptr(ret);
-      varList[i]->set_scope(name->get_scope());
-      //varList[i]->set_type(name->get_type());
-    }
-
-    // this is necessary because declaration is required for each variable.
-    for(size_t i(1);i<varList.size();i++){
-      SgVariableDeclaration* decl =sb::buildVariableDeclaration(varList[i]->get_name(),
-                                                                varList[i]->get_type(),
-                                                                varList[i]->get_initializer());
-      varList[i]->set_definition(decl->get_definition());
-    }
-  }
-  else{
+  if(name==0) {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
 
-#if 0 // this is no longer required
-  bool isFortranParameter = false;
-  // See buildVariableDeclaration
-  if (ret->get_scope() && si::is_Fortran_language()){
-    SgFunctionDefinition * f_def = si::getEnclosingProcedure (ret->get_scope());
-    /* variables in a function parameter list are moved? */
-    if (f_def != NULL){
-      for(size_t i(0);i<varList.size();i++){
-        name = varList[i];
-        SgSymbolTable * st = f_def->get_symbol_table();
-        SgVariableSymbol * v_symbol = st->find_variable(name->get_name());
-        if (v_symbol != NULL){
-          SgInitializedName *default_initName = ret->get_decl_item (name->get_name());
-          SgInitializedName * new_initName = v_symbol->get_declaration();
-          SgInitializedNamePtrList&  n_list= ret->get_variables();
-          std::replace (n_list.begin(), n_list.end(),default_initName, new_initName );
-          SgNode * old_parent = new_initName->get_parent();
-          //XEV_WARN("old:" << name->get_name() << " parent="<<old_parent->class_name());
-          //if(old_parent==0 || isSgFunctionParameterList(old_parent)==0) XEV_ABORT();
-          if(isSgFunctionParameterList(old_parent)) {
-            new_initName->set_parent(ret);
-            SgVariableDefinition * var_def = isSgVariableDefinition(default_initName->get_declptr()) ;
-            var_def->set_parent(new_initName);
-            var_def->set_vardefn(new_initName);
-            new_initName->set_declptr(var_def);
-            delete (default_initName);
-            isFortranParameter = true;
-          }
-        }
-      }
-    }
-  }
-  if (! isFortranParameter)
-    si::fixVariableDeclaration(ret,ret->get_scope());
-#endif
+  // defining declaration
+  if( cls ) {
+    SgType * typ = name->get_type();
+    SgNamedType *namedType = isSgNamedType(typ->findBaseType());
 
-#if 0 // bitfield is moved to inode
+    //cls->set_parent( typ );
+    namedType->set_declaration (cls);
+    namedType->get_declaration()->set_definingDeclaration(cls);
+    ret = sb::buildVariableDeclaration(name->get_name(),
+                                       namedType,
+                                       name->get_initializer());
+
+    ret->set_baseTypeDefiningDeclaration( cls );
+    cls->set_parent(ret);
+  }
+  // non-defining declaration
+  else{
+    ret = sb::buildVariableDeclaration(name->get_name(),
+                                       name->get_type(),
+                                       name->get_initializer());
+    name->set_definition(ret->get_definition());
+  }
+
+  if(ret==0) {
+    XEV_DEBUG_INFO(node);XEV_ABORT();
+  }
+  ret->set_parent(astParent);
+  ret->set_definingDeclaration(ret);
+
+  // see buildVariableDeclaration in fortran_support.C
+  if(si::is_Fortran_language())
+    ret->set_variableDeclarationContainsBaseTypeDefiningDeclaration(false);
+
+  if( varList.size() > 0 && si::is_Fortran_language() )
+    // NOTE: in the case of Fortran, append_statement does not work?
+    // So this is necessary to define the second variable and later.
+    ret->get_variables() = varList;
+  for(size_t i(0);i<varList.size();i++){
+    if(i>0 && si::is_Fortran_language() == false )
+      ret->append_variable(varList[i],varList[i]->get_initializer());
+    varList[i]->set_parent(ret);
+    varList[i]->set_declptr(ret);
+    varList[i]->set_scope(name->get_scope());
+    //varList[i]->set_type(name->get_type());
+  }
+
+  // this is necessary because declaration is required for each variable.
+  for(size_t i(1);i<varList.size();i++){
+    SgVariableDeclaration* decl =sb::buildVariableDeclaration(varList[i]->get_name(),
+                                                              varList[i]->get_type(),
+                                                              varList[i]->get_initializer());
+    varList[i]->set_definition(decl->get_definition());
+  }
+
+
   // set bitfield (2013.08.06)
   if( bitstr.size() ) {
-    bit = strtoul( bitstr.c_str(),0,0 );
+    unsigned long bit = strtoul( bitstr.c_str(),0,0 );
     SgUnsignedLongVal* val = new SgUnsignedLongVal( bit,bitstr );
     val->set_startOfConstruct(DEFAULT_FILE_INFO);
     ret->set_bitfield (val);
     val->set_parent(ret);
   }
-#else
-  if(bit){
-    ret->set_bitfield (bit);
-    bit->set_parent(ret);
-  }
-#endif
 
   // check the result variable
   if( si::is_Fortran_language() ){
-    SgProcedureHeaderStatement* prc = isSgProcedureHeaderStatement(si::getEnclosingFunctionDeclaration(ret));
+    SgProcedureHeaderStatement* prc
+      = isSgProcedureHeaderStatement(si::getEnclosingFunctionDeclaration(ret));
     if(prc) {
       for(size_t i(0);i<varList.size();i++){
         if(prc->get_name() == varList[i]->get_name()){
@@ -1805,29 +1758,14 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   return ret;
 }
 /** XML attribute writer of SgVariableDeclaration */
-ATTRIB_DECL_DEFAULT(VariableDeclaration);
-#if 0 // bitfield is moved to inode
 void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
   if(n) {
     SgUnsignedLongVal *bit = isSgUnsignedLongVal(n->get_bitfield());
     if( bit )
-      sstr() << " bitfield=\"" << bit->get_value() << "\" ";
+      sstr() << " bitfield=\"" << bit->unparseToString() << "\" ";
   }
   attribSgDeclarationStatement(sstr(),node);
 }
-#endif
-//INODE_DECL_DEFAULT(VariableDeclaration);
-void XevSageVisitor::inodeSgVariableDeclaration(SgNode* node)
-{
-  SgVariableDeclaration* n = isSgVariableDeclaration(node);
-  if(n){
-    SgUnsignedLongVal* v = n->get_bitfield();
-    if(v){
-      // this is required for test2009_22.c
-      v->set_valueString(v->unparseToString());
-      this->visit(v);
-    }
-  }
-}
+INODE_DECL_DEFAULT(VariableDeclaration);
