@@ -1642,13 +1642,14 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName*                        name = 0;
   SgInitializedName*                        tmp  = 0;
   SgDeclarationStatement*                   cls  = 0;
+  SgUnsignedLongVal*                        bit  = 0;
   Rose_STL_Container<SgInitializedName*>    varList;
   //unsigned long     storage=0U;
   string            bitstr;
-  unsigned long     bit = 0;
+  //unsigned long     bit = 0;
 
   //XmlGetAttributeValue(node,"modifier",&storage);
-  XmlGetAttributeValue(node,"bitfield",&bitstr);
+  //XmlGetAttributeValue(node,"bitfield",&bitstr);
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -1661,6 +1662,10 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 
       if( cls==0 ) {
         cls = isSgDeclarationStatement(astchild);
+      }
+
+      if(bit==0){
+        bit = isSgUnsignedLongVal(astchild);
       }
     }
   SUBTREE_VISIT_END();
@@ -1759,6 +1764,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     si::fixVariableDeclaration(ret,ret->get_scope());
 #endif
 
+#if 0 // bitfield is moved to inode
   // set bitfield (2013.08.06)
   if( bitstr.size() ) {
     bit = strtoul( bitstr.c_str(),0,0 );
@@ -1767,6 +1773,12 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     ret->set_bitfield (val);
     val->set_parent(ret);
   }
+#else
+  if(bit){
+    ret->set_bitfield (bit);
+    bit->set_parent(ret);
+  }
+#endif
 
   // check the result variable
   if( si::is_Fortran_language() ){
@@ -1793,6 +1805,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   return ret;
 }
 /** XML attribute writer of SgVariableDeclaration */
+ATTRIB_DECL_DEFAULT(VariableDeclaration);
+#if 0 // bitfield is moved to inode
 void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
@@ -1803,4 +1817,17 @@ void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
   }
   attribSgDeclarationStatement(sstr(),node);
 }
-INODE_DECL_DEFAULT(VariableDeclaration);
+#endif
+//INODE_DECL_DEFAULT(VariableDeclaration);
+void XevSageVisitor::inodeSgVariableDeclaration(SgNode* node)
+{
+  SgVariableDeclaration* n = isSgVariableDeclaration(node);
+  if(n){
+    SgUnsignedLongVal* v = n->get_bitfield();
+    if(v){
+      // this is required for test2009_22.c
+      v->set_valueString(v->unparseToString());
+      this->visit(v);
+    }
+  }
+}
