@@ -358,122 +358,55 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
   SgPointerType*          ptr = 0;
   SgPointerType*          ptrtyp = 0;
   string                  str1,str2;
-  int                     rnk=0;
-  unsigned long           idx=0;
-  SgExpression*           iexp=0;
-
+  int                     rnk = 0;
+  unsigned long           idx = 0;
+  SgExpression*           iexp= 0;
+  SgExprListExp*          lst = 0;
   XmlGetAttributeValue(node,"rank",&rnk);
   if(XmlGetAttributeValue(node,"index",&str2))
     idx = strtoul( str2.c_str(),0,0 );
 
-  //if( rnk == 0 ) {
-  if(1){
-    ret = new SgArrayType();
-    //sav = ret;
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)
-      {
-#if 0
-        ary = isSgArrayType(astchild);
+  ret = new SgArrayType();
+  ret->set_rank(rnk);
+  //sav = ret;
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(typ==NULL)
         typ = isSgType(astchild);
-        ptr = isSgPointerType(astchild);
-        if(typ){
-          if( ptrtyp==0 )
-            sav->set_base_type( typ );
-          else
-            ptrtyp->set_base_type( typ );
-        }
-
-        if( (ptrtyp==0) && ptr )
-          ptrtyp = ptr;
-
-        if( ary )
-          sav = ary;
-#endif
-        if(typ==NULL)
-          typ = isSgType(astchild);
-        else if(iexp==NULL)
+      else {
+        if(lst==NULL)
+          lst =isSgExprListExp(iexp);
+        if(iexp==NULL || iexp==lst )
           iexp = isSgExpression(astchild);
       }
-    SUBTREE_VISIT_END();
-    if(typ){
-      ret->set_base_type(typ);
-      typ->set_parent(ret);
     }
-    else{
-      XEV_DEBUG_INFO(node);
-      XEV_ABORT();
-    }
+  SUBTREE_VISIT_END();
 
-    if(iexp){
-      SgExprListExp* lst = isSgExprListExp(iexp);
-      if(lst !=NULL){
-        if((size_t)rnk == lst->get_expressions().size()){
-          ret->set_rank(rnk);
-          ret->set_dim_info(lst);
-        }
-        else {
-          XEV_DEBUG_INFO(node);
-          XEV_ABORT();
-        }
-      }
-      else{
-        ret->set_index(iexp);
-        iexp->set_startOfConstruct(DEFAULT_FILE_INFO);
-      }
-      iexp->set_parent(ret);
-    }
-    else { /* this is not an error */ }
-
-    ret->set_parent(astParent);
-
-#if 0
-    // don't use idx for this conditon because it can be 0
-    if( str2.size() ){
-      v= new SgUnsignedLongVal( DEFAULT_FILE_INFO, idx);
-      v->set_startOfConstruct(DEFAULT_FILE_INFO);
-      ret->set_index(v);
-      v->set_parent(ret);
-    }
-#endif
+  if(typ){
+    ret->set_base_type(typ);
+    typ->set_parent(ret);
   }
-#if 0
   else{
-    SgExprListExp*                  lst=0;
-    //std::vector< SgExpression * >   exprs;
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)
-      {
-        if(typ==0)
-          typ = isSgType(astchild);
-        if(lst==0)
-          lst = isSgExprListExp(astchild);
-      }
-    SUBTREE_VISIT_END();
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
 
-    if(typ){
-      ret = new SgArrayType(typ);
-      if(ret==0) {
-        XEV_DEBUG_INFO(node);
-        XEV_ABORT();
-      }
-      ret->set_base_type( typ );
-      typ->set_parent(ret);
-      ret->set_parent(astParent);
-    }
-    else {
-      XEV_DEBUG_INFO(node);
-      XEV_ABORT();
-    }
-    if(lst !=NULL && (size_t)rnk == lst->get_expressions().size()){
-      ret->set_rank( rnk );
-      lst->set_parent(ret);
-      ret->set_dim_info( lst );
+  if(lst !=NULL){
+    if((size_t)rnk == lst->get_expressions().size()){
+      ret->set_rank(rnk);
+      ret->set_dim_info(lst);
     }
     else {
       XEV_DEBUG_INFO(node);
       XEV_ABORT();
     }
   }
-#endif
+  if(iexp !=NULL){
+    ret->set_index(iexp);
+    iexp->set_parent(ret);
+  }
+
+  ret->set_parent(astParent);
 
   return ret;
 }
@@ -481,10 +414,14 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
 void XevSageVisitor::attribSgArrayType(SgNode* node) {
   SgArrayType* n = isSgArrayType(node);
   if(n){
-    SgUnsignedLongVal* ul = isSgUnsignedLongVal( n->get_index() );
     sstr() << " rank=\"" << n->get_rank() << "\" ";
-    if( ul )
-      sstr() << " index=\"" << ul->get_value() << "\" ";
+    //SgUnsignedLongVal* ul = isSgUnsignedLongVal( n->get_index() );
+    //if( ul ){
+    //if(ul->get_valueString().size())
+    //sstr() << " index=\"" << ul->get_valueString() << "\" ";
+    //else
+    //sstr() << " index=\"" << ul->get_value() << "\" ";
+    //}
   }
   attribSgType(sstr(),node);
 }
@@ -493,10 +430,16 @@ void XevSageVisitor::inodeSgArrayType(SgNode* node) {
   SgArrayType* n = isSgArrayType(node);
   if(n){
     this->visit(n->get_base_type());
-    if(n->get_rank()==0)
-      this->visit(n->get_index());
-    else
+    sstr()<< "<!-- dim info -->" <<endl;
+    if(n->get_dim_info())
       this->visit(n->get_dim_info());
+    //if(n->get_rank()==0)
+    if(n->get_index()){
+      SgExpression* idx = isSgExpression(si::deepCopy(n->get_index()));
+      si::setSourcePositionForTransformation(idx);
+      this->visit(idx);
+    }
+
   }
   //SgExprListExp* lste = isSgArrayType(node)->get_dim_info();
   //this->visit(lste);
