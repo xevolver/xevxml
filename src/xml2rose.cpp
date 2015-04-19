@@ -197,10 +197,13 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
   SgInitializer* ini = isSgInitializer(astNode);
 
   if(ini){
-    int expl = 0;
-
+    int expl = 1;
+    ini->set_is_explicit_cast(false);
     XmlGetAttributeValue(node,"cast",&expl);
-    ini->set_is_explicit_cast(expl);
+    SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
+    if(c && c->get_file_info() &&c->get_file_info()->isCompilerGenerated()==false)
+      ini->set_is_explicit_cast(expl);
+    //istr << " cast=\"" << ini->get_is_explicit_cast() <<"\" ";
   }
 }
 

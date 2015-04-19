@@ -758,7 +758,7 @@ XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgFormatItem*           itm = 0;
   SgFormatItemList*       lst = new SgFormatItemList();
-
+  SgFormatStatement*      ret = 0;
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if((itm = isSgFormatItem(astchild))!=0){
@@ -769,7 +769,7 @@ XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  SgFormatStatement*    ret = new SgFormatStatement(DEFAULT_FILE_INFO,lst);
+  ret = new SgFormatStatement(DEFAULT_FILE_INFO,lst);
   lst->set_parent( ret );
   ret->set_parent(astParent);
   return ret;

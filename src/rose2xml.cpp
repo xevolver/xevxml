@@ -112,9 +112,9 @@ writePreprocessingInfo(std::ostream& sstr_,SgNode* n)
       str = (*info)[i]->getString();
       str = XmlStr2Entity( str );
       sstr_ << "<PreprocessingInfo pos=\"";
-      sstr_ << (*info)[i]->getRelativePosition() <<"\">";
-      //sstr_ << " type=\"";
-      //sstr_ << (*info)[i]->getTypeOfDirective() << "\" >\n";
+      sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
+      sstr_ << " type=\"";
+      sstr_ << (*info)[i]->getTypeOfDirective() << "\">";
       sstr_ << str;
       //sstr_ << "\n";
       sstr_ << "</PreprocessingInfo>\n";

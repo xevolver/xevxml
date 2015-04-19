@@ -524,6 +524,7 @@ XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent
 {
   SgExprListExp*          exp = 0;
   SgExpression*           var = 0;
+  SgComputedGotoStatement*    ret =0;
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
@@ -534,8 +535,7 @@ XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent
     }
   SUBTREE_VISIT_END();
 
-  SgComputedGotoStatement*    ret =
-    new SgComputedGotoStatement(DEFAULT_FILE_INFO, exp,var );
+  ret = new SgComputedGotoStatement(DEFAULT_FILE_INFO, exp,var );
 
   exp->set_parent(ret);
   var->set_parent(ret);

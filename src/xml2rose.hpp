@@ -157,6 +157,7 @@ public:
 
 #define DEFAULT_FILE_INFO (Sg_File_Info::generateDefaultFileInfoForTransformationNode())
 
+#if 0
 #define SUBTREE_VISIT_BEGIN(X,Y,Z)                                      \
   {                                                                     \
   xercesc::DOMNode* cld_ = (X)->getFirstChild();                        \
@@ -165,7 +166,7 @@ public:
   SgNode* Y = this->visit(cld_,Z);
 
 #define SUBTREE_VISIT_END()     } cld_=cld_->getNextSibling();}}
-
+#endif
 }
 
 #endif

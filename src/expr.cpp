@@ -56,10 +56,11 @@ static void attribSgExpression(ostream& istr,SgNode* node)
     istr << " lvalue=\"1\" ";
 
   SgInitializer* ini = isSgInitializer(node);
-  if(ini && ini->get_is_explicit_cast()){
+  if(ini){
     SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
     if(c && c->get_file_info() &&c->get_file_info()->isCompilerGenerated()==false)
-      istr << " cast=\"1\" ";
+      istr << " cast=\"" << ini->get_is_explicit_cast() <<"\" ";
+    //istr << " cast=\"1\" ";
   }
 }
 
@@ -235,8 +236,12 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
 
   if(imp){
     // for nested implicit casting
-    if(isSgCastExp(exp))return exp;
+    if(isSgCastExp(exp)){
+      exp->set_parent(astParent);
+      return exp;
+    }
   }
+
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ,(SgCastExp::cast_type_enum)cty);
     ret->set_parent(astParent);
@@ -266,7 +271,8 @@ void XevSageVisitor::attribSgCastExp(SgNode* node)
   SgCastExp* cast = isSgCastExp(node);
   if(cast){
     sstr() << " ctype=\"" << cast->get_cast_type() << "\" ";
-    Sg_File_Info* info = cast->get_file_info();
+    //Sg_File_Info* info = cast->get_file_info();
+    Sg_File_Info* info = cast->get_startOfConstruct();
     if(info && info->isCompilerGenerated()){
       sstr() << " implicit=\"1\" ";
     }
@@ -517,13 +523,13 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
             }
             // defining declaration is not found
             else {
-              //XEV_WARN(decl->class_name()<<decl->get_definition()<<decl->get_name());
-              abort();
+              XEV_WARN( "Defning declaration of " << ctype->get_name().getString() << " is not found");
             }
           }
           else {
             //XEV_WARN( ptype->get_base_type()->class_name() <<" is found");
-            abort();
+            XEV_DEBUG_INFO(node);
+            XEV_ABORT();
           }
         }
       }
@@ -559,9 +565,9 @@ XevXmlVisitor::visitSgExprListExp(xercesc::DOMNode* node, SgNode* astParent)
     {
       if((exp = isSgExpression(astchild))!=0) {
         exp->set_parent(ret);
+        // commented out because this should be set by the node itself
+        //if(exp->get_startOfConstruct()==NULL)
         //exp->set_startOfConstruct(DEFAULT_FILE_INFO);
-        if(exp->get_startOfConstruct()==NULL)
-          exp->set_startOfConstruct(DEFAULT_FILE_INFO);
         ret->append_expression(exp);
       }
     }
@@ -1095,8 +1101,14 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
       }
       else {
         XEV_WARN("variable " << name << " is not found in any symbol tables.");
-        XEV_DEBUG_INFO(node);
-        XEV_ABORT();
+        //XEV_DEBUG_INFO(node);
+        //XEV_ABORT();
+
+        /* put a fake with no scope and unknown type */
+        name1 = sb::buildInitializedName(name,SgTypeUnknown::createType());
+        name1->set_scope(scope); // NULL?
+        vsym = new SgVariableSymbol(name1);
+        vsym->set_parent(scope);
       }
       ret = new SgVarRefExp(vsym);
       ret->set_symbol(vsym);
