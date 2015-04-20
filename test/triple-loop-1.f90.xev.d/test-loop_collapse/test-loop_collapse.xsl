@@ -15,9 +15,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevGoToLoop">
-			<xsl:with-param name="loopName" select="'k'" />
-		</xsl:apply-templates>
+		<xsl:apply-templates select="." mode="xevGoToHere" />
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">

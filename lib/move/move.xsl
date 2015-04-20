@@ -5,5 +5,6 @@
 
 	<xsl:import href="goto_loop.xsl" />
 	<xsl:import href="goto_var.xsl" />
+	<xsl:import href="goto_here.xsl" />
 
 </xsl:stylesheet>

@@ -23,11 +23,11 @@
 					test-loop_collapse.xsl found firstLoop
 				</xsl:comment>
 
-				<!-- get loop max from first loop -->
-				<xsl:variable name="max" select="./*[2]" />
+				<!-- get loop end from first loop -->
+				<xsl:variable name="end" select="./*[2]" />
 				<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock/SgFortranDo"
 					mode="loop_collapse_find_second">
-					<xsl:with-param name="firstMax" select="$max" />
+					<xsl:with-param name="firstEnd" select="$end" />
 					<xsl:with-param name="firstLoop" select="$firstLoop" />
 					<xsl:with-param name="secondLoop" select="$secondLoop" />
 				</xsl:apply-templates>
@@ -45,7 +45,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="loop_collapse_find_second">
-		<xsl:param name="firstMax" />
+		<xsl:param name="firstEnd" />
 		<xsl:param name="firstLoop" />
 		<xsl:param name="secondLoop" />
 		<xsl:variable name="currentNode" select="." /> <!-- for debug -->
@@ -61,7 +61,7 @@
 					<xsl:copy-of select="./*[1]" />
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />
-						<xsl:apply-templates select="$firstMax" />
+						<xsl:apply-templates select="firstEnd" />
 					</SgMultiplyOp>
 					<!-- stride -->
 					<xsl:copy-of select="./*[3]" />
@@ -78,7 +78,7 @@
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:apply-templates mode="loop_collapse_find_second">
-						<xsl:with-param name="firstMax" select="$firstMax" />
+						<xsl:with-param name="firstEnd" select="$firstEnd" />
 						<xsl:with-param name="firstLoop" select="$firstLoop" />
 						<xsl:with-param name="secondLoop" select="$secondLoop" />
 					</xsl:apply-templates>
@@ -108,9 +108,6 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="SgPragmaDeclaration" mode="loop_collapse">
-	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="loop_collapse">
-	</xsl:template>
-
+	<!-- <xsl:template match="SgPragmaDeclaration" mode="loop_collapse"> </xsl:template> 
+		<xsl:template match="PreprocessingInfo" mode="loop_collapse"> </xsl:template> -->
 </xsl:stylesheet>
