@@ -23,4 +23,35 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<xsl:template match="*" mode="xevGoToNthLoop">
+		<xsl:param name="loopName" />
+		<xsl:param name="N" />
+		<xsl:choose>
+			<xsl:when
+				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
+				<xsl:choose>
+					<xsl:when test="$N = 1">
+						<xsl:apply-templates select="."
+							mode="xevTransformationHook" />
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:apply-templates mode="xevGoToNthLoop">
+							<xsl:with-param name="loopName" select="$loopName" />
+							<xsl:with-param name="N" select="$N - '1'" />
+						</xsl:apply-templates>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates mode="xevGoToNthLoop">
+						<xsl:with-param name="loopName" select="$loopName" />
+						<xsl:with-param name="N" select="$N" />
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
 </xsl:stylesheet>

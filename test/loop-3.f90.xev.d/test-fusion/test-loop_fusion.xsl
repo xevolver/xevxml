@@ -14,15 +14,16 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevGoToLoop">
+		<xsl:apply-templates select="." mode="xevGoToNthLoop">
 			<xsl:with-param name="loopName" select="'i'" />
+			<xsl:with-param name="N" select="2" />
 		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
 		<xsl:apply-templates select="." mode="xevLoopFusion" />
 	</xsl:template>
-	
+
 	<xsl:template match="SgFortranDo" mode="bkup">
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
