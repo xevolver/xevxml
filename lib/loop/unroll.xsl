@@ -46,7 +46,7 @@
 			</xsl:element>
 
 			<xsl:apply-templates select="./SgBasicBlock"
-				mode="loop_unroll">
+				mode="xevLoopUnroll">
 				<xsl:with-param name="factor" select="$factor" />
 				<xsl:with-param name="loopName" select="$loopName" />
 			</xsl:apply-templates>
@@ -55,7 +55,7 @@
 	</xsl:template>
 
 	<!-- TODO: ExprStatement -> BasicBlock -->
-	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
+	<xsl:template match="SgExprStatement[last()]" mode="xevLoopUnroll">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 
