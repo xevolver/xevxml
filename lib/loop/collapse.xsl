@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="loop_collapse">
+	<xsl:template match="*" mode="xevLoopCollapse">
 		<xsl:param name="firstLoop" />
 		<xsl:param name="secondLoop" />
 		<xsl:apply-templates select="."

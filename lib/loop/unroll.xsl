@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="loop_unroll">
+	<xsl:template match="*" mode="xevLoopUnroll">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 
@@ -17,7 +17,7 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="loop_unroll">
+					<xsl:apply-templates mode="xevLoopUnroll">
 						<xsl:with-param name="factor" select="$factor" />
 						<xsl:with-param name="loopName" select="$loopName" />
 					</xsl:apply-templates>
