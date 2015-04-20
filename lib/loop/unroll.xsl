@@ -119,10 +119,9 @@
 
 
 	<!-- remove SgPragmaDeclaration -->
-	<xsl:template match="SgPragmaDeclaration" mode="loop_unroll_Epilog">
-	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="loop_unroll_Epilog">
-	</xsl:template>
+	<!-- <xsl:template match="SgPragmaDeclaration" mode="loop_unroll_Epilog"> 
+		</xsl:template> <xsl:template match="PreprocessingInfo" mode="loop_unroll_Epilog"> 
+		</xsl:template> -->
 
 	<!-- epilog -->
 	<xsl:template match="*" mode="loop_unroll_Epilog">
@@ -134,8 +133,7 @@
 	<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
 	<!-- remove PreprocessingInfo -->
-	<xsl:template match="PreprocessingInfo" mode="loop_unroll">
-	</xsl:template>
+	<!-- <xsl:template match="PreprocessingInfo" mode="loop_unroll"> </xsl:template> -->
 	<!-- <xsl:template match="SgPragmaDeclaration[1]" mode="loop_unroll"> </xsl:template> -->
 
 

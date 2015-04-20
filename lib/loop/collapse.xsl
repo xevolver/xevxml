@@ -52,7 +52,7 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $secondLoop">
-				<!--change max -->
+				<!--change end -->
 				<xsl:comment>
 					test-loop_collapse.xsl found secondLoop
 				</xsl:comment>
@@ -61,7 +61,10 @@
 					<xsl:copy-of select="./*[1]" />
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />
-						<xsl:apply-templates select="firstEnd" />
+						<xsl:comment>
+							test-loop_collapse.xsl multiply
+						</xsl:comment>
+						<xsl:apply-templates select="$firstEnd" />
 					</SgMultiplyOp>
 					<!-- stride -->
 					<xsl:copy-of select="./*[3]" />

@@ -9,14 +9,7 @@
 		<xsl:param name="size" />
 
 		<!-- emit loop -->
-		DO
-		<xsl:value-of select="$loopName" />
-		_tile =
-		<xsl:value-of select="$start" />
-		,
-		<xsl:value-of select="$end" />
-		,
-		<xsl:value-of select="$size" />
+		DO	<xsl:value-of select="$loopName" />_tile =	<xsl:value-of select="$start" />,	<xsl:value-of select="$end" />,		<xsl:value-of select="$size" />
 		<xsl:apply-templates select="." mode="loop_tile_find_loop">
 			<xsl:with-param name="loopName" select="$loopName" />
 			<xsl:with-param name="end" select="$end" />
@@ -37,17 +30,7 @@
 					found loop
 				</xsl:comment>
 
-				DO
-				<xsl:value-of select="$loopName" />
-				=
-				<xsl:value-of select="$loopName" />
-				_tile, min(
-				<xsl:value-of select="$end" />
-				,
-				<xsl:value-of select="$loopName" />
-				_tile +
-				<xsl:value-of select="$size" />
-				- 1)
+				DO	<xsl:value-of select="$loopName" />	=	<xsl:value-of select="$loopName" />_tile, min(<xsl:value-of select="$end" />,	<xsl:value-of select="$loopName" />_tile +	<xsl:value-of select="$size" />	- 1)
 				<xsl:apply-templates select="self::SgFortranDo/SgBasicBlock">
 				</xsl:apply-templates>
 				END DO

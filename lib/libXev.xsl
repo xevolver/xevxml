@@ -24,6 +24,13 @@
 		<xsl:apply-templates mode="xevInitHook" />
 	</xsl:template>
 
+	<xsl:template match="*">
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates />
+		</xsl:copy>
+	</xsl:template>
+
 	<xsl:template match="*" mode="xevInitHook">
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
@@ -33,18 +40,10 @@
 
 
 	<!-- remove PreprocessingInfo -->
-	<xsl:template match="PreprocessingInfo">
-		<xsl:comment>
-			PreprocessingInfo
-		</xsl:comment>
-		<!-- <xsl:apply-templates /> -->
-	</xsl:template>
+	<!-- <xsl:template match="PreprocessingInfo"> <xsl:comment> PreprocessingInfo 
+		</xsl:comment> </xsl:template> -->
 
 	<!-- remove SgPragmaDeclaration -->
-	<xsl:template match="SgPragmaDeclaration">
-		<xsl:comment>
-			SgPragmaDeclaration
-		</xsl:comment>
-	</xsl:template>
-
+	<!-- <xsl:template match="SgPragmaDeclaration"> <xsl:comment> SgPragmaDeclaration 
+		</xsl:comment> </xsl:template> -->
 </xsl:stylesheet>
