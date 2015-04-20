@@ -14,7 +14,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevGoToNthLoop">
+		<xsl:apply-templates select="." mode="xevSkipToNthLoop">
 			<xsl:with-param name="loopName" select="'i'" />
 			<xsl:with-param name="N" select="2" />
 		</xsl:apply-templates>
