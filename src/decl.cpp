@@ -1677,7 +1677,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     namedType->set_declaration (cls);
     namedType->get_declaration()->set_definingDeclaration(cls);
     ret = sb::buildVariableDeclaration(name->get_name(),
-                                       namedType,
+                                       typ,
                                        name->get_initializer());
 
     ret->set_baseTypeDefiningDeclaration( cls );
@@ -1688,7 +1688,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     ret = sb::buildVariableDeclaration(name->get_name(),
                                        name->get_type(),
                                        name->get_initializer());
-    name->set_definition(ret->get_definition());
+
   }
 
   if(ret==0) {
@@ -1696,6 +1696,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
+  name->set_definition(ret->get_definition());
 
   // see buildVariableDeclaration in fortran_support.C
   if(si::is_Fortran_language())
