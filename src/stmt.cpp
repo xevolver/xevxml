@@ -606,17 +606,24 @@ STMT_DEFAULT(DeallocateStatement);
 SgNode*
 XevXmlVisitor::visitSgDefaultOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgDefaultOptionStmt*      ret  = 0;
   SgStatement*              body = 0;
+  SgDefaultOptionStmt*      ret  = new SgDefaultOptionStmt(DEFAULT_FILE_INFO);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret->set_parent(astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if (body==0)
         body = isSgStatement(astchild);
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildDefaultOptionStmt(body);
+  if(body==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  ret->set_body(body);
+
   string c;
   if(XmlGetAttributeValue(node,"construct",&c)){
     ret->set_default_construct_name(c);

@@ -500,6 +500,8 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
           }
 
           if(ctype==0){
+            ctype = isSgClassType(ptype->findBaseType());
+#if 0
             SgTypedefType* ttype = isSgTypedefType(ptype->get_base_type());
             SgModifierType* mtype = isSgModifierType(ptype->get_base_type());
             if(ttype){
@@ -508,6 +510,7 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
             else if(mtype){
               ctype = isSgClassType(mtype->get_base_type());
             }
+#endif
           }
 
           if(ctype){
