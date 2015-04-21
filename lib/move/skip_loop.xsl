@@ -6,6 +6,18 @@
 		<xsl:param name="loopName" />
 		<xsl:param name="N" />
 		<xsl:variable name="currentNode" select="." /> <!-- for debug -->
+		<xsl:variable name="targetNode"
+			select="(./SgFortranDo/SgAssignOp/SgVarRefExp[@name=$loopName])[$N]/../.." /> <!-- for debug -->
+		<xsl:apply-templates
+			select="(./SgFortranDo/SgAssignOp/SgVarRefExp[@name=$loopName])[$N]/../.."
+			mode="xevTransformationHook" />
+	</xsl:template>
+
+
+	<xsl:template match="*" mode="xevSkipToNthLoop_bkup">
+		<xsl:param name="loopName" />
+		<xsl:param name="N" />
+		<xsl:variable name="currentNode" select="." /> <!-- for debug -->
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">

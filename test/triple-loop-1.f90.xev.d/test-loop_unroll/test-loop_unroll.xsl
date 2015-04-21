@@ -24,7 +24,6 @@
 			<xsl:with-param name="factor" select="3" />
 			<xsl:with-param name="loopName" select="'i'" />
 		</xsl:apply-templates>
-
 	</xsl:template>
 
 	<xsl:template match="SgFortranDo" mode="bkup">
