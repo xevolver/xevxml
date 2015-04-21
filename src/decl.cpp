@@ -404,12 +404,15 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   }
 
   // "decl" is passed to SgClassDefinition and later replaced with "ret"
+  SgNode* prev = decl->get_parent();
+  decl->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,decl)
     {
       if( exp==NULL )
         exp = isSgClassDefinition( astchild );
     }
   SUBTREE_VISIT_END();
+  decl->set_parent(prev);
 
   if(exp!=NULL){
     // defining declaration
@@ -439,8 +442,8 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     ret->set_type(SgClassType::createType(decl));
     ret->set_parent(scope);
     ret->set_scope(scope);
-    //ret->setForward();
-    decl->set_forward(true);
+    ret->setForward();
+    //decl->set_forward(true);
     ret->set_definingDeclaration(decl->get_definingDeclaration());
   }
   //if(isNamed==false) ret->set_isUnNamed(true);

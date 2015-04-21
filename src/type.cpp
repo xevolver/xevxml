@@ -430,7 +430,6 @@ void XevSageVisitor::inodeSgArrayType(SgNode* node) {
   SgArrayType* n = isSgArrayType(node);
   if(n){
     this->visit(n->get_base_type());
-    sstr()<< "<!-- dim info -->" <<endl;
     if(n->get_dim_info())
       this->visit(n->get_dim_info());
     //if(n->get_rank()==0)
