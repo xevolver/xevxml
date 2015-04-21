@@ -299,12 +299,16 @@ XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astPa
   SgFunctionParameterTypeList*    ret = 0;
   SgExprListExp*                  exp = 0;
   SgType*                         typ = 0;
+  std::vector<SgType*>            lst;
+
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
+      typ = isSgType(astchild);
+      if( typ!=0 )
+        lst.push_back(typ);
+
       if( exp==0 )
         exp = isSgExprListExp(astchild);
-      if( typ==0 )
-        typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -312,8 +316,9 @@ XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astPa
     exp = new SgExprListExp(DEFAULT_FILE_INFO );
   }
   ret =  sb::buildFunctionParameterTypeList( exp );
-  if(typ){
-    ret->append_argument(typ);
+  if(lst.size()>0){
+    for(size_t i(0);i<lst.size();i++)
+      ret->append_argument(lst[i]);
   }
   ret->set_parent(astParent);
   exp->set_parent(ret);

@@ -1522,7 +1522,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    if(decl) {
      SgNamedType *namedType = isSgNamedType(typ->findBaseType());
      ret = sb::buildTypedefDeclaration( name.c_str(),
-                                        namedType,
+                                        typ,
                                         sb::topScopeStack());
      XEV_ASSERT(ret!=NULL);
      ret->set_declaration(decl->get_firstNondefiningDeclaration());
