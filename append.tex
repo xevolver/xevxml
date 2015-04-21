@@ -261,6 +261,10 @@ have the following attributes for modifiers.
 	\item[0x40]: register storage modifier
 	\item[0x80]: mutable storage modifier
        \end{description}
+
+ \item \texttt{thread\_local}
+
+       0 or 1. If 1 is given, the variable is thread-local.
 \end{itemize}
 
 The \texttt{$<$SgAttributeSpecificationStatement$>$} element requires
@@ -361,6 +365,8 @@ attributes are also listed in the description.
  \texttt{SgRshiftAssignOp} & $>>$= operator (bitwise right shift assignment)\\
  \texttt{SgRshiftOp} & $>>$ operator (bitwise right shift)\\
  \texttt{SgSubtractOp} & - operator (subtraction)\\
+ \texttt{SgUserDefinedBinaryOp} & user defined binary operator\\
+ & ~\texttt{name} (string) :operator name \\
  \texttt{SgXorAssignOp} & \^{}= operator (bitwise XOR assignment)\\
  \hline
  \multicolumn{2}{l}{Unary operators}\\
@@ -375,6 +381,8 @@ attributes are also listed in the description.
  \texttt{SgPlusPlusOp} & ++ operator (increment)\\
  & ~\texttt{mode} (int): 0 (prefix) or 1 (postfix)\\
  \texttt{SgUnaryAddOp} & Unary + operator (plus)\\
+ \texttt{SgUserDefinedUnaryOp} & user defined unary operator\\
+ & ~\texttt{name} (string) :operator name \\
  \hline
  \multicolumn{2}{l}{Values}\\
  \hline
@@ -432,6 +440,7 @@ attributes are also listed in the description.
  \multicolumn{2}{l}{Other expressions}\\
  \hline
  \texttt{SgAggregateInitializer} & initialization with aggregated data (struct complex x=\{1,2\}) \\
+ & ~\texttt{implicit} (int): 0 (need explicit braces) or 1 (not need)\\
  \texttt{SgAssignInitializer} & initialization (i=0)\\
  \texttt{SgAsteriskShapeExp} & Fortran * expression (write(*,*))\\
  \texttt{SgCastExp} & type cast ((int*)x)\\
@@ -565,6 +574,7 @@ Fortran.
  & ~\texttt{name} (string): name of the COMMON block object \\
 \texttt{SgInitializedName}& initialized name (declared symbols)\\
  & ~\texttt{name} (string): name of the symbol \\
+ & ~\texttt{prev} (string): previous symbol for cray pointer\\
 \texttt{SgInterfaceBody}& body of INTERFACE statement (Fortran only)\\
  & ~\texttt{name} (string): name of the INTERFACE function \\
  \texttt{SgRenamePair}& alias of a variable defined USE statement (Fortran only)\\
