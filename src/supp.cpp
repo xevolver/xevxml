@@ -298,18 +298,23 @@ XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astPa
 {
   SgFunctionParameterTypeList*    ret = 0;
   SgExprListExp*                  exp = 0;
-
+  SgType*                         typ = 0;
   SUBTREE_VISIT_BEGIN(node,astchild,0)
     {
       if( exp==0 )
         exp = isSgExprListExp(astchild);
+      if( typ==0 )
+        typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
 
-  if( exp == 0) // modified (2014.09.20)
+  if( exp == 0) {// modified (2014.09.20)
     exp = new SgExprListExp(DEFAULT_FILE_INFO );
-
+  }
   ret =  sb::buildFunctionParameterTypeList( exp );
+  if(typ){
+    ret->append_argument(typ);
+  }
   ret->set_parent(astParent);
   exp->set_parent(ret);
 
