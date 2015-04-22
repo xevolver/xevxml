@@ -434,8 +434,11 @@ void XevSageVisitor::inodeSgArrayType(SgNode* node) {
       this->visit(n->get_dim_info());
     //if(n->get_rank()==0)
     if(n->get_index()){
-      SgExpression* idx = isSgExpression(si::deepCopy(n->get_index()));
-      si::setSourcePositionForTransformation(idx);
+      SgExpression* idx = n->get_index();
+      if(idx->get_file_info() && idx->get_file_info()->isSameFile(file_)==false){
+        idx = isSgExpression(si::deepCopy(n->get_index()));
+        si::setSourcePositionForTransformation(idx);
+      }
       this->visit(idx);
     }
 

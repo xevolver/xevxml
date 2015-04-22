@@ -55,12 +55,14 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   if(n->get_lvalue())
     istr << " lvalue=\"1\" ";
 
-  SgInitializer* ini = isSgInitializer(node);
+  SgAssignInitializer* ini = isSgAssignInitializer(node);
   if(ini){
-    SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
+    //SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
+    SgCastExp* c = isSgCastExp(ini->get_operand());
     if(c && c->get_file_info() &&c->get_file_info()->isCompilerGenerated()==false)
       istr << " cast=\"" << ini->get_is_explicit_cast() <<"\" ";
-    //istr << " cast=\"1\" ";
+    else
+      istr << " cast=\"0\" ";
   }
 }
 
@@ -175,7 +177,7 @@ INODE_EXPR_DEFAULT(AggregateInitializer);
 SgNode*
 XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
 {
-  SgAssignInitializer* ret = 0;
+  SgAssignInitializer* ret  = sb::buildAssignInitializer();;
   SgExpression*        exp = 0;
 
   SUBTREE_VISIT_BEGIN(node,astchild,0)
@@ -186,12 +188,26 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   if(exp){
-    ret = sb::buildAssignInitializer(exp,exp->get_type());
+
+    ret->set_operand(exp);
     exp->set_parent(ret);
   }
   else {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
+  }
+
+  SgCastExp* c = isSgCastExp(exp);
+  if(c && c->get_file_info()){
+    int expl=0;
+    if(XmlGetAttributeValue(node,"cast",&expl) && expl){
+      //ret->set_is_explicit_cast(true);
+      c->get_file_info()->unsetCompilerGenerated();
+    }
+    else{
+      ret->set_is_explicit_cast(false);
+      c->get_file_info()->setCompilerGenerated();
+    }
   }
   return ret;
 }

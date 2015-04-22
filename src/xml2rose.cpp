@@ -193,18 +193,19 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
     e->set_need_paren(parenf);
     e->set_lvalue(lvalf);
   }
-
-  SgInitializer* ini = isSgInitializer(astNode);
+#if 0
+  SgAssignInitializer* ini = isSgAssignInitializer(astNode);
 
   if(ini){
     int expl = 0;
-    ini->set_is_explicit_cast(0);
     if(XmlGetAttributeValue(node,"cast",&expl)){
       //SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
+      //SgCastExp* c = isSgCastExp(ini->get_operand());
       //if(c)
       ini->set_is_explicit_cast(expl);
     }
   }
+#endif
 }
 
 void
