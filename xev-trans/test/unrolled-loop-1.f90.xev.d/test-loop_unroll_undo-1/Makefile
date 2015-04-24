@@ -1,0 +1,12 @@
+include ../../../lib/Makefile-xev.in
+
+TARGET_SRC = $(wildcard *.target.f90)
+DIFF = $(TARGET_SRC:%target.f90=%diff2.f90)
+
+check: clean-translated $(DIFF)
+	echo $(DIFF)
+
+test:
+	@echo "test"
+	make  loop-3.diff.f90
+

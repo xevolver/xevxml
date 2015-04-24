@@ -1,0 +1,21 @@
+
+SUBROUTINE TEST02()
+    INTEGER found,i
+    INTEGER, DIMENSION(300) :: A
+
+    !$xev dir replace(acc, kernels, loop)
+    !$acc kernels
+    i = 0
+    do  while ( .not. found==300)
+        i = i + 1
+        if (A(i) .eq. 102) then
+           found = i
+        end if
+    end do
+    !$xev dir replace(acc, end, region)
+    !$acc end region
+    
+    !$xev statement-add ptn-001(print,*,'Found_at',maxval(found) )
+    return
+END
+

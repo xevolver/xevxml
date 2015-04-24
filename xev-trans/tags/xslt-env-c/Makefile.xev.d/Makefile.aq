@@ -1,0 +1,53 @@
+# Makefile.aq
+
+XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
+
+SRC2XML_DIR = xev-src2xml
+DIR2XML_DIR = xev-dir2xml
+
+.SUFFIXES: .f .xml .src2xml .dir2xml
+
+all:
+	@echo "usage: make {}"
+
+test-dir-add-trans:
+	xsltproc ../xslt/example-echo.xsl simple-dir-add.xml
+
+test-dir-replace-trans:
+	xsltproc ../xslt/example-echo.xsl simple-dir-replace.xml
+
+test-var-replace-trans:
+	xsltproc ../xslt/example-echo.xsl simple-var-replace.xml
+
+test-include-plain-code:
+	which xsltrans
+	$(XEVXML_ENV) ; \
+	xsltproc ../xslt/example-include-plain-code.xsl $(SRC2XML_DIR)/simple-dir-add.xml \
+	| xml2src \
+	> ./xev-xml2src/test-include-plain-code.f
+
+#	xsltrans ../xslt/example-include-plain-code.xsl $(SRC2XML_DIR)/simple-dir-add.xml \
+
+test-template:
+	#$(XEVXML_ENV) ; xml2src $(SRC2XML_DIR)/test-template.xml
+	#$(XEVXML_ENV) ; xml2src $(SRC2XML_DIR)/simple-dir-replace.xml
+	$(XEVXML_ENV) ; xml2src $(SRC2XML_DIR)/simple-var-replace.xml
+			
+	
+src2xml-files: simple-dir-add.src2xml simple-dir-replace.src2xml simple-var-replace.src2xml
+
+dir2xml-files: simple-dir-add.dir2xml simple-dir-replace.dir2xml simple-var-replace.dir2xml
+
+command-test:
+#	$(XEVXML_ENV) ; xml2src simple-dir-add-output.f < simple-dir-add.xml
+	$(XEVXML_ENV) ; src2xml simple-dir-add.f | dir2xml defs.xml > tmp-output.xml
+
+.f.src2xml:
+	$(XEVXML_ENV) ; src2xml $*.f > $(SRC2XML_DIR)/$*.xml
+
+.f.dir2xml:
+	$(XEVXML_ENV) ; dir2xml defs.xml < $(SRC2XML_DIR)/$*.xml > $(DIR2XML_DIR)/$*.xml
+
+
+clean:
+	rm -f *.xml

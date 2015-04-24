@@ -1,0 +1,76 @@
+<DEFS>
+	<DIRECTIVE name="dir">
+		<CLAUSE name="add">
+			<VARARG/>
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="dir">
+		<CLAUSE name="replace">
+			<VARARG/>
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="dir">
+		<CLAUSE name="append">
+			<VARARG/>
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="dir">
+		<CLAUSE name="remove">
+			<VARARG/>
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="statement">
+		<CLAUSE name="add">
+			<VARARG/>
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="statement">
+		<CLAUSE name="remove">
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="while2for">
+		<CLAUSE name="replace">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="scalar2array1_varref">
+		<CLAUSE name="start">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="end">
+		<CLAUSE name="scalar2array1_varref">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array1to2">
+		<CLAUSE name="type">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="array1to2_varref">
+		<CLAUSE name="start">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="" />
+		</CLAUSE>
+	</DIRECTIVE>
+	<DIRECTIVE name="end">
+		<CLAUSE name="array1to2_varref">
+			<ARG value="default" />
+			<ARG value="default" />
+			<ARG value="default" />
+		</CLAUSE>
+	</DIRECTIVE>
+</DEFS>

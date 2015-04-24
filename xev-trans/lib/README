@@ -1,0 +1,23 @@
+XSLT translation Rules Library
+
+1. Xevolver general translation rules
+
+libXev.xsl:
+
+Xevolver translation rules library top level definition file.
+
+loop/*:
+
+Xevolver translation rules.
+
+
+2. CHiLL compatible translation rules
+
+libCHiLL.xsl:
+
+CHiLL compatible translation rules library top level definition file.
+
+chill/*:
+
+CHiLL compatible translation rules
+
