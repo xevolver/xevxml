@@ -4,6 +4,7 @@ PROGRAM triple_loop_1
 
     REAL(kind=8) :: A(n,n,n), B(n,n,n)
 
+    !$xev loop_tag
     DO k = 1, n - 1
         DO j = 1, n - 1
             DO i = 1, n - 1, 4

@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="loop_fusion">
+	<xsl:template match="*" mode="xevLoopFusion">
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo">
 				<xsl:copy>
@@ -19,16 +19,13 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="loop_fusion">
+					<xsl:apply-templates mode="xevLoopFusion">
 					</xsl:apply-templates>
 				</xsl:copy>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="SgPragmaDeclaration" mode="loop_fusion">
-	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="loop_fusion">
-	</xsl:template>
-
+	<!-- <xsl:template match="SgPragmaDeclaration" mode="loop_fusion"> </xsl:template> 
+		<xsl:template match="PreprocessingInfo" mode="loop_fusion"> </xsl:template> -->
 </xsl:stylesheet>

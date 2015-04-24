@@ -7,8 +7,26 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
-	<xsl:template match="SgFortranDo">
-		<xsl:choose>
+	<xsl:template match="*" mode="xevInitHook">
+		<xsl:apply-templates select="." mode="xevFindDirective">
+			<xsl:with-param name="directiveName" select="'xev loop_tag'" />
+		</xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="*" mode="xevMoveHook">
+		<xsl:apply-templates select=".." mode="xevSkipToNthLoop">
+			<xsl:with-param name="loopName" select="'i'" />
+			<xsl:with-param name="N" select="2" />
+		</xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="*" mode="xevTransformationHook">
+		<xsl:variable name="currentNode" select="." /> <!-- for debug -->
+		<xsl:apply-templates select="." mode="xevLoopFusion" />
+	</xsl:template>
+
+	<xsl:template match="SgFortranDo" mode="bkup">
+		<xsl:choose> <!-- skip first loop -->
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
 				<xsl:comment>
 					xev loop_tag loop_fusion skip

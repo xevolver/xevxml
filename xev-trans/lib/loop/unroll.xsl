@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="loop_unroll">
+	<xsl:template match="*" mode="xevLoopUnroll">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 
@@ -17,7 +17,7 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="loop_unroll">
+					<xsl:apply-templates mode="xevLoopUnroll">
 						<xsl:with-param name="factor" select="$factor" />
 						<xsl:with-param name="loopName" select="$loopName" />
 					</xsl:apply-templates>
@@ -46,7 +46,7 @@
 			</xsl:element>
 
 			<xsl:apply-templates select="./SgBasicBlock"
-				mode="loop_unroll">
+				mode="xevLoopUnroll">
 				<xsl:with-param name="factor" select="$factor" />
 				<xsl:with-param name="loopName" select="$loopName" />
 			</xsl:apply-templates>
@@ -55,7 +55,7 @@
 	</xsl:template>
 
 	<!-- TODO: ExprStatement -> BasicBlock -->
-	<xsl:template match="SgExprStatement[last()]" mode="loop_unroll">
+	<xsl:template match="SgExprStatement[last()]" mode="xevLoopUnroll">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 
@@ -119,10 +119,9 @@
 
 
 	<!-- remove SgPragmaDeclaration -->
-	<xsl:template match="SgPragmaDeclaration" mode="loop_unroll_Epilog">
-	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="loop_unroll_Epilog">
-	</xsl:template>
+	<!-- <xsl:template match="SgPragmaDeclaration" mode="loop_unroll_Epilog"> 
+		</xsl:template> <xsl:template match="PreprocessingInfo" mode="loop_unroll_Epilog"> 
+		</xsl:template> -->
 
 	<!-- epilog -->
 	<xsl:template match="*" mode="loop_unroll_Epilog">
@@ -134,8 +133,7 @@
 	<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
 	<!-- remove PreprocessingInfo -->
-	<xsl:template match="PreprocessingInfo" mode="loop_unroll">
-	</xsl:template>
+	<!-- <xsl:template match="PreprocessingInfo" mode="loop_unroll"> </xsl:template> -->
 	<!-- <xsl:template match="SgPragmaDeclaration[1]" mode="loop_unroll"> </xsl:template> -->
 
 
