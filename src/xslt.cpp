@@ -48,7 +48,7 @@
 #include <stdexcept>
 #include <getopt.h>
 
-const char* DEFAULT_LIBRARY_PATH=XEVXML_PREFIX"lib";
+const char* DEFAULT_LIBRARY_PATH=XEVXML_PREFIX"/lib/xev-trans";
 const char* XEVXML_LIB_ENV="XEVXML_LIBRARY_PATH";
 
 using namespace std;

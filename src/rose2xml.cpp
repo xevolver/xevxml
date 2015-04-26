@@ -79,10 +79,11 @@ writeFortranPragma(std::ostream& sstr_, SgNode* node,
         if( idx >= 0 ) {
           str = (*info)[i]->getString(); // read the string again
           sstr_ << "<SgPragmaDeclaration >\n";
-          sstr_ << "  "; // indent
+          //sstr_ << "  "; // indent
           sstr_ << "<SgPragma pragma=\"";
           // assuming Fortran directives start with !$
           sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
+          sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\n";
           sstr_ << "</SgPragmaDeclaration >\n";
         }
       }

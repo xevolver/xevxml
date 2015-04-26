@@ -1,12 +1,147 @@
-cmake_minimum_required(VERSION 2.8)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -g")
-set(CMAKE_ROSE_DIR $ENV{ROSE_HOME})
-set(CMAKE_JSON_DIR $ENV{PICOJSON_HOME})
-set(CMAKE_XEVXML_PREFIX "${CMAKE_INSTALL_PREFIX}")
-find_package( Boost 1.40 COMPONENTS program_options REQUIRED )
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -g")
+SET(CMAKE_XEVXML_PREFIX "${CMAKE_INSTALL_PREFIX}")
+FIND_PACKAGE( Boost 1.40 COMPONENTS program_options REQUIRED )
 
-configure_file("${PROJECT_SOURCE_DIR}/src/config.h.in" "${PROJECT_SOURCE_DIR}/src/config.h")
-add_library(xevxml STATIC
+#####################################################################
+# picojson
+FIND_PATH(CMAKE_JSON_INCLUDE NAMES picojson.h
+  PATHS
+  $ENV{CMAKE_JSON_INCLUDE_PATH}
+  $ENV{CMAKE_INCLUDE_PATH}
+  ${CMAKE_INCLUDE_PATH}
+  /usr/local/include
+  /usr/include
+  )
+
+IF(CMAKE_JSON_INCLUDE)
+  SET(CMAKE_JSON_FOUND TRUE)
+ELSE(CMAKE_JSON_INCLUDE)
+  SET(CMAKE_JSON_FOUND FALSE)
+ENDIF(CMAKE_JSON_INCLUDE)
+
+IF(CMAKE_JSON_FOUND)
+  MESSAGE(STATUS "Found \"picojson.h\" at ${CMAKE_JSON_INCLUDE}")
+ELSE(CMAKE_JSON_FOUND)
+  MESSAGE(WARNING "Couldn't find \"picojson.h\"")
+ENDIF(CMAKE_JSON_FOUND)
+
+#MESSAGE(STATUS "Picojson: ${CMAKE_JSON_INCLUDE}")
+MARK_AS_ADVANCED(CMAKE_JSON_INCLUDE)
+
+#####################################################################
+# ROSE
+FIND_PATH(CMAKE_ROSE_INCLUDE NAMES rose.h
+  PATHS
+  $ENV{CMAKE_ROSE_INCLUDE_PATH}
+  $ENV{CMAKE_INCLUDE_PATH}
+  ${CMAKE_INCLUDE_PATH}
+  /usr/local/include
+  /usr/local/include/rose
+  /usr/include
+  /usr/include/rose
+  )
+
+FIND_LIBRARY(CMAKE_ROSE_LIBRARY NAMES rose
+  PATHS
+  $ENV{CMAKE_ROSE_LIBRARY_PATH}
+  $ENV{CMAKE_LIBRARY_PATH}
+  ${CMAKE_LIBRARY_PATH}
+  /usr/local/lib
+  /usr/lib
+  )
+
+IF(CMAKE_ROSE_INCLUDE AND CMAKE_ROSE_LIBRARY)
+  SET(CMAKE_ROSE_FOUND TRUE)
+ELSE(CMAKE_ROSE_INCLUDE AND CMAKE_ROSE_LIBRARY)
+  SET(CMAKE_ROSE_FOUND FALSE)
+ENDIF(CMAKE_ROSE_INCLUDE AND CMAKE_ROSE_LIBRARY)
+
+IF(CMAKE_ROSE_FOUND)
+  MESSAGE(STATUS "Found \"rose.h\" at ${CMAKE_ROSE_INCLUDE}")
+  MESSAGE(STATUS "Found \"librose.so\" at ${CMAKE_ROSE_LIBRARY}")
+ELSE(CMAKE_ROSE_FOUND)
+  MESSAGE(FATAL_ERROR "Couldn't find \"rose.h\" and/or \"librose.so\"")
+ENDIF(CMAKE_ROSE_FOUND)
+
+#MESSAGE(STATUS "Picojson: ${CMAKE_JSON_INCLUDE}")
+MARK_AS_ADVANCED(CMAKE_ROSE_INCLUDE CMAKE_ROSE_LIBRARY)
+
+#####################################################################
+# XERCES
+FIND_PATH(CMAKE_XERCES_INCLUDE NAMES xercesc/util/XercesVersion.hpp
+  PATHS
+  $ENV{CMAKE_XERCES_INCLUDE_PATH}
+  ${CMAKE_XERCES_INCLUDE_PATH}
+  ${CMAKE_INCLUDE_PATH}
+  /usr/local/include
+  /usr/include
+  )
+FIND_LIBRARY(CMAKE_XERCES_LIBRARY NAMES xerces-c-3.1
+  PATHS
+  $ENV{CMAKE_XERCES_LIBRARY_PATH}
+  ${CMAKE_XERCES_LIBRARY_PATH}
+  ${CMAKE_LIBRARY_PATH}
+  /usr/lib
+  /usr/local/lib
+  )
+
+IF(CMAKE_XERCES_INCLUDE AND CMAKE_XERCES_LIBRARY)
+  SET(CMAKE_XERCES_FOUND TRUE)
+ELSE(CMAKE_XERCES_INCLUDE AND CMAKE_XERCES_LIBRARY)
+  SET(CMAKE_XERCES_FOUND FALSE)
+ENDIF(CMAKE_XERCES_INCLUDE AND CMAKE_XERCES_LIBRARY)
+
+IF(CMAKE_XERCES_FOUND)
+  MESSAGE(STATUS "Found Xerces-C")
+ELSE(CMAKE_XERCES_FOUND)
+  MESSAGE(FATAL_ERROR "Couldn't find Xerces-C")
+ENDIF(CMAKE_XERCES_FOUND)
+
+MARK_AS_ADVANCED(CMAKE_XERCES_INCLUDE CMAKE_XERCES_LIBRARY)
+
+#####################################################################
+# XALAN
+FIND_PATH(CMAKE_XALAN_INCLUDE NAMES xalanc/Include/XalanVersion.hpp
+  PATHS
+  $ENV{CMAKE_XALAN_INCLUDE_PATH}
+  ${CMAKE_XALAN_INCLUDE_PATH}
+  ${CMAKE_INCLUDE_PATH}
+  /usr/local/include
+  /usr/include
+  )
+FIND_LIBRARY(CMAKE_XALAN_LIBRARY NAMES xalan-c
+  PATHS
+  $ENV{CMAKE_XALAN_LIBRARY_PATH}
+  ${CMAKE_XALAN_LIBRARY_PATH}
+  ${CMAKE_LIBRARY_PATH}
+  /usr/lib
+  /usr/local/lib
+  )
+
+IF(CMAKE_XALAN_INCLUDE AND CMAKE_XALAN_LIBRARY)
+  SET(CMAKE_XALAN_FOUND TRUE)
+ELSE(CMAKE_XALAN_INCLUDE AND CMAKE_XALAN_LIBRARY)
+  SET(CMAKE_XALAN_FOUND FALSE)
+ENDIF(CMAKE_XALAN_INCLUDE AND CMAKE_XALAN_LIBRARY)
+
+IF(CMAKE_XALAN_FOUND)
+  MESSAGE(STATUS "Found Xalan-C")
+ELSE(CMAKE_XALAN_FOUND)
+  MESSAGE(FATAL_ERROR "Couldn't find Xalan-C")
+ENDIF(CMAKE_XALAN_FOUND)
+
+MARK_AS_ADVANCED(CMAKE_XALAN_INCLUDE CMAKE_XALAN_LIBRARY)
+
+
+
+#####################################################################################
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/src/config.h.in"
+  "${PROJECT_SOURCE_DIR}/src/config.h"
+  )
+
+ADD_LIBRARY(xevxml STATIC
   xmlutils.cpp
   type.cpp
   rose2xml.cpp
@@ -18,17 +153,30 @@ add_library(xevxml STATIC
   decl.cpp
   supp.cpp
   value.cpp
-)
-include_directories(../include ${CMAKE_ROSE_DIR}/include ${CMAKE_JSON_DIR}/include ${Boost_INCLUDE_DIR})
-link_directories(${CMAKE_ROSE_DIR}/lib)
-add_executable(src2xml  src2xml.cpp)
-add_executable(xml2src  xml2src.cpp)
-add_executable(xsltexec xslt.cpp)
-add_executable(xsltgen xsltgen.cpp)
+  )
 
-target_link_libraries(src2xml xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})
-target_link_libraries(xml2src xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})
-target_link_libraries(xsltexec xevxml rose xalan-c xerces-c  ${Boost_LIBRARIES})
+INCLUDE_DIRECTORIES(../include
+  ${CMAKE_ROSE_INCLUDE}
+  ${CMAKE_JSON_INCLUDE}
+  ${CMAKE_XERCES_INCLUDE}
+  ${CMAKE_XALAN_INCLUDE}
+  ${Boost_INCLUDE_DIR}
+  )
 
-install_programs( /bin FILES src2xml xml2src xsltexec xsltgen)
-install_files( /lib FILES libxevxml.a)
+LINK_DIRECTORIES(
+  ${CMAKE_ROSE_LIBRARY}
+  ${CMAKE_XERCES_LIBRARY}
+  ${CMAKE_XALAN_LIBRARY}
+  )
+
+ADD_EXECUTABLE(src2xml  src2xml.cpp)
+ADD_EXECUTABLE(xml2src  xml2src.cpp)
+ADD_EXECUTABLE(xsltexec xslt.cpp)
+ADD_EXECUTABLE(xsltgen xsltgen.cpp)
+
+TARGET_LINK_LIBRARIES(src2xml xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(xml2src xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(xsltexec xevxml rose xalan-c xerces-c  ${Boost_LIBRARIES})
+
+INSTALL_PROGRAMS( /bin FILES src2xml xml2src xsltexec xsltgen)
+INSTALL_FILES( /lib FILES libxevxml.a)

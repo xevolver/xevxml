@@ -27,5 +27,5 @@ ADD_CUSTOM_TARGET(apidoc_forced
 
 endif (DOXYGEN_FOUND)
 
-install_files( /lib FILES ${PROJECT_SOURCE_DIR}/test/xslt/rule)
+install_files( /lib/xev-trans/ FILES ${PROJECT_SOURCE_DIR}/xev-trans/lib/)
 install_files( /include FILES ${PROJECT_SOURCE_DIR}/include/)
