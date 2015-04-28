@@ -2,8 +2,26 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
 set(CMAKE_ROSE_DIR $ENV{ROSE_HOME})
 find_package( Boost 1.40 COMPONENTS program_options REQUIRED )
+LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-include_directories(../../include ${CMAKE_ROSE_DIR}/include ${Boost_INCLUDE_DIR})
-link_directories(${CMAKE_ROSE_DIR}/lib)
+FIND_PACKAGE( Picojson )
+FIND_PACKAGE( Rose )
+FIND_PACKAGE( Xerces )
+FIND_PACKAGE( Xalan )
+
+INCLUDE_DIRECTORIES(../../include
+  ${CMAKE_ROSE_INCLUDE}
+  ${CMAKE_JSON_INCLUDE}
+  ${CMAKE_XERCES_INCLUDE}
+  ${CMAKE_XALAN_INCLUDE}
+  ${Boost_INCLUDE_DIR}
+  )
+
+LINK_DIRECTORIES(
+  ${CMAKE_ROSE_LIBRARY}
+  ${CMAKE_XERCES_LIBRARY}
+  ${CMAKE_XALAN_LIBRARY}
+  )
+
 add_executable(defuse  defuse.cpp)
 target_link_libraries(defuse xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})

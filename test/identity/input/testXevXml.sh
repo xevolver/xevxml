@@ -78,9 +78,11 @@ echo -n " NG" 1>&2
 if [ ! -e $OUT/$DIF ]
 then
     echo " (terminated)" 1>&2
+    exit -1
 elif [ -s $OUT/$DIF ]
 then
     echo " (mismatch)" 1>&2
+    exit -1
 elif [ -s $OUT/$LOG ]
 then
     echo " (warning)" 1>&2

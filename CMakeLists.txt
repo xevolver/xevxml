@@ -25,7 +25,26 @@ ADD_CUSTOM_TARGET(apidoc_forced
   COMMAND ${CMAKE_COMMAND} -E echo "Done."
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
+install_files( /docs/ FILES ${PROJECT_SOURCE_DIR}/docs/doxygen/html)
 endif (DOXYGEN_FOUND)
 
 install_files( /lib/xev-trans/ FILES ${PROJECT_SOURCE_DIR}/xev-trans/lib/)
-install_files( /include FILES ${PROJECT_SOURCE_DIR}/include/)
+install_files( /include/ FILES ${PROJECT_SOURCE_DIR}/include/)
+install_files( /docs/ FILES ${PROJECT_SOURCE_DIR}/README.md)
+
+enable_testing()
+
+file(GLOB files ${PROJECT_SOURCE_DIR}/test/identity/input/*.f90
+  ${PROJECT_SOURCE_DIR}/test/unparse/input/*.c)
+foreach(absname ${files})
+  get_filename_component(filename ${absname} NAME)
+  add_test(NAME "identity-${filename}"
+    COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/input/test.sh ${filename}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/
+    )
+endforeach()
+
+add_test(
+  NAME translation-test
+  COMMAND make -C ${PROJECT_SOURCE_DIR}/xev-trans/test check-all
+  )
