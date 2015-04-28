@@ -17,11 +17,7 @@ INCLUDE_DIRECTORIES(../../include
   ${Boost_INCLUDE_DIR}
   )
 
-LINK_DIRECTORIES(
-  ${CMAKE_ROSE_LIBRARY}
-  ${CMAKE_XERCES_LIBRARY}
-  ${CMAKE_XALAN_LIBRARY}
-  )
+
 
 add_executable(defuse  defuse.cpp)
-target_link_libraries(defuse xevxml  rose xalan-c xerces-c  ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(defuse xevxml  ${CMAKE_ROSE_LIBRARY} ${CMAKE_XALAN_LIBRARY} ${CMAKE_XERCES_LIBRARY} ${Boost_LIBRARIES})
