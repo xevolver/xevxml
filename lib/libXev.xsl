@@ -38,12 +38,4 @@
 		</xsl:copy>
 	</xsl:template>
 
-
-	<!-- remove PreprocessingInfo -->
-	<!-- <xsl:template match="PreprocessingInfo"> <xsl:comment> PreprocessingInfo 
-		</xsl:comment> </xsl:template> -->
-
-	<!-- remove SgPragmaDeclaration -->
-	<!-- <xsl:template match="SgPragmaDeclaration"> <xsl:comment> SgPragmaDeclaration 
-		</xsl:comment> </xsl:template> -->
 </xsl:stylesheet>

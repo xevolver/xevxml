@@ -5,6 +5,10 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
+	<xsl:template match="*" mode="xevInitHook">
+		<xsl:apply-templates select="." />
+	</xsl:template>
+
 	<xsl:template match="SgFortranDo">
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
