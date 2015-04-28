@@ -308,6 +308,7 @@ XevXmlVisitor::visitSgColonShapeExp(xe::DOMNode* node, SgNode* astParent)
 {
   SgExpression * ret = new SgColonShapeExp();
   ret->set_parent(astParent);
+  ret->set_startOfConstruct(DEFAULT_FILE_INFO);
   return ret;
 }
 EXPR_DEFAULT(ColonShapeExp);
