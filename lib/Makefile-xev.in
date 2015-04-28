@@ -172,6 +172,7 @@ sync:
 	@echo "sync sync sync"
 
 clean-translated:
+	@pwd
 	-rm -f *.xev.* *.xev2.* *.target-*.* *.target.xml *.diff.* *.diff2.* *.out.xml
 #	-rm -f $(XML2SRC_DIR)/*.xml $(XML2SRC_DIR)/*.f90 $(XML2SRC_DIR)/*.xmldiff
 

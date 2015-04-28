@@ -26,41 +26,5 @@
 		</xsl:apply-templates>
 	</xsl:template>
 
-	<xsl:template match="SgFortranDo" mode="bkup">
-		<xsl:choose>
-			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
-				<xsl:comment>
-					test-2.xsl xev loop_tag
-				</xsl:comment>
-				<xsl:apply-templates select="." mode="find_loop" />
-			</xsl:when>
-
-			<xsl:otherwise>
-				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates />
-				</xsl:copy>
-			</xsl:otherwise>
-
-		</xsl:choose>
-	</xsl:template>
-
-	<xsl:template match="*" mode="find_loop">
-		<xsl:choose>
-			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
-				<xsl:apply-templates select="." mode="chill_unroll">
-					<xsl:with-param name="factor" select="4" />
-					<xsl:with-param name="loopName" select="'i'" />
-				</xsl:apply-templates>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="find_loop" />
-				</xsl:copy>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:template>
-
 </xsl:stylesheet>
 	
