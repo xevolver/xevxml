@@ -99,7 +99,7 @@ $(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml $(XSLT_DIR)/%.xsl
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml
 %.xev.xml: $(DIR2XML_DIR)/%.xml *.xsl
-	$(XEVXML_ENV) ; xsltrans $(XSLT_DIR)/*.xsl < $< > $@
+	$(XEVXML_ENV) ; xsltexec $(XSLT_DIR)/*.xsl < $< > $@
 #	$(XEVXML_ENV) ; xsltrans $(XSLT_DIR)/$*.xsl < $< > $@
 
 # xml2src translation
