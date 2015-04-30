@@ -11,6 +11,10 @@ XSLT_DIR	= .
 ##############################################
 # set default env
 
+# just call src2xml, xml2src etc. @unknown host
+XEVXML_ENV =   
+
+# set XEVXML_ENV for known host
 ifeq ($(HOSTNAME), hagi-a)
 #XEVXML_ENV = . /opt/xevxml/xevxml-20141201-scope/env-xevxml-hagi.sh ;
 #XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
@@ -21,8 +25,6 @@ else ifeq ($(HOSTNAME), sh-CentOS-MX3)
 XEVXML_ENV = . /home/hirasawa/research-git/xevxml/src/env-xevxml-local-here.sh ;
 else ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
 XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh ;
-else
-# unknown host  
 endif
 
 ##############################################
