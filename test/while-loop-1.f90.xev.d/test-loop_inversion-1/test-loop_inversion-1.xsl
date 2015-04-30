@@ -7,7 +7,6 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
-
 	<xsl:template match="*" mode="xevInitHook">
 		<xsl:apply-templates select="." mode="xevFindDirective">
 			<xsl:with-param name="directiveName" select="'xev loop_tag'" />
@@ -15,9 +14,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevGoToLoop">
-			<xsl:with-param name="loopName" select="'i'" />
-		</xsl:apply-templates>
+		<xsl:apply-templates select="." mode="xevGoToHere" />
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">

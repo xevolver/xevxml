@@ -87,8 +87,8 @@ expected-f90-files: $(EXP_SRCS)
 
 # test translation
 #%.check: $(XML2SRC_DIR)/%.xmldiff $(EXP_XML_DIR)/%.f90 $(XML2SRC_DIR)/%.f90
-%.check: $(EXP_XML_DIR)/%.f90 $(XML2SRC_DIR)/%.f90
-	diff $(EXP_XML_DIR)/$*.f90 $(XML2SRC_DIR)/$*.f90
+%.check_bkup: $(EXP_XML_DIR)/%.f90 $(XML2SRC_DIR)/%.f90
+	diff -B $(EXP_XML_DIR)/$*.f90 $(XML2SRC_DIR)/$*.f90
 
 # src2xml translation
 $(SRC2XML_DIR)/%.xml: $(INPUT_DIR)/%.f90
@@ -125,7 +125,7 @@ $(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
 	diff $(XML2SRC_DIR)/$*.xml $(EXP_XML_DIR)/$*.xml > $@ 
 
 %.diff.f90: %.target-xml2src.f90 %.xev.f90
-	diff $^ > $@ 
+	diff -EBw $^ > $@ 
 
 # reset indentation
 %.xev2.f90: %.xev.f90
