@@ -1,4 +1,4 @@
-\chapter{AST Transformation Rules}
+\chapter{AST Transformation Rules}\label{chap:xslt}
 
 XevXML represents an AST in an XML format, and various XML tools are
 hence available for AST transformation. In XevXML, the transformation
@@ -14,3 +14,202 @@ users to newly define their special transformation rules.
 This chapter describes how to define and customize an XSLT rule for AST
 transformation in XevXML.
 
+
+\section{Predefined Rules}\label{sec:predef}
+Remember that, in XevXML, every transformation rule is written in
+XSLT. You can write such a rule from scratch if you want.  But, a code
+transformation rule generally consists of many ``XSLT template rules,''
+and some of them are reusable in other code transformation rules.
+Therefore, XevXML offers some predefined XSLT template rules that can be
+used as a part of a user-defined code transformation rule.
+
+Let's get started with a simple XSLT rule before explaining the
+predefined rules.
+\begin{framed}
+\begin{src}
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+   xmlns:exslt="http://exslt.org/common">
+
+  <xsl:template match="/">
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="*">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="SgFortranDo">
+    <xsl:if test="preceding-sibling::*[1]/SgPragma/@pragma='xev loop_tag'">
+      !pragma is found
+    </xsl:if>
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="loopbody"/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="*" mode="loopbody">
+    ! in a loop body
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates mode="loopbody"/>
+    </xsl:copy>
+  </xsl:template>
+</xsl:stylesheet>
+\end{src}
+\end{framed}
+
+As mentioned in Section~\ref{sec:xslt}, an XSLT rule usually consists of
+several ``template'' rules expressed by \texttt{$<$xsl:template$>$}
+elements. In the above example, three template rules are defined. Each
+template rule has a \texttt{match} attribute whose value is an XPath
+expression. When an XSLT rule is applied to an XML AST, every XML
+element in the XML AST, i.e.~every AST node, is visited once in a
+depth-first manner. Then, if an XML element matches the XPath expression
+of the \texttt{match} attribute, the template rule is applied to the
+matched XML element.
+
+The first template rule matches the root node of an XML AST that is an
+\texttt{$<$SgSourceFile$>$} element, and its rule is applied to the root
+node.
+
+The second template rule matches every node in the XML AST, and its rule
+is applied to the node unless a more specific rule matches the node.
+
+The third template rule matches only an \texttt{$<$SgFortranDo$>$}
+element. This uses an \texttt{$<$xsl:if$>$} element to check if an XPath
+expression is true. The expression is true only if
+\begin{itemize}
+ \item The preceding sibling element of the \texttt{$<$SgFortranDo$>$}
+       element has an \texttt{$<$SgPragma$>$} element as a sub-node,
+ \item The \texttt{$<$SgPragma$>$} element has a \texttt{pragma}
+       attribute, and
+ \item The attribute value is a string of "xev loop\_tag".
+\end{itemize}
+If all the conditions are met, the template rule inserts a comment,
+``pragma is found,'' to the code before copying sub-nodes of the matched
+\texttt{$<$SgFortranDo$>$} element.
+
+In the third template rule, an \texttt{$<$xsl::apply-templates$>$}
+element is used with a \texttt{mode} attribute. As a result, template
+rules with the same mode are applied to the sub-nodes. In this example,
+the fourth template rule is applied to every sub-node of a
+\texttt{$<$SgFortranDo$>$} element, for which all the above conditions
+are met. The fourth template rule instead of the second rule matches
+every node if the rule is called with the \texttt{loopbody} mode. In
+this way, different template rules can be applied only to a subset of
+AST nodes.
+
+
+If the third rule and/or the fourth rule is modified to transform a loop
+structure and/or a loop body, the above XSLT rule can be used as a loop
+transformation rule that is applied only to loops annotated with
+\texttt{"xev loop\_tag"}. Although such a loop transformation rule could
+be complex, it is reusable for many application codes.  Therefore,
+XevXML provides a library of XSLT template rules, in which code
+transformation rules required for basic loop optimization techniques are
+predefined.
+
+In the current version of XevXML, all predefined rules are written for
+Fortran programs. It is ongoing to define such rules for C programs.
+The predefined rules currently included in the library are as follows.
+
+\begin{longtable}[l]{l|l|l}
+ \hline
+ Mode & Parameters & Description \\
+ \hline\hline
+ \endfirsthead
+ \multicolumn{3}{l} {(continued)}\\
+ \hline
+ Mode & Parameters & Description \\
+ \hline\hline
+ \endhead
+ \hline
+ \multicolumn{3}{r} {(continue to next page)}\\
+ \endfoot
+ \hline
+ \endlastfoot
+ \multicolumn{3}{l}{Basic loop optimization rules}\\
+ \hline
+
+\texttt{xevLoopCollapse} & \texttt{firstLoop} & \multirow{3}{9cm}{Two
+ loops are collapsed into a loop. Two parameters, \texttt{firstLoop} and
+ \texttt{secondLoop}, specify the names of index variables of the loops
+ to be collapsed. } \\
+& \texttt{secondLoop} & \\ &&\\ \hline
+
+\texttt{xevLoopFission} & \todo{none?}& \multirow{3}{9cm}{A loop is broken into
+ multiple loops. Now each statement in the original loop is moved to a
+ different loop. Thus, every new loop contains only one statement in its
+ body.} \\
+&&\\ &&\\ \hline
+
+\texttt{xevLoopFusion} & \todo{none?}& \multirow{1}{9cm}{Two consecutive loops are
+ fused into a single loop. Statements in the two loops are moved into
+ the body of the new loop.} \\
+ &&\\ &&\\ \hline
+
+\texttt{xevLoopInterchange} & \todo{none?} & \multirow{3}{9cm}{\todo{Two
+ consecutive loops are interchanged?}} \\
+&&\\ &&\\ \hline
+
+\texttt{xevLoopTile} & \texttt{loopName} & \multirow{4}{9cm}{\todo{A loop's
+ iteration space is partitioned into blocks. \texttt{loopName} is
+ the name of the index variable. \texttt{start} and \texttt{end} are the
+ lower and upper bounds of the space. \texttt{size} is the block size.}} \\
+& \texttt{start} & \\
+& \texttt{end} &\\
+& \texttt{size} &\\ \hline
+
+\texttt{xevLoopUnroll} & \texttt{loopName} & \multirow{3}{9cm}{A loop is
+ unrolled. \texttt{loopName} is the name of the index
+ variable. \texttt{factor} is an unroll factor; every
+ statement in the loop body is duplicated \texttt{factor} times.} \\ &
+ \texttt{factor} & \\ &&\\ \hline
+
+ \multicolumn{3}{l}{CHiLL-compatible versions of optimization rules}\\\hline
+
+ \texttt{chill\_fuse} & \todo{none?} & \multirow{1}{9cm}{Two consecutive loops are
+ fused into a single loop. Statements in the two loops are moved into
+ the body of the new loop.} \\
+ &&\\ &&\\ \hline
+
+ \texttt{chill\_permute} & \texttt{firstLoop} & \multirow{1}{9cm}{The order of up to
+ three loops are changed. \texttt{firstLoop}, \texttt{secondLoop}, and
+ \texttt{thirdLoop} are the names of index variables used by the loops
+ to be permuted.} \\
+ &\texttt{secondLoop}&\\ &\texttt{thirdLoop}&\\ \hline
+
+ \texttt{chill\_split} & \todo{none?} & \multirow{1}{9cm}{This is the
+CHiLL-compatible version of \texttt{xevLoopFission}.} \\ \hline
+
+\texttt{chill\_tile} & \texttt{loopName} & \multirow{4}{9cm}{\todo{A loop's
+ iteration space is partitioned into blocks. \texttt{loopName} is
+ the name of the index variable. \texttt{start} and \texttt{end} are the
+ lower and upper bounds of the space. \texttt{size} is the block size.}} \\
+& \texttt{start} & \\
+& \texttt{end} &\\
+& \texttt{size} &\\ \hline
+
+\texttt{chill\_unroll} & \texttt{loopName} & \multirow{3}{9cm}{A loop in
+ unrolled. \texttt{loopName} is the name of the index
+ variable. \texttt{factor} is an unroll factor; every
+ statement in the loop body is duplicated \texttt{factor} times.} \\ &
+ \texttt{factor} & \\ &&\\ \hline
+
+\texttt{chill\_unroll} & \texttt{loopName} & \multirow{4}{9cm}{The outer
+ loop of a loop nest is unrolled. \texttt{loopName} is the name of the
+ index variable. \texttt{factor} is an unroll factor; every statement in
+ the loop body is duplicated \texttt{factor} times.} \\ &
+ \texttt{factor} & \\ &&\\ &&\\  \hline
+\end{longtable}
+
+In the transformation rule library, a code transformation rule is
+decomposed to three steps. One is initialization. Another is to move
+onto an XML element that represents the root node of a subtree to be
+transformed. The other is to transform the subtree, and write it in XML.

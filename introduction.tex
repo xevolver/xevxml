@@ -1,26 +1,25 @@
 \chapter{Introduction}\label{cap:intro}
 
-%High-performance computing~(HPC) system architectures are getting more
-%complicated and diversified. Due to the system complexity, performance
-%optimizations specific to processor architectures, system
-%configurations, compilers, and/or libraries, called
-%\emph{system-specific optimizations}, are mandatory and becoming more
-%important to exploit the potential of a particular system; an
-%application code must be thoroughly optimized and specialized for one
-%platform to achieve high performance.  As a result, one HPC application
-%often needs to have multiple versions, each of which is optimized in a
-%different way for adapting to a particular platform.  The diversity of
-%system architectures increases the number of optimized versions required
-%for performance portability across major platforms.  To make matters
-%worse, popular platforms can change drastically over time, and thus an
-%application might need to be optimized not only for current major
-%platforms but also for future ones.  Accordingly, an increase in system
-%complexity and diversity would force a programmer to further invest
-%enormous time and effort for HPC application development and
-%maintenance.
+High-performance computing~(HPC) system architectures are getting more
+complicated and diversified. Due to the system complexity, performance
+optimizations specific to processor architectures, system
+configurations, compilers, and/or libraries, called
+\emph{system-specific optimizations}, are mandatory and becoming more
+important to exploit the potential of a particular system; an
+application code must be thoroughly optimized and specialized for one
+platform to achieve high performance.  As a result, one HPC application
+often needs to have multiple versions, each of which is optimized in a
+different way for adapting to a particular platform.  The diversity of
+system architectures increases the number of optimized versions required
+for performance portability across major platforms.  To make matters
+worse, popular platforms can change drastically, and thus an application
+might need to be optimized not only for current major platforms but also
+for future ones.  Accordingly, an increase in system complexity and
+diversity would force a programmer to further invest enormous time and
+effort for HPC application development and maintenance.
 
 %The goal of the Xevolver project is to separate system-specific,
-%system-aware performance optimizations from application codes. 
+%system-aware performance optimizations from application codes.
 
 %XevXML has been developed to express any code modifications separately
 %from an application code. Practical HPC application development is a
@@ -56,7 +55,7 @@ overview of code transformation with XevXML.
 \section{An overview of XevXML}
 \begin{figure}[htb]
  \includegraphics[width=\textwidth]{overview.eps}
- \caption{An overview of intercoversion between ROSE ASTs and XML
+ \caption{An overview of interconversion between ROSE ASTs and XML
  ASTs.}\label{fig:overview}
 \end{figure}
 
@@ -121,7 +120,7 @@ The interconversion is achieved by combining the following two commands,
 An XML AST is exposed to users. Thus, the users can apply any
 transformation to the AST. As an AST is represented as an XML document,
 any XML-related technologies and tools are available for the
-transformations. At present, XevXML employs XML Stylesheet Language
+transformations. XevXML employs XML Stylesheet Language
 Transformation~(XSLT) as the low-level interface to express the
 transformation rules of an XML AST.  AST transformation is what
 compilers do internally for code transformation. Therefore, XevXML is
@@ -148,8 +147,8 @@ transformations are performed using standard XML tools. So the user does
 not need to develop his/her own program for applying the rules to
 application codes.
 
-%XevXML needs to be flexible enough to express varoius code
-%transformations required in practical performance optimizations. 
+%XevXML needs to be flexible enough to express various code
+%transformations required in practical performance optimizations.
 
 %If the user is familiar with ROSE, he/she can develop a code
 %transformation by using ROSE.
@@ -217,50 +216,44 @@ AST of the following XML document.
 \end{src}
 \end{framed}
 
-The data format of XML ASTs is designed to simplify the interconversion
-between ROSE ASTs and XML ASTs. In general, an XML document consists of
-XML elements and their attributes. In XML ASTs, each XML element
-corresponds to a ROSE AST node. XML attributes of an XML element are
-used to keep the necessary information to restore the ROSE AST node.  An
-XML AST looks like a text representation of a ROSE AST.  In other words,
-XevXML provides another interface, XML, to handle ROSE AST nodes.
+The data format of XML ASTs is designed so that the interconversion
+between ROSE ASTs and XML ASTs becomes simple.  In general, an XML
+document consists of XML elements and their attributes. In an XML AST,
+each XML element corresponds to a ROSE AST node. XML attributes of an
+XML element are used to keep the necessary information to restore the
+ROSE AST node.  An XML AST looks like a text representation of a ROSE
+AST.  In other words, XevXML provides another interface, XML, to handle
+ROSE AST nodes.
 
 In the above XML document, the first line just indicates that the file
-is written in XML.  The root node of an AST is the SgSourceFile element
-in the second line. The SgSourceFile element represents the whole C
-code.  The SgGlobal element in the third line is a child node of the
-root node, and indicates the global scope of the C code. In the global
-scope, the main function is declared and defined. In the function body,
-the first statement is an expression statement, and the second statement
-is a return statement. Comments and preprocessor information such as
+is written in XML.  The root node of an AST is the \texttt{SgSourceFile}
+element in the second line. The \texttt{SgSourceFile} element represents
+the whole C code.  The \texttt{SgGlobal} element in the third line is a
+child node of the root node, and indicates the global scope of the C
+code. In the global scope, the \texttt{main} function is declared and
+defined. In the function body, the first statement is an expression
+statement, and the second statement is a \texttt{return}
+statement. Comments and preprocessor information such as
 \texttt{\#include $<$stdio.h$>$} are written as strings within the
-PreprocessingInfo element.
+\texttt{PreprocessingInfo} element.
 
 XML attributes are used to restore ROSE AST nodes. For example, the
-SgStringVal element corresponds to a ROSE AST node of StringVal
-representing a string.  Thus, a string of \texttt{"Hello,
-World!$\backslash{}$n"} is written as its value attribute. Similarly,
-the SgFunctionRefExp element is a reference to the name of a function,
-and the function name is given as the symbol attribute. Let's change
-``printf'' is to ``puts'' by a text editor. Then, when the modified XML
-AST is converted to a C code (by using the \texttt{xml2src} command),
-the function call of printf will be changed to that of puts. This is a
+\texttt{SgStringVal} element corresponds to a ROSE AST node of a
+\texttt{SgStringVal} class object representing a string.  Thus, a string
+of \texttt{"Hello, World!$\backslash{}$n"} is written as its
+\texttt{value} attribute. Similarly, the \texttt{SgFunctionRefExp}
+element is a reference to the name of a function, and the function name
+is given as the \texttt{name} attribute. Let's change ``printf'' is to
+``puts'' by a text editor. Then, when the modified XML AST is converted
+to a C code (by using the \texttt{xml2src} command), the function call
+of \texttt{printf} will be changed to that of \texttt{puts}. This is a
 simple example to show that, in XevXML, XML data transformation results
 in AST transformation and thereby code transformation.
-
-
-
-
-%In this way, each XML element in an XML AST corresponds to a ROSE AST
-%node.
 
 See the ROSE reference manual~\cite{rosemanual} to learn more about the
 definition of each AST node.
 
 \section{XML data transformation}\label{sec:xslt}
-
-%XML is a widely-used data format, and there are many techniques and
-%tools to transform XML data. For example, 
 
 XML data are texts, and various tools are thus available to modify an
 XML AST.  As shown in Section~\ref{sec:xml}, even a text editor can
@@ -302,12 +295,12 @@ transformations are often needed for special demands of individual
 cases.  Therefore, XevXML has been developed for users to define their
 own code transformations in an easy way.
 
-In XevXML, XSLT is employed to describe custom transformation rules of
-XML ASTs at the lowest abstraction level\footnote{Several high-level
-interfaces for definition of code transformation rules are also under
-active development in the Xevolver project.  One of such interfaces will
-be described in Chapter~\ref{chap:json}.}  In XSLT, XML data
-transformations are themselves written in XML.  XSLT uses XPath
+In XevXML, XSLT is currently employed to describe custom transformation
+rules of XML ASTs at the lowest abstraction level\footnote{Several
+high-level interfaces for definition of code transformation rules are
+also under active development in the Xevolver project.  One of such
+interfaces will be described in Chapter~\ref{chap:json}.}  In XSLT, XML
+data transformations are themselves written in XML.  XSLT uses XPath
 expressions~\cite{xpath} to define a pattern within a tree of XML
 elements and attributes.  During the transformation process of XSLT,
 every XML element is visited in a depth-first manner.  When a pattern is
@@ -343,8 +336,10 @@ combination of XPath expressions.
 An example of XSLT rules for AST transformation are as follows.
 \begin{framed}
 \begin{src}
-<?xml version="1.0" encoding="shift_jis"?>
-<xsl:stylesheet version=g1.0h ...omitted...>
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+   xmlns:exslt="http://exslt.org/common">
 
   <xsl:template match="/">
     <xsl:apply-templates/>
@@ -379,7 +374,7 @@ document.
 
 The first rule matches the root of an XML document. The rule just
 invokes \texttt{$<$xsl::apply-templates/$>$} that by default dictates to
-visit all the child nodes and apply appropriate rules to them.
+visit all the sub-nodes and apply appropriate rules to them.
 
 The second rule matches every XML element of an XML document, because
 its XPath expression is given by a wild-card operator, \texttt{*}. The
@@ -388,11 +383,10 @@ element.  This rule simply copies the element and its attributes to the
 output XML document.  The rule is recursively invoked because it invokes
 \texttt{$<$xsl::apply-templates/$>$}.
 
-The third rule matches only an SgForStatement element. It checks if
-another SgForStatement element exists in the subtree of the matched
-element.  Only if it exists, text data are inserted before and after the
-matched element.
-
+The third rule matches only an \texttt{SgForStatement} element. It
+checks if another \texttt{SgForStatement} element exists in the subtree
+of the matched element.  Only if it exists, text data are inserted
+before and after the matched element.
 
 If the above XSLT rules are applied to an XML AST, two function calls,
 \texttt{startLoopNest()} and \texttt{endLoopNest()}, are inserted before

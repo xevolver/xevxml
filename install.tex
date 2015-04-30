@@ -16,19 +16,13 @@
 
 \section{Installation guide}
 \begin{enumerate}
- \item Fist of all, some environment variables such as
+ \item First of all, some environment variables such as
        \texttt{LD\_LIBRARY\_PATH}, \texttt{JAVA\_HOME}, and \texttt{CXX}
-       must be correctly set so as to use ROSE, Xerces, and Xalan. Use
-       \texttt{ROSE\_HOME} and \texttt{PICOJSON\_HOME} for specifying
-       the diretories of ROSE and PicoJSON, respectively.
-
-       For example, if \texttt{picojson.h} is located in
-       \texttt{/usr/local/include}, \texttt{PICOJSON\_HOME} needs be set
-       to \texttt{/usr/local}.
+       must be correctly set so as to use ROSE, Xerces, and Xalan.
 
 
  \item Create a new directory at the top diretocry for building the package.
-       
+
        \vspace{5mm}
        \texttt{\% mkdir mybuild}
 
@@ -63,21 +57,12 @@
        \texttt{\% export CMAKE\_INCLUDE\_PATH=/home/user/local/include:\$CMAKE\_INCLUDE\_PATH}
        \vspace{5mm}
 
-       See the \texttt{cmake} manual for more details\cite{cmake}.
-% \item Generate a configure script file using the autoconf command\\
+      Those environment variables must be correctly set so that all of
+      the necessary header files and libraries such as
+      \texttt{picojson.h} and \texttt{rose.h} are found by the
+       \texttt{cmake} command.
 
-%       \texttt{\% autoconf}
-
-% \item Some environmental variables such as \texttt{LD\_LIBRARY\_PATH},
-%       \texttt{JAVA\_HOME}, and \texttt{CXX} must be correctly set so as to
-%       use ROSE, Xerces, and Xalan.
-
-% \item Run the configure script\\
-       
-%       \texttt{\% ./configure --prefix=/path/to/somewhere $\backslash$}\\
-%       \hspace{75pt}\texttt{--with-rosedir=/usr/local/    $\backslash$}\\
-%       \hspace{75pt}\texttt{--with-xercescdir=/usr/local  $\backslash$}\\
-%       \hspace{75pt}\texttt{--with-xalancdir=/usr/local}
+       See the \texttt{cmake} manual for more details~\cite{cmake}.
 
  \item Run the GNU make command.
 
@@ -93,6 +78,16 @@
        \texttt{\% make install}
        \vspace{5mm}
 
-%   To test the package,\\
-%       \texttt{\% make check}
+   To test the package,
+
+       \vspace{5mm}
+       \texttt{\% make test}
+       \vspace{5mm}
+
+       Some of tests will be failed. But it does not necessarily mean
+       that something is wrong with the built binaries. Even if
+       everything goes well, XevXML fails in some tests. This is mainly
+       because XevXML is built on top of ROSE and unable to pass the
+       tests if ROSE cannot properly parse/unparse the test codes.
+
 \end{enumerate}

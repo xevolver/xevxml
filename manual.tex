@@ -1,9 +1,11 @@
 \documentclass[10pt]{book}
 \usepackage{url}
 \usepackage{geometry}
+\usepackage{multirow}
 \usepackage{framed}
 \usepackage{fancybox}
 \usepackage{graphicx}
+\usepackage{color}
 \usepackage{longtable}
 \newenvironment{src}
 {%begin
@@ -18,12 +20,14 @@
 \end{quote}
 }
 
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+
 \begin{document}
-\title{ {\bf {Xevolver XML Framework}}\\ 
+\title{ {\bf {Xevolver XML Framework}}\\
 A Framework for XML-Based AST Transformations \\
 ~\\
-\bf{Draft User Manual} \\
-{(version @VERSION@)}}  
+\bf{Introductory Tutorial (DRAFT)} \\
+{(version @VERSION@)}}
 
 \author{ {\bf Hiroyuki Takizawa} \\
 Graduate School of Information Sciences\\
@@ -37,7 +41,7 @@ takizawa@cc.tohoku.ac.jp
 \maketitle
 
 \input{preface}
-%\input{acknowledgments}
+\input{acknowledgments}
 
 \tableofcontents
 \input{introduction}
