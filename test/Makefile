@@ -1,4 +1,4 @@
-include ../lib/Makefile-xev.in
+include ../lib/Makefile-xev.mk
 
 
 default:
