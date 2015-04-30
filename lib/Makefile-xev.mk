@@ -95,13 +95,14 @@ $(SRC2XML_DIR)/%.xml: $(INPUT_DIR)/%.f90
 	$(XEVXML_ENV) src2xml $< > $@
 
 # dir2xml translation
-$(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
-	$(XEVXML_ENV) dir2xml ./dir-defs.xml < $< > $@
+#$(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
+#	$(XEVXML_ENV) dir2xml ./dir-defs.xml < $< > $@
 
 # translation
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml $(XSLT_DIR)/%.xsl
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml
-%.xev.xml: $(DIR2XML_DIR)/%.xml *.xsl
+#%.xev.xml: $(DIR2XML_DIR)/%.xml *.xsl
+%.xev.xml: $(SRC2XML_DIR)/%.xml *.xsl
 	$(XEVXML_ENV) xsltexec $(XSLT_DIR)/*.xsl < $< > $@
 #	$(XEVXML_ENV) ; xsltrans $(XSLT_DIR)/$*.xsl < $< > $@
 
