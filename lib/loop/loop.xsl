@@ -9,8 +9,10 @@
 	<xsl:import href="fission.xsl" />
 	<xsl:import href="fusion.xsl" />
 	<xsl:import href="interchange.xsl" />
+	<xsl:import href="reversal.xsl" />
 	<xsl:import href="tile.xsl" />
 	<xsl:import href="unroll.xsl" />
+	<xsl:import href="unswitching.xsl" />
 
 	<!-- Undo transformations -->
 	<xsl:import href="tile_undo.xsl" />

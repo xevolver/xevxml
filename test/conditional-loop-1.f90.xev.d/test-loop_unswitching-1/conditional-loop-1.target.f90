@@ -6,12 +6,16 @@ program triple_loop_1
     real*8 A(n), B(n)
 
     !$xev loop_tag
-    do i=1,n-1
-        A(i) = A(i) + B(i)
-        if (w) then
+    if (w) then
+        do i=1,n-1
+            A(i) = A(i) + B(i)
             B(i)=0;
-        endif
-    end do
+        end do
+    else
+        do i=1,n-1
+            A(i) = A(i) + B(i)
+        end do
+    endif
 
 end program  triple_loop_1
 

@@ -1,6 +1,5 @@
 include ../lib/Makefile-xev.mk
 
-
 default:
 	@echo "useage: make {check-env, input-src, check-all}"
 
@@ -20,14 +19,11 @@ check-all: input-src
 	@wc *.xev.d/test-*/*.diff.* *.xev.d/test-*/*.diff2.*
 
 clean-translated-all:
-	@$(foreach dir, $(TEST_DIRS), echo $(dir); cd $(dir); make clean-translated; cd ../..)
+	@$(foreach dir, $(TEST_DIRS), echo "clean $(dir)"; cd $(dir); make clean-translated; cd ../..; )
 
 #clean-generated-all: clean-translated-all
 clean-generated-all:
-	$(foreach dir, $(XEV_DIRS), echo $(dir); cd $(dir); rm -rf src2xml dir2xml; cd ../)
-
-#input-src: loop-1.f90.input-src loop-2.f90.input-src loop-3.f90.input-src triple-loop-1.f90.input-src
-#input-src: $(INPUTS)
+	@$(foreach dir, $(XEV_DIRS), echo "clean $(dir)"; cd $(dir); rm -rf src2xml dir2xml; cd ../; )
 
 %.f90.input-src:
 	@-mkdir -p $*.f90.xev.d
