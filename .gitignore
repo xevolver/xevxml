@@ -14,6 +14,10 @@
 *.diff.*
 *.diff2.*
 *.verify
+test/*/dir2xml/*.f90
+test/*/dir2xml/*.xml
+test/*/src2xml/*.f90
+test/*/src2xml/*.xml
 
 # old
 **/*.out.xml

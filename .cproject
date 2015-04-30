@@ -140,7 +140,6 @@
 		<buildTargets>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-chill_unroll_jam" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -148,7 +147,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-chill_unroll_jam" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -156,7 +154,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-loop_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -164,7 +161,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-loop_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -172,6 +168,7 @@
 			</target>
 			<target name="check" path="test/loop-3.f90.xev.d/test-chill_fuse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -179,6 +176,7 @@
 			</target>
 			<target name="clean-translated" path="test/loop-3.f90.xev.d/test-chill_fuse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -186,7 +184,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -194,7 +191,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -202,15 +198,12 @@
 			</target>
 			<target name="triple-loop-1.target-xml2src.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>triple-loop-1.target-xml2src.f90</buildCommand>
-				<buildArguments/>
-				<buildTarget/>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -218,6 +211,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-var_replace-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -225,6 +219,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-var_replace-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -232,7 +227,6 @@
 			</target>
 			<target name="check" path="test/unrolled-loop-1.f90.xev.d/test-loop_unroll_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -240,7 +234,6 @@
 			</target>
 			<target name="clean-translated" path="test/unrolled-loop-1.f90.xev.d/test-loop_unroll_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -248,7 +241,6 @@
 			</target>
 			<target name="all" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -256,7 +248,6 @@
 			</target>
 			<target name="test" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>test</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -264,7 +255,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -272,7 +262,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -280,7 +269,6 @@
 			</target>
 			<target name="triple-loop-1.xev.xml" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.xml</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -288,7 +276,6 @@
 			</target>
 			<target name="triple-loop-1.target-xml2src.f90" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.target-xml2src.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -296,7 +283,6 @@
 			</target>
 			<target name="triple-loop-1.diff.xml" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.diff.xml</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -304,7 +290,6 @@
 			</target>
 			<target name="triple-loop-1.target.xml" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.target.xml</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -312,7 +297,6 @@
 			</target>
 			<target name="triple-loop-1.diff.f90" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.diff.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -320,7 +304,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-loop_collapse" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -328,6 +311,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_tile-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -335,6 +319,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_tile-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -342,7 +327,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-2.f90.xev.d/test-loop_interchange_mod" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -350,7 +334,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-2.f90.xev.d/test-loop_interchange_mod" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -358,7 +341,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -366,7 +348,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -374,7 +355,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -382,7 +362,6 @@
 			</target>
 			<target name="triple-loop-1.xev.xml" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.xml</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -390,7 +369,6 @@
 			</target>
 			<target name="triple-loop-1.target-xml2src.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.target-xml2src.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -398,7 +376,6 @@
 			</target>
 			<target name="check" path="test/tiled-loop-1.xev.d/test-loop_tile_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -406,7 +383,6 @@
 			</target>
 			<target name="clean-translated" path="test/tiled-loop-1.xev.d/test-loop_tile_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -414,7 +390,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -422,7 +397,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -430,7 +404,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -438,6 +411,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_permute-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -445,6 +419,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_permute-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -452,7 +427,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -460,7 +434,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -468,7 +441,6 @@
 			</target>
 			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -476,7 +448,6 @@
 			</target>
 			<target name="triple-loop-1.xev.xml" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.xev.xml</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -484,7 +455,6 @@
 			</target>
 			<target name="test" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>test</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -492,7 +462,6 @@
 			</target>
 			<target name="triple-loop-1.target-xml2src.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll-2" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>triple-loop-1.target-xml2src.f90</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -500,6 +469,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-var_replace-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -507,6 +477,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-var_replace-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -514,6 +485,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-loop_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -521,6 +493,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-loop_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -536,6 +509,7 @@
 			</target>
 			<target name="clean-translated" path="test/tiled-loop-1/test-loop_tile_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -543,7 +517,6 @@
 			</target>
 			<target name="test" path="test/tiled-loop-1/test-loop_tile_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>test</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -551,7 +524,6 @@
 			</target>
 			<target name="default" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>default</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -559,6 +531,7 @@
 			</target>
 			<target name="check-env" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check-env</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -566,6 +539,7 @@
 			</target>
 			<target name="input-src" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>input-src</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -573,7 +547,6 @@
 			</target>
 			<target name="check-all" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check-all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -581,7 +554,6 @@
 			</target>
 			<target name="verify" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>verify</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -589,6 +561,7 @@
 			</target>
 			<target name="clean-translated-all" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated-all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -596,6 +569,7 @@
 			</target>
 			<target name="clean-generated-all" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-generated-all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -603,6 +577,7 @@
 			</target>
 			<target name="test" path="test" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>test</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -610,6 +585,7 @@
 			</target>
 			<target name="check" path="test/loop-2.f90.xev.d/test-fission" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -617,6 +593,7 @@
 			</target>
 			<target name="clean-translated" path="test/loop-2.f90.xev.d/test-fission" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -624,7 +601,6 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -632,7 +608,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -640,6 +615,7 @@
 			</target>
 			<target name="check" path="test/loop-3.f90.xev.d/test-fusion" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -647,6 +623,7 @@
 			</target>
 			<target name="clean-translated" path="test/loop-3.f90.xev.d/test-fusion" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -654,6 +631,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-loop_tile-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -661,6 +639,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-loop_tile-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -668,6 +647,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-loop_interchange" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -675,6 +655,7 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-loop_interchange" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -682,6 +663,7 @@
 			</target>
 			<target name="triple-loop-1.diff.xml" path="test/triple-loop-1.f90.xev.d/test-loop_interchange" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>triple-loop-1.diff.xml</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -689,6 +671,7 @@
 			</target>
 			<target name="check" path="test/triple-loop-1.f90.xev.d/test-loop_interchange_split" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -696,7 +679,6 @@
 			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-loop_interchange_split" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -704,6 +686,7 @@
 			</target>
 			<target name="check" path="test/tiled-loop-1.f90.xev.d/test-loop_tile_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -711,6 +694,7 @@
 			</target>
 			<target name="clean-translated" path="test/tiled-loop-1.f90.xev.d/test-loop_tile_undo-1" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -718,6 +702,7 @@
 			</target>
 			<target name="check" path="test/loop-2.f90.xev.d/test-chill_split" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>check</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -725,6 +710,7 @@
 			</target>
 			<target name="clean-translated" path="test/loop-2.f90.xev.d/test-chill_split" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
+				<buildArguments/>
 				<buildTarget>clean-translated</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -732,7 +718,6 @@
 			</target>
 			<target name="all" path="test/triple-loop-1.f90.xev.d" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>all</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
