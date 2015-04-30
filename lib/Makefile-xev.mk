@@ -12,16 +12,17 @@ XSLT_DIR	= .
 # set default env
 
 ifeq ($(HOSTNAME), hagi-a)
-XEVXML_ENV = . /opt/xevxml/xevxml-20141201-scope/env-xevxml-hagi.sh
+#XEVXML_ENV = . /opt/xevxml/xevxml-20141201-scope/env-xevxml-hagi.sh ;
 #XEVXML_ENV = . /opt/xevxml/xevxml-20140531/env-xevxml-hagi.sh
-#XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh
+XEVXML_ENV = . /opt/xevxml/xevxml-current/env-xevxml-hagi.sh ;
 #XEVXML_ENV = . /opt/xevxml/xevxml-prev/env-xevxml-hagi.sh
 #XEVXML_ENV = . /opt/xevxml/xevxml-exp/env-xevxml-hagi.sh
 else ifeq ($(HOSTNAME), sh-CentOS-MX3)
-XEVXML_ENV = . /home/hirasawa/research-git/xevxml/src/env-xevxml-local-here.sh
+XEVXML_ENV = . /home/hirasawa/research-git/xevxml/src/env-xevxml-local-here.sh ;
 else ifeq ($(shell dnsdomainname),aq.sc.isc.tohoku.ac.jp)
-XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh
-else  
+XEVXML_ENV = . /shome/hirasawa/local/share/env-xevxml-aq.sh ;
+else
+# unknown host  
 endif
 
 ##############################################
@@ -89,30 +90,30 @@ expected-f90-files: $(EXP_SRCS)
 
 # src2xml translation
 $(SRC2XML_DIR)/%.xml: $(INPUT_DIR)/%.f90
-	$(XEVXML_ENV) ; src2xml $< > $@
+	$(XEVXML_ENV) src2xml $< > $@
 
 # dir2xml translation
 $(DIR2XML_DIR)/%.xml: $(SRC2XML_DIR)/%.xml ./dir-defs.xml
-	$(XEVXML_ENV) ; dir2xml ./dir-defs.xml < $< > $@
+	$(XEVXML_ENV) dir2xml ./dir-defs.xml < $< > $@
 
 # translation
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml $(XSLT_DIR)/%.xsl
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml
 %.xev.xml: $(DIR2XML_DIR)/%.xml *.xsl
-	$(XEVXML_ENV) ; xsltexec $(XSLT_DIR)/*.xsl < $< > $@
+	$(XEVXML_ENV) xsltexec $(XSLT_DIR)/*.xsl < $< > $@
 #	$(XEVXML_ENV) ; xsltrans $(XSLT_DIR)/$*.xsl < $< > $@
 
 # xml2src translation
 %.xev.f90: %.xev.xml
-	$(XEVXML_ENV) ; xml2src < $< $@
+	$(XEVXML_ENV) xml2src < $< $@
 
 # target .xml file 
 %.target.xml: %.target.f90
-	$(XEVXML_ENV) ; src2xml $< > $@
+	$(XEVXML_ENV) src2xml $< > $@
 
 # target .f90 source file 
 %.target-xml2src.f90: %.target.xml
-	$(XEVXML_ENV) ; xml2src < $< $@
+	$(XEVXML_ENV) xml2src < $< $@
 
 ##############################################
 # diffs
@@ -125,7 +126,7 @@ $(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
 
 # reset indentation
 %.xev2.f90: %.xev.f90
-	$(XEVXML_ENV) ; src2xml $< | xml2src $@ 
+	$(XEVXML_ENV) src2xml $< | xml2src $@ 
 #	$(XEVXML_ENV) ; src2xml $<  > $.xev2.xml
 #	$(XEVXML_ENV) ; xml2src < $.xev2.xml $@ 
 
@@ -139,7 +140,7 @@ $(XML2SRC_DIR)/%.xmldiff: $(XML2SRC_DIR)/%.xml $(EXP_XML_DIR)/%.xml
 # other tests
 
 command-test:
-	$(XEVXML_ENV) ; which xsltrans
+	$(XEVXML_ENV) which xsltrans
 #	$(XEVXML_ENV) ; xml2src simple-dir-add-output.f < simple-dir-add.xml
 #	$(XEVXML_ENV) ; src2xml simple-dir-add.f | dir2xml ../xslt/defs.xml | $(DIR2XML_DIR)/tmp-output.xml
 
@@ -154,7 +155,7 @@ test-var-replace-trans:
 
 test-include-plain-code:
 	which xsltrans
-	$(XEVXML_ENV) ; \
+	$(XEVXML_ENV) \
 	xsltproc ../xslt/example-include-plain-code.xsl $(SRC2XML_DIR)/simple-dir-add.xml \
 	| xml2src \
 	> ./xev-xml2src/test-include-plain-code.f
@@ -164,7 +165,7 @@ test-include-plain-code:
 test-template:
 	#$(XEVXML_ENV) ; xml2src $(SRC2XML_DIR)/test-template.xml
 	#$(XEVXML_ENV) ; xml2src $(SRC2XML_DIR)/simple-dir-replace.xml
-	$(XEVXML_ENV) ; xml2src $(SRC2XML_DIR)/simple-var-replace.xml
+	$(XEVXML_ENV) xml2src $(SRC2XML_DIR)/simple-var-replace.xml
 
 ##############################################
 sync:
