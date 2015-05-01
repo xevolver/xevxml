@@ -3,7 +3,8 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:template match="SgWhileStmt" mode="xevLoopInversion">
-		<SgIfStmt end="1" then="1">
+		<SgIfStmt>
+			<xsl:copy-of select="@*" />
 			<xsl:copy-of select="SgExprStatement" />
 			<SgBasicBlock>
 				<SgFortranDo style="0" end="1" slabel="">
@@ -27,4 +28,5 @@
 			<xsl:copy-of select="PreprocessingInfo" />
 		</SgIfStmt>
 	</xsl:template>
+
 </xsl:stylesheet>

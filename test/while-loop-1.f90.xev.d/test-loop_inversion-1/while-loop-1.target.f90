@@ -6,7 +6,7 @@ program while_loop_1
     real*8 a(n)
 
     !$xev loop_tag
-    if (i<n) then
+    hoge: if (i<n) then
         do
             a(i) = 0
             i = i+1
