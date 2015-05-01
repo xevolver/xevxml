@@ -1,11 +1,22 @@
+REQUIREMENTS
+
+ ROSE compiler infrastructure
+    http://rosecompiler.org/
+
+ Apache Xerces C++ 3.1.1
+    http://xerces.apache.org/
+
+ Apache Xalan C++ 1.0
+    http://xml.apache.org/xalan-c/
+
+ PicoJSON
+    https://github.com/kazuho/picojson/
+
+
 INSTALLATION GUIDE
 
 1. Some environmental variables such as LD_LIBRARY_PATH, JAVA_HOME,
    and CXX must be correctly set so as to use ROSE, Xerces, and Xalan.
-   Moreover, ROSE_HOME and PICOJSON_HOME are used to specify where
-   ROSE and PicoJSON are installed.
-
-   ex) export ROSE_HOME=/usr/local/rose/
 
 2. At the top diretocy of the source tree, make a directory for
    building the package.
@@ -17,6 +28,21 @@ INSTALLATION GUIDE
 
    % cmake ../
 
+   If you need to use a specific version of a library or a header
+   file, you can also use environment variables CMAKE_LIBRARY_PATH and
+   CMAKE_INCLUDE_PATH.
+   For example, if you need to use a library or a header file in
+   /home/user/local, define those enviromnent variables as follows.
+
+   % export CMAKE_LIBRARY_PATH=/home/user/local/lib:$CMAKE_LIBRARY_PATH
+   % export CMAKE_INCLUDE_PATH=/home/user/local/include:$CMAKE_INCLUDE_PATH
+
+   Those environment variables must be correctly set so that all of
+   the necessary header files and libraries such as picojson.h and
+   rose.h are found by the cmake command.
+
+   See the cmake manual for more details.
+
 4. Run the GNU make command.
 
    To compile the package,
@@ -26,3 +52,13 @@ INSTALLATION GUIDE
    To install the package,
 
    % make install
+
+   To test the package,
+
+   % make test
+
+   Some of tests will be failed. But it does not necessarily mean that
+   something is wrong with the built binaries. Even if everything goes
+   well, the current implementation fails in some tests. This is
+   mainly because it is built on top of ROSE and unable to pass the
+   tests if ROSE cannot properly parse/unparse the test codes.
