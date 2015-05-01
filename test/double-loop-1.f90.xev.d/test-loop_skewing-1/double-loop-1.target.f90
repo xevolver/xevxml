@@ -6,8 +6,8 @@ program double_loop_1
 
     !$xev loop_tag
     do i=1,n
-        do j_new=i+1, i+n
-            A(i,j_new-i)=A(i-1,j_new-i)+A(i,j_new-i-1)
+        do j_sk=i+1, i+n
+            A(i,j_sk-i)=A(i-1,j_sk-i)+A(i,j_sk-i-1)
         end do
     end do
 

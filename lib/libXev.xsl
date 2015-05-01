@@ -5,6 +5,9 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+	<!-- emit/* -->
+	<xsl:import href="emit/emit.xsl" />
+
 	<!-- find/* -->
 	<xsl:import href="find/find.xsl" />
 
@@ -15,7 +18,7 @@
 	<xsl:import href="loop/loop.xsl" />
 
 	<!-- var/* -->
-	<xsl:import href="emit/emit.xsl" />
+	<xsl:import href="var/var.xsl" />
 
 
 	<xsl:output method="xml" encoding="UTF-8" />
