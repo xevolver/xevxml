@@ -1,18 +1,20 @@
 \chapter{AST Transformation Rules}\label{chap:xslt}
 
 XevXML represents an AST in an XML format, and various XML tools are
-hence available for AST transformation. In XevXML, the transformation
-rules are (internally) represented as XSLT rules. If a special code
+hence available for AST transformation. In XevXML, a transformation rule
+is (internally) represented as an XSLT rule. If a special code
 transformation is needed, the most flexible and expressive way is to
-write an XSL rule for the transformation.
+write an XSLT rule for the transformation, even though high-level
+interfaces are also developed for some specific purposes. An XSLT rule
+consists of XSLT template rules, each of which is applied to an XML
+element if the element matches a pattern on the XPath expression
+associated with the XSLT template rule..
 
-XevXML provides a lot of predefined rules that are also written in XSLT.
-Users can customize those predefined rules for their own
-purposes. XevXML also provides an XSLT rule template as a sample for
-users to newly define their special transformation rules.
-
-This chapter describes how to define and customize an XSLT rule for AST
-transformation in XevXML.
+XevXML provides some predefined XSLT template rules.  Users can
+customize the predefined rules for their own purposes.  Thus, an XSLT
+template rule can be used as a sample or a baseline for users to newly
+define their special transformation rules.  This chapter describes how
+to define and customize an XSLT rule for code transformation.
 
 
 \section{Predefined Rules}\label{sec:predef}
@@ -66,58 +68,130 @@ predefined rules.
 
 As mentioned in Section~\ref{sec:xslt}, an XSLT rule usually consists of
 several ``template'' rules expressed by \texttt{$<$xsl:template$>$}
-elements. In the above example, three template rules are defined. Each
+elements. In the above example, four template rules are defined. Each
 template rule has a \texttt{match} attribute whose value is an XPath
-expression. When an XSLT rule is applied to an XML AST, every XML
-element in the XML AST, i.e.~every AST node, is visited once in a
-depth-first manner. Then, if an XML element matches the XPath expression
-of the \texttt{match} attribute, the template rule is applied to the
-matched XML element.
+expression. When an XSLT rule consisting of multiple template rules is
+applied to an XML AST, every XML element in the XML AST, i.e.~every AST
+node, is visited once in a depth-first manner. Then, if an XML element
+matches the XPath expression given by the \texttt{match} attribute of a
+template rule, the template rule is applied to the matched XML element.
 
-The first template rule matches the root node of an XML AST that is an
-\texttt{$<$SgSourceFile$>$} element, and its rule is applied to the root
-node.
+In the above example, the XPath expression of the first template rule,
+i.e.,~\texttt{*}, matches only the root node of an XML AST that is an
+\texttt{$<$SgSourceFile$>$} element. Therefore, its rule is applied to
+the root node, and \texttt{$<$xsl:apply-templates$>$} is called for
+its child nodes.
 
 The second template rule matches every node in the XML AST, and its rule
-is applied to the node unless a more specific rule matches the node.
+is applied to the node unless a more specific rule matches the node.This
+rule also calls \texttt{$<$xsl:apply-templates$>$} for every child
+node.
 
 The third template rule matches only an \texttt{$<$SgFortranDo$>$}
-element. This uses an \texttt{$<$xsl:if$>$} element to check if an XPath
-expression is true. The expression is true only if
+element. This uses an \texttt{$<$xsl:if$>$} element to check if the
+XPath expression given by its \texttt{test} attribute is true. The
+expression is true only if
 \begin{itemize}
  \item The preceding sibling element of the \texttt{$<$SgFortranDo$>$}
-       element has an \texttt{$<$SgPragma$>$} element as a sub-node,
+       element has an \texttt{$<$SgPragma$>$} element as a child node,
  \item The \texttt{$<$SgPragma$>$} element has a \texttt{pragma}
        attribute, and
  \item The attribute value is a string of "xev loop\_tag".
 \end{itemize}
 If all the conditions are met, the template rule inserts a comment,
-``pragma is found,'' to the code before copying sub-nodes of the matched
-\texttt{$<$SgFortranDo$>$} element.
+``pragma is found,'' to the code before copying sub-nodes and attributes
+of the matched \texttt{$<$SgFortranDo$>$} element.
 
 In the third template rule, an \texttt{$<$xsl::apply-templates$>$}
 element is used with a \texttt{mode} attribute. As a result, template
-rules with the same mode are applied to the sub-nodes. In this example,
-the fourth template rule is applied to every sub-node of a
+rules with the same mode are applied to the child nodes. In this
+example, the fourth template rule is applied to every child node of a
 \texttt{$<$SgFortranDo$>$} element, for which all the above conditions
 are met. The fourth template rule instead of the second rule matches
-every node if the rule is called with the \texttt{loopbody} mode. In
-this way, different template rules can be applied only to a subset of
-AST nodes.
+every node if \texttt{$<$xsl::apply-templates$>$} is used with the
+\texttt{loopbody} mode. In this way, different template rules can be
+applied only to a subset of AST nodes.
 
 
 If the third rule and/or the fourth rule is modified to transform a loop
 structure and/or a loop body, the above XSLT rule can be used as a loop
-transformation rule that is applied only to loops annotated with
-\texttt{"xev loop\_tag"}. Although such a loop transformation rule could
-be complex, it is reusable for many application codes.  Therefore,
-XevXML provides a library of XSLT template rules, in which code
-transformation rules required for basic loop optimization techniques are
-predefined.
+transformation rule applied only to loops annotated with \texttt{"xev
+loop\_tag"}. Although such a loop transformation rule could be complex,
+its components, i.e.~XSLT template rules, are reusable for many
+application codes.  Therefore, XevXML provides a library of predefined
+XSLT template rules often required for basic loop optimization techniques.
 
-In the current version of XevXML, all predefined rules are written for
-Fortran programs. It is ongoing to define such rules for C programs.
-The predefined rules currently included in the library are as follows.
+
+In the template rule library, a code transformation rule is assumed to
+be comprised of three steps. One step is initialization, which usually
+finds an annotation being used to indicate where to transform. Another
+step is to move onto an XML element that is the root node of a subtree
+to be transformed. The other step is to transform the subtree, and print
+it out in XML. The library contains several predefined rules for each
+step.
+
+Using such predefined template rules for each step, a special directive
+for unrolling Loop $i$ can be defined as follow.
+\begin{framed}
+ \begin{src}
+<?xml version="1.0" encoding="UTF-8"?>
+  <xsl:stylesheet version="1.0"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+  <xsl:import href="libCHiLL.xsl" />
+
+  <xsl:output method="xml" encoding="UTF-8" />
+
+  <xsl:template match="*" mode="xevInitHook">
+   <xsl:apply-templates select="." mode="xevFindDirective">
+      <xsl:with-param name="directiveName" select="'xev loop_tag'" />
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="*" mode="xevMoveHook">
+    <xsl:apply-templates select="." mode="xevGoToLoop">
+      <xsl:with-param name="loopName" select="'i'" />
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="*" mode="xevTransformationHook">
+    <xsl:apply-templates select="." mode="chill_unroll">
+      <xsl:with-param name="factor" select="4" />
+      <xsl:with-param name="loopName" select="'i'" />
+    </xsl:apply-templates>
+  </xsl:template>
+</xsl:stylesheet>
+\end{src}
+\end{framed}
+
+The template rule with the \texttt{xevInitHook} mode represents the
+first step of the initialization. In the rule,
+\texttt{$<$xsl:apply-templates$>$} is used with the
+\texttt{xevFindDirective} mode. This results in using a predefined
+template rule associated with the \texttt{xevFindDirective} mode, and
+also finds a directive, \texttt{xev loop\_tag}.
+
+The template rule with the \texttt{xevMoveHook} mode represents the
+second step. In the rule, \texttt{$<$xsl:apply-templates$>$} is used
+with the \texttt{xevGoToLoop} mode. This results in visiting a loop
+whose index variable is \texttt{i}. The loop is to be transformed by
+this code transformation rule.
+
+The template rule with the \texttt{xevTransformationHook} mode
+represents the third step. In the rule,
+\texttt{$<$xsl:apply-templates$>$} is used with the
+\texttt{chill\_unroll} mode for loop unrolling. The
+\texttt{chill\_unroll} mode needs two parameters, \texttt{factor} and
+\texttt{loopName}. In this example, the third rule unrolls Loop $i$ four
+times.
+
+In this way, we can organize a custom compiler directive by directly
+using XevXML's low-level interface, i.e.,~XSLT.
+
+In the current version of XevXML, all of predefined template rules are
+written for Fortran programs. It is ongoing to define such rules for C
+programs.  The predefined rules currently included in the library are as
+follows.
 
 \begin{longtable}[l]{l|l|l}
  \hline
@@ -134,6 +208,35 @@ The predefined rules currently included in the library are as follows.
  \endfoot
  \hline
  \endlastfoot
+ \multicolumn{3}{l}{Initialization rules}\\
+ \hline
+\texttt{xevFindDirective} & \texttt{directiveName} & \multirow{3}{9cm}{A
+ compiler directive specified by the \texttt{directiveName} attribute is
+ found by this rule.}\\
+&& \\ &&\\ \hline
+
+ \multicolumn{3}{l}{Movement rules}\\
+ \hline
+\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
+ $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
+&\texttt{N} & \\ &&\\ \hline
+
+
+\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
+ $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
+&\texttt{N} & \\ &&\\ \hline
+
+\texttt{xevGoToLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
+loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
+&& \\ &&\\ \hline
+
+\texttt{xevGoToVar} & \texttt{varName} & \multirow{3}{9cm}{A variable
+ reference to \texttt{varName} is visited by using the rule.}\\
+&& \\ &&\\ \hline
+
+\texttt{xevGoToHere} & & \multirow{3}{9cm}{This is a dummy rule to do nothing at the second step of a code transformation.}\\
+&& \\ &&\\ \hline
+
  \multicolumn{3}{l}{Basic loop optimization rules}\\
  \hline
 
@@ -209,7 +312,10 @@ CHiLL-compatible version of \texttt{xevLoopFission}.} \\ \hline
  \texttt{factor} & \\ &&\\ &&\\  \hline
 \end{longtable}
 
-In the transformation rule library, a code transformation rule is
-decomposed to three steps. One is initialization. Another is to move
-onto an XML element that represents the root node of a subtree to be
-transformed. The other is to transform the subtree, and write it in XML.
+\section{Custom Rules}\label{sec:custom}
+
+\todo{To be described}
+
+\section{Summary}
+
+\todo{To be described}
