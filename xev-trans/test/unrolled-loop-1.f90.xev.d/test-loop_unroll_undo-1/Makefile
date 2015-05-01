@@ -1,4 +1,4 @@
-include ../../../lib/Makefile-xev.in
+include ../../../lib/Makefile-xev.mk
 
 TARGET_SRC = $(wildcard *.target.f90)
 DIFF = $(TARGET_SRC:%target.f90=%diff2.f90)

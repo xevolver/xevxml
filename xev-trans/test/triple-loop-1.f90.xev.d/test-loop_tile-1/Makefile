@@ -1,4 +1,4 @@
-include ../../../lib/Makefile-xev.in
+include ../../../lib/Makefile-xev.mk
 
 
 check: clean-translated triple-loop-1.diff2.f90

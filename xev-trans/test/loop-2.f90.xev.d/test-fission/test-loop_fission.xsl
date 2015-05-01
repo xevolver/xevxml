@@ -21,7 +21,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		<xsl:apply-templates select="." mode="xevLoopFission" />
+		<xsl:apply-templates select="." mode="xevLoopReversal" />
 	</xsl:template>
 
 </xsl:stylesheet>
