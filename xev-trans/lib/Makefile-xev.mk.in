@@ -1,0 +1,65 @@
+
+
+
+##############################################
+# set default command
+
+SRC2XML	= @CMAKE_BINARY_DIR@/src/src2xml
+XML2SRC	= @CMAKE_BINARY_DIR@/src/xml2src
+XSLTEXEC= @CMAKE_BINARY_DIR@/src/xsltexec
+
+##############################################
+# xev generated
+
+SRC2XML_DIR = ../src2xml
+
+
+##############################################
+# .PRECIOUS
+
+.PRECIOUS:  %.xev.f90 %.xev.xml %.target-xml2src.f90 %.target.xml %.diff.xml  %.diff.f90 # for debug
+.PRECIOUS:  %.xev2.f90 %.xev2.xml %.diff2.xml  %.diff2.f90 # for debug2
+
+
+##############################################
+# translation
+
+#$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml $(XSLT_DIR)/%.xsl
+#$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml
+#%.xev.xml: $(DIR2XML_DIR)/%.xml *.xsl
+%.xev.xml: $(SRC2XML_DIR)/%.xml *.xsl
+	$(XSLTEXEC) $(XSLT_DIR)/*.xsl < $< > $@
+
+# xml2src translation
+%.xev.f90: %.xev.xml
+	$(XML2SRC) < $< $@
+
+# target .xml file 
+%.target.xml: %.target.f90
+	$(SRC2XML) $< > $@
+
+# target .f90 source file 
+%.target-xml2src.f90: %.target.xml
+	$(XML2SRC) < $< $@
+
+##############################################
+# diffs
+
+%.diff.f90: %.target-xml2src.f90 %.xev.f90
+	diff -EBw $^ > $@ 
+
+# reset indentation
+%.xev2.f90: %.xev.f90
+	$(SRC2XML) $< | xml2src $@ 
+
+%.diff2.f90: %.xev2.f90 %.target-xml2src.f90
+	diff $^ > $@ 
+
+%.diff.xml: %.xev.xml %.target.xml
+	diff $^ > $@ 
+
+##############################################
+# clean
+
+clean-translated:
+	-rm -f *.xev.* *.xev2.* *.target-*.* *.target.xml *.diff.* *.diff2.* *.out.xml
