@@ -44,13 +44,19 @@ foreach(absname ${files})
     )
 endforeach()
 
+add_test(NAME "input-src"
+    COMMAND make input-src
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/xev-trans/test
+    )
+
 file(GLOB files ${PROJECT_SOURCE_DIR}/xev-trans/test/*.f90.xev.d/test-*/*.xsl)
 foreach(absname ${files})
   get_filename_component(filename ${absname} NAME)
   get_filename_component(dirname ${absname} DIRECTORY)
 #  add_test(NAME "trans-${filename}" # error for duplicate test name
   add_test(NAME "trans-${dirname}"
-    COMMAND make -C ${dirname} check
+    COMMAND make check
+    WORKING_DIRECTORY ${dirname}
     )
 endforeach()
 
