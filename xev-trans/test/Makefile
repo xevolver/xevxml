@@ -5,7 +5,7 @@ default:
 
 check-env:
 	@hostname
-	@$(XEVXML_ENV) which src2xml
+#	@$(XEVXML_ENV) which src2xml
 
 
 TEST_SRCS = $(wildcard *.f90)
@@ -29,10 +29,9 @@ clean-generated-all:
 	@-mkdir -p $*.f90.xev.d
 # src2xml
 	@-mkdir -p $*.f90.xev.d/src2xml
-	$(XEVXML_ENV) src2xml $*.f90 > $*.f90.xev.d/src2xml/$*.xml
-	$(XEVXML_ENV) xml2src < $*.f90.xev.d/src2xml/$*.xml $*.f90.xev.d/src2xml/$*.f90
+	$(SRC2XML) $*.f90 > $*.f90.xev.d/src2xml/$*.xml
+	$(XML2SRC) < $*.f90.xev.d/src2xml/$*.xml $*.f90.xev.d/src2xml/$*.f90
 # dir2xml
 #	@-mkdir -p $*.f90.xev.d/dir2xml
 #	$(XEVXML_ENV) dir2xml ../dir-defs.xml < $*.f90.xev.d/src2xml/$*.xml > $*.f90.xev.d/dir2xml/$*.xml
 #	$(XEVXML_ENV) xml2src < $*.f90.xev.d/dir2xml/$*.xml	 $*.f90.xev.d/dir2xml/$*.f90
-	

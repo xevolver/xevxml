@@ -22,6 +22,11 @@ CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/test/identity/input/test.sh"
   )
 
+CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/xev-trans/lib/Makefile-xev.mk.in"
+  "${PROJECT_SOURCE_DIR}/xev-trans/lib/Makefile-xev.mk"
+  )
+
 ADD_LIBRARY(xevxml STATIC
   xmlutils.cpp
   type.cpp

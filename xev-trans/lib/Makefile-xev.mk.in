@@ -27,8 +27,8 @@ SRC2XML_DIR = ../src2xml
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml $(XSLT_DIR)/%.xsl
 #$(XML2SRC_DIR)/%.xml: $(DIR2XML_DIR)/%.xml
 #%.xev.xml: $(DIR2XML_DIR)/%.xml *.xsl
-%.xev.xml: $(SRC2XML_DIR)/%.xml *.xsl
-	$(XSLTEXEC) $(XSLT_DIR)/*.xsl < $< > $@
+%.xev.xml: $(SRC2XML_DIR)/%.xml ./*.xsl
+	$(XSLTEXEC) ./*.xsl < $< > $@
 
 # xml2src translation
 %.xev.f90: %.xev.xml
