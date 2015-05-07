@@ -11,8 +11,8 @@
 					<xsl:copy-of select="./*[2]" />
 					<xsl:copy-of select="./*[3]" />
 					<SgBasicBlock>
-						<xsl:copy-of select="../SgFortranDo[1]/SgBasicBlock/SgExprStatement" />
-						<xsl:copy-of select="SgBasicBlock/SgExprStatement" />
+						<xsl:copy-of select="../SgFortranDo[1]/SgBasicBlock/*" />
+						<xsl:copy-of select="SgBasicBlock/*" />
 					</SgBasicBlock>
 				</xsl:copy>
 			</xsl:when>
@@ -26,6 +26,4 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- <xsl:template match="SgPragmaDeclaration" mode="loop_fusion"> </xsl:template> 
-		<xsl:template match="PreprocessingInfo" mode="loop_fusion"> </xsl:template> -->
 </xsl:stylesheet>
