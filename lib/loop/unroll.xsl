@@ -41,6 +41,7 @@
 						<xsl:with-param name="factor" select="$factor" /> <xsl:with-param name="loopName" 
 						select="$loopName" /> <xsl:with-param name="cnt" select="position()" /> </xsl:apply-templates> 
 						</xsl:for-each> </SgBasicBlock> -->
+					<xsl:copy-of select="PreprocessingInfo" />
 				</xsl:copy>
 			</xsl:when>
 			<xsl:otherwise>

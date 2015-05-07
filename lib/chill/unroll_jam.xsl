@@ -4,14 +4,14 @@
 
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-	
+
 
 	<xsl:template match="*" mode="chillUnrollJam">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 		<xsl:apply-templates select="." mode="xevLoopUnroll">
-			<xsl:with-param name="factor" />
-			<xsl:with-param name="loopName" />
+			<xsl:with-param name="factor" select="$factor" />
+			<xsl:with-param name="loopName" select="$loopName" />
 		</xsl:apply-templates>
 	</xsl:template>
 
