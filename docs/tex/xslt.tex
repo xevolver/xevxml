@@ -155,7 +155,7 @@ for unrolling Loop $i$ can be defined as follow.
   </xsl:template>
 
   <xsl:template match="*" mode="xevTransformationHook">
-    <xsl:apply-templates select="." mode="chill_unroll">
+    <xsl:apply-templates select="." mode="chillUnroll">
       <xsl:with-param name="factor" select="4" />
       <xsl:with-param name="loopName" select="'i'" />
     </xsl:apply-templates>
