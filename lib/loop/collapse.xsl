@@ -19,9 +19,6 @@
 		<xsl:choose>
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $firstLoop">
-				<xsl:comment>
-					test-loop_collapse.xsl found firstLoop
-				</xsl:comment>
 
 				<!-- get loop end from first loop -->
 				<xsl:variable name="end" select="./*[2]" />
@@ -53,17 +50,11 @@
 			<xsl:when
 				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $secondLoop">
 				<!--change end -->
-				<xsl:comment>
-					test-loop_collapse.xsl found secondLoop
-				</xsl:comment>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
 					<xsl:copy-of select="./*[1]" />
 					<SgMultiplyOp>
 						<xsl:copy-of select="./*[2]" />
-						<xsl:comment>
-							test-loop_collapse.xsl multiply
-						</xsl:comment>
 						<xsl:apply-templates select="$firstEnd" />
 					</SgMultiplyOp>
 					<!-- stride -->
@@ -75,7 +66,6 @@
 					</xsl:apply-templates>
 
 				</xsl:copy>
-
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
@@ -111,6 +101,4 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- <xsl:template match="SgPragmaDeclaration" mode="loop_collapse"> </xsl:template> 
-		<xsl:template match="PreprocessingInfo" mode="loop_collapse"> </xsl:template> -->
 </xsl:stylesheet>

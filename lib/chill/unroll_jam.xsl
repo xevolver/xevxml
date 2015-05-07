@@ -22,9 +22,7 @@
 	<xsl:template match="SgFortranDo" mode="chill_unroll_jam">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
-		<xsl:comment>
-			libCHiLL.xsl chill_unroll_jam
-		</xsl:comment>
+
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
 			<!-- start value -->
@@ -39,11 +37,11 @@
 			</xsl:element>
 
 			<xsl:apply-templates select="./SgBasicBlock"
-				mode="loop_unroll">
+				mode="xevLoopUnroll">
 				<xsl:with-param name="factor" select="$factor" />
 				<xsl:with-param name="loopName" select="$loopName" />
 			</xsl:apply-templates>
-
+			<xsl:copy-of select="PreprocessingInfo" />
 		</xsl:copy>
 	</xsl:template>
 
