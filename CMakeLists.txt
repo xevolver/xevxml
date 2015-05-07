@@ -60,6 +60,20 @@ foreach(absname ${files})
     )
 endforeach()
 
+
+file(GLOB sources ${PROJECT_SOURCE_DIR}/test/xsltgen/*.f90)
+foreach(f90absname ${sources})
+  get_filename_component(f90name ${f90absname} NAME)
+  file(GLOB files ${PROJECT_SOURCE_DIR}/test/xsltgen/${f90name}.xev.d/*.json)
+  foreach(absname ${files})
+    get_filename_component(filename ${absname} NAME)
+    add_test(NAME "xsltgen-${f90name}-${filename}"
+      COMMAND sh ${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh ${f90name} ${filename}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/xsltgen
+      )
+  endforeach()
+endforeach()
+
 #add_test(
 #  NAME translation-test
 #  COMMAND make -C ${PROJECT_SOURCE_DIR}/xev-trans/test check-all

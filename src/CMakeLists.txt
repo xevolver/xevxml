@@ -23,6 +23,11 @@ CONFIGURE_FILE(
   )
 
 CONFIGURE_FILE(
+  "${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh.in"
+  "${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh"
+  )
+
+CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/xev-trans/lib/Makefile-xev.mk.in"
   "${PROJECT_SOURCE_DIR}/xev-trans/lib/Makefile-xev.mk"
   )

@@ -1,0 +1,6 @@
+{
+    "xev loop_tag":{
+        "target":"SgPragmaDeclaration",
+        "replace":"!$test"
+    }
+}
