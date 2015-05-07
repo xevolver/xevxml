@@ -4,8 +4,8 @@
 
 	<xsl:import href="../libXev.xsl" />
 
-	<xsl:template match="*" mode="chill_fuse">
-		<xsl:apply-templates select="." mode="loop_fusion">
+	<xsl:template match="*" mode="chillFuse">
+		<xsl:apply-templates select="." mode="xevLoopFusion">
 		</xsl:apply-templates>
 	</xsl:template>
 
