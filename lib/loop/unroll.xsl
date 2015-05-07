@@ -5,14 +5,76 @@
 	<xsl:template match="*" mode="xevLoopUnroll">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates mode="xevLoopUnroll">
+				<xsl:with-param name="factor" select="$factor" />
+				<xsl:with-param name="loopName" select="$loopName" />
+			</xsl:apply-templates>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="SgFortranDo" mode="xevLoopUnroll">
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
+		<xsl:choose>
+			<xsl:when test="SgAssignOp/SgVarRefExp/@name = $loopName">
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:copy-of select="./*[1]" />
+					<xsl:copy-of select="./*[2]" />
+					<xsl:element name="SgIntVal">
+						<xsl:attribute name="value">
+							<xsl:value-of select="$factor" />
+						</xsl:attribute>
+					</xsl:element>
+
+					<xsl:apply-templates select="SgBasicBlock"
+						mode="xevLoopUnroll">
+						<xsl:with-param name="factor" select="$factor" />
+						<xsl:with-param name="loopName" select="$loopName" />
+					</xsl:apply-templates>
+
+					<!-- <SgBasicBlock> <xsl:variable name="basic_block_content" select="./*" 
+						/> <xsl:apply-templates select="$basic_block_content" /> <xsl:for-each select="(//*)[position() 
+						&lt; $factor]"> <xsl:apply-templates select="$basic_block_content" mode="loop_unroll_body"> 
+						<xsl:with-param name="factor" select="$factor" /> <xsl:with-param name="loopName" 
+						select="$loopName" /> <xsl:with-param name="cnt" select="position()" /> </xsl:apply-templates> 
+						</xsl:for-each> </SgBasicBlock> -->
+				</xsl:copy>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:copy>
+					<xsl:copy-of select="@*" />
+					<xsl:apply-templates mode="xevLoopUnroll">
+						<xsl:with-param name="factor" select="$factor" />
+						<xsl:with-param name="loopName" select="$loopName" />
+					</xsl:apply-templates>
+				</xsl:copy>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template match="SgBasicBlock" mode="xevLoopUnroll">
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
 
 		<xsl:choose>
-			<xsl:when
-				test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = $loopName">
-				<xsl:apply-templates select="." mode="unroll_target_loop">
-					<xsl:with-param name="factor" select="$factor" />
-					<xsl:with-param name="loopName" select="$loopName" />
-				</xsl:apply-templates>
+			<xsl:when test="not(./SgFortranDo)">
+				<SgBasicBlock>
+					<xsl:variable name="basic_block_content" select="./*" />
+
+					<xsl:apply-templates select="$basic_block_content" />
+					<xsl:for-each select="(//*)[position() &lt; $factor]">
+						<xsl:apply-templates select="$basic_block_content"
+							mode="loop_unroll_body">
+							<xsl:with-param name="factor" select="$factor" />
+							<xsl:with-param name="loopName" select="$loopName" />
+							<xsl:with-param name="cnt" select="position()" />
+						</xsl:apply-templates>
+
+					</xsl:for-each>
+				</SgBasicBlock>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy>
@@ -25,42 +87,7 @@
 			</xsl:otherwise>
 		</xsl:choose>
 
-	</xsl:template>
 
-
-
-	<xsl:template match="SgFortranDo" mode="unroll_target_loop">
-		<xsl:param name="factor" />
-		<xsl:param name="loopName" />
-		<xsl:copy>
-			<xsl:copy-of select="@*" />
-			<xsl:copy-of select="./*[1]" />
-			<xsl:copy-of select="./*[2]" />
-			<xsl:element name="SgIntVal">
-				<xsl:attribute name="value">
-							<xsl:value-of select="$factor" />
-						</xsl:attribute>
-			</xsl:element>
-
-			<SgBasicBlock>
-				<xsl:variable name="basic_block_content" select="./*" />
-
-				<xsl:apply-templates select="$basic_block_content" />
-				<xsl:for-each select="(//*)[position() &lt; $factor]">
-					<xsl:apply-templates select="$basic_block_content"
-						mode="loop_unroll_body">
-						<xsl:with-param name="factor" select="$factor" />
-						<xsl:with-param name="loopName" select="$loopName" />
-						<xsl:with-param name="cnt" select="position()" />
-					</xsl:apply-templates>
-
-					<!-- </xsl:for-each> <xsl:apply-templates select="./SgBasicBlock" mode="xevLoopUnroll"> 
-						<xsl:with-param name="factor" select="$factor" /> <xsl:with-param name="loopName" 
-						select="$loopName" /> </xsl:apply-templates> -->
-				</xsl:for-each>
-			</SgBasicBlock>
-
-		</xsl:copy>
 	</xsl:template>
 
 	<xsl:template match="SgFortranDo" mode="old_unroll_target_loop">
@@ -111,6 +138,20 @@
 	</xsl:template>
 
 
+	<xsl:template match="*" mode="loop_unroll_body">
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
+		<xsl:param name="cnt" />
+		<xsl:copy>
+			<xsl:copy-of select="@*" />
+			<xsl:apply-templates mode="loop_unroll_body">
+				<xsl:with-param name="factor" select="$factor" />
+				<xsl:with-param name="loopName" select="$loopName" />
+				<xsl:with-param name="cnt" select="$cnt" />
+			</xsl:apply-templates>
+		</xsl:copy>
+	</xsl:template>
+
 	<xsl:template match="SgVarRefExp" mode="loop_unroll_body">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
@@ -130,20 +171,6 @@
 		<xsl:if test="./@name!=$loopName">
 			<xsl:copy-of select="." />
 		</xsl:if>
-	</xsl:template>
-
-	<xsl:template match="*" mode="loop_unroll_body">
-		<xsl:param name="factor" />
-		<xsl:param name="loopName" />
-		<xsl:param name="cnt" />
-		<xsl:copy>
-			<xsl:copy-of select="@*" />
-			<xsl:apply-templates mode="loop_unroll_body">
-				<xsl:with-param name="factor" select="$factor" />
-				<xsl:with-param name="loopName" select="$loopName" />
-				<xsl:with-param name="cnt" select="$cnt" />
-			</xsl:apply-templates>
-		</xsl:copy>
 	</xsl:template>
 
 	<!-- epilog -->
