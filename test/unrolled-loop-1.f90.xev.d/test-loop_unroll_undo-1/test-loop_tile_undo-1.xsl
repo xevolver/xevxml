@@ -20,7 +20,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		<xsl:apply-templates select="." mode="loop_unroll_undo">
+		<xsl:apply-templates select="." mode="xevLoopUnrollUndo">
 			<xsl:with-param name="factor" select="'4'" />
 		</xsl:apply-templates>
 	</xsl:template>

@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="loop_unroll_undo">
+	<xsl:template match="*" mode="xevLoopUnrollUndo">
 		<xsl:param name="factor" />
 
 		<xsl:choose>
@@ -24,7 +24,7 @@
 			<xsl:otherwise>
 				<xsl:copy>
 					<xsl:copy-of select="@*" />
-					<xsl:apply-templates mode="loop_unroll_undo">
+					<xsl:apply-templates mode="xevLoopUnrollUndo">
 						<xsl:with-param name="factor" select="$factor" />
 					</xsl:apply-templates>
 				</xsl:copy>
