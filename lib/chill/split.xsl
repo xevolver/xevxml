@@ -4,8 +4,8 @@
 
 	<xsl:import href="../libXev.xsl" />
 
-	<xsl:template match="*" mode="chill_split">
-		<xsl:apply-templates select="." mode="loop_fission">
+	<xsl:template match="*" mode="chillSplit">
+		<xsl:apply-templates select="." mode="xevLoopFission">
 		</xsl:apply-templates>
 	</xsl:template>
 
