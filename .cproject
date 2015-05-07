@@ -192,21 +192,6 @@
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="triple-loop-1.xev.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>make</buildCommand>
-				<buildArguments/>
-				<buildTarget>triple-loop-1.xev.f90</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="triple-loop-1.target-xml2src.f90" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>triple-loop-1.target-xml2src.f90</buildCommand>
-				<buildArguments/>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
 			<target name="clean-translated" path="test/triple-loop-1.f90.xev.d/test-chill_unroll_jam-chill_unroll" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments/>

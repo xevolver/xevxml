@@ -17,6 +17,7 @@
 						<xsl:apply-templates
 							select="self::SgFortranDo/SgBasicBlock/SgExprStatement[1]" />
 					</xsl:element>
+					<xsl:copy-of select="PreprocessingInfo" />
 				</xsl:copy>
 
 			</xsl:when>

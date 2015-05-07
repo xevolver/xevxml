@@ -7,6 +7,10 @@
 
 	<xsl:output method="xml" encoding="UTF-8" />
 
+	<xsl:template match="*" mode="xevInitHook">
+		<xsl:apply-templates select="." />
+	</xsl:template>
+
 	<xsl:template match="SgFortranDo">
 		<xsl:choose>
 			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
@@ -15,7 +19,7 @@
 				</xsl:comment>
 
 				<xsl:variable name="step1">
-					<xsl:apply-templates select="." mode="chill_unroll_jam">
+					<xsl:apply-templates select="." mode="chillUnrollJam">
 						<xsl:with-param name="factor" select="4" />
 						<xsl:with-param name="loopName" select="'k'" />
 					</xsl:apply-templates>
@@ -39,7 +43,7 @@
 	<xsl:template match="*" mode="find_loop_and_unroll">
 		<xsl:choose>
 			<xsl:when test="self::SgFortranDo/SgAssignOp/SgVarRefExp/@name = 'i'">
-				<xsl:apply-templates select="." mode="chill_unroll">
+				<xsl:apply-templates select="." mode="chillUnroll">
 					<xsl:with-param name="factor" select="2" />
 					<xsl:with-param name="loopName" select="'i'" />
 				</xsl:apply-templates>
@@ -53,10 +57,6 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="SgPragmaDeclaration" mode="find_loop_and_unroll">
-	</xsl:template>
-	<xsl:template match="PreprocessingInfo" mode="find_loop_and_unroll">
-	</xsl:template>
 
 </xsl:stylesheet>
 	

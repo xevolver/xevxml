@@ -21,7 +21,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		<xsl:apply-templates select="." mode="chill_unroll_jam">
+		<xsl:apply-templates select="." mode="chillUnrollJam">
 			<xsl:with-param name="factor" select="4" />
 			<xsl:with-param name="loopName" select="'k'" />
 		</xsl:apply-templates>

@@ -16,8 +16,6 @@
 
 	<xsl:template match="*" mode="xevMoveHook">
 		<xsl:apply-templates select="." mode="xevGoToHere" />
-		<!-- <xsl:apply-templates select="." mode="xevGoToLoop"> <xsl:with-param 
-			name="loopName" select="'i'" /> </xsl:apply-templates> -->
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
@@ -27,31 +25,6 @@
 			<xsl:with-param name="end" select="'n - 1'" />
 			<xsl:with-param name="size" select="'4'" />
 		</xsl:apply-templates>
-	</xsl:template>
-
-
-	<xsl:template match="SgFortranDo" mode="bkup">
-		<xsl:choose>
-			<xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma = 'xev loop_tag'">
-				<xsl:comment>
-					xev loop_tag loop_tile-1
-				</xsl:comment>
-				<xsl:apply-templates select="." mode="loop_tile">
-					<xsl:with-param name="loopName" select="'i'" />
-					<xsl:with-param name="start" select="'1'" />
-					<xsl:with-param name="end" select="'n - 1'" />
-					<xsl:with-param name="size" select="'4'" />
-				</xsl:apply-templates>
-			</xsl:when>
-
-			<xsl:otherwise>
-				<xsl:copy>
-					<xsl:copy-of select="@*" />
-					<xsl:apply-templates />
-				</xsl:copy>
-			</xsl:otherwise>
-
-		</xsl:choose>
 	</xsl:template>
 
 </xsl:stylesheet>

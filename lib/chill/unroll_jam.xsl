@@ -6,7 +6,7 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 
-	<xsl:template match="*" mode="chill_unroll_jam">
+	<xsl:template match="*" mode="chillUnrollJam">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 		<xsl:copy>
@@ -19,7 +19,7 @@
 	</xsl:template>
 
 
-	<xsl:template match="SgFortranDo" mode="chill_unroll_jam">
+	<xsl:template match="SgFortranDo" mode="chillUnrollJam">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 
