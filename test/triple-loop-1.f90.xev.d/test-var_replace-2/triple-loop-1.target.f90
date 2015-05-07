@@ -9,7 +9,7 @@ program triple_loop_1
     do k=1,n-1
         do j=1,n-1
             do i=1,n-1
-                C(i,j,k) = A(i,j,k)
+                CCCC(i,j,k) = A(i,j,k)
             end do
         end do
     end do

@@ -20,7 +20,10 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
-		C
+		<!-- C -->
+		<xsl:apply-templates select="." mode="xevEmitVar">
+			<xsl:with-param name="varName" select="'CCCC'" />
+		</xsl:apply-templates>
 	</xsl:template>
 
 </xsl:stylesheet>
