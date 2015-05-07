@@ -35,7 +35,7 @@ const char xsltheader[]=
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
   "  <xsl:stylesheet version=\"1.0\"\n"
   "    xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:exslt=\"http://exslt.org/common\">\n"
-  "  <xsl:import href=\"../libCHiLL.xsl\" />\n"
+  "  <xsl:import href=\"libCHiLL.xsl\" />\n"
   "  <xsl:output method=\"xml\" encoding=\"UTF-8\" />\n";
 
 const char xsltfooter[]="\n</xsl:stylesheet>\n";
