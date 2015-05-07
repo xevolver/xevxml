@@ -1,0 +1,406 @@
+\chapter{Internal Structures and Behaviors}\label{chap:internal}
+
+Since ROSE already has various features of code analyses and
+transformations useful to implement custom code transformation programs,
+XevXML provides some C++ classes and functions, which are helpful for
+such programs to read and write XML ASTs.  As a result, code
+transformation programs developed with ROSE can handle XML ASTs.
+
+This chapter describes XevXML classes and functions that allows ROSE to
+handle XML ASTs. By inheriting the classes, users can develop customized
+versions of \texttt{src2xml} and \texttt{xml2src} commands. For example,
+\texttt{src2xml} would be customized so that some additional XML
+attributes are written in an XML AST.
+
+
+\section{Utility functions}
+%A simplified version of the code is as follows.
+
+%A minimum code of a ROSE-based translator is as follows.
+By using ROSE, it is easy to write an identity translator, i.e.,~the
+simplest translator.
+\begin{framed}
+\begin{src}
+/* identity.cpp */
+#include <rose.h>
+
+int main(int argc,char** argv){
+  SgProject* sageProject=frontend(argc,argv);
+
+  /* do something here for code transformation */
+
+  return backend(sageProject);
+}
+\end{src}
+\end{framed}
+
+The \texttt{frondend()} function reads a code and builds its AST. The
+\texttt{backend()} function passes the AST to the backend for unparsing
+and compilation.
+
+XevXML offers a utility function, \texttt{XevConvertRoseToXml()}, for
+such a ROSE-based translator to print out a ROSE AST as an XML AST. All
+of the functions and classes provided XevXML are defined within a name
+space, \texttt{XevXml}.
+
+
+For example, a simplified version of the \texttt{src2xml} command is as
+follows. It just prints out an XML AST, and then immediately ends.
+
+\begin{framed}
+\begin{src}
+/* simple.cpp */
+#include <iostream>
+#include <rose.h>
+#include <xevxml.hpp>
+
+int main(int argc,char** argv){
+  SgProject* sageProject=frontend(argc,argv);
+
+  /* print out an XML AST to the standard output */
+  XevXml::XevInitialize();
+  XevXml::XevConvertRoseToXml(std::cout,&sageProject);
+  XevXml::XevFinalize();
+
+  /* return backend(sageProject); */
+  return 0; /* backend is not called in this example */
+}
+\end{src}
+\end{framed}
+
+Run your compiler with appropriate options to specify the paths to
+necessary header files and libraries.
+
+\vspace{5mm}
+\texttt{\% g++ -I... simple.cpp -o simple -L... -lxevxml -lrose -lxalan-c -lxerces-c }
+\vspace{5mm}
+
+\noindent The generated executable, \texttt{simple}, will print out an
+XML AST of a C or Fortran code to the standard output.
+
+\vspace{5mm}
+\texttt{\% ./simple input.c}
+\begin{verbatim}
+<?xml version="1.0" encoding="UTF-8"?>
+<SgSourceFile file="input.c" lang="2" fmt="2">
+ <SgGlobal>
+ ...omitted...
+ </SgGlobal>
+</SgSourceFile>
+\end{verbatim}
+\vspace{5mm}
+
+A simplified version of the \texttt{xml2src} command is as follows.
+
+\begin{framed}
+\begin{src}
+/* simple2.cpp */
+#include <iostream>
+#include <rose.h>
+#include <xevxml.hpp>
+
+int main(int argc,char** argv){
+  SgProject* sageProject=0;
+
+  /* read an XML AST from the standard input */
+  XevXml::XevInitialize();
+  if( XevXml::XevConvertXmlToRose(std::cin,&sageProject) == false ){
+    std::cerr << " failed" << std::endl;
+    abort();
+  }
+  else {
+    /* check the AST (optional) */
+    AstTests::runAllTests(sageProject);
+    /* unparse the AST and print it out */
+    XevXml::XevUnparseToStream(std::cout,&sageProject);
+  }
+  XevXml::XevFinalize();
+
+  return 0;
+}
+\end{src}
+\end{framed}
+
+The \texttt{XevConvertXmlToRose()} function reads an XML AST and
+converts it to a ROSE AST. If the conversion does not fail, the
+\texttt{XevUnparseToStream()} function is called to print the ROSE AST
+to a C++ stream.  Accordingly, the above code, \texttt{simple2}, reads
+an XML AST from the standard input, and then unparses it. The unparsed
+code is printed out to the standard output.
+
+The following combination of the above two commands works as an identity
+translator.
+
+\vspace{5mm}
+\texttt{\% ./simple input.c | ./simple2 }
+\begin{verbatim}
+#include <stdio.h>
+
+int main()
+{
+  ...omitted...
+  return 0;
+}
+\end{verbatim}
+
+
+The behaviors of the \texttt{XevConvertRoseToXml()} function can be
+changed using a \texttt{XevXmlOption} class object. For example, a
+slightly-modified vetsion of \texttt{simple.cpp} that uses the
+\texttt{XevXmlOption} is as follows.
+\begin{framed}
+\begin{src}
+/* simple-mod.cpp */
+#include <iostream>
+#include <rose.h>
+#include <xevxml.hpp>
+
+int main(int argc,char** argv){
+  SgProject* sageProject=frontend(argc,argv);
+
+  /* print out an XML AST to the standard output */
+  XevXml::XevInitialize();
+  XevXml::XevXmlOption opt;
+  /* the following options are disabled by default */
+  opt.getFortranPragmaFlag() = true; // parse Fortran pragmas
+  opt.getPrintAddressFlag() = true; // print the address of every AST node
+
+  /* execute the conversion with the above options */
+  XevXml::XevConvertRoseToXml(std::cout,&sageProject,&opt);
+  XevXml::XevFinalize();
+
+  return 0;
+}
+\end{src}
+\end{framed}
+
+In the above code, all the options disabled by default are enabled.  By
+default, every ``xev pragma'' in a Fortran code, which starts with
+\texttt{!\$xev}, is handled as a comment.  By enabling the flag accessed
+by the \texttt{getFortranPragmaFlag()} method, such a pragma will be
+converted to an XML element. The other options are basically used for
+debugging.
+
+\section{Visitor classes}
+
+As described in the previous section, a C code whose file name is
+\texttt{input.c} will be converted to the following XML AST.
+\vspace{5mm}
+\begin{verbatim}
+<?xml version="1.0" encoding="UTF-8"?>
+<SgSourceFile file="input.c" lang="2" fmt="2">
+ <SgGlobal>
+ ...omitted...
+ </SgGlobal>
+</SgSourceFile>
+\end{verbatim}
+\vspace{5mm}
+ROSE uses C++ class objects, called \emph{Sage III class objects}, to
+represent nodes of an AST.  That is, every node of a ROSE AST is an
+object of a Sage III class. Each Sage III class is a subclass of the
+\texttt{SgNode} class.  For example, the \texttt{SgGlobal} class is one
+Sage III class, and its object represents the global scope of a code.
+On the other hand, every node of an XML AST is an XML element whose name
+is the same as the Sage III class name of its corresponding ROSE AST
+node.  Hence, an \texttt{$<$SgGlobal$>$} element appears right after an
+\texttt{$<$SgSourceFile$>$} element, which corresponds to an
+\texttt{SgSourceFile} class object representing the source code.  See
+the ROSE reference manual\cite{rose} for more details of Sage III
+classes. Chapter~\ref{sec:attrib} also describes XML elements of Sage
+III classes currently supported by XevXML.
+
+XML attributes are used to keep the necessary information to rebuild
+each ROSE AST. For example, \texttt{$<$SgSourceFile$>$} has a
+\texttt{lang} attribute so that an XML AST can record the language of
+the original source code.  The attributes of XML AST nodes are described
+in Chapter~\ref{sec:attrib}.
+
+To customize the format of an XML AST, XevXML offers two internal C++
+classes, \texttt{XevSageVisitor} and \texttt{XevXmlVisitor}.  The former
+class traverses an AST of Sage III classes used in ROSE, and translates
+it to an XML AST.  The latter traverses an XML AST to rebuild ROSE's
+AST.
+
+The \texttt{XevConvertRoseToXml()} function internally uses the
+\texttt{XevSageVisitor} class for converting a ROSE AST to an XML AST.
+The \texttt{XevSageVisitor} class is a Vistor pattern class that visits
+every node of a ROSE AST in a depth-first fashion. Whenever
+\texttt{XevSageVisitor} visits an AST node, it writes an XML element
+whose name is the same as the Sage III class name of an AST node, e.g.,
+\texttt{SgGlobal}.  When writing XML attributes of each XML element,
+\texttt{attribSg*()} method is invoked (\texttt{Sg*} is the name of a
+Sage III class). Similarly, when writing the sub-nodes of each XML
+element, \texttt{inodeSg*()} method is invoked.  Therefore, by
+overloading those methods, a user can customize XML documents generated
+by the \texttt{XevSageVisitor} class.
+
+In the following code, a new attribute \texttt{"foo"} whose value is
+\texttt{"bar"} is added to an \texttt{$<$SgGlobal$>$} element.
+\begin{framed}
+\begin{src}
+/* custom.cpp */
+#include <xevxml.hpp>
+
+class MyVisitor: public XevXml::XevSageVisitor
+{
+public:
+  MyVisitor():XevXml::XevSageVisitor() {}
+
+  void attribSgGlobal(SgNode* node)
+  {
+    // print the default attributes
+    XevXml::XevSageVisitor::attribSgGlobal(node);
+    std::ostream& os = getOutputStream();
+
+    os << " foo=\"str\"";
+    os << " bar=\"1\"";
+  }
+};
+
+int main(int argc,char** argv)
+{
+  SgProject* sageProject=frontend(argc,argv);
+  MyVisitor visitor;
+  XevXml::XevXmlOption opt;
+
+  XevXml::XevInitialize();
+  visitor.setXmlOption(&opt);
+  visitor.write(std::cout,&sageProject);
+  XevXml::XevFinalize();
+  return 0;
+}
+\end{src}
+\end{framed}
+
+The \texttt{MyVisitor} class is a subclass of \texttt{XevSageVisitor}.
+The \texttt{XevSageVisitor::setXmlOption()} method is used to pass an
+\texttt{XevXmlOption} object to the \texttt{MyVisitor} class
+object. After that, the \texttt{XevSageVisitor::write()} method is
+invoked to write an XML AST to a given \texttt{std::ostream} object.
+
+The \texttt{XevSageVisitor::attribSgGlobal()} method is overloaded by
+\texttt{MyVisitor::attribSgGlobal()}.  In the new method, the reference
+to an \texttt{std::ostream} object, which is given by the first argument
+of the \texttt{XevSageVisitor::write()} method,
+i.e.,~\texttt{std::cout}, is obtained by calling
+\texttt{getOutputStream()}.  Then, two strings are passed to the object.
+As a result, the strings appear as XML attributes of an
+\texttt{$<$SgGlobal$>$} element.
+
+\vspace{5mm}
+\texttt{\% ./custom input.c}
+\begin{verbatim}
+<?xml version="1.0" encoding="UTF-8"?>
+<SgSourceFile file="input.c" lang="2" fmt="2">
+ <SgGlobal foo="str" bar="1">
+ ...omitted...
+ </SgGlobal>
+</SgSourceFile>
+\end{verbatim}
+\vspace{5mm}
+
+The \texttt{XevConvertXmlToRose()} function internally uses the
+\texttt{XevXmlVisitor} class for converting an XML AST to a ROSE AST.
+The \texttt{XevXmlVisitor} class is a Vistor pattern class that visits
+every node of an XML AST in a depth-first fashion.  Whenever
+\texttt{XevXmlVisitor} visits an XML element, \texttt{visigSg*()} method
+is invoked. Therefore, by overloading such a method, a user can
+customize the rebuilding process of an AST.
+
+\begin{framed}
+\begin{src}
+/* custom2.cpp */
+#include <xevxml.hpp>
+#include <xmlutils.hpp>
+
+class MyXmlVisitor: public XevXml::XevXmlVisitor
+{
+public:
+  SgNode* visitSgGlobal(xercesc::DOMNode* node, SgNode* parent)
+  {
+    SgNode* n =
+      XevXml::XevXmlVisitor::visitSgGlobal(node,parent);
+
+    std::string sval;
+    if(XevXml::XmlGetAttributeValue(node,"foo",&sval)==true){
+      std::cerr << " attribute \"foo\" is found" << std::endl;
+      std::cerr << " the value is " << sval << std::endl;
+    }
+    else {
+      std::cerr << " attribute \"foo\" is not found" << std::endl;
+    }
+
+    int ival;
+    if(XevXml::XmlGetAttributeValue(node,"bar",&ival)==true){
+      std::cerr << " attribute \"bar\" is found" << std::endl;
+      std::cerr << " the value is " << ival << std::endl;
+    }
+    else {
+      std::cerr << " attribute \"bar\" is not found" << std::endl;
+    }
+
+    float fval;
+    if(XevXml::XmlGetAttributeValue(node,"baz",&fval)==true){
+      std::cerr << " attribute \"baz\" is found" << std::endl;
+      std::cerr << " the value is " << fval << std::endl;
+    }
+    else {
+      std::cerr << " attribute \"baz\" is not found" << std::endl;
+    }
+
+    return n;
+  }
+};
+
+int main(int argc,char** argv)
+{
+  SgProject* sageProject=0;
+  MyXmlVisitor visitor;
+  XevXml::XmlInitialize();
+  visitor.read(std::cin,&sageProject);
+  XevXml::XmlFinalize();
+  return 0;
+}
+\end{src}
+\end{framed}
+
+When an XML AST is traversed, every XML element is represented as an
+\texttt{xercesc::DOMNode} class object. Because of the depth-first AST
+traversal, its parent node is already converted to an \texttt{SgNode}
+object in many cases.  The pointers to those two objects are given to
+\texttt{XevXmlVisitor::visitSg*()} as function arguments.  If the
+\texttt{SgNode} object of the parent node is not available yet, the
+second argument is \texttt{NULL}.
+
+\texttt{XevXmlVisitor::visitSg*()} has to return a pointer to an
+\texttt{SgNode} object, which is actually an \texttt{Sg*} object.  For
+example, the \texttt{XevXmlVisitor::visitSgGlobal()} method is called
+when a \texttt{$<$SgGlobal$>$} element is visited.  This method and its
+overloaded versions are expected to return a pointer to an
+\texttt{SgGlobal} object.
+
+In the above code, \texttt{XevXmlVisitor::visitSgGlobal()} is overloaded
+by the \texttt{MyXmlVisitor} class so that a utility function,
+\texttt{XevXml::XmlGetAttributeValue()}, is called for checking if each
+attribute is given or not.  Here,
+\texttt{XevXml::XmlGetAttributeValue()} is a C++ template function
+defined in \texttt{xmlutils.hpp}.
+
+\begin{verbatim}
+% ./custom input.c |./custom2
+ attribute "foo" is found
+ the value is str
+ attribute "bar" is found
+ the value is 1
+ attribute "baz" is not found
+\end{verbatim}
+
+\section{Summary}
+XmlXML is an extensible code transformation framework. Its internal
+structures and behaviors can be customized if necessary. The utility
+functions and classes will be useful to develop tools for
+transformation, visualization, and analysis of an XML AST. Use of XML
+for representing an AST will by design be helpful to make those tools
+interoperable.
+
+%The interoperability is one important benefit of using XevXML.

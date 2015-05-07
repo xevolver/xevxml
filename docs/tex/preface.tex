@@ -1,0 +1,44 @@
+
+\chapter*{Preface}
+
+%  Purpose:
+% \begin{itemize}
+%    \item a. Welcome
+%    \item b. Program features
+%    \item c. Program benefits
+% \end{itemize}
+% \begin{center}
+% *********************  \newline
+% \end{center}
+% \vspace{0.25in}
+
+
+Welcome to the Xevolver XML introductory tutorial.  Xevolver
+XML~(XevXML) is one of software products developed by the Xevolver
+project.  The purpose of this project is to help migration of legacy HPC
+applications to new systems by improving their performance portabilities
+across system generations.  Since a high priority is given to
+performance, an HPC application is often optimized and specialized for a
+particular HPC system. As a result, the performance is not portable to
+other systems.  To make matters worse, such system-specific code
+optimizations are likely to be scattered over the application code. This
+is one main reason why HPC application migration is so painful. It is
+not affordable to reoptimize the whole code whenever a new system
+becomes available.
+
+
+
+XevXML is developed for XML-based AST transformations to provide an easy
+way to user-defined code transformations.  The current implementation of
+XevXML is built on top of the ROSE compiler framework. XevXML converts a
+ROSE's AST to an XML document, and exposes it to programmers. So the
+programmers can use any XML-related technologies and tools to transform
+the AST. Then, the transformed AST is given back to the ROSE compiler
+framework so that the AST is unparsed to generate a transformed
+application code.  Instead of directly modifying an application code,
+programmers can define their own code transformations to optimize the
+code for each system.  System-specific optimizations are represented as
+XML translation rules, which can be defined separately from an
+application code.  This leads to separation between application
+requirements and system requirements, expecting a lower migration cost
+of HPC applications to new systems.
