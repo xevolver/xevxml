@@ -18,8 +18,8 @@ CONFIGURE_FILE(
   )
 
 CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/test/identity/input/test.sh.in"
-  "${PROJECT_SOURCE_DIR}/test/identity/input/test.sh"
+  "${PROJECT_SOURCE_DIR}/test/identity/test.sh.in"
+  "${PROJECT_SOURCE_DIR}/test/identity/test.sh"
   )
 
 CONFIGURE_FILE(

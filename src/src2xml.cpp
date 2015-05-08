@@ -40,6 +40,49 @@
 
 using namespace std;
 
+static  struct option long_opts[]={
+  {"check_fortran_pragma",  1, NULL, 'F'},
+  {"help",                  0, NULL, 'h'},
+  {0,0,0,0}
+};
+bool fortran_pragma=true;
+
+void ProcessOpts(int argc,char** argv)
+{
+  // See manpage of getopt
+  int c;
+  int digit_optind = 0;
+
+
+  while(1){
+    int option_index = 0;
+    c = getopt_long(argc,argv,"F:h",long_opts,&option_index);
+    if(c==-1){
+      break;
+    }
+    switch(c){
+    case'F':
+      if( string("true") == optarg )
+        fortran_pragma = true;
+      else if ( string("false") == optarg )
+        fortran_pragma = false;
+      else
+        fortran_pragma = atoi(optarg);
+      break;
+    case 'h':
+      cerr << "USAGE:" << argv[0] << " [OPTION]... FILENAME " << endl;
+      cerr << "OPTIONS:" << endl;
+      cerr << "-F, --check_fortran_pragma <bool>\t Enable Fortran pragma support (default:true)\n";
+      cerr << "-h, --help                       \t Print this message\n";
+      exit(0);
+      break;
+    case ':':
+    case '?':
+      ; /* do nothing */
+    }
+  }
+}
+
 int main(int argc, char** argv)
 {
   int             fd=0;
@@ -48,6 +91,7 @@ int main(int argc, char** argv)
   //xevxml::Ast2XmlOpt opt;
   vector<string> args;
 
+  ProcessOpts(argc,argv);
   for(int id(0);id<argc;++id)
     args.push_back( string(argv[id]) );
   args.push_back( string("-rose:skip_syntax_check")); // some Fortran codes need this
@@ -64,7 +108,7 @@ int main(int argc, char** argv)
 #endif
   XevXml::XmlInitialize();
   XevXml::XevXmlOption opt;
-  opt.getFortranPragmaFlag() = true;
+  opt.getFortranPragmaFlag() = fortran_pragma;
   //opt.getSkipCompilerGeneratedFlag() = true;
   opt.getSkipCompilerGeneratedFlag() = false;
   fflush(stdout);
