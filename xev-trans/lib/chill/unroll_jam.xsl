@@ -6,12 +6,21 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 
-	<xsl:template match="*" mode="chill_unroll_jam">
+	<xsl:template match="*" mode="chillUnrollJam">
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
+		<xsl:apply-templates select="." mode="xevLoopUnroll">
+			<xsl:with-param name="factor" select="$factor" />
+			<xsl:with-param name="loopName" select="$loopName" />
+		</xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="*" mode="old_chillUnrollJam">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
-			<xsl:apply-templates mode="chill_unroll_jam">
+			<xsl:apply-templates mode="chillUnrollJam">
 				<xsl:with-param name="factor" />
 				<xsl:with-param name="loopName" />
 			</xsl:apply-templates>
@@ -19,19 +28,24 @@
 	</xsl:template>
 
 
-	<xsl:template match="SgFortranDo" mode="chill_unroll_jam">
+
+	<xsl:template match="SgFortranDo" mode="old_chillUnrollJam">
 		<xsl:param name="factor" />
 		<xsl:param name="loopName" />
-		<xsl:comment>
-			libCHiLL.xsl chill_unroll_jam
-		</xsl:comment>
+		<xsl:apply-templates select="." mode="unroll_target_loop">
+			<xsl:with-param name="factor" select="$factor" />
+			<xsl:with-param name="loopName" select="$loopName" />
+		</xsl:apply-templates>
+	</xsl:template>
+
+	<xsl:template match="SgFortranDo" mode="old_chillUnrollJam">
+		<xsl:param name="factor" />
+		<xsl:param name="loopName" />
+
 		<xsl:copy>
 			<xsl:copy-of select="@*" />
-			<!-- start value -->
 			<xsl:copy-of select="./*[1]" />
-			<!-- end value -->
 			<xsl:copy-of select="./*[2]" />
-			<!-- stride value -->
 			<xsl:element name="SgIntVal">
 				<xsl:attribute name="value">
 							<xsl:value-of select="$factor" />
@@ -39,11 +53,11 @@
 			</xsl:element>
 
 			<xsl:apply-templates select="./SgBasicBlock"
-				mode="loop_unroll">
+				mode="xevLoopUnroll">
 				<xsl:with-param name="factor" select="$factor" />
 				<xsl:with-param name="loopName" select="$loopName" />
 			</xsl:apply-templates>
-
+			<xsl:copy-of select="PreprocessingInfo" />
 		</xsl:copy>
 	</xsl:template>
 

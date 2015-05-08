@@ -25,7 +25,7 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="call_chill_unroll0">
-		<xsl:apply-templates select="." mode="chill_unroll">
+		<xsl:apply-templates select="." mode="chillUnroll">
 			<xsl:with-param name="factor" select="2" />
 			<xsl:with-param name="loopName" select="'i'" />
 		</xsl:apply-templates>

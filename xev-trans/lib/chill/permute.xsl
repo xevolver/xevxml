@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:template match="*" mode="chill_permute">
+	<xsl:template match="*" mode="chillPermute">
 		<xsl:param name="firstLoop" />
 		<xsl:param name="secondLoop" />
 		<xsl:param name="thirdLoop" />
@@ -35,8 +35,8 @@
 					</xsl:element>
 				</xsl:element>
 			</xsl:element>
+			<xsl:copy-of select="PreprocessingInfo" />
 		</xsl:element>
-
 	</xsl:template>
 
 	<xsl:template match="*" mode="find_permute_loop">

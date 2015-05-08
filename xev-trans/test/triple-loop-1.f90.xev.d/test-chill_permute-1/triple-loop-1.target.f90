@@ -5,6 +5,7 @@ program triple_loop_1
 
     real*8 A(n, n, n), B(n, n, n)
 
+    !$xev loop_tag
     do i=1,n-1
         do k=1,n-1
             do j=1,n-1

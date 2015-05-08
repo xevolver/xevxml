@@ -19,6 +19,7 @@ program UnrollTest
             do j=1,N
                 c(i,j)=0.0
                 loopUpperBound = N
+                !$xev loop_tag
                 do k=1, loopUpperBound
                     c(i,j)=c(i,j)+b(k,j)*a(i,k)
                 end do

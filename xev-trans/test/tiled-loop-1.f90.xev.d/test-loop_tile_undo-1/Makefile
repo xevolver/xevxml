@@ -1,6 +1,6 @@
 include ../../../lib/Makefile-xev.mk
 
-check: clean-translated tiled-loop-1.diff2.f90
+check: clean-translated tiled-loop-1.diff.f90
 
 test:
 	@echo "test"

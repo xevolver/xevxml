@@ -4,16 +4,12 @@
 
 	<xsl:import href="../libXev.xsl" />
 
-	<xsl:template match="*" mode="chill_tile">
-		<xsl:param name="loopName" />
-		<xsl:param name="start" />
-		<xsl:param name="end" />
-		<xsl:param name="size" />
-		<xsl:apply-templates select="." mode="loop_tile">
-			<xsl:with-param name="loopName" select="$loopName" />
-			<xsl:with-param name="start" select="$start" />
-			<xsl:with-param name="end" select="$end" />
-			<xsl:with-param name="size" select="$size" />
+	<xsl:template match="*" mode="chillTile">
+		<xsl:param name="size1" />
+		<xsl:param name="size2" />
+		<xsl:apply-templates select="." mode="xevLoopTile">
+			<xsl:with-param name="size1" select="$size1" />
+			<xsl:with-param name="size2" select="$size2" />
 		</xsl:apply-templates>
 	</xsl:template>
 
