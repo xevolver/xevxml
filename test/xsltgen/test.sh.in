@@ -40,29 +40,37 @@ OUT=$DIR
 
 cat /dev/null > $OUT/$LOG
 $SRC2XML $SRC 1> $OUT/$XML 2>> $OUT/$LOG
-if [ $? -eq 0 ]; then
-    $XSLTGEN < $DIR/$JSON 1> $OUT/$XSLT 2>> $OUT/$LOG
-    if [ $? -eq 0 ]; then
-        $XSLTEXEC $OUT/$XSLT < $OUT/$XML 1> $OUT/AFTER_$XML 2>> $OUT/$LOG
-        if [ $? -eq 0 ]; then
-            $XML2SRC < $OUT/AFTER_$XML 1> $OUT/AFTER_$EXP 2>> $OUT/$LOG
-            if [ $? -eq 0 ]; then
-                US="_"
-                diff $OUT/AFTER_$EXP $OUT/EXPECTED_$EXP > $OUT/$DIF
-                echo 1>&2
-                exit 0
-            fi
-        else
-            echo 1>&2
-            exit 3
-        fi
-    else
-        echo 1>&2
-        exit 2
-    fi
-else
-    echo 1>&2
+if [ $? -ne 0 ]; then
+    echo " NG (src2xml failed)" 1>&2
     exit 1
 fi
-echo 1>&2
-exit 4
+
+$XSLTGEN < $DIR/$JSON 1> $OUT/$XSLT 2>> $OUT/$LOG
+if [ $? -ne 0 ]; then
+    echo " NG (xsltgen failed)" 1>&2
+    exit 2
+fi
+
+
+$XSLTEXEC $OUT/$XSLT < $OUT/$XML 1> $OUT/AFTER_$XML 2>> $OUT/$LOG
+if [ $? -ne 0 ]; then
+    echo " NG (xsltexec failed)" 1>&2
+    exit 3
+fi
+
+
+$XML2SRC < $OUT/AFTER_$XML 1> $OUT/AFTER_$EXP 2>> $OUT/$LOG
+if [ $? -ne 0 ]; then
+    echo " NG (xml2src failed)" 1>&2
+    exit 4
+fi
+
+US="_"
+diff $OUT/AFTER_$EXP $OUT/EXPECTED_$EXP > $OUT/$DIF
+if [ $? -ne 0 -o -s $OUT/$DIF ]; then
+    echo " NG (mismatch)" 1>&2
+    exit 5
+fi
+
+echo " OK" 1>&2
+exit 0

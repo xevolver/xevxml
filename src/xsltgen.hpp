@@ -40,6 +40,7 @@ const char xsltheader[]=
 
 const char xsltfooter[]="\n</xsl:stylesheet>\n";
 
+#if 0
 const char* xslttmpl[] =
   {
     /* 0 */                               /* 1 */
@@ -61,6 +62,31 @@ const char* xslttmpl[] =
     "      </xsl:otherwise>\n",
     "    </xsl:choose>\n",
     "  </xsl:template>\n"
+  };
+#endif
+
+const char* xslttmpl[] =
+  {
+    /* 0 */                                 /* 1 */
+    "  <xsl:template match=\"",/*tagret*/ "\" mode=\"xevInitHook\">\n",
+    /* 2 */
+    "    <xsl:apply-templates select=\".\" mode=\"xevFindDirective\">\n",
+    /* 3 */
+    "      <xsl:with-param name=\"directiveName\" select=\"'", 
+    /*xev loop_tag*/ 
+    "'\" />\n",                       /* 4 */
+    "    </xsl:apply-templates>\n",   /* 5 */
+    "  </xsl:template>\n",            /* 6 */
+    "  <xsl:template match=\"*\" mode=\"xevMoveHook\">\n", /* 7 */
+    "    <xsl:apply-templates select=\".\" mode=\"xevGoToHere\" />\n", /* 8 */
+    "  </xsl:template>\n", /* 9 */
+    "  <xsl:template match=\"*\" mode=\"xevTransformationHook\">\n", /* 10 */
+    "  </xsl:template>\n", /* 11 */
+    /* 12 - 15 */
+    "  <xsl:copy>\n",
+    "    <xsl:copy-of select=\"@*\" />\n",
+    "    <xsl:apply-templates />\n",
+    "  </xsl:copy>\n",
   };
 
 const char* xlstcaller[] =

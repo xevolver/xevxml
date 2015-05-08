@@ -125,7 +125,7 @@ int WriteApplyTemplates(const picojson::value::object& dir)
   }
   if(str_replace.size() == 0 && rules.size()==0){
     /*just copy all XML elements and attributes*/
-    for(int m(7);m<11;++m)
+    for(int m(12);m<16;++m)
       std::cout << xslttmpl[m];
   }
   if(str_after.size()>0)
@@ -192,17 +192,18 @@ void WriteXslt(const picojson::value::object& root)
           std::cout << xslttmpl[4];
         }
         else {
+	  std::cout << " <xsl:apply-template mode=\"xevFindDirective\"/>\n";
           // directive name is *. don't check if a directive exists.
-          std::cout << "      <xsl:when test=\"true()\">\n";
+	  // std::cout << "      <xsl:when test=\"true()\">\n";
         }
-        /* for each directive */
-        WriteApplyTemplates((*k)->second.get<picojson::object>());
-        std::cout << xslttmpl[5];
+	for(int m(5);m<11;++m)
+	  std::cout << xslttmpl[m];
+
+	// rules associated with the directive
+	WriteApplyTemplates((*k)->second.get<picojson::object>());
+	std::cout << xslttmpl[11];
       }
     }
-    /* otherwise element */
-    for(int m(6);m<14;++m)
-      std::cout << xslttmpl[m];
   }
 
   WriteCaller();
