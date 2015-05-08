@@ -2,8 +2,8 @@
     "xev loop_tag":{
         "target":"SgFortranDo",
         "rules":[
-            {"chill_unroll_jam":{"loopName":"k","factor":2}},
-            {"chill_unroll":{"loopName":"i","factor":2}}
+            {"chillUnrollJam":{"loopName":"k","factor":2}},
+            {"chillUnroll":{"loopName":"i","factor":2}}
         ]
     }
 }
