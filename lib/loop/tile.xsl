@@ -1,8 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"  xmlns:exslt="http://exslt.org/common">
 
 	<xsl:template match="*" mode="xevLoopTile">
+		<xsl:param name="loopName1" />
+		<xsl:param name="size1" />
+		<xsl:param name="loopName2" />
+		<xsl:param name="size2" />
+
+
+							<SgFortranDo style="0" end="1" slabel="">
+								<SgAssignOp>
+									<SgVarRefExp name="j_tile" lvalue="1" />
+									<SgIntVal value="1" string="1" />
+								</SgAssignOp>
+								<SgSubtractOp>
+									<SgVarRefExp name="n" />
+									<SgIntVal value="1" string="1" />
+								</SgSubtractOp>
+								<SgIntVal value="4" string="4" />
+								<SgBasicBlock>
+									<SgFortranDo style="0" end="1" slabel="">
+										<SgAssignOp>
+											<SgVarRefExp name="i_tile" lvalue="1" />
+											<SgIntVal value="1" string="1" />
+										</SgAssignOp>
+										<SgSubtractOp>
+											<SgVarRefExp name="n" />
+											<SgIntVal value="1" string="1" />
+										</SgSubtractOp>
+										<SgIntVal value="4" string="4" />
+										<SgBasicBlock>
+											<SgFortranDo style="0" end="1" slabel="">
+												<SgAssignOp>
+													<SgVarRefExp name="j" lvalue="1" />
+													<SgVarRefExp name="j_tile" />
+												</SgAssignOp>
+												<SgFunctionCallExp>
+													<SgFunctionRefExp name="min" kind="1" />
+													<SgExprListExp>
+														<SgSubtractOp>
+															<SgVarRefExp name="n" />
+															<SgIntVal value="1" string="1" />
+														</SgSubtractOp>
+														<SgSubtractOp>
+															<SgAddOp>
+																<SgVarRefExp name="j_tile" />
+																<SgIntVal value="4" string="4" />
+															</SgAddOp>
+															<SgIntVal value="1" string="1" />
+														</SgSubtractOp>
+													</SgExprListExp>
+												</SgFunctionCallExp>
+												<SgNullExpression />
+												<SgBasicBlock>
+													<SgFortranDo style="0" end="1" slabel="">
+														<SgAssignOp>
+															<SgVarRefExp name="i" lvalue="1" />
+															<SgVarRefExp name="i_tile" />
+														</SgAssignOp>
+														<SgFunctionCallExp>
+															<SgFunctionRefExp name="min" kind="1" />
+															<SgExprListExp>
+																<SgSubtractOp>
+																	<SgVarRefExp name="n" />
+																	<SgIntVal value="1" string="1" />
+																</SgSubtractOp>
+																<SgSubtractOp>
+																	<SgAddOp>
+																		<SgVarRefExp name="i_tile" />
+																		<SgIntVal value="4" string="4" />
+																	</SgAddOp>
+																	<SgIntVal value="1" string="1" />
+																</SgSubtractOp>
+															</SgExprListExp>
+														</SgFunctionCallExp>
+														<SgNullExpression />
+														<SgBasicBlock>
+															<SgExprStatement>
+																<SgAssignOp>
+																	<SgPntrArrRefExp lvalue="1">
+																		<SgVarRefExp name="B" />
+																		<SgExprListExp>
+																			<SgVarRefExp name="i" />
+																			<SgVarRefExp name="j" />
+																			<SgVarRefExp name="k" />
+																		</SgExprListExp>
+																	</SgPntrArrRefExp>
+																	<SgPntrArrRefExp>
+																		<SgVarRefExp name="A" />
+																		<SgExprListExp>
+																			<SgVarRefExp name="i" />
+																			<SgVarRefExp name="j" />
+																			<SgVarRefExp name="k" />
+																		</SgExprListExp>
+																	</SgPntrArrRefExp>
+																</SgAssignOp>
+															</SgExprStatement>
+														</SgBasicBlock>
+													</SgFortranDo>
+												</SgBasicBlock>
+											</SgFortranDo>
+										</SgBasicBlock>
+									</SgFortranDo>
+								</SgBasicBlock>
+							</SgFortranDo>
+	
+	</xsl:template>
+	
+
+	
+	<xsl:template match="*" mode="old_xevLoopTile">
 		<xsl:param name="loopName" />
 		<xsl:param name="start" />
 		<xsl:param name="end" />
