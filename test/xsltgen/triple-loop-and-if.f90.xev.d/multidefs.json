@@ -1,0 +1,10 @@
+{
+    "xev loop_tag2":{
+        "target":"SgIfStmt",
+        "insert-before":"!$test2"
+    },
+    "xev loop_tag":{
+        "target":"*",
+        "insert-before":"!$test1"
+    }
+}
