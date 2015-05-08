@@ -395,7 +395,6 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
   SgPragma* ret = 0;
   string line;
 
-#if 0
   if(XmlGetAttributeValue(node,"pragma",&line)){
 #if 0
     std::string tmp;
@@ -415,7 +414,7 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-#endif
+#if 0
   line = "";
   if(node->getFirstChild()){
     char* buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
@@ -424,11 +423,11 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
     xe::XMLString::release(&buf);
   }
   ret = sb::buildPragma(line);
+#endif
   return ret;
 }
 /** XML attribute writer of SgPragma */
-ATTRIB_SUPP_DEFAULT(Pragma);
-#if 0
+//ATTRIB_SUPP_DEFAULT(Pragma);
 void XevSageVisitor::attribSgPragma(SgNode* node)
 {
   SgPragma* n = isSgPragma(node);
@@ -437,15 +436,15 @@ void XevSageVisitor::attribSgPragma(SgNode* node)
     sstr() << " pragma=\"" << XmlStr2Entity(n->get_pragma()) << "\" ";
   }
 }
-#endif
-//INODE_SUPP_DEFAULT(Pragma);
+INODE_SUPP_DEFAULT(Pragma);
+#if 0
 void XevSageVisitor::inodeSgPragma(SgNode* node)
 {
   SgPragma* n = isSgPragma(node);
   if(n)
     sstr() << XmlStr2Entity(n->get_pragma()) << endl;
 }
-
+#endif
 // ===============================================================================
 /// Visitor of a SgSourceFile element in an XML document
 SgNode*
