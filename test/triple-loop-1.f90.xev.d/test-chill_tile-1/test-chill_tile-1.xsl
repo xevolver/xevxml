@@ -14,15 +14,15 @@
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevMoveHook">
-		<xsl:apply-templates select="." mode="xevGoToHere" />
+		<xsl:apply-templates select="." mode="xevGoToLoop">
+			<xsl:with-param name="loopName" select="'j'" />
+		</xsl:apply-templates>
 	</xsl:template>
 
 	<xsl:template match="*" mode="xevTransformationHook">
 		<xsl:apply-templates select="." mode="chillTile">
-			<xsl:with-param name="loopName" select="'i'" />
-			<xsl:with-param name="start" select="'1'" />
-			<xsl:with-param name="end" select="'n - 1'" />
-			<xsl:with-param name="size" select="'4'" />
+			<xsl:with-param name="size1" select="'4'" />
+			<xsl:with-param name="size2" select="'4'" />
 		</xsl:apply-templates>
 	</xsl:template>
 
