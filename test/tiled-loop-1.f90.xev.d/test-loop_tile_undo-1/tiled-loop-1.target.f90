@@ -16,6 +16,7 @@ program TileLoop
     call cpu_time(t1)
 
     do k=1,100
+        !$xev loop_tag
         do j=1,N
             do i=1,N
                 a(i,j)=a(i,j)+b(i,j)*a(i,j)
@@ -25,6 +26,7 @@ program TileLoop
 
     call cpu_time(t2)
     ta=real(t2-t1)/100
+    !    print *,  ta
 
     if (a(1,1) == 2.53530120E+30) then
         print *, "OK: ", a(1,1)
