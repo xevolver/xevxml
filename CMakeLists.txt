@@ -34,33 +34,6 @@ install_files( /docs/ FILES ${PROJECT_SOURCE_DIR}/README.md)
 
 enable_testing()
 
-file(GLOB files ${PROJECT_SOURCE_DIR}/test/identity/input/*.f90
-  ${PROJECT_SOURCE_DIR}/test/unparse/input/*.c)
-foreach(absname ${files})
-  get_filename_component(filename ${absname} NAME)
-  add_test(NAME "identity-${filename}"
-    COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/input/test.sh ${filename}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/
-    )
-endforeach()
-
-add_test(NAME "input-src"
-    COMMAND make input-src
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/xev-trans/test
-    )
-
-file(GLOB files ${PROJECT_SOURCE_DIR}/xev-trans/test/*.f90.xev.d/test-*/*.xsl)
-foreach(absname ${files})
-  get_filename_component(filename ${absname} NAME)
-  get_filename_component(dirname ${absname} DIRECTORY)
-  add_test(NAME "trans-${filename}" # error for duplicate test name
-#  add_test(NAME "trans-${dirname}"
-    COMMAND make check
-    WORKING_DIRECTORY ${dirname}
-    )
-endforeach()
-
-
 file(GLOB sources ${PROJECT_SOURCE_DIR}/test/xsltgen/*.f90)
 foreach(f90absname ${sources})
   get_filename_component(f90name ${f90absname} NAME)
@@ -73,6 +46,41 @@ foreach(f90absname ${sources})
       )
   endforeach()
 endforeach()
+
+add_test(NAME "input-src"
+    COMMAND make input-src
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/xev-trans/test
+    )
+
+file(GLOB files ${PROJECT_SOURCE_DIR}/xev-trans/test/*.f90.xev.d/test-*/*.xsl)
+foreach(absname ${files})
+  get_filename_component(filename ${absname} NAME)
+  get_filename_component(dirname ${absname} DIRECTORY)
+  add_test(NAME "trans-${filename}"
+    COMMAND make check
+    WORKING_DIRECTORY ${dirname}
+    )
+endforeach()
+
+file(GLOB files ${PROJECT_SOURCE_DIR}/xev-trans/test/*.f90)
+foreach(absname ${files})
+  get_filename_component(filename ${absname} NAME)
+  add_test(NAME "xev-trans-identity-${filename}"
+    COMMAND sh test.sh ${absname}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/
+    )
+endforeach()
+
+file(GLOB files ${PROJECT_SOURCE_DIR}/test/identity/input/*.f90
+  ${PROJECT_SOURCE_DIR}/test/unparse/input/*.c)
+foreach(absname ${files})
+  get_filename_component(filename ${absname} NAME)
+  add_test(NAME "identity-${filename}"
+    COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/input/test.sh ${filename}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/
+    )
+endforeach()
+
 
 #add_test(
 #  NAME translation-test

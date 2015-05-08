@@ -1,0 +1,27 @@
+
+
+
+# generated files
+/docs/doxygen/html/
+/src/config.h
+/test/identity/input/test.sh
+/test/xsltgen/test.sh
+/xev-trans/lib/Makefile-xev.mk
+
+# identity test files
+/test/identity/input/*.rmod
+/test/identity/output/xev_*.f90
+/test/identity/output/rose_*.f90
+/test/identity/output/*.dif
+/test/identity/output/*.log
+/test/identity/output/*.xml
+
+# xsltgen test files
+/test/xsltgen/*.xev.d/AFTER_*
+/test/xsltgen/*.xev.d/*.dif
+/test/xsltgen/*.xev.d/*.log
+/test/xsltgen/*.xev.d/*.xml
+/test/xsltgen/*.xev.d/*.xsl
+
+# general
+*~
