@@ -180,8 +180,8 @@ this code transformation rule.
 The template rule with the \texttt{xevTransformationHook} mode
 represents the third step. In the rule,
 \texttt{$<$xsl:apply-templates$>$} is used with the
-\texttt{chill\_unroll} mode for loop unrolling. The
-\texttt{chill\_unroll} mode needs two parameters, \texttt{factor} and
+\texttt{chillUnroll} mode for loop unrolling. The
+\texttt{chillUnroll} mode needs two parameters, \texttt{factor} and
 \texttt{loopName}. In this example, the third rule unrolls Loop $i$ four
 times.
 
@@ -217,14 +217,6 @@ follows.
 
  \multicolumn{3}{l}{Movement rules}\\
  \hline
-\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
- $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
-&\texttt{N} & \\ &&\\ \hline
-
-
-\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
- $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
-&\texttt{N} & \\ &&\\ \hline
 
 \texttt{xevGoToLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
 loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
@@ -233,6 +225,10 @@ loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
 \texttt{xevGoToVar} & \texttt{varName} & \multirow{3}{9cm}{A variable
  reference to \texttt{varName} is visited by using the rule.}\\
 && \\ &&\\ \hline
+
+\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
+ $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
+&\texttt{N} & \\ &&\\ \hline
 
 \texttt{xevGoToHere} & & \multirow{3}{9cm}{This is a dummy rule to do nothing at the second step of a code transformation.}\\
 && \\ &&\\ \hline
@@ -246,76 +242,291 @@ loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
  to be collapsed. } \\
 & \texttt{secondLoop} & \\ &&\\ \hline
 
-\texttt{xevLoopFission} & \todo{none?}& \multirow{3}{9cm}{A loop is broken into
- multiple loops. Now each statement in the original loop is moved to a
+\texttt{xevLoopFission} & none & \multirow{3}{9cm}{A loop is broken into
+ multiple loops. \shtodo{Now each statement in the original loop is moved to a
  different loop. Thus, every new loop contains only one statement in its
- body.} \\
+ body.}} \\
 &&\\ &&\\ \hline
 
-\texttt{xevLoopFusion} & \todo{none?}& \multirow{1}{9cm}{Two consecutive loops are
+\texttt{xevLoopFusion} & none & \multirow{1}{9cm}{Two consecutive loops are
  fused into a single loop. Statements in the two loops are moved into
  the body of the new loop.} \\
  &&\\ &&\\ \hline
 
-\texttt{xevLoopInterchange} & \todo{none?} & \multirow{3}{9cm}{\todo{Two
- consecutive loops are interchanged?}} \\
+\texttt{xevLoopInterchange} & none & \multirow{2}{9cm}{Two
+ consecutive loops are interchanged.} \\
 &&\\ &&\\ \hline
 
-\texttt{xevLoopTile} & \texttt{loopName} & \multirow{4}{9cm}{\todo{A loop's
- iteration space is partitioned into blocks. \texttt{loopName} is
- the name of the index variable. \texttt{start} and \texttt{end} are the
- lower and upper bounds of the space. \texttt{size} is the block size.}} \\
-& \texttt{start} & \\
-& \texttt{end} &\\
-& \texttt{size} &\\ \hline
+\texttt{xevLoopTile} & \texttt{size1} & \multirow{3}{9cm}{
+Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1} is
+ the block size of the outer loop and  \texttt{size2} is the block size of the inner loop.} \\
+& \texttt{size2} &\\
+&  &\\ \hline
 
-\texttt{xevLoopUnroll} & \texttt{loopName} & \multirow{3}{9cm}{A loop is
- unrolled. \texttt{loopName} is the name of the index
- variable. \texttt{factor} is an unroll factor; every
+\texttt{xevLoopUnroll} & \shtodo{omit loopName?} & \multirow{3}{9cm}{A loop is
+ unrolled. \shtodo{\texttt{loopName} is the name of the index
+ variable.} \texttt{factor} is an unroll factor; every
  statement in the loop body is duplicated \texttt{factor} times.} \\ &
  \texttt{factor} & \\ &&\\ \hline
 
  \multicolumn{3}{l}{CHiLL-compatible versions of optimization rules}\\\hline
 
- \texttt{chill\_fuse} & \todo{none?} & \multirow{1}{9cm}{Two consecutive loops are
+ \texttt{chillFuse} & none & \multirow{1}{9cm}{Two consecutive loops are
  fused into a single loop. Statements in the two loops are moved into
  the body of the new loop.} \\
  &&\\ &&\\ \hline
 
- \texttt{chill\_permute} & \texttt{firstLoop} & \multirow{1}{9cm}{The order of up to
+ \texttt{chillPermute} & \texttt{firstLoop} & \multirow{1}{9cm}{The order of up to
  three loops are changed. \texttt{firstLoop}, \texttt{secondLoop}, and
  \texttt{thirdLoop} are the names of index variables used by the loops
  to be permuted.} \\
  &\texttt{secondLoop}&\\ &\texttt{thirdLoop}&\\ \hline
 
- \texttt{chill\_split} & \todo{none?} & \multirow{1}{9cm}{This is the
+ \texttt{chillSplit} & none & \multirow{1}{9cm}{This is the
 CHiLL-compatible version of \texttt{xevLoopFission}.} \\ \hline
 
-\texttt{chill\_tile} & \texttt{loopName} & \multirow{4}{9cm}{\todo{A loop's
- iteration space is partitioned into blocks. \texttt{loopName} is
- the name of the index variable. \texttt{start} and \texttt{end} are the
- lower and upper bounds of the space. \texttt{size} is the block size.}} \\
-& \texttt{start} & \\
-& \texttt{end} &\\
-& \texttt{size} &\\ \hline
+\texttt{chillTile} & \texttt{size1} & \multirow{3}{9cm}{
+Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1} is
+ the block size of the outer loop and  \texttt{size2} is the block size of the inner loop.} \\
+& \texttt{size2} &\\
+&  &\\ \hline
 
-\texttt{chill\_unroll} & \texttt{loopName} & \multirow{3}{9cm}{A loop in
+\texttt{chillUnroll} & \shtodo{omit loopName?}  & \multirow{3}{9cm}{A loop in
  unrolled. \texttt{loopName} is the name of the index
  variable. \texttt{factor} is an unroll factor; every
  statement in the loop body is duplicated \texttt{factor} times.} \\ &
  \texttt{factor} & \\ &&\\ \hline
 
-\texttt{chill\_unroll} & \texttt{loopName} & \multirow{4}{9cm}{The outer
+\texttt{chillUnrollJam} & \texttt{loopName} & \multirow{4}{9cm}{The outer
  loop of a loop nest is unrolled. \texttt{loopName} is the name of the
  index variable. \texttt{factor} is an unroll factor; every statement in
  the loop body is duplicated \texttt{factor} times.} \\ &
  \texttt{factor} & \\ &&\\ &&\\  \hline
 \end{longtable}
 
+\shtodo{add recent rules}
+
 \section{Custom Rules}\label{sec:custom}
 
-\todo{To be described}
+In this section, suggested steps for implmenting custom XSLT rules are described.
+As an example, a rule of loop inversion[citation] is introduced.
+
+The rule will translate this original while loop
+\begin{framed}
+\begin{src}
+    do while(i<n)
+        a(i) = 0
+        i = i+1
+    end do
+\end{src}
+\end{framed}
+
+to this target code.
+
+\begin{framed}
+\begin{src}
+    if (i<n) then
+        do
+            a(i) = 0
+            i = i+1
+            if  (i<n)  cycle
+            exit
+        end do
+    endif
+\end{src}
+\end{framed}
+
+
+
+\subsection{Obtain Specific XML Elements of the Expected Code}
+
+The following XML elements can be obtained with src2xml on the target code.
+
+\begin{framed}
+\begin{src}
+<SgIfStmt end="1" then="1">
+	<SgExprStatement>
+		<SgLessThanOp>
+			<SgVarRefExp name="i" />
+			<SgVarRefExp name="n" />
+		</SgLessThanOp>
+	</SgExprStatement>
+	<SgBasicBlock>
+		<SgFortranDo style="0" end="1" slabel="">
+			<SgNullExpression />
+			<SgNullExpression />
+			<SgNullExpression />
+			<SgBasicBlock>
+				<SgExprStatement>
+					<SgAssignOp>
+						<SgPntrArrRefExp lvalue="1">
+							<SgVarRefExp name="a" />
+							<SgExprListExp>
+								<SgVarRefExp name="i" />
+							</SgExprListExp>
+						</SgPntrArrRefExp>
+						<SgIntVal value="0" string="0" />
+					</SgAssignOp>
+				</SgExprStatement>
+				<SgExprStatement>
+					<SgAssignOp>
+						<SgVarRefExp name="i" lvalue="1" />
+						<SgAddOp>
+							<SgVarRefExp name="i" />
+							<SgIntVal value="1" string="1" />
+						</SgAddOp>
+					</SgAssignOp>
+				</SgExprStatement>
+				<SgIfStmt end="0" then="0">
+					<SgExprStatement>
+						<SgLessThanOp>
+							<SgVarRefExp name="i" />
+							<SgVarRefExp name="n" />
+						</SgLessThanOp>
+					</SgExprStatement>
+					<SgBasicBlock>
+						<SgContinueStmt />
+					</SgBasicBlock>
+					<SgBasicBlock />
+				</SgIfStmt>
+				<SgBreakStmt />
+			</SgBasicBlock>
+		</SgFortranDo>
+	</SgBasicBlock>
+	<SgBasicBlock />
+</SgIfStmt>
+\end{src}
+\end{framed}
+
+\subsubsection{Generalize /SgIfStmt/SgExprStatement}\label{subsubsec:cond}
+
+\shtodo{explanation}
+
+from
+
+\begin{framed}
+\begin{src}
+<SgIfStmt end="1" then="1">
+	<SgExprStatement>
+		<SgLessThanOp>
+			<SgVarRefExp name="i" />
+			<SgVarRefExp name="n" />
+		</SgLessThanOp>
+	</SgExprStatement>
+\end{src}
+\end{framed}
+
+to
+
+\begin{framed}
+\begin{src}
+		<xsl:copy-of select="SgExprStatement" />
+\end{src}
+\end{framed}
+
+\subsubsection{Generalize /SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock}
+
+\shtodo{explanation}
+
+from
+
+\begin{framed}
+\begin{src}
+				<SgExprStatement>
+					<SgAssignOp>
+						<SgPntrArrRefExp lvalue="1">
+							<SgVarRefExp name="a" />
+							<SgExprListExp>
+								<SgVarRefExp name="i" />
+							</SgExprListExp>
+						</SgPntrArrRefExp>
+						<SgIntVal value="0" string="0" />
+					</SgAssignOp>
+				</SgExprStatement>
+				<SgExprStatement>
+					<SgAssignOp>
+						<SgVarRefExp name="i" lvalue="1" />
+						<SgAddOp>
+							<SgVarRefExp name="i" />
+							<SgIntVal value="1" string="1" />
+						</SgAddOp>
+					</SgAssignOp>
+				</SgExprStatement>
+\end{src}
+\end{framed}
+
+to
+
+\begin{framed}
+\begin{src}
+					<xsl:copy-of select="SgBasicBlock/*" />
+\end{src}
+\end{framed}
+
+\subsubsection{Generalize /SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock/SgIfStmt/SgExprStatement}
+
+The generalization of the SgExprStatement in the loop body is almost the same as \ref{subsubsec:cond}
+
+from
+
+\begin{framed}
+\begin{src}
+					<SgExprStatement>
+						<SgLessThanOp>
+							<SgVarRefExp name="i" />
+							<SgVarRefExp name="n" />
+						</SgLessThanOp>
+					</SgExprStatement>
+\end{src}
+\end{framed}
+
+to
+
+\begin{framed}
+\begin{src}
+		<xsl:copy-of select="SgExprStatement" />
+\end{src}
+\end{framed}
+
+
+\subsection{Obtain Generalized Custom Rules}
+
+\shtodo{explanation}
+
+
+\begin{framed}
+\begin{src}
+<xsl:template match="SgWhileStmt" mode="xevLoopInversion">
+	<SgIfStmt>
+		<xsl:copy-of select="SgExprStatement" />
+		<SgBasicBlock>
+			<SgFortranDo style="0" end="1" slabel="">
+				<SgNullExpression />
+				<SgNullExpression />
+				<SgNullExpression />
+				<SgBasicBlock>
+					<xsl:copy-of select="SgBasicBlock/*" />
+					<SgIfStmt end="0" then="0">
+						<xsl:copy-of select="SgExprStatement" />
+						<SgBasicBlock>
+							<SgContinueStmt />
+						</SgBasicBlock>
+						<SgBasicBlock />
+					</SgIfStmt>
+					<SgBreakStmt />
+				</SgBasicBlock>
+			</SgFortranDo>
+		</SgBasicBlock>
+		<SgBasicBlock />
+	</SgIfStmt>
+</xsl:template>
+\end{src}
+\end{framed}
+
+
+As a result, the above rule can be obtained for loop inversion transformation.
 
 \section{Summary}
 
-\todo{To be described}
+\shtodo{To be described}
+
