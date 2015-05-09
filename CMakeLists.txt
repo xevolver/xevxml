@@ -47,6 +47,13 @@ foreach(f90absname ${sources})
   endforeach()
 endforeach()
 
+
+add_test(NAME "test-find_directive-1"
+      COMMAND make check
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/xev-trans/test/find/test-find_directive-1
+      )
+
+
 add_test(NAME "input-src"
     COMMAND make input-src
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/xev-trans/test

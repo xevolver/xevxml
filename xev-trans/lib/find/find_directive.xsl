@@ -6,15 +6,7 @@
 		<xsl:param name="directiveName" />
 		<xsl:choose>
 			<xsl:when
-				test="self::SgFortranDo/preceding-sibling::*[1]/SgPragma/@pragma = $directiveName">
-				<xsl:apply-templates select="." mode="xevMoveHook" />
-			</xsl:when>
-			<xsl:when
-				test="self::SgWhileStmt/preceding-sibling::*[1]/SgPragma/@pragma = $directiveName">
-				<xsl:apply-templates select="." mode="xevMoveHook" />
-			</xsl:when>
-			<xsl:when
-				test="self::SgIfStmt/preceding-sibling::*[1]/SgPragma/@pragma = $directiveName">
+				test="preceding-sibling::*[1]/SgPragma/@pragma = $directiveName">
 				<xsl:apply-templates select="." mode="xevMoveHook" />
 			</xsl:when>
 			<xsl:otherwise>
