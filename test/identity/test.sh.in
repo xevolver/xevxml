@@ -36,6 +36,18 @@ case $SRC in
 	LOG=`echo $SRC |sed 's/.F$/.log/'`
 	echo -n "\"\t\t\t   r" 1>&2
 	;;
+    *.f)
+	XML=`echo $SRC |sed 's/.f$/.xml/'`
+	DIF=`echo $SRC |sed 's/.f$/.dif/'`
+	LOG=`echo $SRC |sed 's/.f$/.log/'`
+	echo -n "\"\t\t\t   r" 1>&2
+	;;
+    *.f03)
+	XML=`echo $SRC |sed 's/.f03$/.xml/'`
+	DIF=`echo $SRC |sed 's/.f03$/.dif/'`
+	LOG=`echo $SRC |sed 's/.f03$/.log/'`
+	echo -n "\"\t\t\t   r" 1>&2
+	;;
 esac
 OUT=output
 IN=input/
