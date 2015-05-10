@@ -193,6 +193,8 @@ written for Fortran programs. It is ongoing to define such rules for C
 programs.  The predefined rules currently included in the library are as
 follows.
 
+\vspace{36pt}
+
 \begin{longtable}[l]{l|l|l}
  \hline
  Mode & Parameters & Description \\
@@ -210,33 +212,31 @@ follows.
  \endlastfoot
  \multicolumn{3}{l}{Initialization rules}\\
  \hline
-\texttt{xevFindDirective} & \texttt{directiveName} & \multirow{3}{9cm}{A
+\texttt{xevFindDirective} & \texttt{directiveName} & \multirow{2}{9cm}{A
  compiler directive specified by the \texttt{directiveName} attribute is
  found by this rule.}\\
-&& \\ &&\\ \hline
-
-\pagebreak
-
+&&\\ \hline
+%\pagebreak
  \multicolumn{3}{l}{Movement rules}\\
  \hline
 
-\texttt{xevGoToLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
+\texttt{xevGoToLoop} & \texttt{loopName} & \multirow{2}{9cm}{The
 loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
-&& \\ &&\\ \hline
+&&\\ \hline
 
-\texttt{xevGoToVar} & \texttt{varName} & \multirow{3}{9cm}{A variable
+\texttt{xevGoToVar} & \texttt{varName} & \multirow{2}{9cm}{A variable
  reference to \texttt{varName} is visited by using the rule.}\\
-&& \\ &&\\ \hline
+&&\\ \hline
 
-\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{3}{9cm}{The
+\texttt{xevSkipToNthLoop} & \texttt{loopName} & \multirow{2}{9cm}{The
  $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
-&\texttt{N} & \\ &&\\ \hline
+&\texttt{N} & \\ \hline
 
-\texttt{xevGoToHere} & none & \multirow{3}{9cm}{This is 
+\texttt{xevGoToHere} & none & \multirow{2}{9cm}{This is
 a dummy rule to do nothing at the second step of a code transformation.}\\
-&& \\ &&\\ \hline
+&&\\ \hline
 
-\pagebreak
+%\pagebreak
 
  \multicolumn{3}{l}{Basic loop optimization rules}\\
  \hline
@@ -254,28 +254,28 @@ a dummy rule to do nothing at the second step of a code transformation.}\\
 % body.} \\
 %&&\\ &&\\ \hline
 
-\texttt{xevLoopFusion} & none & \multirow{1}{9cm}{Two consecutive loops are
+\texttt{xevLoopFusion} & none & \multirow{3}{9cm}{Two consecutive loops are
  fused into a single loop. Statements in the two loops are moved into
  the body of the new loop.} \\
  &&\\ &&\\ \hline
 
-\texttt{xevLoopInterchange} & none & \multirow{2}{9cm}{Two
+\texttt{xevLoopInterchange} & none & \multirow{1}{9cm}{Two
  consecutive loops are interchanged.} \\
-&&\\ &&\\ \hline
+\hline
 
-\texttt{xevLoopInversion} & none & \multirow{1}{9cm}{A while loop body is
+\texttt{xevLoopInversion} & none & \multirow{2}{9cm}{A while loop body is
 inverted into a do while loop with a if statement.} \\
- &&\\ &&\\ \hline
+&&\\ \hline
 
 \texttt{xevLoopReversal} & none & \multirow{1}{9cm}{The order of a loop index
 is reversed.} \\
- &&\\ &&\\ \hline
+\hline
 
-\texttt{xevLoopSkewing} & none & \multirow{1}{9cm}{The index of the inner loop of
+\texttt{xevLoopSkewing} & none & \multirow{3}{9cm}{The index of the inner loop of
 a loop nest is transformed into a new one that is dependent on the index of the outer loop.} \\
  &&\\ &&\\ \hline
 
-\texttt{xevLoopStripMining} & \texttt{size} & \multirow{3}{9cm}{The iteration 
+\texttt{xevLoopStripMining} & \texttt{size} & \multirow{3}{9cm}{The iteration
 of a loop is divided into two consecutive loops. \texttt{size} is
 the division size of the loop index.} \\ &
  \texttt{factor} & \\ &&\\ \hline
@@ -292,11 +292,11 @@ Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1
  statement in the loop body is duplicated \texttt{factor} times.} \\ &
  \texttt{factor} & \\ &&\\ \hline
 
-\texttt{xevLoopUnswitching} & none & \multirow{1}{9cm}{An conditional
+\texttt{xevLoopUnswitching} & none & \multirow{2}{9cm}{An conditional
 if statement in a loop body is moved outside of the loop.} \\
- &&\\ &&\\ \hline
+&&\\ \hline
 
-\pagebreak
+%\pagebreak
 
  \multicolumn{3}{l}{CHiLL-compatible versions of optimization rules}\\\hline
 
