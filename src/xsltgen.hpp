@@ -36,11 +36,22 @@ const char xsltheader[]=
   "  <xsl:stylesheet version=\"1.0\"\n"
   "    xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:exslt=\"http://exslt.org/common\">\n"
   "  <xsl:import href=\"libCHiLL.xsl\" />\n"
-  "  <xsl:output method=\"xml\" encoding=\"UTF-8\" />\n";
+  "  <xsl:output method=\"xml\" encoding=\"UTF-8\" />\n"
+  "  <xsl:template match=\"/\" \n>"
+  "    <xsl:apply-templates/>\n"
+  "  </xsl:template\n>";
+
+const char xsltdefault[]=
+  "  <xsl:template match=\"*\" \n>"
+  "    <xsl:copy>\n"
+  "      <xsl:copy-of select=\"@*\" />\n"
+  "      <xsl:apply-templates />\n"
+  "    </xsl:copy>\n"
+  "  </xsl:template\n>";
 
 const char xsltfooter[]="\n</xsl:stylesheet>\n";
 
-#if 0
+#if 1
 const char* xslttmpl[] =
   {
     /* 0 */                               /* 1 */
@@ -63,8 +74,7 @@ const char* xslttmpl[] =
     "    </xsl:choose>\n",
     "  </xsl:template>\n"
   };
-#endif
-
+#else
 const char* xslttmpl[] =
   {
     /* 0 */                                 /* 1 */
@@ -72,8 +82,8 @@ const char* xslttmpl[] =
     /* 2 */
     "    <xsl:apply-templates select=\".\" mode=\"xevFindDirective\">\n",
     /* 3 */
-    "      <xsl:with-param name=\"directiveName\" select=\"'", 
-    /*xev loop_tag*/ 
+    "      <xsl:with-param name=\"directiveName\" select=\"'",
+    /*xev loop_tag*/
     "'\" />\n",                       /* 4 */
     "    </xsl:apply-templates>\n",   /* 5 */
     "  </xsl:template>\n",            /* 6 */
@@ -88,6 +98,7 @@ const char* xslttmpl[] =
     "    <xsl:apply-templates />\n",
     "  </xsl:copy>\n",
   };
+#endif
 
 const char* xlstcaller[] =
   {

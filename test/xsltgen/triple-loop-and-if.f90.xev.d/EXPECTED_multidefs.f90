@@ -12,7 +12,6 @@ END DO
 END DO
 END DO
 !pragma xev loop_tag2
-!$test1
 !$test2
     !$xev loop_tag2
 IF (A(1,1,1) > B(1,1,1)) THEN

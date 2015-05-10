@@ -125,7 +125,7 @@ int WriteApplyTemplates(const picojson::value::object& dir)
   }
   if(str_replace.size() == 0 && rules.size()==0){
     /*just copy all XML elements and attributes*/
-    for(int m(12);m<16;++m)
+    for(int m(7);m<11;++m)
       std::cout << xslttmpl[m];
   }
   if(str_after.size()>0)
@@ -164,17 +164,31 @@ void WriteXslt(const picojson::value::object& root)
 {
   std::cout << xsltheader;
   std::map<std::string,std::vector<picojson::value::object::const_iterator>* > targets;
+  bool any = false;
 
   /* for each child of the root node (== for each directive definition) */
   picojson::value::object::const_iterator i;
   for ( i = root.begin(); i != root.end(); ++i) {
     std::string target = GetTarget(i);      // get the target information if any
+    if(target == "*" ) any = true;
     if(targets.find(target)==targets.end()) // the target is not registered yet?
       targets[target] = new std::vector<picojson::value::object::const_iterator>();
     targets[target]->push_back(i); // each target has a list of directives
   }
 
+
   std::map<std::string,std::vector<picojson::value::object::const_iterator>* >::iterator j;
+  if(any==true){
+    /* copy directives of target "*" to the other targets  because they should be applied to any targets */
+    for(j=targets.begin();j!=targets.end();++j){
+      if( j->first != "*" ){
+        targets[j->first]->insert(targets[j->first]->end(),targets["*"]->begin(),targets["*"]->end());
+      }
+    }
+  }
+  else
+    std::cout <<xsltdefault;
+
   /* for each target */
   for(j=targets.begin();j!=targets.end();++j){
     std::cout << xslttmpl[0];
@@ -192,18 +206,20 @@ void WriteXslt(const picojson::value::object& root)
           std::cout << xslttmpl[4];
         }
         else {
-	  std::cout << " <xsl:apply-template mode=\"xevFindDirective\"/>\n";
+          //std::cout << " <xsl:apply-template mode=\"xevFindDirective\"/>\n";
           // directive name is *. don't check if a directive exists.
-	  // std::cout << "      <xsl:when test=\"true()\">\n";
+          std::cout << "      <xsl:when test=\"true()\">\n";
         }
-	for(int m(5);m<11;++m)
-	  std::cout << xslttmpl[m];
+        //std::cout << xslttmpl[5];
 
-	// rules associated with the directive
-	WriteApplyTemplates((*k)->second.get<picojson::object>());
-	std::cout << xslttmpl[11];
+        WriteApplyTemplates((*k)->second.get<picojson::object>());
+        std::cout << xslttmpl[5];
+        // rules associated with the directive
+        //std::cout << xslttmpl[11];
       }
     }
+    for(int m(6);m<14;++m)
+      std::cout << xslttmpl[m];
   }
 
   WriteCaller();
