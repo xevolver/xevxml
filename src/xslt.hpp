@@ -36,8 +36,11 @@
 #include "config.h"
 #include "common.hpp"
 
+const char* XEVXML_DEFAULT_LIBRARY_PATH=XEVXML_PREFIX"/lib/xev-trans";
+const char* XEVXML_LIB_ENV="XEVXML_LIBRARY_PATH";
+
 extern void XsltTransform(std::stringstream& istr,
                           std::stringstream& ostr,
-                          std::string xsltfn="example.xsl");
+                          std::string xsltfn, std::string libdirs=XEVXML_DEFAULT_LIBRARY_PATH);
 
 #endif

@@ -46,70 +46,87 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
+#include <vector>
 #include <getopt.h>
-
-const char* DEFAULT_LIBRARY_PATH=XEVXML_PREFIX"/lib/xev-trans";
-const char* XEVXML_LIB_ENV="XEVXML_LIBRARY_PATH";
 
 using namespace std;
 namespace xe=xercesc;
 namespace xa=xalanc;
 
-string libdir=DEFAULT_LIBRARY_PATH;
-
-static std::string GetPath(const XMLCh* systemId, std::string xsltfn)
-{
-  std::string abs = xe::XMLString::transcode(systemId);
-  if(strncmp(abs.c_str(),"file:///",8) != 0)
-    return abs.c_str();
-  std::ifstream ifs(abs.c_str()+7);
-  if(ifs) {
-    ifs.close();
-    return abs.c_str()+7; //remove "file://"
-  }
-
-
-  std::string::size_type n(0),m(0);
-
-  // get the directory in which the XSLT file exists.
-  std::string base;
-  while((n=xsltfn.find("/",n))!=std::string::npos){
-    base = xsltfn.substr(0,n);
-    n++;
-  }
-
-  // remove "file://"
-  abs = abs.c_str()+7;
-
-  // compare the XSLT directory and the systemId.
-  n=0;m=0;
-  string relpath;
-  while((n=abs.find("/",n))!=std::string::npos
-        && (m=base.find("/",m))!=std::string::npos){
-    relpath =  abs.substr(n);
-    if(abs.substr(0,n) !=base.substr(0,m)) break;
-    n++;m++;
-  }
-  if(base.substr(0,m).size()==base.size() )
-    return libdir+abs.substr(n);
-
-  int up=1;
-  m++;
-  while((m=base.find("/",m))!=std::string::npos){
-    up++;m++;
-  }
-  for(int i(0);i<up;i++){
-    relpath = "/../" + relpath;
-  }
-  //cerr << relpath <<endl;
-  return libdir+relpath;
-}
-
 class MyEntityResolver: public xe::EntityResolver, public xe::XMLEntityResolver
 {
   std::string xsltfn_;
+  std::string xsltloc_;
+  vector<string> libdirs_;
+
+
+  /*
+    systemId has the absolute path to the file being accessed.
+  */
+  std::string GetPath(const XMLCh* systemId)
+  {
+    char* buf = xe::XMLString::transcode(systemId);
+    std::string abs = buf;
+    xe::XMLString::release(&buf);
+    if(strncmp(abs.c_str(),"file:///",8) != 0)
+      // this is not a local file. don't change it.
+      return abs.c_str();
+
+    std::ifstream ifs(abs.c_str()+7);
+    // the file exists at the location given by the absolute path.
+    if(ifs) {
+      ifs.close();
+      return abs.c_str()+7; //remove "file://"
+    }
+
+    std::string::size_type n(0),m(0);
+
+    // remove "file://"
+    abs = abs.c_str()+7;
+
+    // compare the XSLT directory and the systemId.
+    string relpath;
+    while((n=abs.find("/",n))!=std::string::npos
+          && (m=xsltloc_.find("/",m))!=std::string::npos){
+      relpath =  abs.substr(n);
+      if(abs.substr(0,n) !=xsltloc_.substr(0,m)) break;
+      n++;m++;
+    }
+    if(xsltloc_.substr(0,m).size()==xsltloc_.size() ){
+      /* it will be located in the subdirectories */
+      for(size_t i(0);i<libdirs_.size();i++){
+        string fn = libdirs_[i]+abs.substr(n);
+        ifs.open(fn.c_str(),ios::in);
+        if(ifs){ // found!
+          ifs.close();
+          return fn;
+        }
+      }
+      return NULL;
+    }
+
+    int up=1;
+    m++;
+    while((m=xsltloc_.find("/",m))!=std::string::npos){
+      up++;m++;
+    }
+    for(int i(0);i<up;i++){
+      relpath = "/../" + relpath;
+    }
+    //cerr << relpath <<endl;
+    for(size_t i(0);i<libdirs_.size();i++){
+      string fn = libdirs_[i]+abs.substr(n);
+      ifs.open(fn.c_str(), ios::in);
+      if(ifs){ // found!
+        ifs.close();
+        return fn;
+      }
+    }
+    return NULL;
+  }
+
 public:
-  MyEntityResolver(std::string& xsltfn):xsltfn_(xsltfn.c_str()) {
+  MyEntityResolver(std::string& xsltfn, std::string& libdirs):xsltfn_(xsltfn.c_str()) {
     char* apath=NULL;
     apath = realpath(xsltfn_.c_str(),NULL);
     if(apath==NULL) {
@@ -118,6 +135,33 @@ public:
     }
     xsltfn_ = apath;
     free(apath);
+
+    string::size_type n(0),prev(0);
+    // get the directory in which the XSLT file exists.
+    while((n=xsltfn_.find("/",n))!=std::string::npos){
+      xsltloc_ = xsltfn_.substr(prev,n);
+      n++;
+    }
+    cerr << "libdirs=" << libdirs << endl;
+    if(libdirs.size()>0){
+      n=0;
+      string dir;
+      while((n=libdirs.find(":",n))!=std::string::npos){
+        dir = libdirs.substr(prev,n);
+        if(dir.size()>0)
+          libdirs_.push_back(dir);
+        prev = n;
+        n++;
+      }
+      dir = libdirs.substr(prev);
+      if(dir.size()>0)
+        libdirs_.push_back(dir);
+    }
+    if(libdirs_.size() == 0)
+      libdirs_.push_back(XEVXML_DEFAULT_LIBRARY_PATH);
+
+    for(size_t i(0);i<libdirs_.size();i++)
+      cerr << libdirs_[i] << endl;
   }
   ~MyEntityResolver(){}
 
@@ -126,36 +170,22 @@ public:
                 const XMLCh* const  p/* publicId */,
                 const XMLCh* const  systemId)
   {
-    std::string uri = GetPath(systemId,xsltfn_);
-    //return xe::EntityResolver::resolveEntity(p,systemId);
+    std::string uri = GetPath(systemId);
     xe::InputSource* src = 0;
-    //cerr << "pwd=" <<getenv("PWD") <<endl;
-    //cerr << "xslt="<<xsltfn_ <<endl;
-    //cerr << "sysid="<<xe::XMLString::transcode(systemId) << endl;
-    //cerr << xe::XMLString::transcode(resourceIdentifier->getSchemaLocation()) << endl;
-    //cerr <<  "uri="<<uri <<endl;
-    //cerr << "libdir="<<libdir<<endl;
-    src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri.c_str()));
 
+    src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri.c_str()));
     return src;
   }
   virtual xe::InputSource*
   resolveEntity(xe::XMLResourceIdentifier*    resourceIdentifier)
 
   {
-    //return xe::EntityResolver::resolveEntity(p,systemId);
     if (resourceIdentifier->getResourceIdentifierType()
-            == xe::XMLResourceIdentifier::ExternalEntity){
-      std::string uri = GetPath(resourceIdentifier->getSystemId(),xsltfn_);
+        == xe::XMLResourceIdentifier::ExternalEntity){
+      std::string uri = GetPath(resourceIdentifier->getSystemId());
       xe::InputSource* src = 0;
-      //cerr << "pwd=" <<getenv("PWD") <<endl;
-      //cerr << "xslt="<<xsltfn_ <<endl;
-      //cerr << "sysid="<<xe::XMLString::transcode(resourceIdentifier->getSystemId()) << endl;
-      //cerr << xe::XMLString::transcode(resourceIdentifier->getSchemaLocation()) << endl;
-      //cerr <<  "uri="<<uri <<endl;
-      //cerr << "libdir="<<libdir<<endl;
-      src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri.c_str()));
 
+      src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri.c_str()));
       return src;
     }
 
@@ -164,13 +194,13 @@ public:
 };
 
 
-void XsltTransform(stringstream& istr, stringstream& ostr, string xsltfn)
+void XsltTransform(stringstream& istr, stringstream& ostr, string xsltfn, string libdirs)
 {
   // work with Xalan-C++
   try {
     //xalanc::XSLTInputSource xmlIn(str);
     xa::XalanTransformer transformer;
-    transformer.setEntityResolver(new MyEntityResolver(xsltfn));
+    transformer.setEntityResolver(new MyEntityResolver(xsltfn,libdirs));
     if( 0 != transformer.transform(istr,xsltfn.c_str(),ostr)){
       XEV_WARN( transformer.getLastError());
       XEV_ABORT();
@@ -199,14 +229,14 @@ static  struct option long_opts[]={
   {0,0,0,0}
 };
 
-void ProcessOpts(int argc,char** argv, string& xslt)
+void ProcessOpts(int argc,char** argv, string& xslt, string& libdirs)
 {
   // See manpage of getopt
   int c;
   int digit_optind = 0;
   const char* env = getenv(XEVXML_LIB_ENV);
   if(env!=NULL){
-    libdir = env;
+    libdirs = env;
   }
   while(1){
     int option_index = 0;
@@ -219,7 +249,7 @@ void ProcessOpts(int argc,char** argv, string& xslt)
     }
     switch(c){
     case'L':
-      libdir = optarg;
+      libdirs = optarg;
       break;
     case 'h':
       cerr << "USAGE:" << argv[0] << " [OPTION]... FILENAME " << endl;
@@ -242,7 +272,9 @@ int main(int argc,char** argv)
   stringstream ostr;
   char c;
   string fn;
-  ProcessOpts(argc,argv,fn);
+  string libdirs=XEVXML_DEFAULT_LIBRARY_PATH;
+
+  ProcessOpts(argc,argv,fn,libdirs);
   if( argc < 2 || fn.size()==0) {
     cerr << "Try option `--help' for more information" <<endl;
     return -1;
@@ -255,7 +287,7 @@ int main(int argc,char** argv)
     istr << c;
   }
 
-  XsltTransform(istr,ostr,fn);
+  XsltTransform(istr,ostr,fn,libdirs);
 
   cout << ostr.str() << flush;
 

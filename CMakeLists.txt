@@ -79,7 +79,9 @@ foreach(absname ${files})
 endforeach()
 
 file(GLOB files ${PROJECT_SOURCE_DIR}/test/identity/input/*.f90
-  ${PROJECT_SOURCE_DIR}/test/unparse/input/*.c)
+  ${PROJECT_SOURCE_DIR}/test/identity/input/*.c
+  ${PROJECT_SOURCE_DIR}/test/identity/input/*.f
+  ${PROJECT_SOURCE_DIR}/test/identity/input/*.f03)
 foreach(absname ${files})
   get_filename_component(filename ${absname} NAME)
   add_test(NAME "identity-${filename}"
