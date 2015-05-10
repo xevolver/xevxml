@@ -61,7 +61,7 @@ static std::string GetPath(const XMLCh* systemId, std::string xsltfn)
 {
   std::string abs = xe::XMLString::transcode(systemId);
   if(strncmp(abs.c_str(),"file:///",8) != 0)
-    return abs.c_str()+7; //remove "file://"
+    return abs.c_str();
   std::ifstream ifs(abs.c_str()+7);
   if(ifs) {
     ifs.close();
@@ -226,7 +226,7 @@ void ProcessOpts(int argc,char** argv, string& xslt)
       cerr << "OPTIONS:" << endl;
       cerr << "-L, --libdir <path>\t Specify the library path\n";
       cerr << "-h, --help         \t Print this message\n";
-      cerr << libdir;
+      //cerr << libdir;
       exit(0);
       break;
     case ':':

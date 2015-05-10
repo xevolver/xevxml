@@ -1,7 +1,7 @@
 all:
-	pdflatex manual.tex
-#	bibtex manual
-	pdflatex manual.tex
-	pdflatex manual.tex
-	pdflatex manual.tex
+	platex manual.tex
+	bibtex manual
+	platex manual.tex
+	platex manual.tex
+	platex manual.tex
 

@@ -25,15 +25,16 @@ effort for HPC application development and maintenance.
 %from an application code. Practical HPC application development is a
 %team work of multiple programmers.
 
-XevXML is a code transformation framework that allows users to define
-their own code transformations, called \emph{user-defined code
-transformations}.  It exposes an abstract syntax tree~(AST) to users so
-that they can apply any transformations to the AST. Transformation rules
-written in external files can be defined for individual systems,
-compilers, libraries, and so on.  That is, code transformations
-representing system-aware optimizations can be separated from an
-application code.  Hence, to achieve high performance, the users no
-longer need to specialize an application code for a particular platform.
+XevXML~\cite{xevxml-hipc}~\cite{xevxml-sc13} is a code transformation
+framework that allows users to define their own code transformations,
+called \emph{user-defined code transformations}.  It exposes an
+abstract syntax tree~(AST) to users so that they can apply any
+transformations to the AST. Transformation rules written in external
+files can be defined for individual systems, compilers, libraries, and
+so on.  That is, code transformations representing system-aware
+optimizations can be separated from an application code.  Hence, to
+achieve high performance, the users no longer need to specialize an
+application code for a particular platform.
 
 XevXML assumes that an application code is annotated with a special
 mark, using directives and/or comments, and transformations are applied
@@ -44,13 +45,14 @@ in external files. If system-aware code modifications are expressed as
 code transformations, users can express system-awareness separately from
 an application code.
 
-As the name implies, XevXML employs eXtensible Markup Language~(XML) to
-represent an AST, i.e.,~an internal representation of code structures
-used by compilers.  XML is a widely-used data format, and various
-XML-related technologies and tools have already been standardized and
-matured.  Therefore, the users implement special code transformations by
-using only those standard tools.  This chapter briefly describes an
-overview of code transformation with XevXML.
+As the name implies, XevXML employs eXtensible Markup
+Language~(XML)~\cite{xml11} to represent an AST, i.e.,~an internal
+representation of code structures used by compilers.  XML is a
+widely-used data format, and various XML-related technologies and
+tools have already been standardized and matured.  Therefore, the
+users implement special code transformations by using only those
+standard tools.  This chapter briefly describes an overview of code
+transformation with XevXML.
 
 \section{An overview of XevXML}
 \begin{figure}[htb]
@@ -60,13 +62,14 @@ overview of code transformation with XevXML.
 \end{figure}
 
 XevXML has so far been developed on top of the ROSE compiler
-infrastructure~\cite{rose}.  XevXML provides the interconversion between
-an ROSE AST and its XML representation. Figure~\ref{fig:overview} shows
-an overview of the interconversion.  XevXML converts a ROSE AST to an
-XML representation of the AST, called an \emph{XML AST}. In XevXML, an
-XML AST is exposed to users.  After user-defined transformations, the
-transformed XML AST is again converted back to a ROSE AST so that ROSE
-can unparse it to a C or Fortran code.
+infrastructure~\cite{rose}~\cite{quinlan2000rose}.  XevXML provides
+the interconversion between an ROSE AST and its XML
+representation. Figure~\ref{fig:overview} shows an overview of the
+interconversion.  XevXML converts a ROSE AST to an XML representation
+of the AST, called an \emph{XML AST}. In XevXML, an XML AST is exposed
+to users.  After user-defined transformations, the transformed XML AST
+is again converted back to a ROSE AST so that ROSE can unparse it to a
+C or Fortran code.
 
 The interconversion is achieved by combining the following two commands,
 \texttt{src2xml} and \texttt{xml2src}.
@@ -83,8 +86,15 @@ The interconversion is achieved by combining the following two commands,
 	    into an XML document. \texttt{src2xml} reads a code from the
 	    input file given by the command-line argument, and prints
 	    an output XML document to the standard
-	    output. \texttt{src2xml} also accepts some of ROSE
-	    command-line options such as \texttt{-rose:verbose}. A ROSE
+	    output. 
+	    \begin{description}
+	    \item[\texttt{-F}, \texttt{--check\_fortran\_pragma}=$<$true/false$>$]
+	    ~\newline enable the conversion of each Fortran pragma, e.g.~\texttt{!\$xev loog\_tag}, to an \texttt{$<$SgPragmaDeclaration$>$} element. This conversion is enabled by default, and needs to be disabled to make the behavior identical to that of ROSE. 
+	    \item[\texttt{-h}, \texttt{--help}] ~\newline print the usage.
+	    \end{description}
+	    
+	    \texttt{src2xml} also accepts some of ROSE command-line
+	    options such as \texttt{-rose:verbose}. A ROSE
 	    command-line option \texttt{-rose:skip\_syntax\_check} is
 	    automatically appended to the command-line options because
 	    it is required for some Fortran90 codes.
@@ -118,13 +128,14 @@ The interconversion is achieved by combining the following two commands,
 \end{framed}
 
 An XML AST is exposed to users. Thus, the users can apply any
-transformation to the AST. As an AST is represented as an XML document,
-any XML-related technologies and tools are available for the
+transformation to the AST. As an AST is represented as an XML
+document, any XML-related technologies and tools are available for the
 transformations. XevXML employs XML Stylesheet Language
-Transformation~(XSLT) as the low-level interface to express the
-transformation rules of an XML AST.  AST transformation is what
-compilers do internally for code transformation. Therefore, XevXML is
-capable of implementing various code transformations.
+Transformation~(XSLT)~\cite{Kay08xslt}~\cite{Tidwell08xslt} as the
+low-level interface to express the transformation rules of an XML AST.
+AST transformation is what compilers do internally for code
+transformation. Therefore, XevXML is capable of implementing various
+code transformations.
 
 XevXML can easily collaborate with ROSE.  ROSE already has various
 features of code analyses and transformations to implement custom code
@@ -295,17 +306,18 @@ transformations are often needed for special demands of individual
 cases.  Therefore, XevXML has been developed for users to define their
 own code transformations in an easy way.
 
-In XevXML, XSLT is currently employed to describe custom transformation
-rules of XML ASTs at the lowest abstraction level\footnote{Several
-high-level interfaces for definition of code transformation rules are
-also under active development in the Xevolver project.  One of such
-interfaces will be described in Chapter~\ref{chap:json}.}  In XSLT, XML
-data transformations are themselves written in XML.  XSLT uses XPath
-expressions~\cite{xpath} to define a pattern within a tree of XML
-elements and attributes.  During the transformation process of XSLT,
-every XML element is visited in a depth-first manner.  When a pattern is
-found at an XML element, the XML element is altered based on the rule
-associated with the pattern.
+In XevXML, XSLT is currently employed to describe custom
+transformation rules of XML ASTs at the lowest abstraction
+level\footnote{Several high-level interfaces for definition of code
+transformation rules are also under active development in the Xevolver
+project.  One of such interfaces will be described in
+Chapter~\ref{chap:json}.}  In XSLT, XML data transformations are
+themselves written in XML.  XSLT uses XPath
+expressions~\cite{xpath}~\cite{Kay08xslt}, to define a pattern within
+a tree of XML elements and attributes.  During the transformation
+process of XSLT, every XML element is visited in a depth-first manner.
+When a pattern is found at an XML element, the XML element is altered
+based on the rule associated with the pattern.
 
 A simple XPath expression looks like a UNIX file path. In a UNIX file
 system, files and directories organize a tree structure. A file path is
@@ -444,10 +456,12 @@ library path.
 	    and prints an output XML AST to the standard output. The
 	    command-line options are as follows.
 
-	    \begin{tabular}{ll}
-	     {\bf -L, --libdir $<$path$>$} & specify the library path.\\
-	     {\bf -h, --help} &  prints the usage\\
-	    \end{tabular}
+	    \begin{description}
+	    \item[\texttt{-L}, \texttt{--libdir}=$<$path$>$]~\newline
+	    specify the library path.      
+    	    \item[\texttt{-h}, \texttt{--help}]~\newline
+	    print the usage.
+	    \end{description}
 
 	    An environment variable, \texttt{XEVOLVER\_LIBRARY\_PATH},
 	    is used to configure the default path of the transformation
