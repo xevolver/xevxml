@@ -215,6 +215,8 @@ follows.
  found by this rule.}\\
 && \\ &&\\ \hline
 
+\pagebreak
+
  \multicolumn{3}{l}{Movement rules}\\
  \hline
 
@@ -230,8 +232,11 @@ loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
  $N$-th loop from a loop whose index variable is given by \texttt{loopName} is visited by using the rule.}\\
 &\texttt{N} & \\ &&\\ \hline
 
-\texttt{xevGoToHere} & & \multirow{3}{9cm}{This is a dummy rule to do nothing at the second step of a code transformation.}\\
+\texttt{xevGoToHere} & none & \multirow{3}{9cm}{This is 
+a dummy rule to do nothing at the second step of a code transformation.}\\
 && \\ &&\\ \hline
+
+\pagebreak
 
  \multicolumn{3}{l}{Basic loop optimization rules}\\
  \hline
@@ -242,11 +247,12 @@ loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
  to be collapsed. } \\
 & \texttt{secondLoop} & \\ &&\\ \hline
 
-\texttt{xevLoopFission} & none & \multirow{3}{9cm}{A loop is broken into
- multiple loops. \shtodo{Now each statement in the original loop is moved to a
- different loop. Thus, every new loop contains only one statement in its
- body.}} \\
-&&\\ &&\\ \hline
+% TODO xevLoopFission
+%\texttt{xevLoopFission} & none & \multirow{3}{9cm}{A loop is broken into
+% multiple loops. Now each statement in the original loop is moved to a
+% different loop. Thus, every new loop contains only one statement in its
+% body.} \\
+%&&\\ &&\\ \hline
 
 \texttt{xevLoopFusion} & none & \multirow{1}{9cm}{Two consecutive loops are
  fused into a single loop. Statements in the two loops are moved into
@@ -257,17 +263,40 @@ loop whose index variable is \texttt{loopName} is visited by using the rule.}\\
  consecutive loops are interchanged.} \\
 &&\\ &&\\ \hline
 
+\texttt{xevLoopInversion} & none & \multirow{1}{9cm}{A while loop body is
+inverted into a do while loop with a if statement.} \\
+ &&\\ &&\\ \hline
+
+\texttt{xevLoopReversal} & none & \multirow{1}{9cm}{The order of a loop index
+is reversed.} \\
+ &&\\ &&\\ \hline
+
+\texttt{xevLoopSkewing} & none & \multirow{1}{9cm}{The index of the inner loop of
+a loop nest is transformed into a new one that is dependent on the index of the outer loop.} \\
+ &&\\ &&\\ \hline
+
+\texttt{xevLoopStripMining} & \texttt{size} & \multirow{3}{9cm}{The iteration 
+of a loop is divided into two consecutive loops. \texttt{size} is
+the division size of the loop index.} \\ &
+ \texttt{factor} & \\ &&\\ \hline
+
 \texttt{xevLoopTile} & \texttt{size1} & \multirow{3}{9cm}{
 Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1} is
  the block size of the outer loop and  \texttt{size2} is the block size of the inner loop.} \\
 & \texttt{size2} &\\
 &  &\\ \hline
 
-\texttt{xevLoopUnroll} & \shtodo{omit loopName?} & \multirow{3}{9cm}{A loop is
- unrolled. \shtodo{\texttt{loopName} is the name of the index
- variable.} \texttt{factor} is an unroll factor; every
+\texttt{xevLoopUnroll} & \texttt{loopName} & \multirow{3}{9cm}{A loop is
+ unrolled. \texttt{loopName} is the name of the index
+ variable. \texttt{factor} is an unroll factor; every
  statement in the loop body is duplicated \texttt{factor} times.} \\ &
  \texttt{factor} & \\ &&\\ \hline
+
+\texttt{xevLoopUnswitching} & none & \multirow{1}{9cm}{An conditional
+if statement in a loop body is moved outside of the loop.} \\
+ &&\\ &&\\ \hline
+
+\pagebreak
 
  \multicolumn{3}{l}{CHiLL-compatible versions of optimization rules}\\\hline
 
@@ -282,8 +311,9 @@ Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1
  to be permuted.} \\
  &\texttt{secondLoop}&\\ &\texttt{thirdLoop}&\\ \hline
 
- \texttt{chillSplit} & none & \multirow{1}{9cm}{This is the
-CHiLL-compatible version of \texttt{xevLoopFission}.} \\ \hline
+% TODO chillSplit
+% \texttt{chillSplit} & none & \multirow{1}{9cm}{This is the
+%CHiLL-compatible version of \texttt{xevLoopFission}.} \\ \hline
 
 \texttt{chillTile} & \texttt{size1} & \multirow{3}{9cm}{
 Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1} is
@@ -291,7 +321,7 @@ Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1
 & \texttt{size2} &\\
 &  &\\ \hline
 
-\texttt{chillUnroll} & \shtodo{omit loopName?}  & \multirow{3}{9cm}{A loop in
+\texttt{chillUnroll} & \texttt{loopName}  & \multirow{3}{9cm}{A loop in
  unrolled. \texttt{loopName} is the name of the index
  variable. \texttt{factor} is an unroll factor; every
  statement in the loop body is duplicated \texttt{factor} times.} \\ &
@@ -304,12 +334,15 @@ Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1
  \texttt{factor} & \\ &&\\ &&\\  \hline
 \end{longtable}
 
-\shtodo{add recent rules}
-
 \section{Custom Rules}\label{sec:custom}
 
 In this section, suggested steps for implmenting custom XSLT rules are described.
 As an example, a rule of loop inversion[citation] is introduced.
+
+% TODO
+To be described.
+
+\iffalse
 
 The rule will translate this original while loop
 \begin{framed}
@@ -526,7 +559,9 @@ to
 
 As a result, the above rule can be obtained for loop inversion transformation.
 
+
 \section{Summary}
 
 \shtodo{To be described}
 
+\fi

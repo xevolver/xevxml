@@ -2,3 +2,7 @@
 *.log
 *.toc
 *.pdf
+*.bbl
+*.blg
+*.dvi
+
