@@ -29,16 +29,16 @@ becomes available.
 
 
 XevXML is developed for XML-based AST transformations to provide an easy
-way to user-defined code transformations.  The current implementation of
-XevXML is built on top of the ROSE compiler framework. XevXML converts a
-ROSE's AST to an XML document, and exposes it to programmers. So the
-programmers can use any XML-related technologies and tools to transform
-the AST. Then, the transformed AST is given back to the ROSE compiler
-framework so that the AST is unparsed to generate a transformed
-application code.  Instead of directly modifying an application code,
-programmers can define their own code transformations to optimize the
-code for each system.  System-specific optimizations are represented as
-XML translation rules, which can be defined separately from an
-application code.  This leads to separation between application
+way for user-defined code transformations.  The current implementation
+of XevXML is built on top of the ROSE compiler framework. XevXML
+converts ROSE's AST to an XML document, and exposes it to
+programmers. So the programmers can use any XML-related technologies and
+tools to transform the AST. Then, the transformed AST is given back to
+the ROSE compiler framework so that the AST is unparsed to generate a
+transformed application code.  Instead of directly modifying an
+application code, programmers can define their own code transformations
+to optimize the code for each system.  System-specific optimizations are
+represented as XML translation rules, which can be defined separately
+from an application code.  This leads to separation between application
 requirements and system requirements, expecting a lower migration cost
 of HPC applications to new systems.

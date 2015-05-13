@@ -13,8 +13,8 @@ different way for adapting to a particular platform.  The diversity of
 system architectures increases the number of optimized versions required
 for performance portability across major platforms.  To make matters
 worse, popular platforms can change drastically, and thus an application
-might need to be optimized not only for current major platforms but also
-for future ones.  Accordingly, an increase in system complexity and
+might need to be optimized not only for current platforms but also for
+future ones.  Accordingly, an increase in system complexity and
 diversity would force a programmer to further invest enormous time and
 effort for HPC application development and maintenance.
 
@@ -34,7 +34,7 @@ files can be defined for individual systems, compilers, libraries, and
 so on.  That is, code transformations representing system-aware
 optimizations can be separated from an application code.  Hence, to
 achieve high performance, the users no longer need to specialize an
-application code for a particular platform.
+application code itself for a particular platform.
 
 XevXML assumes that an application code is annotated with a special
 mark, using directives and/or comments, and transformations are applied
@@ -135,7 +135,7 @@ Transformation~(XSLT)~\cite{Kay08xslt}~\cite{Tidwell08xslt} as the
 low-level interface to express the transformation rules of an XML AST.
 AST transformation is what compilers do internally for code
 transformation. Therefore, XevXML is capable of implementing various
-code transformations.
+code transformations usually done by compilers.
 
 XevXML can easily collaborate with ROSE.  ROSE already has various
 features of code analyses and transformations to implement custom code
@@ -237,9 +237,9 @@ AST.  In other words, XevXML provides another interface, XML, to handle
 ROSE AST nodes.
 
 In the above XML document, the first line just indicates that the file
-is written in XML.  The root node of an AST is the \texttt{SgSourceFile}
-element in the second line. The \texttt{SgSourceFile} element represents
-the whole C code.  The \texttt{SgGlobal} element in the third line is a
+is written in XML.  The root node of an AST is the \texttt{$<$SgSourceFile$>$}
+element in the second line. The \texttt{$<$SgSourceFile$>$} element represents
+the whole C code.  The \texttt{$<$SgGlobal$>$} element in the third line is a
 child node of the root node, and indicates the global scope of the C
 code. In the global scope, the \texttt{main} function is declared and
 defined. In the function body, the first statement is an expression
@@ -249,10 +249,10 @@ statement. Comments and preprocessor information such as
 \texttt{PreprocessingInfo} element.
 
 XML attributes are used to restore ROSE AST nodes. For example, the
-\texttt{SgStringVal} element corresponds to a ROSE AST node of a
+\texttt{$<$SgStringVal$>$} element corresponds to a ROSE AST node of a
 \texttt{SgStringVal} class object representing a string.  Thus, a string
 of \texttt{"Hello, World!$\backslash{}$n"} is written as its
-\texttt{value} attribute. Similarly, the \texttt{SgFunctionRefExp}
+\texttt{value} attribute. Similarly, the \texttt{$<$SgFunctionRefExp$>$}
 element is a reference to the name of a function, and the function name
 is given as the \texttt{name} attribute. Let's change ``printf'' is to
 ``puts'' by a text editor. Then, when the modified XML AST is converted
@@ -269,9 +269,9 @@ definition of each AST node.
 XML data are texts, and various tools are thus available to modify an
 XML AST.  As shown in Section~\ref{sec:xml}, even a text editor can
 modify an XML AST.  One may consider that, in the case of using a text
-editor, modifying a C/Fortran code is much easier than modifying its XML
-AST. So why don't we directly modify the code?  The answer is to avoid
-specializing the code for a particular platform.
+editor, modifying the original code written in C/Fortran is much easier
+than modifying its XML AST. So why don't we directly modify the code?
+The answer is to avoid specializing the code for a particular platform.
 
 In many cases, system-aware code optimizations assuming a particular
 target platform are necessary to exploit the system performance.  A
@@ -324,17 +324,17 @@ system, files and directories organize a tree structure. A file path is
 a text string to specify a location in the directory tree.  There are
 two ways to point to the location of a file or a diretory.  One is an
 absolute path, and the other is a relative path.  If the string of a
-path starts with \texttt{/}, the path is an absolute path, otherwise it
-is a relative path. An absolute path is the path to a file or a
-directory from the root diretory. For example, the root directory is
-expressed by \texttt{/}, its sub-directory named ``sub'' is expressed by
-\texttt{/sub}, and a file named ``xfile'' that is located in the ``sub''
-directory is expressed by \texttt{/sub/xfile}.  Note that \texttt{/}
-represents the root directory and is also used as a delimiting
-character.  On the other hand, a relative path indicates the path from
-the working directory where a user or an application is located. When
-the working diretory is \texttt{/sub}, a relative path to a
-\texttt{xfile} can be represented as \texttt{xfile}, \texttt{./xfile},
+path starts with a slash, \texttt{/}, the path is an absolute path,
+otherwise it is a relative path. An absolute path is the path to a file
+or a directory from the root diretory. For example, the root directory
+is expressed by \texttt{/}, its sub-directory named ``sub'' is expressed
+by \texttt{/sub}, and a file named ``xfile'' that is located in the
+``sub'' directory is expressed by \texttt{/sub/xfile}.  Note that
+\texttt{/} represents the root directory and is also used as a
+delimiting character.  On the other hand, a relative path indicates the
+path from the working directory where a user or an application is
+located. When the working diretory is \texttt{/sub}, a relative path to
+a \texttt{xfile} can be represented as \texttt{xfile}, \texttt{./xfile},
 \texttt{../sub/xfile}, etc.  Of course, those relative paths point to
 the same location because \texttt{.} and \texttt{..} denote the working
 diretory and its parent directory, respectively.
@@ -380,7 +380,7 @@ An example of XSLT rules for AST transformation are as follows.
 \end{src}
 \end{framed}
 The above XML file defines three rules, each of which is described
-within the \texttt{xsl:template} element. Based on these rules, an XML
+within the \texttt{$<$xsl:template$>$} element. Based on these rules, an XML
 document is transformed to another XML document, called an output XML
 document.
 
@@ -395,8 +395,8 @@ element.  This rule simply copies the element and its attributes to the
 output XML document.  The rule is recursively invoked because it invokes
 \texttt{$<$xsl::apply-templates/$>$}.
 
-The third rule matches only an \texttt{SgForStatement} element. It
-checks if another \texttt{SgForStatement} element exists in the subtree
+The third rule matches only an \texttt{$<$SgForStatement$>$} element. It
+checks if another \texttt{$<$SgForStatement$>$} element exists in the subtree
 of the matched element.  Only if it exists, text data are inserted
 before and after the matched element.
 
@@ -432,7 +432,7 @@ in other XSLT files. If a specified file written in an XSLT file for
 importing rules does not exist in the working directory, the
 \texttt{xsltexec} command looks for the file in the XevXML
 transformation library path specified by an environment variable,
-\texttt{XEVOLVER\_LIBRARY\_PATH}. The library path would usually be
+\texttt{XEVXML\_LIBRARY\_PATH}. The library path would usually be
 specified so that the command uses predefined XSLT rules offered by
 XevXML.  The command also has a command line option to specify the
 library path.
@@ -463,7 +463,7 @@ library path.
 	    print the usage.
 	    \end{description}
 
-	    An environment variable, \texttt{XEVOLVER\_LIBRARY\_PATH},
+	    An environment variable, \texttt{XEVXML\_LIBRARY\_PATH},
 	    is used to configure the default path of the transformation
 	    library.
  \item[EXAMPLES]~\\ \texttt{xsltexec sample.xsl $<$ hello.xml}\\ This

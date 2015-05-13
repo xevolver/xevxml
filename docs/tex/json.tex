@@ -6,10 +6,12 @@ In XevXML, transformation rules are defined by XSLT rules, and applied
 to an XML AST. By writing appropriate XSLT rules, XevXML as well as
 compilers can transform an AST in various ways.  However, directly
 transforming an AST might be a too low-level approach for performance
-optimizations on a case-by-case basis.  Therefore, several high-level
-interfaces for XevXML are under development.
+optimizations, especially if some optimization parameters need to be
+empirically configured in a try-and-error fashion as often seen in
+practical loop optimizations.  Therefore, several high-level interfaces
+for XevXML are under development.
 
-In practice, code modifications for performance optimizations are often
+In practice, code modifications for loop optimizations are often
 expressed by combinations of well-known loop transformations.  Moreover,
 text insertion and deletion based on code pattern matching are also
 frequently required for practical performance optimizations.
@@ -22,10 +24,16 @@ specific purposes.  Although the interface is less flexible than the
 XSLT approach of straightforwardly dictating AST transformations, it
 offers an easy way to quickly define a custom compiler directive that is
 associated with a composite of predefined rules. Such a directive can
-also be associated with text insertion and deletion. Therefore, the
-high-level interface is useful for generating a lot of transformation
-rules and also for mechanically inserting some texts into a code, which
-are frequently required in practical performance optimizations.
+also be associated with text insertion and deletion. 
+
+The high-level interface is useful for generating a lot of various loop
+variants that are optimized with different loop transformation rules and
+parameters. Such loop variants are often required for so-called
+auto-tuning~\cite{autotuning}, which is automatic performance tuning
+based on empirical performance profiling.  Besides, the high-level
+interface is also helpful for mechanically inserting some texts into a
+code, which are frequently required in practical performance
+optimizations.
 
 \section{XSLT rule generation}
 XevXML provides the \texttt{xsltgen} command that reads a simple
@@ -82,11 +90,12 @@ separate a key and its value. In a directive definition, the key
 indicates the directive name, and its value is a JSON object, called a
 rule definition, that defines the rule associated with the directive.
 In the above file, two compiler directives, \texttt{xev loop\_tag1} and
-\texttt{xev loop\_tag2}, are defined for Fortran. If the key is
-\texttt{"*"}, the rule defined by its value is applied without any
-directive. The pair whose key is \texttt{"target"} specifies what kind
-of statements the rule is applied. That is, the value is expected to be
-the AST node name of the statement that appears after the directive.
+\texttt{xev loop\_tag2}, are defined for Fortran.  The pair whose key is
+\texttt{"target"} specifies what kind of statements the rule is
+applied. That is, the value is expected to be the AST node name of the
+statement that appears after the directive.  If the directive name is
+\texttt{"*"}, the rule defined by its value is applied to the target AST
+node even if there is no directive attached to the statement.
 
 The first directive, \texttt{xev loop\_tag1}, assumes that it is
 followed by an \texttt{IF} statement. Then, it simply inserts a comment
@@ -96,7 +105,7 @@ The second directive, \texttt{xev loop\_tag2}, is associated with a
 composite of two predefined rules, \texttt{chillUnrollJam} and
 \texttt{chillUnroll}.  This directive applies those loop optimization
 rules with the given parameters to the \texttt{DO} statement following
-the directive, which is an XML element of \texttt{SgFortranDo}.  The
+the directive, which is an XML element of \texttt{$<$SgFortranDo$>$}.  The
 predefined rules with their parameters are listed in an array of JSON,
 which is enclosed in \texttt{[} and \texttt{]}. Unlike an object of
 JSON, an array is an ordered list. The rules are applied in the same
@@ -125,57 +134,54 @@ optimizations of the kernel loop might be required to achieve high
 performance. However, even if the optimization is a certain combination
 of the techniques listed above, manual optimization of a kernel loop is
 not an easy task. This is because an appropriate combination of loop
-optimization techniques is unknown. In addition, most of loop
+optimization techniques is unknown.  In addition, most of loop
 optimization techniques have some parameters that need to be determined
-appropriately for high performance.
-
-To make matters worse, different platforms require different loop
-optimizations.  Appropriate loop optimization, i.e.,~the combination and
-parameters, could change drastically depending on the target platform.
-Thus, manual code modification for loop optimization generally results
-in specializing the code only for a particular platform. Accordingly,
-the necessary information for loop optimizations should be separated
-from an application code.
+appropriately for high performance.  To make matters worse, different
+platforms require different loop optimizations.  Appropriate loop
+optimization, i.e.,~the combination and parameters, could change
+drastically depending on the target platform.  Thus, manual code
+modification for loop optimization generally results in specializing the
+code only for a particular platform. Accordingly, the necessary
+information for loop optimizations should be separated from an
+application code.
 
 Because of the importance, XevXML provides the \texttt{xsltgen} command
 as an easy way to compose loop optimization techniques and to associate
 the composite with a user-defined compiler directive.  Code
 transformation rules for basic loop optimization techniques are
 predefined. The predefined rules in the XevXML transformation rule
-library are listed in Section~\ref{sec:predef}.
-
-%\textbf{*** List of predefined rules and their parameters***}
-
-Those predefined rules are themselves written in XSLT, and hence
-customizable for special demands of individual cases. A customized rule
-can also be used together with other predefined rules using the
-\texttt{xsltgen} command. Chapter~\ref{chap:xslt} describes how to
-customize predefined rules and also how to define new rules.
+library are described in Section~\ref{sec:predef}.  Those predefined
+rules are themselves written in XSLT, and hence customizable for special
+demands of individual cases. A customized rule can also be used together
+with other predefined rules using the \texttt{xsltgen}
+command. Chapter~\ref{chap:xslt} describes how to customize predefined
+rules and also how to define new rules.
 
 
 \section{Text insertion/deletion}
-The \texttt{xsltgen} command can also be used to define a custom
-compiler directive for inserting or deleting a text into a code. Such a
-directive is useful to literally change some statements depending on the
-target platform.  Although the C preprocessor can also achieve it using
-\texttt{\#ifdef}, such an approach often makes an application code
-unmaintainable, so-called \texttt{\#ifdef} hell. In the case of using
-\texttt{xsltgen}, the text to be inserted is written in an external
-file, which is an XSLT file generated by \texttt{xsltgen}.  Therefore,
-the original code is not messed up with platform-dependent code
-fragments.
+The \texttt{xsltgen} command can define a custom compiler directive
+associated with not only AST transformations but also with text
+insertion and removal. Such a directive is useful to literally change
+some statements depending on the target platform.  Although the C
+preprocessor can also achieve it using \texttt{\#ifdef}, such an
+approach often makes an application code unmaintainable, so-called
+\texttt{\#ifdef} hell. In the case of using \texttt{xsltgen}, the text
+to be inserted is written in an external file, which is an XSLT file
+generated by \texttt{xsltgen}.  Therefore, the original code is not
+messed up with platform-dependent code fragments.
 
 To define a directive for text insertion, a JSON object of the directive
 definition has one or more pairs whose keys are
 \texttt{"insert-before"}, \texttt{"insert-after"}, or \texttt{"replace"}
 and whose values are strings. As the names imply,
 \texttt{"insert-before"}, \texttt{"insert-after"}, and
-\texttt{"replace"} inserts a text before the target statement, inserts a
+\texttt{"replace"} insert a text before the target statement, insert a
 text after the target statement, and replace the target statement with a
 text, respectively.
 
 For example, the following JSON file will produce an XML rule that
-inserts the function calls before and after a \texttt{for} loop.
+literally inserts function calls before and after a \texttt{for} loop in
+a C code.
 \begin{framed}
 \begin{src}
 {

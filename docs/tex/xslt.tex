@@ -5,25 +5,26 @@ hence available for AST transformation. In XevXML, a transformation rule
 is (internally) represented as an XSLT rule. If a special code
 transformation is needed, the most flexible and expressive way is to
 write an XSLT rule for the transformation, even though high-level
-interfaces are also developed for some specific purposes. An XSLT rule
-consists of XSLT template rules, each of which is applied to an XML
-element if the element matches a pattern on the XPath expression
-associated with the XSLT template rule..
+interfaces are also developed for some specific purposes as described in
+Chapter~\ref{chap:json}. An XSLT rule consists of XSLT template rules,
+each of which is applied to an XML element if the element matches a
+pattern on the XPath expression associated with the XSLT template rule.
 
 XevXML provides some predefined XSLT template rules.  Users can
 customize the predefined rules for their own purposes.  Thus, an XSLT
 template rule can be used as a sample or a baseline for users to newly
 define their special transformation rules.  This chapter describes how
-to define and customize an XSLT rule for code transformation.
+to use and customize an XSLT rule for code transformation.
 
 
 \section{Predefined Rules}\label{sec:predef}
-Remember that, in XevXML, every transformation rule is written in
-XSLT. You can write such a rule from scratch if you want.  But, a code
-transformation rule generally consists of many ``XSLT template rules,''
-and some of them are reusable in other code transformation rules.
-Therefore, XevXML offers some predefined XSLT template rules that can be
-used as a part of a user-defined code transformation rule.
+Remember that, in XevXML, every transformation rule is internally
+written in XSLT. You can write such a rule from scratch if you want.
+But, a code transformation rule generally consists of many ``XSLT
+template rules,'' and some of them are reusable in other code
+transformation rules.  Therefore, XevXML offers some predefined XSLT
+template rules that can be used as a part of a user-defined code
+transformation rule.
 
 Let's get started with a simple XSLT rule before explaining the
 predefined rules.
@@ -77,15 +78,15 @@ matches the XPath expression given by the \texttt{match} attribute of a
 template rule, the template rule is applied to the matched XML element.
 
 In the above example, the XPath expression of the first template rule,
-i.e.,~\texttt{*}, matches only the root node of an XML AST that is an
+i.e.,~\texttt{/}, matches only the root node of an XML AST that is an
 \texttt{$<$SgSourceFile$>$} element. Therefore, its rule is applied to
 the root node, and \texttt{$<$xsl:apply-templates$>$} is called for
 its child nodes.
 
-The second template rule matches every node in the XML AST, and its rule
-is applied to the node unless a more specific rule matches the node.This
-rule also calls \texttt{$<$xsl:apply-templates$>$} for every child
-node.
+The second template rule matches every node in the XML AST,
+i.e.,~\texttt{*}, and its rule is applied to the node unless a more
+specific rule matches the node.  This rule also calls
+\texttt{$<$xsl:apply-templates$>$} for every child node.
 
 The third template rule matches only an \texttt{$<$SgFortranDo$>$}
 element. This uses an \texttt{$<$xsl:if$>$} element to check if the
@@ -105,7 +106,7 @@ of the matched \texttt{$<$SgFortranDo$>$} element.
 In the third template rule, an \texttt{$<$xsl::apply-templates$>$}
 element is used with a \texttt{mode} attribute. As a result, template
 rules with the same mode are applied to the child nodes. In this
-example, the fourth template rule is applied to every child node of a
+example, the fourth template rule is applied to every child node of an
 \texttt{$<$SgFortranDo$>$} element, for which all the above conditions
 are met. The fourth template rule instead of the second rule matches
 every node if \texttt{$<$xsl::apply-templates$>$} is used with the
@@ -119,7 +120,7 @@ transformation rule applied only to loops annotated with \texttt{"xev
 loop\_tag"}. Although such a loop transformation rule could be complex,
 its components, i.e.~XSLT template rules, are reusable for many
 application codes.  Therefore, XevXML provides a library of predefined
-XSLT template rules often required for basic loop optimization techniques.
+XSLT template rules often required for basic loop optimizations.
 
 
 In the template rule library, a code transformation rule is assumed to
@@ -127,7 +128,7 @@ be comprised of three steps. One step is initialization, which usually
 finds an annotation being used to indicate where to transform. Another
 step is to move onto an XML element that is the root node of a subtree
 to be transformed. The other step is to transform the subtree, and print
-it out in XML. The library contains several predefined rules for each
+it out in XML. The library offers several predefined rules for each
 step.
 
 Using such predefined template rules for each step, a special directive
@@ -172,10 +173,10 @@ template rule associated with the \texttt{xevFindDirective} mode, and
 also finds a directive, \texttt{xev loop\_tag}.
 
 The template rule with the \texttt{xevMoveHook} mode represents the
-second step. In the rule, \texttt{$<$xsl:apply-templates$>$} is used
-with the \texttt{xevGoToLoop} mode. This results in visiting a loop
-whose index variable is \texttt{i}. The loop is to be transformed by
-this code transformation rule.
+second step. In the rule, the \texttt{xevGoToLoop} mode is used when
+calling \texttt{$<$xsl:apply-templates$>$}. This results in visiting a
+loop whose index variable is \texttt{i}. The loop is to be transformed
+by the template rule of the third step.
 
 The template rule with the \texttt{xevTransformationHook} mode
 represents the third step. In the rule,
@@ -334,10 +335,24 @@ Two consecutive loops' iteration space is partitioned into blocks. \texttt{size1
  \texttt{factor} & \\ &&\\ &&\\  \hline
 \end{longtable}
 
+The above predefined template rules are basically designed under
+assumption of the three steps defined with the \texttt{xevInitHook},
+\texttt{xevMoveHook}, and \texttt{xevTransformHook} modes. But we do not
+necessarily use the predefined rules for all of the three steps.  If
+necessary, some steps can be manually described as in the first XSLT
+example of this section. Indeed, the \texttt{xsltgen} command currently
+uses predefined rules only for the third step.  The XSLT template rules
+for the other two steps are written directly in individual XSLT
+files. See the XSLT file generated by the \texttt{xsltgen} command for
+details.
+
 \section{Custom Rules}\label{sec:custom}
 
-In this section, suggested steps for implmenting custom XSLT rules are described.
-As an example, a rule of loop inversion[citation] is introduced.
+%In this section, suggested steps for implmenting custom XSLT rules are described.
+%As an example, a rule of loop inversion[citation] is introduced.
+
+This section is a step-by-step tutorial to implement a custom XSLT rule,
+taking loop inversion~[citation] as an example.
 
 % TODO
 To be described.
