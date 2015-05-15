@@ -306,6 +306,15 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
   SgFunctionDeclaration* fdecl = isSgFunctionDeclaration(decl);
   if(fdecl==NULL)return;
 
+  if(XmlGetAttributeValue(node,"function_modifier",&mod)){
+    vec = fdecl->get_functionModifier().get_modifierVector();
+    for(size_t i(0);i<vec.size();i++){
+      vec[i] = (mod & 1);
+      mod >>= 1;
+    }
+    fdecl->get_functionModifier().set_modifierVector(vec);
+  }
+
   if(XmlGetAttributeValue(node,"end_name",&enf))
     fdecl->set_named_in_end_statement(enf);
 

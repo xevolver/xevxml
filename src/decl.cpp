@@ -956,6 +956,18 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
     if(n->get_oldStyleDefinition())
       sstr() << " old=\"1\" ";
+
+    SgFunctionModifier& f = n->get_functionModifier();
+    SgBitVector bit = f.get_modifierVector();
+    unsigned long fmod = 0;
+    for(size_t i(0);i<bit.size();i++){
+      if(bit[i]){
+	fmod |= (1<<i);
+      }
+    }
+    if(fmod>2) { //m!= e_unknown && m!= e_default
+      sstr() << " function_modifier=\"" << fmod << "\"";
+    }
   }
   attribSgDeclarationStatement(sstr(),node);
 }
