@@ -8,7 +8,7 @@ write an XSLT rule for the transformation, even though high-level
 interfaces are also developed for some specific purposes as described in
 Chapter~\ref{chap:json}. An XSLT rule consists of XSLT template rules,
 each of which is applied to an XML element if the element matches a
-pattern on the XPath expression associated with the XSLT template rule.
+pattern of the XPath expression associated with the XSLT template rule.
 
 XevXML provides some predefined XSLT template rules.  Users can
 customize the predefined rules for their own purposes.  Thus, an XSLT
@@ -114,13 +114,14 @@ every node if \texttt{$<$xsl::apply-templates$>$} is used with the
 applied only to a subset of AST nodes.
 
 
-If the third rule and/or the fourth rule is modified to transform a loop
-structure and/or a loop body, the above XSLT rule can be used as a loop
-transformation rule applied only to loops annotated with \texttt{"xev
-loop\_tag"}. Although such a loop transformation rule could be complex,
-its components, i.e.~XSLT template rules, are reusable for many
-application codes.  Therefore, XevXML provides a library of predefined
-XSLT template rules often required for basic loop optimizations.
+If the third rule and/or the fourth rule is modified so as to transform
+a loop structure and/or a loop body, the above XSLT rule can be
+considered as a loop transformation rule applied only to loops annotated
+with \texttt{"xev loop\_tag"}. Although such a loop transformation rule
+could be complex, its components, i.e.~XSLT template rules, are reusable
+for many application codes.  Therefore, XevXML provides a library of
+predefined XSLT template rules often required for basic loop
+optimizations.
 
 
 In the template rule library, a code transformation rule is assumed to
@@ -351,232 +352,476 @@ details.
 %In this section, suggested steps for implmenting custom XSLT rules are described.
 %As an example, a rule of loop inversion[citation] is introduced.
 
-This section is a step-by-step tutorial to implement a custom XSLT rule,
-taking loop inversion~[citation] as an example.
+
+
+
+%taking loop inversion~[citation] as an example. 
+
+
+This section is a step-by-step tutorial to define a custom XSLT rule.
+
+Since XSLT is an expressive programming language, we can define an
+arbitrary XSLT template rule in various ways.  But there is a
+frequently-used way to define an XSLT template rule for code
+transformation.  One easy and typical way is summarized as follows.
+\begin{description}
+ \item[Step 1.] Write two versions of a code. One is the orginal version
+	    and the other is its translated version. Let $C_\mathrm{in}$
+	    and $C_\mathrm{out}$ be the original version and the
+	    translated version, respectively. They can be considered as
+	    an input code example and an output code example of the code
+	    transformation to be defined below.
+
+ \item[Step 2.] Convert $C_\mathrm{in}$ and $C_\mathrm{out}$ to their
+	    XML representations, which are subtrees of XML ASTs, called
+	    a $C_\mathrm{in}$ subtree and a $C_\mathrm{out}$ subtree,
+	    respectively. The \texttt{src2xml} command can produce an
+	    XML AST of a code. Thus, those subtrees should appear in the
+	    XML AST if $C_\mathrm{in}$ and $C_\mathrm{out}$ are in the
+	    code.
+
+ \item[Step 3.] Write an XSLT template rule whose XPath expression
+	    matches the code fragment to be transformed.  At this step,
+	    the XSLT template rule can be empty, i.e.,~ the
+	    \texttt{$<$xsl:template$>$} element does not have child
+	    elements for writing XML elements into the output XML
+	    data. A macthed code fragment will be completely removed if
+	    the rule is empty.
+
+ \item[Step 4.] Copy the $C_\mathrm{out}$ subtree into the XSLT template
+	    rule. That is, the XML elements of the $C_\mathrm{out}$
+	    subtree are simply used as child nodes of the
+	    \texttt{$<$xsl:template$>$} element. At this step, any code
+	    fragment matching the XSLT template rule is replaced with
+	    $C_\mathrm{out}$.
+
+ \item[Step 5.] Generalize the rule so that some statements and/or
+	    expressions in the original code are copied to the
+	    translated code. By comparing the subtrees of
+	    $C_\mathrm{in}$ and $C_\mathrm{out}$, we can consider which
+	    XML elements of $C_\mathrm{in}$ should be copied to the
+	    subtree of the output code.
+\end{description}
+
+
+%If a code fragment is converted to an XML AST and copied inside an XSLT
+%template rule, every subtree of an XML AST that matches the XPath
+%expression of the XSLT template rule is replaced with the subtree in the
+%template rule.
 
 % TODO
-To be described.
+% To be described.
 
-\iffalse
-
-The rule will translate this original while loop
-\begin{framed}
-\begin{src}
-    do while(i<n)
-        a(i) = 0
-        i = i+1
-    end do
-\end{src}
-\end{framed}
-
-to this target code.
+%\iffalse
+\subsubsection*{Step 1.~Write two versions of a code}
+In the following, an XSLT rule to translate a simple \texttt{DO WHILE}
+loop to its another version is defined as an example.  The two versions
+are as follows.  This loop transformation is so-called loop
+inversion~\cite{loopinv}.  Hereafter, the former version is called the
+original loop, and the latter is the target loop.
 
 \begin{framed}
 \begin{src}
-    if (i<n) then
-        do
-            a(i) = 0
-            i = i+1
-            if  (i<n)  cycle
-            exit
-        end do
-    endif
+! original loop
+do while(i<n)
+  a(i) = 0
+  i = i+1
+end do
 \end{src}
 \end{framed}
 
+\begin{framed}
+\begin{src}
+! target loop
+if (i<n) then
+  do
+    a(i) = 0
+    i = i+1
+    if  (i<n)  cycle
+    exit
+  end do
+endif
+\end{src}
+\end{framed}
 
+%\subsection{Obtain Specific XML Elements of the Expected Code}
+\subsubsection*{Step 2.~Convert the loops to XML}
+%The following XML elements can be obtained with src2xml on the target code.
 
-\subsection{Obtain Specific XML Elements of the Expected Code}
-
-The following XML elements can be obtained with src2xml on the target code.
+By converting the target loop, we can get the following XML data, which
+is a subtree of an XML AST. If this subtree exists in an XML AST, the
+target loop (as is) appears in the output code when the XML AST is
+unparsed.
 
 \begin{framed}
 \begin{src}
 <SgIfStmt end="1" then="1">
+  <SgExprStatement>
+    <SgLessThanOp>
+      <SgVarRefExp name="i" />
+      <SgVarRefExp name="n" />
+    </SgLessThanOp>
+  </SgExprStatement>
+  <SgBasicBlock>
+    <SgFortranDo style="0" end="1" slabel="">
+      <SgNullExpression />
+      <SgNullExpression />
+      <SgNullExpression />
+      <SgBasicBlock>
 	<SgExprStatement>
-		<SgLessThanOp>
-			<SgVarRefExp name="i" />
-			<SgVarRefExp name="n" />
-		</SgLessThanOp>
+          <SgAssignOp>
+            <SgPntrArrRefExp lvalue="1">
+              <SgVarRefExp name="a" />
+              <SgExprListExp>
+		<SgVarRefExp name="i" />
+              </SgExprListExp>
+            </SgPntrArrRefExp>
+            <SgIntVal value="0" string="0" />
+          </SgAssignOp>
 	</SgExprStatement>
-	<SgBasicBlock>
-		<SgFortranDo style="0" end="1" slabel="">
-			<SgNullExpression />
-			<SgNullExpression />
-			<SgNullExpression />
-			<SgBasicBlock>
-				<SgExprStatement>
-					<SgAssignOp>
-						<SgPntrArrRefExp lvalue="1">
-							<SgVarRefExp name="a" />
-							<SgExprListExp>
-								<SgVarRefExp name="i" />
-							</SgExprListExp>
-						</SgPntrArrRefExp>
-						<SgIntVal value="0" string="0" />
-					</SgAssignOp>
-				</SgExprStatement>
-				<SgExprStatement>
-					<SgAssignOp>
-						<SgVarRefExp name="i" lvalue="1" />
-						<SgAddOp>
-							<SgVarRefExp name="i" />
-							<SgIntVal value="1" string="1" />
-						</SgAddOp>
-					</SgAssignOp>
-				</SgExprStatement>
-				<SgIfStmt end="0" then="0">
-					<SgExprStatement>
-						<SgLessThanOp>
-							<SgVarRefExp name="i" />
-							<SgVarRefExp name="n" />
-						</SgLessThanOp>
-					</SgExprStatement>
-					<SgBasicBlock>
-						<SgContinueStmt />
-					</SgBasicBlock>
-					<SgBasicBlock />
-				</SgIfStmt>
-				<SgBreakStmt />
-			</SgBasicBlock>
-		</SgFortranDo>
-	</SgBasicBlock>
-	<SgBasicBlock />
+	<SgExprStatement>
+          <SgAssignOp>
+            <SgVarRefExp name="i" lvalue="1" />
+            <SgAddOp>
+              <SgVarRefExp name="i" />
+              <SgIntVal value="1" string="1" />
+            </SgAddOp>
+          </SgAssignOp>
+	</SgExprStatement>
+	<SgIfStmt end="0" then="0">
+          <SgExprStatement>
+            <SgLessThanOp>
+              <SgVarRefExp name="i" />
+              <SgVarRefExp name="n" />
+            </SgLessThanOp>
+          </SgExprStatement>
+          <SgBasicBlock>
+            <SgContinueStmt />
+          </SgBasicBlock>
+          <SgBasicBlock />
+	</SgIfStmt>
+	<SgBreakStmt />
+      </SgBasicBlock>
+    </SgFortranDo>
+  </SgBasicBlock>
+  <SgBasicBlock />
 </SgIfStmt>
 \end{src}
 \end{framed}
 
-\subsubsection{Generalize /SgIfStmt/SgExprStatement}\label{subsubsec:cond}
+It is easy to get the XML data. If the original loop and the target loop
+are in a code, their subtrees appear in the XML AST of the code.  The
+XML AST can be easily obtained by using the \texttt{src2xml} command.
+See Chapter~\ref{chap:intro} for details of the command.
 
-\shtodo{explanation}
+%\subsubsection{Generalize /SgIfStmt/SgExprStatement}\label{subsubsec:cond}
+%\shtodo{explanation}
+%from
 
-from
+\subsubsection*{Step 3.~Write an initial XSLT template rule}
 
+The syntax of an XSLT template rule is as follows.
 \begin{framed}
 \begin{src}
-<SgIfStmt end="1" then="1">
-	<SgExprStatement>
-		<SgLessThanOp>
-			<SgVarRefExp name="i" />
-			<SgVarRefExp name="n" />
-		</SgLessThanOp>
-	</SgExprStatement>
+<xsl:template match=XXXX mode=ZZZZ>
+   YYYY
+</xsl:template>
+\end{src}
+\end{framed}
+Here, XXXX and YYYY must be correctly written to define an XSLT template
+rule.  Roughly speaking, XXXX indicates what kind of an XML element is
+subject to this rule, and YYYY indicates how the XML element appears in
+the output XML data.  For example, if we want to write a rule applied to
+every \texttt{$<$SgWhileStmt$>$} element, \texttt{XXXX} should be
+written as \texttt{"SgWhileStmt"}. If YYYY is empty, the matched XML
+element and its sub-nodes do not appear in the output XML data. ZZZZ is
+optinal but important for using predefined rules in XevXML. An XSLT
+template rule associated with the ZZZZ mode does not match XXXX unless
+it is invoked with the ZZZZ mode.
+
+As shown in the first XSLT example in Section~\ref{sec:predef}, we can
+write a rule so that it is applied only to an annotated code fragment.
+An ``empty'' XSLT template rule applied only to \texttt{DO WHILE}
+statements annotated with \texttt{!\$xev loop\_tag} is as follows.
+\begin{framed}
+\begin{src}
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+		xmlns:exslt="http://exslt.org/common">
+
+  <xsl:template match="/">
+    <xsl:apply-templates/>
+  </xsl:template>
+
+  <xsl:template match="*">
+    <xsl:copy>
+      <xsl:copy-of select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="SgWhileStmt">
+    <xsl:choose>
+      <xsl:when test="preceding-sibling::*[1]/SgPragma/@pragma='xev loop_tag'">
+	<!-- rule for annotated statements should be written here -->
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:copy>
+	  <xsl:copy-of select="@*"/>
+	  <xsl:apply-templates/>
+	</xsl:copy>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+</xsl:stylesheet>
 \end{src}
 \end{framed}
 
-to
+Or, by using the predefined rules provided by XevXml, the above rule can
+be simplified as follows.
 
 \begin{framed}
 \begin{src}
-		<xsl:copy-of select="SgExprStatement" />
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+		xmlns:exslt="http://exslt.org/common">
+
+  <xsl:import href="libCHiLL.xsl" />
+
+  <xsl:template match="*" mode="xevInitHook">
+   <xsl:apply-templates select="." mode="xevFindDirective">
+      <xsl:with-param name="directiveName" select="'xev loop_tag'" />
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="*" mode="xevMoveHook">
+    <xsl:apply-templates select="." mode="xevGoToLoop">
+      <xsl:with-param name="loopName" select="'i'" />
+    </xsl:apply-templates>
+  </xsl:template>
+
+  <xsl:template match="*" mode="xevTransformationHook">
+    <xsl:apply-templates select="." mode="myLoopInversion"/>
+  </xsl:template>
+
+  <xsl:template match="SgWhileStmt" mode="myLoopInversion">
+    <!-- rule for annotated statements should be written here -->
+  </xsl:template>
+</xsl:stylesheet>
 \end{src}
 \end{framed}
 
-\subsubsection{Generalize /SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock}
+%Let's use the above rule as an initial rule and improve it in the
+%following steps.  
 
-\shtodo{explanation}
+Since the fourth rule is invoked with the \texttt{myLoopInversion} mode,
+the rule is called the \texttt{myLoopInversion} rule.  The above
+\texttt{myLoopInversion} rule will remove annotated \texttt{DO WHILE}
+statements because it is empty (only a comment is written now) and no
+XML element is hence output to the output XML data. Therefore, in the
+following, the \texttt{myLoopInversion} rule is modified so that it
+outputs a transformed version of the original loop. The other template
+rules are unmodified.
 
-from
+\subsubsection*{Step 4.~Copy the subtree of the target loop to the XML template rule}
 
-\begin{framed}
-\begin{src}
-				<SgExprStatement>
-					<SgAssignOp>
-						<SgPntrArrRefExp lvalue="1">
-							<SgVarRefExp name="a" />
-							<SgExprListExp>
-								<SgVarRefExp name="i" />
-							</SgExprListExp>
-						</SgPntrArrRefExp>
-						<SgIntVal value="0" string="0" />
-					</SgAssignOp>
-				</SgExprStatement>
-				<SgExprStatement>
-					<SgAssignOp>
-						<SgVarRefExp name="i" lvalue="1" />
-						<SgAddOp>
-							<SgVarRefExp name="i" />
-							<SgIntVal value="1" string="1" />
-						</SgAddOp>
-					</SgAssignOp>
-				</SgExprStatement>
-\end{src}
-\end{framed}
-
-to
+The comment in the \texttt{myLoopInversion} rule is replaced with the
+subtree obtained at Step 2.  If this rule is applied to an XML AST,
+every annotated \texttt{DO WHILE} statement with its loop body is
+replaced with the target loop as is.
 
 \begin{framed}
 \begin{src}
-					<xsl:copy-of select="SgBasicBlock/*" />
-\end{src}
-\end{framed}
+<xsl:template match="SgWhileStmt" mode="myLoopInversion">
+  <SgIfStmt end="1" then="1">
+    <SgExprStatement> 
+      <SgLessThanOp>
+        <SgVarRefExp name="i" />
+        <SgVarRefExp name="n" />
+      </SgLessThanOp>
+    </SgExprStatement>
 
-\subsubsection{Generalize /SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock/SgIfStmt/SgExprStatement}
+    ... omitted ... (See Step 2)
 
-The generalization of the SgExprStatement in the loop body is almost the same as \ref{subsubsec:cond}
-
-from
-
-\begin{framed}
-\begin{src}
-					<SgExprStatement>
-						<SgLessThanOp>
-							<SgVarRefExp name="i" />
-							<SgVarRefExp name="n" />
-						</SgLessThanOp>
-					</SgExprStatement>
-\end{src}
-\end{framed}
-
-to
-
-\begin{framed}
-\begin{src}
-		<xsl:copy-of select="SgExprStatement" />
-\end{src}
-\end{framed}
-
-
-\subsection{Obtain Generalized Custom Rules}
-
-\shtodo{explanation}
-
-
-\begin{framed}
-\begin{src}
-<xsl:template match="SgWhileStmt" mode="xevLoopInversion">
-	<SgIfStmt>
-		<xsl:copy-of select="SgExprStatement" />
-		<SgBasicBlock>
-			<SgFortranDo style="0" end="1" slabel="">
-				<SgNullExpression />
-				<SgNullExpression />
-				<SgNullExpression />
-				<SgBasicBlock>
-					<xsl:copy-of select="SgBasicBlock/*" />
-					<SgIfStmt end="0" then="0">
-						<xsl:copy-of select="SgExprStatement" />
-						<SgBasicBlock>
-							<SgContinueStmt />
-						</SgBasicBlock>
-						<SgBasicBlock />
-					</SgIfStmt>
-					<SgBreakStmt />
-				</SgBasicBlock>
-			</SgFortranDo>
-		</SgBasicBlock>
-		<SgBasicBlock />
-	</SgIfStmt>
+  </SgIfStmt>
 </xsl:template>
 \end{src}
 \end{framed}
 
 
-As a result, the above rule can be obtained for loop inversion transformation.
+\subsubsection*{Step 5.~Generalize the XSLT template rule}
+The \texttt{myLoopInversion} rule in Step 4 simply replaces an annotated
+\texttt{DO WHILE} loop with the target loop, and is usable only for loop
+inversion of the original loop (See Step 1). Therefore, we need to
+generalize the rule so that it can be reusable for loop inversion of
+other loops.
 
+To generalize it, we usually need to copy some statements and
+expressions of the original loop to the target loop.  One is the
+condition expression of the \texttt{DO WHILE} statement of the original
+loop, i.e.,~\texttt{(i < n)}. If a \texttt{DO WHILE} statement has a
+different condition expression, the expression should be used in the
+target loop. Nonetheless, the \texttt{myLoopInversion} rule in Step 4
+always uses \texttt{(i < n)} as the condition expression of the
+transformed loop without repect to the condition expression of a
+\texttt{DO WHILE} loop to be transformed.  Notice that the expression
+appears twice in the target loop (See Step 1). One is the condition of
+the first \texttt{IF} statement, and the other is the condition of the
+second \texttt{IF} statement.
+
+See the subtree of the target loop in Step 2. The
+\texttt{myLoopInversion} rule in Step 4 is defined so as to output the
+subtree as is, and thus to always output \texttt{(i < n)}, which
+corresponds to the following \texttt{$<$SgExprStatement$>$} element and
+its sub-nodes.
+\begin{framed}
+\begin{src}
+...
+<SgIfStmt end="1" then="1">
+  <SgExprStatement>
+    <SgLessThanOp>
+      <SgVarRefExp name="i" />
+      <SgVarRefExp name="n" />
+    </SgLessThanOp>
+  </SgExprStatement>
+...
+\end{src}
+\end{framed}
+
+On the other hand, the condition of a \texttt{DO WHILE} statement
+corresponds to \texttt{SgWhileStmt/SgExprStatement} and its sub-nodes in
+an XML AST\footnote{To figure out such a correspondence, it is helpful
+to convert the original loop to its XML representation.}.  Since the
+\texttt{myLoopInversion} rule matches an \texttt{$<$SgWhileStmt$>$}
+element, the XPath expression of the condition is given by
+\texttt{./SgExprStatement}~(relative path notation). Accordingly, the
+rule should be modified so that the \texttt{$<$SgExprStatement$>$}
+element specified by \texttt{./SgExpression} is copied to the output XML
+data.
+\begin{framed}
+\begin{src}
+...
+<SgIfStmt end="1" then="1">
+  <xsl:copy-of select="./SgExprStatement" />
+...
+\end{src}
+\end{framed}
+
+%\subsubsection{Generalize /SgIfStmt/SgBasicBlock/SgFortranDo/SgBasicBlock}
+%\shtodo{explanation}
+
+To make the \texttt{myLoopInversion} rule reusable for other loops, we
+also need to copy all statements in the original loop body to the target
+loop body. See the subtree of the target loop in Step 2.  Since the
+original loop body contains two expression statements, \texttt{a(i)=0}
+and \texttt{i=i+1}, the current \texttt{myLoopInvesion} rule always
+outputs these two statements in the target loop body, and thus is not
+reusable for other loops. The loop body is represented by the following
+\texttt{$<$SgBasicBlock$>$} element and its sub-nodes.
+\begin{framed}
+\begin{src}
+...
+<SgBasicBlock>
+  <SgExprStatement>
+    <SgAssignOp>
+      <SgPntrArrRefExp lvalue="1">
+	<SgVarRefExp name="a" />
+	<SgExprListExp>
+	  <SgVarRefExp name="i" />
+	</SgExprListExp>
+      </SgPntrArrRefExp>
+      <SgIntVal value="0" string="0" />
+    </SgAssignOp>
+  </SgExprStatement>
+  <SgExprStatement>
+    <SgAssignOp>
+      <SgVarRefExp name="i" lvalue="1" />
+      <SgAddOp>
+	<SgVarRefExp name="i" />
+	<SgIntVal value="1" string="1" />
+      </SgAddOp>
+    </SgAssignOp>
+  </SgExprStatement>
+</SgBasicBlock>
+...
+\end{src}
+\end{framed}
+
+On the other hand, the loop body of an \texttt{DO WHILE} statement is
+represented by \texttt{SgWhileStmt/SgBasicBlock} and its sub-nodes.
+Since the \texttt{myLoopInversion} rule matches an
+\texttt{$<$SgWhileStmt$>$} element, the XPath expression of the loop
+body is given by \texttt{./SgBasicBlock}~(relative path
+notation). Accordingly, the \texttt{myLoopInversion} rule should be
+modified so that all of the sub-nodes of the \texttt{$<$SgBasicBlock$>$}
+element specified by \texttt{./SgBasicBlock} are copied to the output
+XML data.
+
+\begin{framed}
+\begin{src}
+...
+<SgBasicBlock>
+  <xsl:copy-of select="./SgBasicBlock/*" />
+</SgBasicBlock>
+...
+\end{src}
+\end{framed}
+
+Finally, a generalized \texttt{myLoopInversion} rule is obtained as follows.
+\begin{framed}
+\begin{src}
+<xsl:template match="SgWhileStmt" mode="myLoopInversion">
+  <SgIfStmt end="1" then="1">
+    <xsl:copy-of select="./SgExprStatement" />
+    <SgBasicBlock>
+      <SgFortranDo style="0" end="1" slabel="">
+	<SgNullExpression />
+	<SgNullExpression />
+	<SgNullExpression />
+	<SgBasicBlock>
+	  <xsl:copy-of select="./SgBasicBlock/*" />
+	  <SgIfStmt end="0" then="0">
+	    <xsl:copy-of select="./SgExprStatement" />
+	    <SgBasicBlock>
+	      <SgContinueStmt />
+	    </SgBasicBlock>
+	    <SgBasicBlock />
+	  </SgIfStmt>
+	  <SgBreakStmt />
+	</SgBasicBlock>
+      </SgFortranDo>
+    </SgBasicBlock>
+    <SgBasicBlock />
+  </SgIfStmt>
+</xsl:template>
+\end{src}
+\end{framed}
+
+The above rule is usable for loop inversion of not only the original
+loop but also other standard \texttt{DO WHILE} loops.  In this way, we
+can gradually and incrementally generalize an XSLT template rule step by
+step so that the rule can cover a wider range of loops.  
 
 \section{Summary}
 
-\shtodo{To be described}
+In XevXML, XSLT template rules for basic loop transformations are
+already predefined. The predefined rules will usually be used via the
+\texttt{xsltgen} command described in Chapter~\ref{chap:json}.
 
-\fi
+In practical performance optimizations, some systems, applications,
+application domains, and/or programmers may demand special code
+transformations, which are not predefined, for high performance,
+portability, maintainability, and so forth.  In such a case, they can
+define their own code transformation rules for the special demands.
+
+For defining a custom transformation rule, we first write a simple XSLT
+rule usable only for replacing a particular code to its target code, and
+then gradually generalize the rule so as to make it reusable for other
+codes.  It is easy to write the initial simple rule by reference to an
+XML AST of the target code.
+
+%\shtodo{To be described}
+
+%\fi
