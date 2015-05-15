@@ -172,6 +172,7 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       checkDeclStmt(node,ret);
       checkLocatedNode(node,ret);
       if(isSgType(ret)==0 && isSgSourceFile(ret)==0 && astParent==0 ){
+	XEV_WARN("SgNode with no parent is found\n");
 	XEV_DEBUG_INFO(node);
         XEV_ABORT();
       }

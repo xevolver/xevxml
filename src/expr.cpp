@@ -173,6 +173,60 @@ void XevSageVisitor::attribSgAggregateInitializer(SgNode* node)
 INODE_EXPR_DEFAULT(AggregateInitializer);
 
 // ===============================================================================
+/// Visitor of a SgAsmOp element in an XML document
+SgNode*
+XevXmlVisitor::visitSgAsmOp(xe::DOMNode* node, SgNode* astParent)
+{
+  SgAsmOp*        ret = 0;
+  SgExpression*   exp = 0;
+  int cons = 0, mod =0, rec=0,out=0;
+  string name;
+  XmlGetAttributeValue(node,"constraint",&cons);
+  XmlGetAttributeValue(node,"modifiers",&mod);
+  XmlGetAttributeValue(node,"record",&rec);
+  XmlGetAttributeValue(node,"name",&name);
+  XmlGetAttributeValue(node,"output",&out);
+  ret = new SgAsmOp(DEFAULT_FILE_INFO, 
+		    (SgAsmOp::asm_operand_constraint_enum)cons,
+		    (SgAsmOp::asm_operand_modifier_enum)mod);
+
+  ret->set_parent(astParent);
+  ret->set_recordRawAsmOperandDescriptions(rec);
+  ret->set_isOutputOperand(out);
+  ret->set_name(name);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if( exp==0 )
+        exp = isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  if(exp!=NULL){
+    exp->set_parent(ret);
+    ret->set_expression(exp);
+  }
+  return ret;
+}
+void XevSageVisitor::attribSgAsmOp(SgNode* node)
+{
+  SgAsmOp* n = isSgAsmOp(node);
+  if(n){
+    if(n->get_constraint())
+      sstr() << " constraint=\"" << n->get_constraint() << "\"";
+    if(n->get_modifiers())
+      sstr() << " modifiers=\"" << n->get_modifiers() << "\"";
+    if(n->get_name().empty()==false)
+      sstr() << " name=\"" << n->get_name() << "\"";
+    if(n->get_recordRawAsmOperandDescriptions())
+      sstr() << " record=\"" << n->get_recordRawAsmOperandDescriptions() << "\"";
+    if(n->get_isOutputOperand())
+      sstr() << " output=\"" << n->get_isOutputOperand() << "\"";
+  }
+  attribSgExpression(sstr(),node);
+}
+INODE_EXPR_DEFAULT(AsmOp);
+
+// ===============================================================================
 /// Visitor of a SgAssignInitializer element in an XML document
 SgNode*
 XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)

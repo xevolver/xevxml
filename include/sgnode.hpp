@@ -145,6 +145,7 @@ SAGE3_VAL(WcharVal);
 // -------------------------------------
 SAGE3_EXPR(ActualArgumentExpression);
 SAGE3_EXPR(AggregateInitializer);
+SAGE3_EXPR(AsmOp);
 SAGE3_EXPR(AssignInitializer);
 SAGE3_EXPR(AsteriskShapeExp);
 SAGE3_EXPR(CastExp);

@@ -109,19 +109,54 @@ SgNode*
 XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 {
   SgAsmStmt*     ret = 0;
+  SgExpression*  op = 0;
   string                      asm_code;
-  string                      vol;
+  string                      regs;
   int                         typ=0;
+  int                         gnu=0;
 
-  if(XmlGetAttributeValue(node,"code",&asm_code) == false
-     ||   XmlGetAttributeValue(node,"volatile",&typ) == false ){
+
+  if(XmlGetAttributeValue(node,"code",&asm_code) == false){
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
 
   ret = sb::buildAsmStatement( asm_code );
-  ret->set_isVolatile( typ );
+  //ret->set_isVolatile( typ );
   ret->set_parent(astParent);
+
+  XmlGetAttributeValue(node,"gnu",&gnu);
+  ret->set_useGnuExtendedFormat(gnu);
+  
+  if(XmlGetAttributeValue(node,"regs",&regs)){
+    char* str = (char*)regs.c_str();
+    char* c;
+    int e;
+    SgAsmStmt::AsmRegisterNameList& lst = ret->get_clobberRegisterList();
+    c = strtok(str,",");
+    if(c) {
+      e = atoi(c);
+      lst.push_back((SgInitializedName::asm_register_name_enum)e);
+    }
+    while(c){
+      c = strtok(NULL,",");
+
+      if(c) {
+	e = atoi(c);
+	lst.push_back((SgInitializedName::asm_register_name_enum)e);
+      }
+    }
+  }
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      op = isSgExpression(astchild);
+      if(op){
+	ret->get_operands().push_back(op);
+	op->set_parent(ret);
+      }
+    }
+  SUBTREE_VISIT_END();
 
   return ret;
 }
@@ -134,10 +169,20 @@ void XevSageVisitor::attribSgAsmStmt(SgNode* node)
   if(n) {
     str = n->get_assemblyCode();
     str = XmlStr2Entity( str );
-    sstr() << " volatile=\"" << n->get_isVolatile() << "\"";
+    //sstr() << " volatile=\"" << n->get_isVolatile() << "\"";
     sstr() << " code=\"" << str << "\"";
+    sstr() << " gnu=\"" << n->get_useGnuExtendedFormat() << "\"";
+    if(n->get_clobberRegisterList().size()>0){
+      sstr() << " regs=\"";
+      for(size_t i(0);i<n->get_clobberRegisterList().size();i++){
+	sstr() << n->get_clobberRegisterList()[i];
+	if(i< n->get_clobberRegisterList().size()-1)
+	  sstr() << ",";
+      }
+      sstr() << "\"";
+    }
   }
-  attribSgStatement(sstr(),node);
+  attribSgDeclarationStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(AsmStmt);
 
