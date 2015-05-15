@@ -526,7 +526,7 @@ XevXmlVisitor::visitSgComputedGotoStatement(xe::DOMNode* node, SgNode* astParent
   SgExpression*           var = 0;
   SgComputedGotoStatement*    ret =0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( exp==0 )
         exp = isSgExprListExp(astchild);
@@ -756,6 +756,7 @@ XevXmlVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
   SgExprStatement* ret = sb::buildExprStatement(exp);
   //SgExprStatement* ret = 0;
 
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(exp==0)
@@ -764,7 +765,6 @@ XevXmlVisitor::visitSgExprStatement(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret->set_expression(exp);
-  ret->set_parent(astParent);
   exp->set_parent(ret);
 
   return ret;
@@ -852,7 +852,7 @@ XevXmlVisitor::visitSgForInitStatement(xercesc::DOMNode* node, SgNode* astParent
   SgStatement* stmt  = 0;
   SgStatementPtrList lst;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if((stmt = isSgStatement(astchild))!=0)
         lst.push_back(stmt);
@@ -1521,7 +1521,7 @@ XevXmlVisitor::visitSgLabelStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"slabel",&slabel);
   XmlGetAttributeValue(node,"nlabel",&nlabel);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if (body==0)
         body = isSgStatement(astchild);
@@ -1915,7 +1915,7 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
   SgReturnStmt*        ret   = 0;
   SgExpression*        exp   = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(exp==0)
         exp = isSgExpression(astchild);

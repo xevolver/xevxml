@@ -177,7 +177,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     case SgAttributeSpecificationStatement::e_parameterStatement:
     case SgAttributeSpecificationStatement::e_externalStatement:
     case SgAttributeSpecificationStatement::e_allocatableStatement:
-      SUBTREE_VISIT_BEGIN(node,astchild,0)
+      SUBTREE_VISIT_BEGIN(node,astchild,astParent)
         {
           exp = isSgExpression(astchild);
           if( exp ) {
@@ -255,7 +255,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     case SgAttributeSpecificationStatement::e_dataStatement :
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
       ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-      SUBTREE_VISIT_BEGIN(node,astchild,0)
+      SUBTREE_VISIT_BEGIN(node,astchild,astParent)
         {
           dataGroup = isSgDataStatementGroup(astchild);
           if( dataGroup ) {
@@ -279,7 +279,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
 
       ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
       ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-      SUBTREE_VISIT_BEGIN(node,astchild,0)
+      SUBTREE_VISIT_BEGIN(node,astchild,astParent)
         {
           str = isSgStringVal(astchild);
           if( str ) {
@@ -613,7 +613,7 @@ XevXmlVisitor::visitSgEntryStatement(xe::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"name",&name);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( typ==0 )
         typ = isSgType(astchild);
@@ -762,7 +762,7 @@ XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
   SgFormatItem*           itm = 0;
   SgFormatItemList*       lst = new SgFormatItemList();
   SgFormatStatement*      ret = 0;
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if((itm = isSgFormatItem(astchild))!=0){
         lst->get_format_item_list().insert(
@@ -842,7 +842,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"old"         ,&old   );
   XmlGetAttributeValue(node,"definition"  ,&hasdef);
 
-  FUNCTION_HEADER_VISIT_BEGIN(node,astchild,0)
+  FUNCTION_HEADER_VISIT_BEGIN(node,astchild,astParent)
     {
       if(lst==0)
         lst = isSgFunctionParameterList(astchild);
@@ -936,6 +936,7 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
   SgFunctionParameterList* ret = sb::buildFunctionParameterList();
   SgInitializedName* ini=0;
 
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if((ini = isSgInitializedName(astchild)) != NULL ){
@@ -945,7 +946,6 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
       }
     }
   SUBTREE_VISIT_END();
-  ret->set_parent(astParent);
 
   return ret;
 }
@@ -1179,7 +1179,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    SgPragmaDeclaration* ret = 0;
    SgPragma* pr = 0;
 
-   SUBTREE_VISIT_BEGIN(node,child,0)
+   SUBTREE_VISIT_BEGIN(node,child,astParent)
      {
        if(pr==0)
          pr = isSgPragma(child);
@@ -1188,11 +1188,13 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    if(pr) {
      ret = sb::buildPragmaDeclaration(pr->get_pragma());
+     pr->set_parent(ret);
    }
    else {
      XEV_DEBUG_INFO(node);
      XEV_ABORT();
    }
+   ret->set_parent(astParent);
    return ret;
  }
  DECL_DEFAULT(PragmaDeclaration);
@@ -1240,7 +1242,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    // -----------------------------------------------------------------------
    // function header
-   FUNCTION_HEADER_VISIT_BEGIN(node,astchild,0);
+   FUNCTION_HEADER_VISIT_BEGIN(node,astchild,astParent);
    {
      if(typ==0)
        typ = isSgType(astchild);
@@ -1513,7 +1515,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    XmlGetAttributeValue(node,"name",&name);
 
-   SUBTREE_VISIT_BEGIN(node,astchild,0)
+   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
      {
        if(typ==0)
          typ = isSgType(astchild);
@@ -1650,7 +1652,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"bitfield",&bitstr);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       tmp = isSgInitializedName(astchild);
       if( tmp ) {

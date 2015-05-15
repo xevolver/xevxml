@@ -162,6 +162,7 @@ SAGE3_EXPR(NullExpression);
 //SAGE3_EXPR(PntrArrRefExp);
 SAGE3_EXPR(PointerDerefExp);
 SAGE3_EXPR(SizeOfOp);
+SAGE3_EXPR(StatementExpression);
 SAGE3_EXPR(SubscriptExpression);
 SAGE3_EXPR(VarArgEndOp);
 SAGE3_EXPR(VarArgOp);

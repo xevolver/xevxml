@@ -98,7 +98,7 @@ XevXmlVisitor::visitSgActualArgumentExpression(xe::DOMNode* node, SgNode* astPar
   std::string                 name;
 
   XmlGetAttributeValue(node,"name",&name);
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( exp==0 )
         exp = isSgExpression(astchild);
@@ -137,7 +137,7 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
   SgExprListExp*          lst = 0;
   //SgType*                 typ = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( lst==0 )
         lst = isSgExprListExp(astchild);
@@ -180,7 +180,8 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   SgAssignInitializer* ret  = sb::buildAssignInitializer();;
   SgExpression*        exp = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  ret->set_parent(astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(exp==0)
         exp = isSgExpression(astchild);
@@ -241,7 +242,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"ctype",&cty);
   XmlGetAttributeValue(node,"implicit",&imp);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(exp==0)
         exp = isSgExpression(astchild);
@@ -325,7 +326,7 @@ XevXmlVisitor::visitSgCompoundInitializer(xe::DOMNode* node, SgNode* astParent)
   SgCompoundInitializer*  ret = 0;
   SgExprListExp*          lst = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( lst==0 )
         lst = isSgExprListExp(astchild);
@@ -351,7 +352,7 @@ XevXmlVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*         tstmt = 0;
   SgExpression*         fstmt = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       /* assuming these stmts appear in this order */
       if(cond==0)
@@ -389,7 +390,7 @@ XevXmlVisitor::visitSgConstructorInitializer(xercesc::DOMNode* node, SgNode* ast
   XmlGetAttributeValue(node,"paren_after_name", &paren);
   XmlGetAttributeValue(node,"unknown",          &unkc);
 
-  SUBTREE_VISIT_BEGIN(node,child,0)
+  SUBTREE_VISIT_BEGIN(node,child,astParent)
     {
       if(mdecl==0)
         mdecl = isSgMemberFunctionDeclaration(child);
@@ -404,7 +405,7 @@ XevXmlVisitor::visitSgConstructorInitializer(xercesc::DOMNode* node, SgNode* ast
   if(mdecl) mdecl->set_parent(ret);
   if(elst) elst->set_parent(ret);
   if(typ) typ->set_parent(ret);
-
+  ret->set_parent(astParent);
   return ret;
 }
 /** XML attribute writer of SgConstructorInitializer */
@@ -490,6 +491,7 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
   SgClassDefinition*   defn=0;
   ret = sb::buildArrowExp( lhs,rhs);
   bool pushed = false;
+  ret->set_parent(astParent);
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -602,14 +604,15 @@ EXPR_DEFAULT(ExprListExp);
 SgNode*
 XevXmlVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent)
 {
-  SgFunctionCallExp*        ret  = 0;
+  //SgFunctionCallExp*        ret  = 0;
+  SgFunctionCallExp*        ret  = new SgFunctionCallExp(DEFAULT_FILE_INFO);
   SgExpression*             exp  = 0;
   SgExprListExp*            para = 0;
 
-
+  ret->set_parent(astParent);
   std::vector< SgExpression * > exprs;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==0 )
         exp = isSgExpression(astchild);
@@ -618,10 +621,16 @@ XevXmlVisitor::visitSgFunctionCallExp(xercesc::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  ret = sb::buildFunctionCallExp( exp, para );
-  ret->set_parent(astParent);
-  if(exp) exp->set_parent(ret);
-  if(para) para->set_parent(ret);
+  //ret = sb::buildFunctionCallExp( exp, para );
+  //ret->set_parent(astParent);
+  if(exp) {
+    exp->set_parent(ret);
+    ret->set_function(exp);
+  }
+  if(para) {
+    para->set_parent(ret);
+    ret->set_args(para);
+  }
   return ret;
 }
 EXPR_DEFAULT(FunctionCallExp);
@@ -745,7 +754,7 @@ XevXmlVisitor::visitSgImpliedDo(xercesc::DOMNode* node, SgNode* astParent)
   SgExprListExp*      lst = 0;
   SgScopeStatement*   scp = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       /* assuming these stmts appear in this order */
       if(ini==0)
@@ -850,7 +859,7 @@ XevXmlVisitor::visitSgPointerDerefExp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*         exp = 0;
   SgType*               typ = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(typ==0)
         typ = isSgType(astchild);
@@ -882,7 +891,7 @@ XevXmlVisitor::visitSgSizeOfOp(xercesc::DOMNode* node, SgNode* astParent)
   SgType*               typ = 0;
   string class_name;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(exp==0)
         exp = isSgExpression(astchild);
@@ -906,6 +915,32 @@ void XevSageVisitor::inodeSgSizeOfOp(SgNode* node){
     this->visit(typ);
 }
 
+// ===============================================================================
+/// Visitor of a SgStatementExpression element in an XML document
+SgNode*
+XevXmlVisitor::visitSgStatementExpression(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgStatementExpression*      ret = new SgStatementExpression(DEFAULT_FILE_INFO);
+  SgStatement*                stmt=0;
+  ret->set_parent(astParent);
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      //assuming these stmts appear in this order
+      if( stmt==0 )
+        stmt = isSgStatement(astchild);
+    }
+  SUBTREE_VISIT_END();
+  if(stmt==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  ret->set_statement(stmt);
+  stmt->set_parent(ret);
+  return ret;
+}
+EXPR_DEFAULT(StatementExpression);
+
 
 // ===============================================================================
 /// Visitor of a SgSubscriptExpression element in an XML document
@@ -917,7 +952,7 @@ XevXmlVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astPar
   SgExpression*               upp=0;
   SgExpression*               str=0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       //assuming these stmts appear in this order
       if( low==0 )
@@ -950,7 +985,7 @@ XevXmlVisitor::visitSgVarArgEndOp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*   lhs = 0;
 
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
@@ -975,7 +1010,7 @@ XevXmlVisitor::visitSgVarArgOp(xercesc::DOMNode* node, SgNode* astParent)
   SgType*           typ = 0;
 
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( typ==0 )
         typ = isSgType(astchild);
@@ -1008,7 +1043,7 @@ XevXmlVisitor::visitSgVarArgStartOp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*     lhs = 0;
   SgExpression*     rhs = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( lhs==0 )
         lhs = isSgExpression(astchild);
@@ -1208,7 +1243,7 @@ INODE_EXPR_DEFAULT(VarRefExp);
     xe::DOMNode* child=node->getFirstChild();                           \
     while(child) {                                                      \
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){       \
-        SgNode* astchild = this->visit(child);                          \
+        SgNode* astchild = this->visit(child,astParent);		\
         if(exp==0)                                                      \
           exp = isSgExpression(astchild);                               \
       }                                                                 \
@@ -1245,7 +1280,7 @@ INODE_EXPR_DEFAULT(VarRefExp);
     xe::DOMNode* child=node->getFirstChild();                           \
     while(child) {                                                      \
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){       \
-        SgNode* astchild = this->visit(child);                          \
+        SgNode* astchild = this->visit(child,astParent);                \
         if(exp==0)                                                      \
           exp = isSgExpression(astchild);                               \
       }                                                                 \
@@ -1321,7 +1356,7 @@ XevXmlVisitor::visitSgPointerAssignOp(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*         rhs = 0;
   //std::vector< SgExpression * > exprs;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( lhs==0 )
         lhs = isSgExpression(astchild);

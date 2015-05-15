@@ -242,7 +242,7 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
   {                                                                     \
     SgType* ret=NULL;                                                   \
     SgExpression* kexp = NULL;                                          \
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
+    SUBTREE_VISIT_BEGIN(node,astchild,astParent)                        \
       {                                                                 \
         kexp = isSgExpression(astchild);                                \
       }                                                                 \
@@ -287,14 +287,18 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
     SgType* ret=NULL;                                                   \
     SgType* typ=NULL;                                                   \
     SgExpression* kexp = NULL;                                          \
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
+    SUBTREE_VISIT_BEGIN(node,astchild,astParent)                        \
       {                                                                 \
         if(typ==0) typ = isSgType(astchild);                            \
         if(kexp==0) kexp = isSgExpression(astchild);                    \
       }                                                                 \
     SUBTREE_VISIT_END();                                                \
-    if(typ)                                                             \
+    if(typ){								\
       ret = Sg##Type::createType(typ,kexp);                             \
+      typ->set_parent(ret);						\
+    }									\
+    if(kexp)								\
+      kexp->set_parent(ret);						\
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
@@ -565,7 +569,7 @@ XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
   SgType*                         typ = 0;
   SgFunctionParameterTypeList*    lst = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( typ==0 )
         typ = isSgType(astchild);
@@ -618,7 +622,7 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
@@ -674,7 +678,7 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"len",&len);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(len && lexp==0){
         lexp = isSgExpression(astchild);
@@ -768,7 +772,7 @@ XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
   SgType*           typ = 0;
   SgExpression*    kexp = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
@@ -812,7 +816,7 @@ XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
   SgType*           typ = 0;
   SgExpression*     kexp = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
@@ -855,7 +859,7 @@ XevXmlVisitor::visitSgTypeInt(xercesc::DOMNode* node, SgNode* astParent)
   SgType* ret=NULL;
   SgExpression* kexp = NULL;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(kexp==0)
         kexp = isSgExpression(astchild);
@@ -885,7 +889,7 @@ XevXmlVisitor::visitSgTypeLabel(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression* kexp = NULL;
 
 
-  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(kexp==0)
         kexp = isSgExpression(astchild);

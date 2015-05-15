@@ -132,6 +132,7 @@ SgNode*
 XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 {
   SgNode* ret = 0;
+
   if(node) {
     char* buf = xe::XMLString::transcode(node->getNodeName());
     string nname = buf;
@@ -146,7 +147,6 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       }
     }
     else {
-
       //#define XEVXML_DEBUG
 #ifdef XEVXML_DEBUG
       static int g_count=0;
@@ -171,7 +171,10 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       checkStatement(node,ret);
       checkDeclStmt(node,ret);
       checkLocatedNode(node,ret);
-
+      if(isSgType(ret)==0 && isSgSourceFile(ret)==0 && astParent==0 ){
+	XEV_DEBUG_INFO(node);
+        XEV_ABORT();
+      }
       return ret;
     }
   }

@@ -172,7 +172,7 @@ XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
   SgValueExp*   real  = 0;
   SgValueExp*   imag  = 0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       /* assuming these exprs appear in this order */
       if(real==0)

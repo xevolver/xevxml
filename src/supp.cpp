@@ -301,7 +301,7 @@ XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astPa
   SgType*                         typ = 0;
   std::vector<SgType*>            lst;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       typ = isSgType(astchild);
       if( typ!=0 )
@@ -424,6 +424,8 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
   }
   ret = sb::buildPragma(line);
 #endif
+  if(ret)
+    ret->set_parent(astParent);
   return ret;
 }
 /** XML attribute writer of SgPragma */
@@ -575,7 +577,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"name",&name);
 
-  SUBTREE_VISIT_BEGIN(node,astchild,0)
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(ini==0)
         ini = isSgInitializer(astchild);
