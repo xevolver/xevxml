@@ -233,6 +233,36 @@ void XevSageVisitor::inodeSgArithmeticIfStatement(SgNode* node)
 }
 
 // ===============================================================================
+/// Visitor of a SgAssociateStatement element in an XML document
+SgNode*
+XevXmlVisitor::visitSgAssociateStatement(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgAssociateStatement*   ret=0;
+  SgBasicBlock*           body=0;
+  SgVariableDeclaration*  decl=0;
+
+  ret = new SgAssociateStatement(DEFAULT_FILE_INFO);
+  ret->set_parent(astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if( body==0 )
+        body = isSgBasicBlock(astchild);
+      if( decl==0 )
+        decl = isSgVariableDeclaration(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  if(body==0||decl==0)
+    XEV_ABORT();
+
+  ret->set_body(body);
+  ret->set_variable_declaration(decl);
+
+  return ret;
+}
+STMT_DEFAULT(AssociateStatement);
+
+// ===============================================================================
 /// Visitor of a SgBackspaceStatement element in an XML document
 SgNode*
 XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)

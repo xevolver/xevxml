@@ -202,6 +202,7 @@ SAGE3_DECL(VariableDeclaration);
 // -------------------------------------
 SAGE3_STMT(AllocateStatement);
 SAGE3_STMT(ArithmeticIfStatement);
+SAGE3_STMT(AssociateStatement);
 SAGE3_STMT(BackspaceStatement);
 SAGE3_STMT(BasicBlock);
 SAGE3_STMT(BreakStmt);
