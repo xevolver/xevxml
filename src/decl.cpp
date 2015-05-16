@@ -365,9 +365,10 @@ void XevSageVisitor::attribSgAttributeSpecificationStatement(SgNode* node)
 /** XML internal node writer of SgAttributeSpecificationStatement */
 void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
 {
-  if(isSgAttributeSpecificationStatement(node)) {
+  SgAttributeSpecificationStatement* n = isSgAttributeSpecificationStatement(node);
+  if(n) {
     SgExprListExp* lste = 0;
-    lste = isSgAttributeSpecificationStatement(node)->get_parameter_list();
+    lste = n->get_parameter_list();
     if( lste){
       SgExpressionPtrList& lst = lste->get_expressions();
 
@@ -375,7 +376,7 @@ void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
         this->visit(lst[i]);
       }
     }
-    lste = isSgAttributeSpecificationStatement(node)->get_bind_list();
+    lste = n->get_bind_list();
     if( lste) {
       SgExpressionPtrList& lst = lste->get_expressions();
 
@@ -384,12 +385,11 @@ void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
       }
     }
 
-    SgDataStatementGroupPtrList & lst
-      = isSgAttributeSpecificationStatement(node)->get_data_statement_group_list();
-    for(size_t i=0;i<lst.size();i++){
-      this->visit(lst[i]);
+    SgDataStatementGroupPtrList & dlst = n->get_data_statement_group_list();
+    for(size_t i=0;i<dlst.size();i++){
+      this->visit(dlst[i]);
     }
-    SgStringList & slst =isSgAttributeSpecificationStatement(node)->get_name_list();
+    SgStringList & slst = n->get_name_list();
       string s;
     for(size_t i=0;i<slst.size();i++){
       s = slst[i];
@@ -1761,7 +1761,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
-  name->set_definition(ret->get_definition());
+  //name->set_definition(ret->get_definition());
 
   // see buildVariableDeclaration in fortran_support.C
   if(si::is_Fortran_language())
