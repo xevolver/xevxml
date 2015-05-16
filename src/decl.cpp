@@ -127,7 +127,7 @@ XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 
   XmlGetAttributeValue(node,"gnu",&gnu);
   ret->set_useGnuExtendedFormat(gnu);
-  
+
   if(XmlGetAttributeValue(node,"regs",&regs)){
     char* str = (char*)regs.c_str();
     char* c;
@@ -1267,6 +1267,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    //SgFunctionType*                 typ = 0;
    SgType*                         typ = 0;
    SgFunctionParameterList*        lst = 0;
+   SgFunctionParameterList*        lst2 = 0;
    SgScopeStatement*               scope = 0;
    SgBasicBlock*                   def = 0;
    SgFunctionDefinition*           fdf = 0;
@@ -1313,10 +1314,12 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    if(lst && typ){
      if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-       ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst,
+       lst2 = si::deepCopy(lst);
+       ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst2,
                                                 (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
        //SgNode::get_globalFunctionTypeTable()->print_functypetable(std::cerr);
        //std::cerr << "--------------------" << ret->get_type() -> get_return_type() -> class_name() << std::endl;
+       lst2->set_parent(ret);
      }
      else {
        // add (block data) 0828
@@ -1342,11 +1345,11 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    // -----------------------------------------------------------------------
    // "*" in parameter list is considered an alternative return
-   if(lst && si::is_Fortran_language()==true){
+   if(lst2 && si::is_Fortran_language()==true){
      int counter=1;
      SgScopeStatement* scope = ret->get_definition();
-     for(size_t i(0);i<lst->get_args().size();i++){
-       SgInitializedName* ini = lst->get_args()[i];
+     for(size_t i(0);i<lst2->get_args().size();i++){
+       SgInitializedName* ini = lst2->get_args()[i];
        // for each parameter, find its symbol in the function definition scope
        SgSymbol* sym = scope->lookup_symbol(ini->get_name());
 
@@ -1374,7 +1377,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
          XEV_ABORT();
        }
      }
-   } // if lst
+   } // if lst2
 
    // -----------------------------------------------------------------------
    // function body
@@ -1824,7 +1827,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
 void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
-  if(n) {
+  // get_bitfield() often fails for Fortran2003 programs (e.g. test2011_33.f03)
+  if( si::is_Fortran_language() == false && n && n->get_bitfield() ) {
     SgUnsignedLongVal *bit = isSgUnsignedLongVal(n->get_bitfield());
     if( bit )
       sstr() << " bitfield=\"" << bit->unparseToString() << "\" ";

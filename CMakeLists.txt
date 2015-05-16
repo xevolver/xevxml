@@ -34,6 +34,8 @@ install_files( /docs/ FILES ${PROJECT_SOURCE_DIR}/README.md)
 
 enable_testing()
 
+set(CTEST_CUSTOM_PRE_TEST "make -C ${PROJECT_SOURCE_DIR}/test/identity")
+
 file(GLOB sources ${PROJECT_SOURCE_DIR}/test/xsltgen/*.f90)
 foreach(f90absname ${sources})
   get_filename_component(f90name ${f90absname} NAME)
