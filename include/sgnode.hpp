@@ -189,6 +189,7 @@ SAGE3_DECL(FortranIncludeLine);
 SAGE3_DECL(FunctionDeclaration);
 SAGE3_DECL(FunctionParameterList);
 SAGE3_DECL(ImplicitStatement);
+SAGE3_DECL(ImportStatement);
 SAGE3_DECL(InterfaceStatement);
 SAGE3_DECL(ModuleStatement);
 SAGE3_DECL(NamelistStatement);

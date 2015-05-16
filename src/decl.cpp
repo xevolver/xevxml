@@ -1063,6 +1063,35 @@ XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
 }
 DECL_DEFAULT(ImplicitStatement);
 
+// =====================================================================
+/// Visitor of a SgImportStatement element in an XML document
+SgNode*
+XevXmlVisitor::visitSgImportStatement(xe::DOMNode* node, SgNode* astParent)
+{
+  SgImportStatement*        ret   = new SgImportStatement(DEFAULT_FILE_INFO);
+  SgExpressionPtrList       lst;
+  SgExpression*             exp = 0;
+
+  ret->set_parent(astParent);
+  ret->set_definingDeclaration(ret);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      exp = isSgExpression(astchild);
+      if(exp)
+        lst.push_back(exp);
+    }
+  SUBTREE_VISIT_END();
+
+  if(!lst.empty()) {
+    ret->get_import_list() = lst;
+    for(size_t i(0);i<lst.size();i++)
+      lst[i]->set_parent(ret);
+  }
+
+  return ret;
+}
+DECL_DEFAULT(ImportStatement);
+
 
 
 // =====================================================================
