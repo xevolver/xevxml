@@ -142,8 +142,8 @@ XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
       c = strtok(NULL,",");
 
       if(c) {
-	e = atoi(c);
-	lst.push_back((SgInitializedName::asm_register_name_enum)e);
+        e = atoi(c);
+        lst.push_back((SgInitializedName::asm_register_name_enum)e);
       }
     }
   }
@@ -152,8 +152,8 @@ XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
     {
       op = isSgExpression(astchild);
       if(op){
-	ret->get_operands().push_back(op);
-	op->set_parent(ret);
+        ret->get_operands().push_back(op);
+        op->set_parent(ret);
       }
     }
   SUBTREE_VISIT_END();
@@ -175,9 +175,9 @@ void XevSageVisitor::attribSgAsmStmt(SgNode* node)
     if(n->get_clobberRegisterList().size()>0){
       sstr() << " regs=\"";
       for(size_t i(0);i<n->get_clobberRegisterList().size();i++){
-	sstr() << n->get_clobberRegisterList()[i];
-	if(i< n->get_clobberRegisterList().size()-1)
-	  sstr() << ",";
+        sstr() << n->get_clobberRegisterList()[i];
+        if(i< n->get_clobberRegisterList().size()-1)
+          sstr() << ",";
       }
       sstr() << "\"";
     }
@@ -346,8 +346,11 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     case SgAttributeSpecificationStatement::e_intrinsicStatement:
     case SgAttributeSpecificationStatement::e_optionalStatement:
     case SgAttributeSpecificationStatement::e_pointerStatement:
+    case SgAttributeSpecificationStatement::e_protectedStatement:
     case SgAttributeSpecificationStatement::e_saveStatement :
     case SgAttributeSpecificationStatement::e_targetStatement :
+    case SgAttributeSpecificationStatement::e_valueStatement :
+    case SgAttributeSpecificationStatement::e_volatileStatement :
       SUBTREE_VISIT_BEGIN(node,astchild,ret)
         {
           str = isSgStringVal(astchild);
@@ -360,14 +363,29 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
 
       if(XmlGetAttributeValue(node,"intent",&intent))
         ret->set_intent(intent);
+
+      if(ekind==SgAttributeSpecificationStatement::e_protectedStatement){
+        for(size_t i(0);i<slst.size();i++){
+          SgVariableSymbol* vsym
+            = si::lookupVariableSymbolInParentScopes( slst[i], sb::topScopeStack() );
+          if(vsym){
+            vsym->get_declaration()->set_protected_declaration(true);
+            //vsym->get_declaration()->get_declptr()->get_declarationModifier().get_accessModifier().setProtected();
+            //cerr << "decl=" <<  vsym->get_declaration()->get_protected_declaration() << endl;
+          }
+          else{
+            XEV_DEBUG_INFO(node);
+            XEV_ABORT();
+          }
+        }
+      }
       break;
     default:
       XEV_DEBUG_INFO(node);
       XEV_ABORT();
       break;
     }
-    //TODO: need to consider forward declaration?
-    if(ret) ret->set_definingDeclaration(ret);
+
     return ret;
 }
 /** XML attribute writer of SgAttributeSpecificationStatement */
@@ -986,7 +1004,7 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     unsigned long fmod = 0;
     for(size_t i(0);i<bit.size();i++){
       if(bit[i]){
-	fmod |= (1<<i);
+        fmod |= (1<<i);
       }
     }
     if(fmod>2) { //m!= e_unknown && m!= e_default
