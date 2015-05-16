@@ -217,15 +217,26 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     Rose_STL_Container<std::string> slst;
 
     int intent = 0;
+    SgAttributeSpecificationStatement::attribute_spec_enum  ekind
+      = (SgAttributeSpecificationStatement::attribute_spec_enum)kind;
+
+    // See sb::buildAttributeSpecificationStatement in sageBuilder_fortran.C
+    ret = new SgAttributeSpecificationStatement( DEFAULT_FILE_INFO );
+    ret->set_attribute_kind(ekind);
+    ret->set_definingDeclaration(ret);
+    ret->set_firstNondefiningDeclaration(ret);
+    ret->set_parent(astParent);
 
     switch (kind){
     case SgAttributeSpecificationStatement::e_parameterStatement:
     case SgAttributeSpecificationStatement::e_externalStatement:
     case SgAttributeSpecificationStatement::e_allocatableStatement:
-      SUBTREE_VISIT_BEGIN(node,astchild,astParent)
+    case SgAttributeSpecificationStatement::e_bindStatement:
+      SUBTREE_VISIT_BEGIN(node,astchild,ret)
         {
           exp = isSgExpression(astchild);
           if( exp ) {
+#if 0
             // search SgVariableDeclaration            add (0828)
             if( (aref=isSgPntrArrRefExp(exp)) != 0 ){
               if( (vref=isSgVarRefExp(aref->get_lhs_operand())) != 0 ){
@@ -254,22 +265,26 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
                 }
               }
             }
+#endif
             lst.push_back(exp);
             //ret->get_parameter_list()->prepend_expression(exp);
           }
         }
       SUBTREE_VISIT_END();
-      ret = sb::buildAttributeSpecificationStatement( (SgAttributeSpecificationStatement::attribute_spec_enum)  kind  );
+
       elst = sb::buildExprListExp( lst );
       elst->set_parent(ret);
-      ret->set_parameter_list( elst );
+      if(ekind != SgAttributeSpecificationStatement::e_bindStatement)
+        ret->set_parameter_list( elst );
+      else
+        ret->set_bind_list( elst );
       break;
 
     case SgAttributeSpecificationStatement::e_dimensionStatement:
-      ret = sb::buildAttributeSpecificationStatement( (SgAttributeSpecificationStatement::attribute_spec_enum)  kind  );
       SUBTREE_VISIT_BEGIN(node,astchild,ret)
         {
           exp = isSgExpression(astchild);
+#if 0
           // search SgVariableDeclaration            add (0828)
           if( (aref=isSgPntrArrRefExp(exp)) != 0 ){
             if( (vref=isSgVarRefExp(aref->get_lhs_operand())) != 0 ){
@@ -290,6 +305,20 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
               }
             }
           }
+#else
+          if( exp && (inam = si::convertRefToInitializedName(exp)) ){
+            prnt = inam->get_parent();
+            if( prnt == 0 )
+              lst.push_back(exp);
+            else if(isSgFunctionParameterList(prnt)){
+              SgFunctionDefinition * f_def = si::getEnclosingProcedure (sb::topScopeStack());
+              if(f_def==0) XEV_ABORT();
+              inam->set_scope(f_def);
+              inam->set_definition(ret);
+              lst.push_back(exp);
+            }
+          }
+#endif
         }
       SUBTREE_VISIT_END();
       elst = sb::buildExprListExp( lst );
@@ -298,9 +327,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
       break;
 
     case SgAttributeSpecificationStatement::e_dataStatement :
-      ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
-      ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-      SUBTREE_VISIT_BEGIN(node,astchild,astParent)
+      SUBTREE_VISIT_BEGIN(node,astchild,ret)
         {
           dataGroup = isSgDataStatementGroup(astchild);
           if( dataGroup ) {
@@ -321,10 +348,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     case SgAttributeSpecificationStatement::e_pointerStatement:
     case SgAttributeSpecificationStatement::e_saveStatement :
     case SgAttributeSpecificationStatement::e_targetStatement :
-
-      ret = new SgAttributeSpecificationStatement( Sg_File_Info::generateDefaultFileInfoForTransformationNode() );
-      ret->set_attribute_kind((SgAttributeSpecificationStatement::attribute_spec_enum)  kind);
-      SUBTREE_VISIT_BEGIN(node,astchild,astParent)
+      SUBTREE_VISIT_BEGIN(node,astchild,ret)
         {
           str = isSgStringVal(astchild);
           if( str ) {
@@ -355,12 +379,12 @@ void XevSageVisitor::attribSgAttributeSpecificationStatement(SgNode* node)
     SgAttributeSpecificationStatement::attribute_spec_enum kind =
       n->get_attribute_kind();
     sstr() << " kind=\"" << kind << "\" ";
-    if( n->get_bind_list() )
-      sstr() << " bind_list=\"1\" ";
+    //if( n->get_bind_list() )
+    //sstr() << " bind_list=\"1\" ";
     if( n->get_intent() )
       sstr() << " intent=\"" << n->get_intent() << "\" ";
   }
-  attribSgStatement(sstr(),node);
+  attribSgDeclarationStatement(sstr(),node);
 }
 /** XML internal node writer of SgAttributeSpecificationStatement */
 void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
@@ -390,7 +414,7 @@ void XevSageVisitor::inodeSgAttributeSpecificationStatement(SgNode* node)
       this->visit(dlst[i]);
     }
     SgStringList & slst = n->get_name_list();
-      string s;
+    string s;
     for(size_t i=0;i<slst.size();i++){
       s = slst[i];
       SgStringVal *sv = SageBuilder::buildStringVal(s);
