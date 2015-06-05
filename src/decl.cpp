@@ -1826,11 +1826,19 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     cls->set_parent(ret);
   }
   // non-defining declaration
-  else{
+  else if(name->get_name().is_null()==false){
     ret = sb::buildVariableDeclaration(name->get_name(),
                                        name->get_type(),
                                        name->get_initializer());
 
+  }
+  else{
+    // probably, an unnamed structure or union member
+    SgVariableDefinition* def = new SgVariableDefinition(DEFAULT_FILE_INFO);
+    ret = new SgVariableDeclaration(DEFAULT_FILE_INFO);
+    ret->append_variable(name,name->get_initializer());
+    name->set_declptr(def);
+    def->set_parent(ret);
   }
 
   if(ret==0) {
@@ -1838,7 +1846,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
-  //name->set_definition(ret->get_definition());
+  if(name->get_name().is_null()==false)
+    name->set_definition(ret->get_definition());
 
   // see buildVariableDeclaration in fortran_support.C
   if(si::is_Fortran_language())
@@ -1852,7 +1861,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     if(i>0 && si::is_Fortran_language() == false )
       ret->append_variable(varList[i],varList[i]->get_initializer());
     varList[i]->set_parent(ret);
-    varList[i]->set_declptr(ret);
+    varList[i]->set_declptr(ret->get_definition());
     varList[i]->set_scope(name->get_scope());
     //varList[i]->set_type(name->get_type());
   }
@@ -1905,7 +1914,7 @@ void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
 {
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
   // get_bitfield() often fails for Fortran2003 programs (e.g. test2011_33.f03)
-  if( si::is_Fortran_language() == false && n && n->get_bitfield() ) {
+  if( n && si::is_Fortran_language() == false && n && n->get_bitfield() ) {
     SgUnsignedLongVal *bit = isSgUnsignedLongVal(n->get_bitfield());
     if( bit )
       sstr() << " bitfield=\"" << bit->unparseToString() << "\" ";
