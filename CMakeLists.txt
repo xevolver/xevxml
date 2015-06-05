@@ -10,9 +10,9 @@ SET(DOXYGEN_OUTPUT docs/doxygen/)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT ${DOXYGEN_OUTPUT}
-  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+#  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
   COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-  COMMAND ${CMAKE_COMMAND} -E echo "Done."
+#  COMMAND ${CMAKE_COMMAND} -E echo "Done."
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS ${DOXYGEN_INPUT}
   )
@@ -20,9 +20,9 @@ ADD_CUSTOM_COMMAND(
 ADD_CUSTOM_TARGET(apidoc ALL DEPENDS ${DOXYGEN_OUTPUT})
 
 ADD_CUSTOM_TARGET(apidoc_forced
-  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
+#  COMMAND ${CMAKE_COMMAND} -E echo_append "Building API Documentation..."
   COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_INPUT}
-  COMMAND ${CMAKE_COMMAND} -E echo "Done."
+#  COMMAND ${CMAKE_COMMAND} -E echo "Done."
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 install_files( /docs/ FILES ${PROJECT_SOURCE_DIR}/docs/doxygen/html)
