@@ -1029,6 +1029,31 @@ XevXmlVisitor::visitSgSubscriptExpression(xercesc::DOMNode* node, SgNode* astPar
 }
 EXPR_DEFAULT(SubscriptExpression);
 
+/// Visitor of a SgVarArgCopyOp element in an XML document
+SgNode*
+XevXmlVisitor::visitSgVarArgCopyOp(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgVarArgCopyOp* ret = 0;
+  SgExpression*   lhs = 0;
+  SgExpression*   rhs = 0;
+
+
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
+    {
+      if( lhs==0 )
+        lhs = isSgExpression(astchild);
+      else if(rhs==0)
+	rhs = isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  ret = new SgVarArgCopyOp( DEFAULT_FILE_INFO, lhs, rhs, lhs->get_type() );
+  ret->set_parent(astParent);
+  lhs->set_parent(ret);
+  return ret;
+}
+EXPR_DEFAULT(VarArgCopyOp);
+
 
 // ===============================================================================
 /// Visitor of a SgVarArgEndOp element in an XML document

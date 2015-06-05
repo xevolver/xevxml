@@ -166,6 +166,7 @@ SAGE3_EXPR(SizeOfOp);
 SAGE3_EXPR(StatementExpression);
 SAGE3_EXPR(SubscriptExpression);
 SAGE3_EXPR(VarArgEndOp);
+SAGE3_EXPR(VarArgCopyOp);
 SAGE3_EXPR(VarArgOp);
 SAGE3_EXPR(VarArgStartOp);
 SAGE3_EXPR(VarRefExp);
