@@ -1846,8 +1846,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
-  if(name->get_name().is_null()==false)
-    name->set_definition(ret->get_definition());
+  //if(name->get_name().is_null()==false)
+  //name->set_definition(ret->get_definition());
 
   // see buildVariableDeclaration in fortran_support.C
   if(si::is_Fortran_language())
