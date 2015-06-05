@@ -384,8 +384,8 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
           }
         }
       }
-      break;
 #endif
+      break;
     default:
       XEV_DEBUG_INFO(node);
       XEV_ABORT();
