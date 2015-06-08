@@ -1855,8 +1855,9 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     // probably, an unnamed structure or union member
     SgVariableDefinition* def = new SgVariableDefinition(DEFAULT_FILE_INFO);
     ret = new SgVariableDeclaration(DEFAULT_FILE_INFO);
-    ret->append_variable(name,name->get_initializer());
     name->set_declptr(def);
+    name->set_definition(def);
+    ret->append_variable(name,name->get_initializer());
     def->set_parent(ret);
   }
 
@@ -1881,15 +1882,17 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       ret->append_variable(varList[i],varList[i]->get_initializer());
     varList[i]->set_parent(ret);
     //varList[i]->set_declptr(ret->get_definition());
-    varList[i]->set_declptr(ret);
-    varList[i]->set_scope(name->get_scope());
+    if(varList[i]->get_name().is_null()==false){
+      varList[i]->set_declptr(ret);
+      varList[i]->set_scope(name->get_scope());
+    }
     //varList[i]->set_type(name->get_type());
   }
 
   // this is necessary because declaration is required for each variable.
   for(size_t i(1);i<varList.size();i++){
     vsym = si::lookupVariableSymbolInParentScopes(varList[i]->get_name());
-    if(vsym==NULL){
+    if(vsym==NULL && varList[i]->get_name().is_null() == false){
       SgVariableDeclaration* decl =sb::buildVariableDeclaration(varList[i]->get_name(),
                                                                 varList[i]->get_type(),
                                                                 varList[i]->get_initializer());
