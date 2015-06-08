@@ -364,27 +364,25 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
       if(XmlGetAttributeValue(node,"intent",&intent))
         ret->set_intent(intent);
 
-#if 0 // protect statement does not correctly work yet
       if(ekind==SgAttributeSpecificationStatement::e_protectedStatement){
         for(size_t i(0);i<slst.size();i++){
           SgVariableSymbol* vsym
             = si::lookupVariableSymbolInParentScopes( slst[i], sb::topScopeStack() );
           if(vsym){
-            SgVariableDeclaration* vdecl = isSgVariableDeclaration(vsym->get_declaration()->get_declptr());
-            //->set_protected_declaration(true);
-            //vsym->get_declaration()->get_declptr()->get_declarationModifier().get_accessModifier().setProtected();
-            //cerr << "decl=" <<  vsym->get_declaration()->get_protected_declaration() << endl;
-            if(vdecl)
+            SgVariableDeclaration* vdecl = isSgVariableDeclaration(vsym->get_declaration()->get_parent());
+            if(vdecl){
               for(size_t i(0);i<vdecl->get_variables().size();i++)
-                vdecl->get_variables()[i]->set_protected_declaration(true);
+                if( vdecl->get_variables()[i]->get_name().getString()==slst[i])
+                  vdecl->get_variables()[i]->set_protected_declaration(true);
+            }
           }
           else{
+            // is this an error?
             XEV_DEBUG_INFO(node);
             XEV_ABORT();
           }
         }
       }
-#endif
       break;
     default:
       XEV_DEBUG_INFO(node);
