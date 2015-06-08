@@ -1052,6 +1052,8 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
     }
   SUBTREE_VISIT_END();
 
+  ret->set_definingDeclaration(NULL);
+  ret->set_firstNondefiningDeclaration(ret);
   return ret;
 }
 DECL_DEFAULT(FunctionParameterList);
@@ -1810,6 +1812,15 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     XEV_ABORT();
   }
 
+  SgVariableSymbol* vsym = si::lookupVariableSymbolInParentScopes(name->get_name());
+#if 0
+  if(vsym){
+    cerr << "found " << name->get_name().getString() << "@ visitSgVariableDeclaration" << endl;
+    cerr << vsym->get_type()->class_name() << endl;
+  }
+  else
+    cerr << "NOT found " << name->get_name().getString() << "@ visitSgVariableDeclaration" << endl;
+#endif
   // defining declaration
   if( cls ) {
     SgType * typ = name->get_type();
@@ -1827,10 +1838,20 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   // non-defining declaration
   else if(name->get_name().is_null()==false){
-    ret = sb::buildVariableDeclaration(name->get_name(),
-                                       name->get_type(),
-                                       name->get_initializer());
-
+    if(vsym==NULL ||  si::is_Fortran_language()==false ) {
+      ret = sb::buildVariableDeclaration(name->get_name(),
+                                         name->get_type(),
+                                         name->get_initializer());
+    }
+    else {
+      // this variable would already be defined in SgFunctionParameterList
+      // calling buildVariableDeclaration craches so it is not called below.
+      ret = new SgVariableDeclaration(DEFAULT_FILE_INFO);
+      ret->set_definingDeclaration(vsym->get_declaration()->get_definition());
+      if(vsym && isSgFunctionParameterList(vsym->get_declaration()->get_parent())){
+        vsym->get_declaration()->set_parent(ret);
+      }
+    }
   }
   else{
     // probably, an unnamed structure or union member
@@ -1861,17 +1882,23 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     if(i>0 && si::is_Fortran_language() == false )
       ret->append_variable(varList[i],varList[i]->get_initializer());
     varList[i]->set_parent(ret);
-    varList[i]->set_declptr(ret->get_definition());
+    //varList[i]->set_declptr(ret->get_definition());
+    varList[i]->set_declptr(ret);
     varList[i]->set_scope(name->get_scope());
     //varList[i]->set_type(name->get_type());
   }
 
   // this is necessary because declaration is required for each variable.
   for(size_t i(1);i<varList.size();i++){
-    SgVariableDeclaration* decl =sb::buildVariableDeclaration(varList[i]->get_name(),
-                                                              varList[i]->get_type(),
-                                                              varList[i]->get_initializer());
-    varList[i]->set_definition(decl->get_definition());
+    vsym = si::lookupVariableSymbolInParentScopes(varList[i]->get_name());
+    if(vsym==NULL){
+      SgVariableDeclaration* decl =sb::buildVariableDeclaration(varList[i]->get_name(),
+                                                                varList[i]->get_type(),
+                                                                varList[i]->get_initializer());
+      //varList[i]->set_definition(decl->get_definition());
+      varList[i]->set_declptr(decl);
+      decl->append_variable(varList[i],varList[i]->get_initializer());
+    }
   }
 
 
