@@ -186,9 +186,9 @@ XevXmlVisitor::visitSgAsmOp(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"record",&rec);
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"output",&out);
-  ret = new SgAsmOp(DEFAULT_FILE_INFO, 
-		    (SgAsmOp::asm_operand_constraint_enum)cons,
-		    (SgAsmOp::asm_operand_modifier_enum)mod);
+  ret = new SgAsmOp(DEFAULT_FILE_INFO,
+                    (SgAsmOp::asm_operand_constraint_enum)cons,
+                    (SgAsmOp::asm_operand_modifier_enum)mod);
 
   ret->set_parent(astParent);
   ret->set_recordRawAsmOperandDescriptions(rec);
@@ -566,7 +566,8 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
 
           if(ptype)
             ctype = isSgClassType(si::getElementType(ptype));
-          else{
+          else if(isSgTypeUnknown(lhs->get_type())==0) {
+            //NOTE: the type of lhs could be SgTypeUnknown
             XEV_WARN(lhs->get_type()->class_name() <<" is given as lhs of SgArrowExp");
             XEV_DEBUG_INFO(node);
             XEV_ABORT();
@@ -599,13 +600,14 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
             }
             // defining declaration is not found
             else {
-              XEV_WARN( "Defning declaration of " << ctype->get_name().getString() << " is not found");
+              XEV_WARN( "Defining declaration of " << ctype->get_name().getString() << " is not found");
             }
           }
           else {
             //XEV_WARN( ptype->get_base_type()->class_name() <<" is found");
+            XEV_WARN( lhs->get_type()->class_name() <<" is used as the type of lhs of SgArrowExp.");
             XEV_DEBUG_INFO(node);
-            XEV_ABORT();
+            //XEV_ABORT();
           }
         }
       }
