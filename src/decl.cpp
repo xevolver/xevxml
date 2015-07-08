@@ -1845,7 +1845,14 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       // this variable would already be defined in SgFunctionParameterList
       // calling buildVariableDeclaration craches so it is not called below.
       ret = new SgVariableDeclaration(DEFAULT_FILE_INFO);
-      ret->set_definingDeclaration(vsym->get_declaration()->get_definition());
+      if(vsym->get_declaration()){
+	if(isSgVariableDeclaration(vsym->get_declaration()->get_definition()))
+	  ret->set_definingDeclaration(vsym->get_declaration()->get_definition());
+	else{
+	  ret->set_definingDeclaration(ret);
+	  vsym->get_declaration()->set_definition(ret);
+	}
+      }
       if(vsym && isSgFunctionParameterList(vsym->get_declaration()->get_parent())){
         vsym->get_declaration()->set_parent(ret);
       }
