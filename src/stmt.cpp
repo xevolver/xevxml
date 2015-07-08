@@ -41,6 +41,21 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
+static PreprocessingInfo* 
+attachRawText(SgLocatedNode* node, const std::string& text, 
+	      PreprocessingInfo::RelativePositionType position=PreprocessingInfo::before)
+{
+  PreprocessingInfo* ret = 0;
+  PreprocessingInfo::DirectiveType mytype 
+    = PreprocessingInfo::CpreprocessorCompilerGeneratedLinemarker;
+  //PreprocessingInfo::DirectiveType mytype = PreprocessingInfo::RawText; //error
+  //PreprocessingInfo::DirectiveType mytype = PreprocessingInfo::LineReplacement; //replace
+  ret = new PreprocessingInfo (mytype,text, "transformation-generated", 0, 0, 0, position);
+  node->addToAttachedPreprocessingInfo(ret);
+  return ret;
+}
+
+
 /// Check if there is a text between two adjacent statement.
 /// If such a text exists, it is attached to either of the two statements.
 static
@@ -62,7 +77,8 @@ void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* b
           si::appendStatement (astchild,isSgScopeStatement(blk));
         prev=isSgStatement(astchild);
         if(remain.length()){ //the text is located before the 1st statement
-          si::attachArbitraryText(prev,remain,PreprocessingInfo::before);
+          //si::attachArbitraryText(prev,remain,PreprocessingInfo::before);
+          attachRawText(prev,remain,PreprocessingInfo::before);
           remain="";
         }
       }
@@ -88,7 +104,8 @@ void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* b
         text += line;
       if(text.length()){
         if(prev)
-          si::attachArbitraryText(prev,text,PreprocessingInfo::after);
+          //si::attachArbitraryText(prev,text,PreprocessingInfo::after);
+          attachRawText(prev,text,PreprocessingInfo::after);
         else // the text is located before the 1st statement
           remain = text;
       }
@@ -96,7 +113,8 @@ void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* b
     child=child->getNextSibling();
   }
   if(remain.length()) // for empty basic block
-    si::attachArbitraryText(isSgLocatedNode(blk),remain,PreprocessingInfo::inside);
+    //si::attachArbitraryText(isSgLocatedNode(blk),remain,PreprocessingInfo::inside);
+    attachRawText(isSgLocatedNode(blk),remain,PreprocessingInfo::inside);
 }
 
 
