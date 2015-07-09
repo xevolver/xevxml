@@ -616,31 +616,27 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
 {
   SgModifierType* ret=NULL;
   SgType* typ =NULL;
-  string modtype;
+  unsigned long mod=0;
 
-  if(XmlGetAttributeValue(node,"modifier",&modtype)==false){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
-
-  if( modtype == "const" ) {
-    //return sb::buildConstType(itype);
-    //ret = new SgModifierType(typ);
-    ret = sb::buildConstType(typ);
+  if(typ==0 || XmlGetAttributeValue(node,"modifier",&mod)==false) {
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
   }
-  else if ( modtype == "volatile" )
-    ret = sb::buildVolatileType(typ);
-  else if ( modtype == "restrict" )
-    ret = sb::buildRestrictType(typ);
-  else return NULL;
-  typ->set_parent(ret);
+  ret = sb::buildModifierType(typ);
   ret->set_parent(astParent);
+  //ret->set_base_type(typ);
+  typ->set_parent(ret);
+  if(XmlGetAttributeValue(node,"cv_modifier",&mod)) {
+    ret->get_typeModifier().get_constVolatileModifier()
+      .set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
+  }
+
   return ret;
 }
 /** XML attribute writer of SgModifierType */
@@ -648,14 +644,17 @@ void XevSageVisitor::attribSgModifierType(SgNode* node){
   SgModifierType* n = isSgModifierType(node);
   if(n) {
     SgTypeModifier m = n->get_typeModifier();
-    if( m.isRestrict() )
-      sstr() << " modifier=\"restrict\" ";
-
-    SgConstVolatileModifier cv = m.get_constVolatileModifier();
-    if( cv.isConst() )
-      sstr() << " modifier=\"const\" ";
-    else if(cv.isVolatile() )
-      sstr() << " modifier=\"volatile\" ";
+    unsigned long mod = 0;
+    SgBitVector vec = m.get_modifierVector();
+    for(size_t i(0);i<vec.size();i++){
+      mod |= (((unsigned int)vec[i]) << i );
+    }
+    sstr() << " modifier=\"" << mod << "\" ";
+    
+    SgConstVolatileModifier::cv_modifier_enum cv 
+      = m.get_constVolatileModifier().get_modifier();
+    if( cv != SgConstVolatileModifier::e_default )
+      sstr() << " cv_modifier=\"" << cv << "\" ";
   }
 }
 /** XML interanal node writer of SgModifierType */
