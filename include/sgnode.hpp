@@ -273,6 +273,7 @@ SAGE3_TYPE(TypeLabel);
 SAGE3_TYPE(TypeLong);
 SAGE3_TYPE(TypeLongDouble);
 SAGE3_TYPE(TypeLongLong);
+SAGE3_TYPE(TypeOfType);
 SAGE3_TYPE(TypeShort);
 SAGE3_TYPE(TypeSignedChar);
 SAGE3_TYPE(TypeSignedInt);

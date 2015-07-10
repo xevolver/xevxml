@@ -915,6 +915,65 @@ void XevSageVisitor::inodeSgTypeLabel(SgNode* node){
   inodeSgType(this,node);
 }
 
+// ===============================================================================
+/// Visitor of a SgTypeOfType element in an XML document
+SgNode*
+XevXmlVisitor::visitSgTypeOfType(xe::DOMNode* node, SgNode* astParent)
+{
+  SgTypeOfType*       ret = new SgTypeOfType();
+  SgExpression*       exp = 0;
+  SgType*             typ = 0;
+
+  ret->set_parent(astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(typ==NULL){
+        typ = isSgType(astchild);
+	/*
+        if(typ){
+          ret->set_base_type(typ);
+	  typ->set_parent(ret);
+	}
+	*/
+      }
+      if(exp==NULL){
+        exp = isSgExpression(astchild);
+	/*
+        if(exp){
+          ret->set_base_expression(exp);
+	  exp->set_parent(ret);
+	  }*/
+      }
+    }
+  SUBTREE_VISIT_END();
+  if(typ==NULL&&exp==NULL) {
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  //ret = sb::buildTypeOfType(exp,typ);
+  if(exp){
+    exp->set_parent(ret);
+    ret->set_base_expression(exp);
+    ret->set_base_type(exp->get_type());
+  }
+  else if(typ){
+    typ->set_parent(ret);
+    ret->set_base_type(typ);
+  }
+  return ret;
+}
+/** XML attribute writer of SgTypeOfType */
+void XevSageVisitor::attribSgTypeOfType(SgNode* node){
+  attribSgType(sstr(),node);
+}
+/** XML interanal node writer of SgPointerType */
+void XevSageVisitor::inodeSgTypeOfType(SgNode* node){
+  SgTypeOfType* n = isSgTypeOfType(node);
+  if(n){
+    this->visit(n->get_base_type());
+    this->visit(n->get_base_expression());
+  }
+}
 
 // ===============================================================================
 /// Visitor of a SgPointerType element in an XML document
