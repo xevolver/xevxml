@@ -463,10 +463,11 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   //xe::DOMNode*          nameatt=0;
   string                name,val;
   int                   typ=0;
-  bool                  isNamed = true;
+  bool                  unnamed = false;
 
   XmlGetAttributeValue(node,"type",&typ);
-  isNamed = XmlGetAttributeValue(node,"name",&name);
+  XmlGetAttributeValue(node,"name",&name);
+  XmlGetAttributeValue(node,"unnamed",&unnamed);
 
   SgClassSymbol* csym = si::lookupClassSymbolInParentScopes(name);
   if(csym==NULL) {
@@ -494,52 +495,37 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     //nondefn->set_class_type( (SgClassDeclaration::class_types)typ  );
   }
 
-  // "decl" is passed to SgClassDefinition and later replaced with "ret"
-  SgNode* prev = decl->get_parent();
-  decl->set_parent(astParent);
-  SUBTREE_VISIT_BEGIN(node,astchild,decl)
+  ret = new SgClassDeclaration( DEFAULT_FILE_INFO, name,
+				(SgClassDeclaration::class_types)typ);
+  ret->set_parent(astParent);
+  ret->set_scope(scope);
+  ret->set_firstNondefiningDeclaration(decl);
+  ret->set_class_type( (SgClassDeclaration::class_types)typ);
+  ret->set_type(SgClassType::createType(decl));
+
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==NULL )
         exp = isSgClassDefinition( astchild );
     }
   SUBTREE_VISIT_END();
-  decl->set_parent(prev);
 
   if(exp!=NULL){
     // defining declaration
-    ret = new SgClassDeclaration( DEFAULT_FILE_INFO, name,
-                                  (SgClassDeclaration::class_types)typ);
     ret->set_definition( exp );
-    ret->set_parent(astParent);
-    ret->set_scope(scope);
-    //ret->set_firstNondefiningDeclaration(decl->get_firstNondefiningDeclaration());
-    ret->set_firstNondefiningDeclaration(ret); // nondefining decl not needed??
-    csym->set_declaration(ret); // nondefining decl not needed??
-    ret->set_type(decl->get_type());
     ret->set_definingDeclaration(ret);
-
     decl->set_definingDeclaration(ret);
-
     exp->set_declaration(ret);
     exp->set_parent(ret);
   }
   else{
     // non-defining declaration
-    ret = new SgClassDeclaration( DEFAULT_FILE_INFO, name,
-                                  (SgClassDeclaration::class_types)typ);
-    ret->set_firstNondefiningDeclaration(decl->get_firstNondefiningDeclaration());
-    ret->set_type(decl->get_type());
     ret->set_definition(NULL);
     ret->set_definingDeclaration(decl->get_definingDeclaration());
-    ret->set_class_type( (SgClassDeclaration::class_types)typ  );
-    ret->set_type(SgClassType::createType(decl));
-    ret->set_parent(scope);
-    ret->set_scope(scope);
     ret->setForward();
     //decl->set_forward(true);
-    ret->set_definingDeclaration(decl->get_definingDeclaration());
   }
-  //if(isNamed==false) ret->set_isUnNamed(true);
+  ret->set_isUnNamed(unnamed);
   return ret;
 }
 /** XML attribute writer of SgClassDeclaration */
@@ -548,7 +534,8 @@ void XevSageVisitor::attribSgClassDeclaration(SgNode* node)
   SgClassDeclaration*      n = isSgClassDeclaration(node);
 
   if(n) {
-    //if( n->get_isUnNamed() == false )
+    if( n->get_isUnNamed())
+      sstr() << " unnamed=\"1\" ";
     sstr() << " name=" << n->get_name() << " ";
     sstr() << " type=\"" << n->get_class_type() << "\" ";
   }
@@ -1827,8 +1814,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     SgNamedType *namedType = isSgNamedType(typ->findBaseType());
 
     //cls->set_parent( typ );
-    namedType->set_declaration (cls);
-    namedType->get_declaration()->set_definingDeclaration(cls);
+    //namedType->set_declaration (cls);
+    //namedType->get_declaration()->set_definingDeclaration(cls);
     ret = sb::buildVariableDeclaration(name->get_name(),
                                        typ,
                                        name->get_initializer());
