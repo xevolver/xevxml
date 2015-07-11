@@ -174,6 +174,7 @@ bool XevSageVisitor::hasInode(SgNode* node)
   switch((int)node->variantT()) {
   case V_SgArithmeticIfStatement:
   case V_SgAttributeSpecificationStatement:
+  case V_SgCompoundLiteralExp:
   case V_SgDataStatementGroup:
   case V_SgDataStatementObject:
   case V_SgDataStatementValue:

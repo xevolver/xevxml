@@ -397,6 +397,65 @@ EXPR_DEFAULT(CompoundInitializer);
 #endif
 
 // ===============================================================================
+/// Visitor of a SgCompoundLiteralExp element in an XML document
+SgNode*
+XevXmlVisitor::visitSgCompoundLiteralExp(xe::DOMNode* node, SgNode* astParent)
+{
+  //SgCompoundLiteralExp* ret = new SgCompoundLiteralExp(DEFAULT_FILE_INFO);
+  SgCompoundLiteralExp* ret = new SgCompoundLiteralExp(DEFAULT_FILE_INFO);
+  std::string name;
+  SgType*        typ = 0;
+  SgAggregateInitializer* ini = 0;
+
+  ret->set_parent(astParent);
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if( typ==0 )
+        typ = isSgType(astchild);
+      if( ini==0 )
+        ini = isSgAggregateInitializer(astchild);
+    }
+  SUBTREE_VISIT_END();
+
+  if(XmlGetAttributeValue(node,"symbol", &name)==false
+     || typ == 0 || ini == 0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  ini->set_uses_compound_literal(true);
+
+  SgScopeStatement* scope = sb::topScopeStack();
+  SgInitializedName* name1 = sb::buildInitializedName(name,typ);
+  name1->set_scope(scope); // NULL?
+  name1->set_initptr(ini);
+  SgVariableSymbol* vsym = new SgVariableSymbol(name1);
+  vsym->set_parent(scope);
+  ret->set_symbol(vsym);
+
+  return ret;
+}
+void XevSageVisitor::attribSgCompoundLiteralExp(SgNode* node)
+{
+  SgCompoundLiteralExp* n = isSgCompoundLiteralExp(node);
+  if(n){
+    sstr() << " symbol=\"" << n->get_symbol()->get_name().getString() << "\" ";
+  }
+
+  attribSgExpression(sstr(),node);
+}
+void XevSageVisitor::inodeSgCompoundLiteralExp(SgNode* node)	
+{
+  SgCompoundLiteralExp* n = isSgCompoundLiteralExp(node);
+
+  if(n){
+    SgVariableSymbol* vsym = n->get_symbol();
+    this->visit(vsym->get_declaration()->get_initializer());
+    this->visit(n->get_type());
+  }
+  return;
+}
+
+// ===============================================================================
 /// Visitor of a SgConditionalExp element in an XML document
 SgNode*
 XevXmlVisitor::visitSgConditionalExp(xercesc::DOMNode* node, SgNode* astParent)
@@ -475,6 +534,35 @@ void XevSageVisitor::attribSgConstructorInitializer(SgNode* node)
   attribSgExpression(sstr(),node);
 }
 INODE_EXPR_TYPE(ConstructorInitializer);
+
+// ===============================================================================
+/// Visitor of a SgDesignatedInitializer element in an XML document
+SgNode*
+XevXmlVisitor::visitSgDesignatedInitializer(xercesc::DOMNode* node, SgNode* astParent)
+{
+  SgDesignatedInitializer*  ret = 0;
+  SgExprListExp* lst = 0;
+  SgInitializer* ini =0;
+
+  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
+    {
+      if(ini==0)
+	ini= isSgInitializer(astchild);
+      if(lst==0)
+	lst= isSgExprListExp(astchild);
+    }
+  SUBTREE_VISIT_END();
+  if(ini==0||lst==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
+  ret = new SgDesignatedInitializer(lst,ini);
+  ret->set_parent(astParent);
+  ini->set_parent(ret);
+  lst->set_parent(ret);
+  return ret;
+}
+EXPR_DEFAULT(DesignatedInitializer);
 
 
 // ===============================================================================
@@ -755,12 +843,27 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     }
 #endif
   }
+#if 0
   if(functionSymbol==NULL){
     //build a function based on the name (C language)
     ret = sb::buildFunctionRefExp(name);
   }
   else
     ret = sb::buildFunctionRefExp( functionSymbol );
+#endif
+  if(functionSymbol==NULL){
+    //build a dummy function symbol based on the name (C language)
+    SgType* rtype = sb::buildIntType();
+    SgFunctionParameterList *lst = sb::buildFunctionParameterList();
+    SgGlobal* globalscope = si::getGlobalScope(sb::topScopeStack());
+
+    SgFunctionDeclaration * decl = 
+      sb::buildNondefiningFunctionDeclaration(name,rtype,lst,globalscope);
+    decl->get_declarationModifier().get_storageModifier().setExtern();
+
+    functionSymbol = si::lookupFunctionSymbolInParentScopes(name);
+  }
+  ret = sb::buildFunctionRefExp( functionSymbol );
 
   if(XmlGetAttributeValue(node,"kind",&kind )){
     // set subprogram_kind (2014.04.14)

@@ -512,7 +512,9 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     ret->set_definition( exp );
     ret->set_parent(astParent);
     ret->set_scope(scope);
-    ret->set_firstNondefiningDeclaration(decl->get_firstNondefiningDeclaration());
+    //ret->set_firstNondefiningDeclaration(decl->get_firstNondefiningDeclaration());
+    ret->set_firstNondefiningDeclaration(ret); // nondefining decl not needed??
+    csym->set_declaration(ret); // nondefining decl not needed??
     ret->set_type(decl->get_type());
     ret->set_definingDeclaration(ret);
 
