@@ -635,6 +635,7 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
   bool pushed = false;
   ret->set_parent(astParent);
 
+#if 0
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( lhs==0 ){
@@ -642,7 +643,8 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
         if(lhs) {
           SgClassType    *ctype = 0;
           SgPointerType  *ptype = isSgPointerType(lhs->get_type());
-
+	  SgType* t = lhs->get_type();
+#if 0
           if(ptype==0 && isSgTypedefType(lhs->get_type())){
             SgTypedefType* ttype = isSgTypedefType(lhs->get_type());
             ptype = isSgPointerType(ttype->get_base_type());
@@ -651,12 +653,33 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
             SgModifierType* mtype = isSgModifierType(lhs->get_type());
             ptype = isSgPointerType(mtype->get_base_type());
           }
-
+          else if(ptype==0 && isSgArrayType(lhs->get_type())){
+            SgArrayType* atype = isSgArrayType(lhs->get_type());
+            ptype = isSgPointerType(atype->get_base_type());
+          }
+#endif
+	  if(ptype==0){
+	    while(t && isSgPointerType(t)==0){
+	      SgTypedefType*  ttype = isSgTypedefType(t);
+	      SgModifierType* mtype = isSgModifierType(t);
+	      //SgArrayType*    atype = isSgArrayType(t);
+	      if(ttype) t = ttype->get_base_type();
+	      else if(mtype) t = mtype->get_base_type();
+	      //else if(atype) t = atype->get_base_type();
+	      else break;
+	    }
+	    ptype = isSgPointerType(t);
+	  }
           if(ptype)
             ctype = isSgClassType(si::getElementType(ptype));
-          else if(isSgTypeUnknown(lhs->get_type())==0) {
+          else if(isSgArrayType(t)) 
+	    // an array could be used as a pointer (test2012_42.c)
+            ctype = isSgClassType(si::getElementType(isSgArrayType(t)));
+          else if(isSgTypeUnknown(t)==0) {
             //NOTE: the type of lhs could be SgTypeUnknown
-            XEV_WARN(lhs->get_type()->class_name() <<" is given as lhs of SgArrowExp");
+            XEV_WARN(t->class_name() <<" is given as lhs of SgArrowExp");
+	    if(isSgNamedType(t))
+	      XEV_WARN(isSgNamedType(t)->get_name());
             XEV_DEBUG_INFO(node);
             XEV_ABORT();
           }
@@ -699,6 +722,34 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
             //XEV_ABORT();
           }
         }
+      }
+      else if( rhs==0 ){
+        if(pushed==true)
+          sb::popScopeStack();
+        rhs = isSgExpression(astchild);
+      }
+    }
+  SUBTREE_VISIT_END();
+#endif
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if( lhs==0 ){
+        lhs = isSgExpression(astchild);
+        if(lhs) {
+          SgClassType* ctype = isSgClassType(lhs->get_type());
+          if(ctype==0)
+            ctype = isSgClassType(lhs->get_type()->findBaseType());
+          if(ctype){
+            SgClassDeclaration* decl = isSgClassDeclaration(ctype->get_declaration());
+            if(decl->get_definition()==0)
+              decl = isSgClassDeclaration(decl->get_definingDeclaration());
+            if(decl && decl->get_definition()){
+              defn = decl->get_definition();
+              sb::pushScopeStack(defn);
+              pushed = true;
+            }
+	  }
+	}
       }
       else if( rhs==0 ){
         if(pushed==true)
