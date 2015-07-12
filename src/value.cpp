@@ -47,7 +47,7 @@ using namespace XevXml;
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
     Sg##valType* ret = 0;                                               \
-    baseType ival;                                                      \
+    baseType ival=0;							\
     std::string vstr;                                                   \
     if(XmlGetAttributeValue(node,"value",&ival)==false) {               \
       XEV_DEBUG_INFO(node);                                             \
@@ -78,7 +78,7 @@ using namespace XevXml;
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
     Sg##valType* ret = 0;                                               \
-    baseType ival;                                                      \
+    baseType ival=0;                                                    \
     std::string vstr;                                                   \
     if(XmlGetAttributeValue(node,"value",&ival)==false) {               \
       XEV_DEBUG_INFO(node);                                             \
@@ -99,8 +99,38 @@ using namespace XevXml;
   /** XML internal node writer of Sg##valType */                        \
   void XevSageVisitor::inodeSg##valType(SgNode* node) {return;}
 
+#define VISIT_VAL_CHAR(valType,baseType)				\
+  /** Visitor of a Sg##valType element in an XML document */            \
+  SgNode* XevXmlVisitor::                                               \
+  visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
+  {                                                                     \
+    Sg##valType* ret = 0;                                               \
+    baseType ival=0;                                                    \
+    unsigned long temp=0;						\
+    std::string vstr;                                                   \
+    if(XmlGetAttributeValue(node,"value",&temp)==false) {               \
+      XEV_DEBUG_INFO(node);                                             \
+      XEV_ABORT();                                                      \
+    }                                                                   \
+    ival = (baseType)temp;						\
+    ret = sb::build##valType(ival);					\
+    ret->set_parent(astParent);                                         \
+    return ret;                                                         \
+  }                                                                     \
+  /** XML attribute writer of Sg##valType */                            \
+  void XevSageVisitor::attribSg##valType(SgNode* node)                  \
+  {                                                                     \
+    Sg##valType* n = isSg##valType(node);                               \
+      if(n) {                                                           \
+	unsigned long temp = (unsigned long)n->get_value();		\
+        sstr() << " value=\"" << temp << "\" ";				\
+      }                                                                 \
+  }                                                                     \
+  /** XML internal node writer of Sg##valType */                        \
+  void XevSageVisitor::inodeSg##valType(SgNode* node) {return;}
+
 VISIT_VAL_NO_STRING(BoolValExp,bool);
-VISIT_VAL(CharVal,char);
+VISIT_VAL_CHAR(CharVal,char);
 VISIT_VAL(DoubleVal,double);
 VISIT_VAL(FloatVal,float);
 VISIT_VAL(IntVal,int);
@@ -111,7 +141,7 @@ VISIT_VAL(LongLongIntVal,long long int);
 //VISIT_VAL(SgEnumVal);
 VISIT_VAL(ShortVal,short);
 //VISIT_VAL(StringVal,string);
-VISIT_VAL(UnsignedCharVal,unsigned char);
+VISIT_VAL_CHAR(UnsignedCharVal,unsigned char);
 VISIT_VAL(UnsignedIntVal,unsigned int);
 VISIT_VAL(UnsignedLongLongIntVal,unsigned long long);
 VISIT_VAL(UnsignedLongVal,unsigned long);

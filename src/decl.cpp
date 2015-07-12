@@ -930,6 +930,10 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
         typ = isSgType(astchild);
     }
   FUNCTION_HEADER_VISIT_END();
+  if(typ==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
   if(lst) {
     if(hasdef){
       ret
