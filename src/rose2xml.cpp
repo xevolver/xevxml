@@ -234,14 +234,17 @@ static bool isInSameFile(SgNode* node, SgFile* file){
       || info->isOutputInCodeGeneration()
       // the following is needed for index of SgArrayType
       || info->isSourcePositionUnavailableInFrontend();
-  //bool isCode = node->get_parent() != NULL
-  //&& !isSgGlobal(node->get_parent())
-  //&& !isSgNamespaceDefinitionStatement(node->get_parent());
+  bool isCode = false;
+  if(SageInterface::is_Fortran_language()==false){
+    isCode = node->get_parent() != NULL
+      && !isSgGlobal(node->get_parent())
+      && !isSgNamespaceDefinitionStatement(node->get_parent());
+  }
   bool isRightFile = info->isSameFile(file);
 
   // isCode is not used to avoid printing the code included by SgFortranIncludeLine
-  //return isCompilerGenerated || isRightFile || isCode;
-  return isCompilerGenerated || isRightFile ;
+  return isCompilerGenerated || isRightFile || isCode;
+  //return isCompilerGenerated || isRightFile ;
 }
 
 /* check if the corresponding element needs indentation */
