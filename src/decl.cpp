@@ -747,12 +747,10 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
   //xe::DOMNamedNodeMap*  amap = node->getAttributes();
   //xe::DOMNode*          nameatt=0;
   string                name;
+  bool unnamed=false;
 
   if( XmlGetAttributeValue(node,"name",&name) ){
-    ret = sb::buildEnumDeclaration( SgName( name.c_str() ), scope );
-    ret->set_name(SgName( name.c_str()));
-    ret->set_isUnNamed( false );
-
+    ret = sb::buildEnumDeclaration( name, scope );
     esym = si::lookupEnumSymbolInParentScopes(name);
     if(esym==0){
       XEV_DEBUG_INFO(node);
@@ -761,9 +759,8 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
     //scope->get_symbol_table()->print();
   }
   else {
-    ret = sb::buildEnumDeclaration( SgName( name.c_str() ), scope );
-    ret->set_isUnNamed( true );
-
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
   }
   ret->set_parent(astParent);
 
@@ -774,11 +771,20 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
         ret->append_enumerator(ini);
         ini->set_parent(ret);
         ret->set_definingDeclaration(ret);
-        esym->set_declaration(ret);
+        esym->get_declaration()->set_definingDeclaration(ret);
+        //esym->set_declaration(ret);
       }
     }
   SUBTREE_VISIT_END();
 
+  if( XmlGetAttributeValue(node,"unnamed",&unnamed) ){
+    ret->set_isUnNamed(unnamed);
+  }
+  esym = si::lookupEnumSymbolInParentScopes(name);
+  if(esym==0){
+    XEV_DEBUG_INFO(node);
+    XEV_ABORT();
+  }
   return ret;
 }
 /** XML attribute writer of SgEnumDeclaration */
@@ -787,7 +793,8 @@ void XevSageVisitor::attribSgEnumDeclaration(SgNode* node)
   SgEnumDeclaration*      n = isSgEnumDeclaration(node);
 
   if(n) {
-    //if( n->get_isUnNamed() ==false)
+    if( n->get_isUnNamed())
+      sstr() << " unnamed=\"1\" ";
     sstr() << " name=" << n->get_name() << " ";
   }
   attribSgStatement(sstr(),node);
@@ -938,9 +945,9 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     if(hasdef){
       ret
         = sb::buildDefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
-      def = new SgFunctionDefinition(DEFAULT_FILE_INFO);
-      def->set_parent(ret);
-      ret->set_definition(def);
+      //def = new SgFunctionDefinition(DEFAULT_FILE_INFO);
+      //def->set_parent(ret);
+      //ret->set_definition(def);
     }
     else
       ret
@@ -951,16 +958,8 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     XEV_ABORT();
   }
 
-  if(def &&  si::is_C_language()){
-    ret->set_oldStyleDefinition(old);
-    oldlst = ret->get_args();
-    for(size_t i(0);i<oldlst.size();i++){
-      //cerr << i << " " << oldlst[i]->get_name().getString() << endl;
-      SgVariableSymbol* vsym =new SgVariableSymbol(oldlst[i]);
-      def->get_symbol_table()->insert(oldlst[i]->get_name(),vsym);
-    }
-  }
   def = 0; // for visiting SgFunctionDefinition
+  ret->set_parent(astParent);
   FUNCTION_BODY_VISIT_BEGIN(node,astchild,ret)
     {
       if(def==0)
@@ -969,17 +968,25 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   FUNCTION_BODY_VISIT_END();
 
   if(hasdef == 0 ) {
-    Sg_File_Info* info = DEFAULT_FILE_INFO;
-    info->setOutputInCodeGeneration();
-    def = new SgFunctionDefinition(info);
+    //Sg_File_Info* info = DEFAULT_FILE_INFO;
+    //info->setOutputInCodeGeneration();
+    //def = new SgFunctionDefinition(info);
     ret->get_declarationModifier().get_storageModifier().setExtern();
   }
+  if(def && si::is_C_language()){
+    ret->set_oldStyleDefinition(old);
+    oldlst = ret->get_args();
+    for(size_t i(0);i<oldlst.size();i++){
+      //cerr << i << " " << oldlst[i]->get_name().getString() << endl;
+      SgVariableSymbol* vsym =new SgVariableSymbol(oldlst[i]);
+      def->get_symbol_table()->insert(oldlst[i]->get_name(),vsym);
+    }
+  }
 
+  if(def)
+    def->set_parent(ret);
   lst->set_parent(ret);
-  def->set_parent(ret);
   ret->set_definition(def);
-  ret->set_parent(astParent);
-
   return ret;
 }
 /** XML attribute writer of SgFunctionDeclaration */

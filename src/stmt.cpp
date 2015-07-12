@@ -1074,8 +1074,8 @@ XevXmlVisitor::visitSgFunctionDefinition(xe::DOMNode* node, SgNode* astParent)
   SgBasicBlock* blk = 0;
   Sg_File_Info* info = DEFAULT_FILE_INFO;
   info->setOutputInCodeGeneration();
-  //SgFunctionDefinition* ret  = new SgFunctionDefinition(info);
-#if 1
+  SgFunctionDefinition* ret  = new SgFunctionDefinition(info);
+#if 0
   SgFunctionDefinition* ret  = 0;
   SgFunctionDeclaration* decl = isSgFunctionDeclaration(astParent);
   if(decl==0 ||decl->get_definition()==0)

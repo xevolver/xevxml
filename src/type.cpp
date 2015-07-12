@@ -544,8 +544,18 @@ XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
     ret = new SgEnumType(decl);
   }
   else{
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_WARN("Symbol of enum " << name <<" is not found");
+    SgScopeStatement* scope = sb::topScopeStack();
+    SgEnumDeclaration* dec = new SgEnumDeclaration(DEFAULT_FILE_INFO);
+    dec->set_name(name);
+    dec->set_parent(scope);
+    dec->set_scope(scope);
+    dec->set_firstNondefiningDeclaration(dec);
+    //dec->set_definition(NULL);
+    dec->set_definingDeclaration(NULL);
+    ret = new SgEnumType(dec);
+    //XEV_DEBUG_INFO(node);
+    //XEV_ABORT();
   }
   ret->set_parent(astParent);
   return ret;

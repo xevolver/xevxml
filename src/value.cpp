@@ -56,7 +56,7 @@ using namespace XevXml;
     ret = sb::build##valType(ival);                                     \
     ret->set_parent(astParent);                                         \
     if(XmlGetAttributeValue(node,"string",&vstr))                       \
-      ret->set_valueString(vstr);                                       \
+      ret->set_valueString(XmlEntity2Str(vstr));			\
     return ret;                                                         \
   }                                                                     \
   /** XML attribute writer of Sg##vatType */                            \
@@ -66,7 +66,8 @@ using namespace XevXml;
       if(n) {                                                           \
         sstr() << " value=\"" << n->get_value() << "\" ";               \
         if(n->get_valueString().size())                                 \
-          sstr() << " string=\"" << n->get_valueString() << "\" ";      \
+          sstr() << " string=\"" << XmlStr2Entity(n->get_valueString())	\
+		 << "\" ";						\
       }                                                                 \
   }                                                                     \
   /** XML internal node writer of Sg##vatType */                        \
@@ -93,7 +94,7 @@ using namespace XevXml;
   {                                                                     \
     Sg##valType* n = isSg##valType(node);                               \
       if(n) {                                                           \
-        sstr() << " value=\"" << n->get_value() << "\" ";               \
+        sstr()<< " value=\"" << n->get_value() << "\" ";		\
       }                                                                 \
   }                                                                     \
   /** XML internal node writer of Sg##valType */                        \
