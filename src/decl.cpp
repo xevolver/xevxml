@@ -1913,8 +1913,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   // set bitfield (2013.08.06)
   if( bitstr.size() ) {
     unsigned long bit = strtoul( bitstr.c_str(),0,0 );
-    SgUnsignedLongVal* val = new SgUnsignedLongVal( bit,bitstr );
-    val->set_startOfConstruct(DEFAULT_FILE_INFO);
+    SgIntVal* val = new SgIntVal( bit,bitstr );
+    si::setSourcePositionAsTransformation(val);
     ret->set_bitfield (val);
     val->set_parent(ret);
   }
@@ -1950,7 +1950,8 @@ void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
   SgVariableDeclaration* n = isSgVariableDeclaration(node);
   // get_bitfield() often fails for Fortran2003 programs (e.g. test2011_33.f03)
   if( n && si::is_Fortran_language() == false && n && n->get_bitfield() ) {
-    SgUnsignedLongVal *bit = isSgUnsignedLongVal(n->get_bitfield());
+    //SgUnsignedLongVal *bit = isSgUnsignedLongVal(n->get_bitfield());
+    SgIntVal *bit = isSgIntVal(n->get_bitfield());
     if( bit )
       sstr() << " bitfield=\"" << bit->unparseToString() << "\" ";
   }

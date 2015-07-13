@@ -197,7 +197,7 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
     e->set_need_paren(parenf);
     e->set_lvalue(lvalf);
   }
-#if 0
+#if 1
   SgAssignInitializer* ini = isSgAssignInitializer(astNode);
 
   if(ini){
