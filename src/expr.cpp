@@ -304,7 +304,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
         typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
-
+#if 0
   if(imp){
     // for nested implicit casting
     if(isSgCastExp(exp)){
@@ -312,7 +312,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
       return exp;
     }
   }
-
+#endif
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ,(SgCastExp::cast_type_enum)cty);
     ret->set_parent(astParent);
@@ -331,8 +331,12 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   if(imp){
     // ignore implicit type conversions
     ret->get_startOfConstruct()->setCompilerGenerated();
+    ret->get_endOfConstruct()->setCompilerGenerated();
     ret->get_operatorPosition()->setCompilerGenerated();
     ret->get_file_info()->setCompilerGenerated();
+  }
+  else{
+    si::setSourcePositionAsTransformation(ret);
   }
   return ret;
 }

@@ -107,7 +107,8 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
 {
   SgLocatedNode* n = isSgLocatedNode(astNode);
   string file_info;
-  if(n) si::setSourcePositionAsTransformation(n);
+  if(n && isSgCastExp(n) == 0) 
+    si::setSourcePositionAsTransformation(n);
   if(n && XmlGetAttributeValue(node,"file_info",&file_info)) {
     int fid, line, col;
     stringstream ss;
