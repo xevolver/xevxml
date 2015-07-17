@@ -640,6 +640,12 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
   }
   ret = sb::buildModifierType(typ);
   ret->set_parent(astParent);
+  SgBitVector vec =  ret->get_typeModifier().get_modifierVector();
+  for(size_t i(0);i<vec.size();i++){
+    vec[i] = (mod & 1);
+    mod >>= 1;
+  }
+  ret->get_typeModifier().set_modifierVector(vec);
   //ret->set_base_type(typ);
   typ->set_parent(ret);
   if(XmlGetAttributeValue(node,"cv_modifier",&mod)) {
