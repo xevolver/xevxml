@@ -1014,6 +1014,9 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     if(fmod>2) { //m!= e_unknown && m!= e_default
       sstr() << " function_modifier=\"" << fmod << "\"";
     }
+    if(n->get_asm_name().size() > 0 ){
+      sstr() << " asm_name=\"" << n->get_asm_name() << "\"";
+    }
   }
   attribSgDeclarationStatement(sstr(),node);
 }

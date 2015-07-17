@@ -323,6 +323,7 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     decl->set_binding_label(bind);
   }
   string link;
+  string asmn;
   if(XmlGetAttributeValue(node,"link",&link)){
     decl->set_linkage(link);
   }
@@ -341,6 +342,9 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
 
   if(XmlGetAttributeValue(node,"end_name",&enf))
     fdecl->set_named_in_end_statement(enf);
+
+  if(XmlGetAttributeValue(node,"asm_name",&asmn))
+    fdecl->set_asm_name(asmn);
 
   if(fdecl->get_definition()!=NULL)
     fdecl->get_definition()->set_declaration(fdecl);
