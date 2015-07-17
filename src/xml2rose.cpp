@@ -107,9 +107,32 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
 {
   SgLocatedNode* n = isSgLocatedNode(astNode);
   string file_info;
-  if(n && isSgCastExp(n) == 0) 
+  int gen=0;
+
+  if(n==0) return;
+  if(isSgCastExp(n) == 0) 
     si::setSourcePositionAsTransformation(n);
-  if(n && XmlGetAttributeValue(node,"file_info",&file_info)) {
+  if(XmlGetAttributeValue(node, "codegen",&gen) && gen==false) {
+    if( isSgGlobal(n->get_parent()) 
+	|| isSgNamespaceDefinitionStatement(n->get_parent()) ){ 
+      si::setSourcePosition(n);
+      n->get_file_info()->setCompilerGenerated();
+      n->get_startOfConstruct()->setCompilerGenerated();
+      n->get_endOfConstruct()->setCompilerGenerated();
+      n->get_file_info()->setFrontendSpecific();
+      n->get_startOfConstruct()->setFrontendSpecific();
+      n->get_endOfConstruct()->setFrontendSpecific();
+      n->get_file_info()->unsetOutputInCodeGeneration();
+      n->get_startOfConstruct()->unsetOutputInCodeGeneration();
+      n->get_endOfConstruct()->unsetOutputInCodeGeneration();
+      n->get_file_info()->unsetTransformation();
+      n->get_startOfConstruct()->unsetTransformation();
+      n->get_endOfConstruct()->unsetTransformation();
+      //std::cerr << "NOTE: " << n->class_name() << " is ignored"<<std::endl;
+      //si::dumpPreprocInfo(n);
+    }
+  }	
+  if(XmlGetAttributeValue(node,"file_info",&file_info)) {
     int fid, line, col;
     stringstream ss;
     ss << file_info;

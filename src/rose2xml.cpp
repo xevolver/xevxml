@@ -231,9 +231,9 @@ static bool isInSameFile(SgNode* node, SgFile* file){
   if(isFrontendSpecific==false)
     isCompilerGenerated = info->isCompilerGenerated()
       || info->isTransformation()
-      || info->isOutputInCodeGeneration()
+      || info->isOutputInCodeGeneration();
       // the following is needed for index of SgArrayType
-      || info->isSourcePositionUnavailableInFrontend();
+  //|| info->isSourcePositionUnavailableInFrontend();
   bool isCode = false;
   if(SageInterface::is_Fortran_language()==false){
     isCode = node->get_parent() != NULL
@@ -241,7 +241,16 @@ static bool isInSameFile(SgNode* node, SgFile* file){
       && !isSgNamespaceDefinitionStatement(node->get_parent());
   }
   bool isRightFile = info->isSameFile(file);
-
+#if 0
+  if(isSgGlobal(node->get_parent())){
+    info->display(node->class_name());
+    std::cout << node->get_parent()->class_name() << std::endl;
+    if(isCompilerGenerated || isRightFile || isCode)
+      std::cout << "  true " << std::endl;
+    else
+      std::cout << "  false " << std::endl;
+  }
+#endif
   // isCode is not used to avoid printing the code included by SgFortranIncludeLine
   return isCompilerGenerated || isRightFile || isCode;
   //return isCompilerGenerated || isRightFile ;
@@ -312,6 +321,8 @@ void XevSageVisitor::visit(SgNode* node)
     XEV_WARN("unknown Sage AST node found \"" << node->class_name() << "\"");
     XEV_ABORT();
   }
+  if(node->get_file_info() && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false)
+    sstr() << " codegen=\"0\" ";
 
   if( hasInode(node) )
     sstr() << ">" << std::endl;
@@ -493,6 +504,7 @@ bool XevXml::writeXmlElement(SgNode* node,  XevConversionHelper* help)
     sstr_ << node << "\"";
     sstr_.unsetf(ios::hex);
   }
+
   /* write attributes of this element */
   writeXmlAttribs(sstr_,node,help);
 
