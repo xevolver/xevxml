@@ -920,6 +920,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   SgType*                  typ = 0;
   int                      old = 0;
   int                      hasdef=0;
+  int                      noparams=0;
   SgInitializedNamePtrList oldlst;
 
   string name;
@@ -928,6 +929,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     XEV_ABORT();
   XmlGetAttributeValue(node,"old"         ,&old   );
   XmlGetAttributeValue(node,"definition"  ,&hasdef);
+  XmlGetAttributeValue(node,"no_params"   ,&noparams);
 
   FUNCTION_HEADER_VISIT_BEGIN(node,astchild,astParent)
     {
@@ -960,6 +962,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
 
   def = 0; // for visiting SgFunctionDefinition
   ret->set_parent(astParent);
+  ret->set_prototypeIsWithoutParameters(noparams);
   FUNCTION_BODY_VISIT_BEGIN(node,astchild,ret)
     {
       if(def==0)
@@ -1016,6 +1019,9 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     }
     if(n->get_asm_name().size() > 0 ){
       sstr() << " asm_name=\"" << n->get_asm_name() << "\"";
+    }
+    if(n->get_prototypeIsWithoutParameters() ){
+      sstr() << " no_params=\"1\"";
     }
   }
   attribSgDeclarationStatement(sstr(),node);

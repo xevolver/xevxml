@@ -574,7 +574,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
 
   string               name;
   string               prev;
-
+  int                  empty = 0;
   XmlGetAttributeValue(node,"name",&name);
 
   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
@@ -613,6 +613,14 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
     }
     ret->set_prev_decl_item(ini);
   }
+  if(XmlGetAttributeValue(node,"empty_bracket",&empty)){
+    ret->set_hasArrayTypeWithEmptyBracketSyntax(empty);
+    // the above function does not work as expected.
+    // so I directly remove the expression of array index
+    SgArrayType* a = isSgArrayType(typ);
+    if(a)
+      a->set_index(NULL);
+  }
   return ret;
 }
 /** XML attribute writer of SgInitializedName */
@@ -627,6 +635,8 @@ void XevSageVisitor::attribSgInitializedName(SgNode* node)
     }
     if(n->get_storageModifier().get_modifier() !=SgStorageModifier::e_default)
       sstr() << " storage_modifier=\"" << n->get_storageModifier().get_modifier() <<"\" ";
+    if(n->get_hasArrayTypeWithEmptyBracketSyntax())
+      sstr() << " empty_bracket=\"1\" ";
   }
 }
 /** XML internal node writer of SgInitializedName */

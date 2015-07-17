@@ -112,8 +112,8 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
   if(n==0) return;
   if(isSgCastExp(n) == 0) 
     si::setSourcePositionAsTransformation(n);
-  if(XmlGetAttributeValue(node, "codegen",&gen) && gen==false) {
-    if( isSgGlobal(n->get_parent()) 
+  if(XmlGetAttributeValue(node, "codegen",&gen) && gen==0 ) {
+    if( n->get_parent()==0 || isSgType(n->get_parent()) || isSgGlobal(n->get_parent()) 
 	|| isSgNamespaceDefinitionStatement(n->get_parent()) ){ 
       si::setSourcePosition(n);
       n->get_file_info()->setCompilerGenerated();
