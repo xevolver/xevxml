@@ -159,6 +159,7 @@ bool XevSageVisitor::write(std::ostream& str, SgProject** prj){
 bool XevSageVisitor::hasInode(SgNode* node)
 {
   SgType* t = isSgType(node);
+  SgExpression* e = isSgExpression(node);
   if(t && t->containsInternalTypes())
     // such as SgArrayTYpe, SgPointerType, ...
     return true;
@@ -170,7 +171,10 @@ bool XevSageVisitor::hasInode(SgNode* node)
     return true;
   if( getPreprocessingInfo(node) )
     return true;
-
+  if( e && e->get_originalExpressionTree()){
+    if(SageInterface::is_Fortran_language()==false)
+      return true;
+  }
   switch((int)node->variantT()) {
   case V_SgArithmeticIfStatement:
   case V_SgAttributeSpecificationStatement:

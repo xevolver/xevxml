@@ -71,17 +71,23 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   void XevSageVisitor::attribSg##x(SgNode* node)    \
   {attribSgExpression(sstr(),node);}
 
-#define INODE_EXPR_DEFAULT(x)                       \
-  /** XML internal node writer of Sg##x */          \
-  void XevSageVisitor::inodeSg##x(SgNode* node)     \
-  {return;}
+#define INODE_EXPR_DEFAULT(x)						\
+  /** XML internal node writer of Sg##x */				\
+  void XevSageVisitor::inodeSg##x(SgNode* node){			\
+  Sg##x* n = isSg##x(node);						\
+    if(n){								\
+      this->visit(n->get_originalExpressionTree());			\
+    }									\
+  }
 
-#define INODE_EXPR_TYPE(x)                          \
-  /** XML internal node writer of Sg##x */          \
-  void XevSageVisitor::inodeSg##x(SgNode* node){    \
-    Sg##x* n = isSg##x(node);                       \
-      if(n)                                         \
-        this->visit(n->get_type());                 \
+#define INODE_EXPR_TYPE(x)						\
+  /** XML internal node writer of Sg##x */				\
+  void XevSageVisitor::inodeSg##x(SgNode* node){			\
+  Sg##x* n = isSg##x(node);						\
+    if(n){								\
+    this->visit(n->get_type());						\
+    this->visit(n->get_originalExpressionTree());			\
+    }									\
   }
 
 #define EXPR_DEFAULT(x)                         \
@@ -290,6 +296,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   SgCastExp*     ret   = 0;
   SgType*        typ   = 0;
   SgExpression*  exp   = 0;
+  SgExpression* oexp   = 0;
   int            cty   = 0;
   int            imp   = 0;
 
@@ -302,42 +309,29 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
         exp = isSgExpression(astchild);
       if(typ==0)
         typ = isSgType(astchild);
+      if(exp && oexp==0)
+	oexp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
-#if 0
-  if(imp){
-    // for nested implicit casting
-    if(isSgCastExp(exp)){
-      exp->set_parent(astParent);
-      return exp;
-    }
-  }
-#endif
+
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ,(SgCastExp::cast_type_enum)cty);
     ret->set_parent(astParent);
-  }
-  else if(exp){
-    // ignore implicit type conversions
-    XEV_WARN("An SgCastExp node ignored");
-    XEV_DEBUG_INFO(node);
-    exp->set_parent(astParent);
-    return exp;
   }
   else {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-  if(imp){
-    // ignore implicit type conversions
+  if(imp && oexp){
+    si::setSourcePosition(ret);
     ret->get_startOfConstruct()->setCompilerGenerated();
     ret->get_endOfConstruct()->setCompilerGenerated();
     ret->get_operatorPosition()->setCompilerGenerated();
     ret->get_file_info()->setCompilerGenerated();
+    ret->set_originalExpressionTree(oexp);
   }
-  else{
+  else
     si::setSourcePositionAsTransformation(ret);
-  }
   return ret;
 }
 //ATTRIB_EXPR_DEFAULT(CastExp);
@@ -937,7 +931,15 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
       //XEV_ABORT();
     }
   }
-
+  SgExpression* oexp = 0;
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(oexp==0)
+	oexp=isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+  if(oexp)
+    ret->set_originalExpressionTree(oexp);
   return ret;
 }
 /** XML attribute writer of SgFunctionRefExp */
@@ -1419,7 +1421,15 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
     si::setOneSourcePositionForTransformation(ret);
   }
   ret->set_parent(astParent);
-
+  SgExpression* oexp = 0;
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(oexp==0)
+	oexp=isSgExpression(astchild);
+    }
+  SUBTREE_VISIT_END();
+  if(oexp)
+    ret->set_originalExpressionTree(oexp);
   return ret;
 }
 /** XML attribute writer of SgVarRefExp */
@@ -1443,6 +1453,7 @@ INODE_EXPR_DEFAULT(VarRefExp);
   {                                                                     \
     SgExpression* lhs = 0;                                              \
     SgExpression* rhs = 0;                                              \
+    SgExpression* oex = 0;                                              \
     xe::DOMNode* child=node->getFirstChild();                           \
     Sg##op* ret = sb::build##op(lhs,rhs);                               \
     ret->set_parent(astParent);                                         \
@@ -1454,6 +1465,8 @@ INODE_EXPR_DEFAULT(VarRefExp);
           lhs = isSgExpression(astchild);                               \
         else if(rhs==0)                                                 \
           rhs = isSgExpression(astchild);                               \
+        else if(oex==0)                                                 \
+          oex = isSgExpression(astchild);                               \
       }                                                                 \
       child=child->getNextSibling();                                    \
     }                                                                   \
@@ -1466,13 +1479,20 @@ INODE_EXPR_DEFAULT(VarRefExp);
       XEV_DEBUG_INFO(node);                                             \
       XEV_ABORT();                                                      \
     }                                                                   \
+    if(oex)								\
+      ret->set_originalExpressionTree(oex);				\
   }                                                                     \
   /** XML attribute writer of Sg##op */                                 \
   void XevSageVisitor::attribSg##op(SgNode* node)                       \
   {attribSgExpression(sstr(),node);}                                    \
   /** XML internal node writer of Sg##op */                             \
   void XevSageVisitor::inodeSg##op(SgNode* node)                        \
-  {return;}
+  {									\
+    SgBinaryOp* n = isSgBinaryOp(node);					\
+    if(n && n->get_originalExpressionTree())				\
+      this->visit(n->get_originalExpressionTree());			\
+    return;								\
+  }
 
 #define VISIT_UOP(op)                                                   \
   /** Visitor of a Sg##op element in an XML document */                 \
