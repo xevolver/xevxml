@@ -110,11 +110,11 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
   int gen=0;
 
   if(n==0) return;
-  if(isSgCastExp(n) == 0) 
+  if(isSgCastExp(n) == 0)
     si::setSourcePositionAsTransformation(n);
   if(XmlGetAttributeValue(node, "codegen",&gen) && gen==0 ) {
-    if( n->get_parent()==0 || isSgType(n->get_parent()) || isSgGlobal(n->get_parent()) 
-	|| isSgNamespaceDefinitionStatement(n->get_parent()) ){ 
+    if( n->get_parent()==0 || isSgType(n->get_parent()) || isSgGlobal(n->get_parent())
+	|| isSgNamespaceDefinitionStatement(n->get_parent()) ){
       si::setSourcePosition(n);
       n->get_file_info()->setCompilerGenerated();
       n->get_startOfConstruct()->setCompilerGenerated();
@@ -131,7 +131,7 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
       //std::cerr << "NOTE: " << n->class_name() << " is ignored"<<std::endl;
       //si::dumpPreprocInfo(n);
     }
-  }	
+  }
   if(XmlGetAttributeValue(node,"file_info",&file_info)) {
     int fid, line, col;
     stringstream ss;
@@ -305,7 +305,9 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
   mod=SgConstVolatileModifier::e_default;
   XmlGetAttributeValue(node,"cv_modifier",&mod);
   m.get_typeModifier().get_constVolatileModifier().set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
-
+  mod=-1;
+  if(XmlGetAttributeValue(node,"alignment",&mod))
+    m.get_typeModifier().set_gnu_attribute_alignment(mod);
   mod=SgAccessModifier::e_default;
   XmlGetAttributeValue(node,"access_modifier",&mod);
   m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)mod);

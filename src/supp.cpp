@@ -575,6 +575,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   string               name;
   string               prev;
   int                  empty = 0;
+  short                align = 0;
   XmlGetAttributeValue(node,"name",&name);
 
   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
@@ -596,9 +597,20 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   }
   if(ini) ini->set_parent(ret);
 
+  /*
+    if an attribute is set, it needs to be copied in visitSgVariableDeclaration
+   */
   unsigned long mod = (unsigned long)SgStorageModifier::e_default;
   if(XmlGetAttributeValue(node,"storage_modifier",&mod)){
     ret->get_storageModifier().set_modifier((SgStorageModifier::storage_modifier_enum)mod);
+  }
+  if(XmlGetAttributeValue(node,"gnu_attrib",&mod)){
+    SgBitVector vec =ret->get_gnu_attribute_modifierVector();
+    for(size_t i(0);i<vec.size();i++){
+      vec[i] = mod & 1;
+      mod >>= 1;
+    }
+    ret->set_gnu_attribute_modifierVector(vec);
   }
 
   // for SgTypeCrayPointer support
@@ -617,9 +629,15 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
     ret->set_hasArrayTypeWithEmptyBracketSyntax(empty);
     // the above function does not work as expected.
     // so I directly remove the expression of array index
-    SgArrayType* a = isSgArrayType(typ);
-    if(a)
-      a->set_index(NULL);
+    //SgArrayType* a = isSgArrayType(typ);
+    //if(a)
+    //a->set_index(NULL);
+  }
+  if(XmlGetAttributeValue(node,"alignment",&align)){
+    if(align>=0){
+      ret->set_gnu_attribute_alignment(align);
+      ret->set_using_C11_Alignas_keyword(false);
+    }
   }
   return ret;
 }
@@ -629,7 +647,7 @@ void XevSageVisitor::attribSgInitializedName(SgNode* node)
   SgInitializedName* n = isSgInitializedName(node);
   if(n) {
     sstr() << " name=" << n->get_name() << " ";
-    if(n->get_prev_decl_item()){
+    if(isSgTypeCrayPointer(n->get_type()) && n->get_prev_decl_item()){
       // used for SgTypeCrayPointer
       sstr() << " prev=" << n->get_prev_decl_item()->get_name() << " ";
     }
@@ -637,6 +655,14 @@ void XevSageVisitor::attribSgInitializedName(SgNode* node)
       sstr() << " storage_modifier=\"" << n->get_storageModifier().get_modifier() <<"\" ";
     if(n->get_hasArrayTypeWithEmptyBracketSyntax())
       sstr() << " empty_bracket=\"1\" ";
+    if(n->get_gnu_attribute_alignment()>=0)
+      sstr() << " alignment=\""<< n->get_gnu_attribute_alignment() <<"\" ";
+    SgBitVector bit = n->get_gnu_attribute_modifierVector();
+    unsigned long mod = 0;
+    for(size_t i(0);i<bit.size();i++){
+      mod |= ((unsigned int)bit[i] << i);
+    }
+    if(mod) sstr() << " gnu_attrib=\"" << mod << "\" ";
   }
 }
 /** XML internal node writer of SgInitializedName */

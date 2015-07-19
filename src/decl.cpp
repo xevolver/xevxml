@@ -69,6 +69,8 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
   if(modifier.get_typeModifier().get_constVolatileModifier().get_modifier()
      != SgConstVolatileModifier::e_default)
     istr << " cv_modifier=\"" <<  modifier.get_typeModifier().get_constVolatileModifier().get_modifier()<< "\" ";
+  if(modifier.get_typeModifier().get_gnu_attribute_alignment()>=0)
+    istr << " alignment=\"" << modifier.get_typeModifier().get_gnu_attribute_alignment() << "\" ";
   if( SageInterface::is_C_language() == false )
     istr << " access_modifier=\"" <<  modifier.get_accessModifier().get_modifier()<< "\" ";
   if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default){
@@ -1851,6 +1853,13 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       ret = sb::buildVariableDeclaration(name->get_name(),
                                          name->get_type(),
                                          name->get_initializer());
+      /* buildVariableDeclaration creates a new SgInitializedName so attributes must be copied */
+      SgInitializedName* decl_item = ret->get_decl_item(name->get_name());
+      decl_item->set_gnu_attribute_alignment(name->get_gnu_attribute_alignment());
+      decl_item->set_hasArrayTypeWithEmptyBracketSyntax(name->get_hasArrayTypeWithEmptyBracketSyntax());
+      decl_item->set_prev_decl_item(name->get_prev_decl_item());
+      decl_item->get_storageModifier().set_modifier(name->get_storageModifier().get_modifier());
+      decl_item->set_gnu_attribute_modifierVector(decl_item->get_gnu_attribute_modifierVector());
     }
     else {
       // this variable would already be defined in SgFunctionParameterList
