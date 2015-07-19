@@ -563,6 +563,29 @@ XevXmlVisitor::visitSgDesignatedInitializer(xercesc::DOMNode* node, SgNode* astP
   ret->set_parent(astParent);
   ini->set_parent(ret);
   lst->set_parent(ret);
+  SgExpressionPtrList plst = lst->get_expressions();
+  bool isDataMember = (isSgVarRefExp(plst[0])!=NULL);
+  bool isArrayElm = (isSgUnsignedLongVal(plst[0])!=NULL);
+
+  if(isDataMember){
+    SgVarRefExp* varref = isSgVarRefExp(plst[0]);
+    SgVariableSymbol* vsym = varref->get_symbol();
+    if(vsym && vsym->get_declaration() ){
+      if( isSgTypeUnknown(vsym->get_type()) ){
+        // this class is defined in an external file.
+        // thus the declaration is not found in the XML AST.
+        // so a dummy is created for this initializer.
+        SgClassDefinition*  def = new SgClassDefinition(DEFAULT_FILE_INFO);
+        SgClassDeclaration* dcl = new SgClassDeclaration(DEFAULT_FILE_INFO);
+        vsym->get_declaration()->set_scope(def);
+        def->set_declaration(dcl);
+        dcl->set_class_type(SgClassDeclaration::e_union);
+      }
+    }
+    else{
+      XEV_WARN("Cannot find variable symbol");
+    }
+  }
   return ret;
 }
 EXPR_DEFAULT(DesignatedInitializer);
