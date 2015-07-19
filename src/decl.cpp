@@ -1033,9 +1033,6 @@ void XevSageVisitor::inodeSgFunctionDeclaration(SgNode* node)
   if(n){
     SgType* t = isSgFunctionDeclaration(node)->get_type()->get_return_type();
     this->visit(t);
-
-    for(size_t i(0);i<n->get_args().size();i++)
-      this->visit(n->get_args()[i]);
   }
 }
 
