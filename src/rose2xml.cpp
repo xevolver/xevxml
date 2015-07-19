@@ -278,17 +278,6 @@ static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
         visitor->visit(succ);
     }
   }
-  // let's use inodeSg*** for internal types
-#if 0
-  else {
-    SgType* t = isSgType(node);
-    Rose_STL_Container<SgType*> types = t->getInternalTypes();
-    for(size_t i(0);i<types.size();++i){
-      if(types[i]!=NULL && types[i]!=t)
-        visitor->visit(types[i]);
-    }
-  }
-#endif
 }
 
 void XevSageVisitor::visit(SgNode* node)

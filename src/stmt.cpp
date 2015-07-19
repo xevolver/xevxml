@@ -378,6 +378,7 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgCaseOptionStmt*     ret  = new SgCaseOptionStmt(DEFAULT_FILE_INFO);
   SgExpression*         key  = 0;
+  SgExpression*         kend = 0;
   SgStatement*          body = 0;
 
   ret->set_parent(astParent);
@@ -388,6 +389,8 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
         key = isSgExpression(astchild);
       else if (body==0)
         body = isSgStatement(astchild);
+      else if(kend==0)
+	kend = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -403,6 +406,9 @@ XevXmlVisitor::visitSgCaseOptionStmt(xercesc::DOMNode* node, SgNode* astParent)
   string c;
   if(XmlGetAttributeValue(node,"construct",&c)){
     ret->set_case_construct_name(c);
+  }
+  if(kend){
+    ret->set_key_range_end(kend);
   }
   return ret;
 }
