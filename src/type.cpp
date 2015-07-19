@@ -293,12 +293,12 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
         if(kexp==0) kexp = isSgExpression(astchild);                    \
       }                                                                 \
     SUBTREE_VISIT_END();                                                \
-    if(typ){								\
+    if(typ){                                                            \
       ret = Sg##Type::createType(typ,kexp);                             \
-      typ->set_parent(ret);						\
-    }									\
-    if(kexp)								\
-      kexp->set_parent(ret);						\
+      typ->set_parent(ret);                                             \
+    }                                                                   \
+    if(kexp)                                                            \
+      kexp->set_parent(ret);                                            \
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
@@ -666,8 +666,8 @@ void XevSageVisitor::attribSgModifierType(SgNode* node){
       mod |= (((unsigned int)vec[i]) << i );
     }
     sstr() << " modifier=\"" << mod << "\" ";
-    
-    SgConstVolatileModifier::cv_modifier_enum cv 
+
+    SgConstVolatileModifier::cv_modifier_enum cv
       = m.get_constVolatileModifier().get_modifier();
     if( cv != SgConstVolatileModifier::e_default )
       sstr() << " cv_modifier=\"" << cv << "\" ";
@@ -945,20 +945,20 @@ XevXmlVisitor::visitSgTypeOfType(xe::DOMNode* node, SgNode* astParent)
     {
       if(typ==NULL){
         typ = isSgType(astchild);
-	/*
+        /*
         if(typ){
           ret->set_base_type(typ);
-	  typ->set_parent(ret);
-	}
-	*/
+          typ->set_parent(ret);
+        }
+        */
       }
       if(exp==NULL){
         exp = isSgExpression(astchild);
-	/*
+        /*
         if(exp){
           ret->set_base_expression(exp);
-	  exp->set_parent(ret);
-	  }*/
+          exp->set_parent(ret);
+          }*/
       }
     }
   SUBTREE_VISIT_END();

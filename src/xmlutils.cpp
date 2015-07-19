@@ -86,6 +86,9 @@ string XmlStr2Entity( string str )
   str = REPLACE( str,">","&gt;" );
   str = REPLACE( str,"\"","&quot;" );
   str = REPLACE( str,"\'","&apos;" );
+  str = REPLACE( str,"\t","&#009;" );
+  str = REPLACE( str,"\n","&#010;" );
+  str = REPLACE( str,"\r","&#013;" );
   return str;
 }
 
@@ -96,7 +99,10 @@ string XmlEntity2Str( string str )
   str = REPLACE( str,"&gt;",">" );
   str = REPLACE( str,"&quot;","\"" );
   str = REPLACE( str,"&apos;","\'" );
-    return str;
+  str = REPLACE( str,"&#009;","\t" );
+  str = REPLACE( str,"&#010;","\n" );
+  str = REPLACE( str,"&#013;","\r" );
+  return str;
 }
 
 bool XmlWriteToString( xe::DOMNode* node, std::stringstream& str )

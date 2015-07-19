@@ -120,7 +120,7 @@ XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-
+  asm_code = XmlEntity2Str( asm_code );
   ret = sb::buildAsmStatement( asm_code );
   //ret->set_isVolatile( typ );
   ret->set_parent(astParent);

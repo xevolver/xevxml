@@ -71,23 +71,23 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   void XevSageVisitor::attribSg##x(SgNode* node)    \
   {attribSgExpression(sstr(),node);}
 
-#define INODE_EXPR_DEFAULT(x)						\
-  /** XML internal node writer of Sg##x */				\
-  void XevSageVisitor::inodeSg##x(SgNode* node){			\
-  Sg##x* n = isSg##x(node);						\
-    if(n){								\
-      this->visit(n->get_originalExpressionTree());			\
-    }									\
+#define INODE_EXPR_DEFAULT(x)                                           \
+  /** XML internal node writer of Sg##x */                              \
+  void XevSageVisitor::inodeSg##x(SgNode* node){                        \
+  Sg##x* n = isSg##x(node);                                             \
+    if(n){                                                              \
+      this->visit(n->get_originalExpressionTree());                     \
+    }                                                                   \
   }
 
-#define INODE_EXPR_TYPE(x)						\
-  /** XML internal node writer of Sg##x */				\
-  void XevSageVisitor::inodeSg##x(SgNode* node){			\
-  Sg##x* n = isSg##x(node);						\
-    if(n){								\
-    this->visit(n->get_type());						\
-    this->visit(n->get_originalExpressionTree());			\
-    }									\
+#define INODE_EXPR_TYPE(x)                                              \
+  /** XML internal node writer of Sg##x */                              \
+  void XevSageVisitor::inodeSg##x(SgNode* node){                        \
+  Sg##x* n = isSg##x(node);                                             \
+    if(n){                                                              \
+    this->visit(n->get_type());                                                 \
+    this->visit(n->get_originalExpressionTree());                       \
+    }                                                                   \
   }
 
 #define EXPR_DEFAULT(x)                         \
@@ -186,8 +186,9 @@ XevXmlVisitor::visitSgAsmOp(xe::DOMNode* node, SgNode* astParent)
   SgAsmOp*        ret = 0;
   SgExpression*   exp = 0;
   int cons = 0, mod =0, rec=0,out=0;
-  string name;
+  string name,cstr;
   XmlGetAttributeValue(node,"constraint",&cons);
+  XmlGetAttributeValue(node,"constraint_string",&cstr);
   XmlGetAttributeValue(node,"modifiers",&mod);
   XmlGetAttributeValue(node,"record",&rec);
   XmlGetAttributeValue(node,"name",&name);
@@ -200,6 +201,7 @@ XevXmlVisitor::visitSgAsmOp(xe::DOMNode* node, SgNode* astParent)
   ret->set_recordRawAsmOperandDescriptions(rec);
   ret->set_isOutputOperand(out);
   ret->set_name(name);
+  ret->set_constraintString(XmlEntity2Str(cstr));
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( exp==0 )
@@ -219,9 +221,12 @@ void XevSageVisitor::attribSgAsmOp(SgNode* node)
   if(n){
     if(n->get_constraint())
       sstr() << " constraint=\"" << n->get_constraint() << "\"";
+    if(n->get_constraintString().size()>0)
+      sstr() << " constraint_string=\""
+             << XmlStr2Entity(n->get_constraintString()) << "\"";
     if(n->get_modifiers())
       sstr() << " modifiers=\"" << n->get_modifiers() << "\"";
-    if(n->get_name().empty()==false)
+    if(n->get_name().size()>0)
       sstr() << " name=\"" << n->get_name() << "\"";
     if(n->get_recordRawAsmOperandDescriptions())
       sstr() << " record=\"" << n->get_recordRawAsmOperandDescriptions() << "\"";
@@ -310,7 +315,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
       if(typ==0)
         typ = isSgType(astchild);
       if(exp && oexp==0)
-	oexp = isSgExpression(astchild);
+        oexp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -441,7 +446,7 @@ void XevSageVisitor::attribSgCompoundLiteralExp(SgNode* node)
 
   attribSgExpression(sstr(),node);
 }
-void XevSageVisitor::inodeSgCompoundLiteralExp(SgNode* node)	
+void XevSageVisitor::inodeSgCompoundLiteralExp(SgNode* node)
 {
   SgCompoundLiteralExp* n = isSgCompoundLiteralExp(node);
 
@@ -545,9 +550,9 @@ XevXmlVisitor::visitSgDesignatedInitializer(xercesc::DOMNode* node, SgNode* astP
   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(ini==0)
-	ini= isSgInitializer(astchild);
+        ini= isSgInitializer(astchild);
       if(lst==0)
-	lst= isSgExprListExp(astchild);
+        lst= isSgExprListExp(astchild);
     }
   SUBTREE_VISIT_END();
   if(ini==0||lst==0){
@@ -641,7 +646,7 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
         if(lhs) {
           SgClassType    *ctype = 0;
           SgPointerType  *ptype = isSgPointerType(lhs->get_type());
-	  SgType* t = lhs->get_type();
+          SgType* t = lhs->get_type();
 #if 0
           if(ptype==0 && isSgTypedefType(lhs->get_type())){
             SgTypedefType* ttype = isSgTypedefType(lhs->get_type());
@@ -656,35 +661,35 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
             ptype = isSgPointerType(atype->get_base_type());
           }
 #endif
-	  if(ptype==0){
-	    while(t && isSgPointerType(t)==0){
-	      SgTypedefType*  ttype = isSgTypedefType(t);
-	      SgModifierType* mtype = isSgModifierType(t);
-	      //SgArrayType*    atype = isSgArrayType(t);
-	      if(ttype) t = ttype->get_base_type();
-	      else if(mtype) t = mtype->get_base_type();
-	      //else if(atype) t = atype->get_base_type();
-	      else break;
-	    }
-	    ptype = isSgPointerType(t);
-	  }
+          if(ptype==0){
+            while(t && isSgPointerType(t)==0){
+              SgTypedefType*  ttype = isSgTypedefType(t);
+              SgModifierType* mtype = isSgModifierType(t);
+              //SgArrayType*    atype = isSgArrayType(t);
+              if(ttype) t = ttype->get_base_type();
+              else if(mtype) t = mtype->get_base_type();
+              //else if(atype) t = atype->get_base_type();
+              else break;
+            }
+            ptype = isSgPointerType(t);
+          }
           if(ptype)
             ctype = isSgClassType(si::getElementType(ptype));
-          else if(isSgArrayType(t)) 
-	    // an array could be used as a pointer (test2012_42.c)
+          else if(isSgArrayType(t))
+            // an array could be used as a pointer (test2012_42.c)
             ctype = isSgClassType(si::getElementType(isSgArrayType(t)));
           else if(isSgTypeUnknown(t)==0) {
             //NOTE: the type of lhs could be SgTypeUnknown
             XEV_WARN(t->class_name() <<" is given as lhs of SgArrowExp");
-	    if(isSgNamedType(t))
-	      XEV_WARN(isSgNamedType(t)->get_name());
+            if(isSgNamedType(t))
+              XEV_WARN(isSgNamedType(t)->get_name());
             XEV_DEBUG_INFO(node);
             XEV_ABORT();
           }
 
           if(ctype==0){
-	    if(ptype)
-	      ctype = isSgClassType(ptype->findBaseType());
+            if(ptype)
+              ctype = isSgClassType(ptype->findBaseType());
 #if 0
             SgTypedefType* ttype = isSgTypedefType(ptype->get_base_type());
             SgModifierType* mtype = isSgModifierType(ptype->get_base_type());
@@ -746,8 +751,8 @@ XevXmlVisitor::visitSgArrowExp(xercesc::DOMNode* node, SgNode* astParent)
               sb::pushScopeStack(defn);
               pushed = true;
             }
-	  }
-	}
+          }
+        }
       }
       else if( rhs==0 ){
         if(pushed==true)
@@ -906,7 +911,7 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     SgFunctionParameterList *lst = sb::buildFunctionParameterList();
     SgGlobal* globalscope = si::getGlobalScope(sb::topScopeStack());
 
-    SgFunctionDeclaration * decl = 
+    SgFunctionDeclaration * decl =
       sb::buildNondefiningFunctionDeclaration(name,rtype,lst,globalscope);
     decl->get_declarationModifier().get_storageModifier().setExtern();
 
@@ -935,7 +940,7 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(oexp==0)
-	oexp=isSgExpression(astchild);
+        oexp=isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
   if(oexp)
@@ -1206,7 +1211,7 @@ XevXmlVisitor::visitSgVarArgCopyOp(xercesc::DOMNode* node, SgNode* astParent)
       if( lhs==0 )
         lhs = isSgExpression(astchild);
       else if(rhs==0)
-	rhs = isSgExpression(astchild);
+        rhs = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -1425,7 +1430,7 @@ XevXmlVisitor::visitSgVarRefExp(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(oexp==0)
-	oexp=isSgExpression(astchild);
+        oexp=isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
   if(oexp)
@@ -1479,19 +1484,19 @@ INODE_EXPR_DEFAULT(VarRefExp);
       XEV_DEBUG_INFO(node);                                             \
       XEV_ABORT();                                                      \
     }                                                                   \
-    if(oex)								\
-      ret->set_originalExpressionTree(oex);				\
+    if(oex)                                                             \
+      ret->set_originalExpressionTree(oex);                             \
   }                                                                     \
   /** XML attribute writer of Sg##op */                                 \
   void XevSageVisitor::attribSg##op(SgNode* node)                       \
   {attribSgExpression(sstr(),node);}                                    \
   /** XML internal node writer of Sg##op */                             \
   void XevSageVisitor::inodeSg##op(SgNode* node)                        \
-  {									\
-    SgBinaryOp* n = isSgBinaryOp(node);					\
-    if(n && n->get_originalExpressionTree())				\
-      this->visit(n->get_originalExpressionTree());			\
-    return;								\
+  {                                                                     \
+    SgBinaryOp* n = isSgBinaryOp(node);                                         \
+    if(n && n->get_originalExpressionTree())                            \
+      this->visit(n->get_originalExpressionTree());                     \
+    return;                                                             \
   }
 
 #define VISIT_UOP(op)                                                   \
@@ -1503,7 +1508,7 @@ INODE_EXPR_DEFAULT(VarRefExp);
     xe::DOMNode* child=node->getFirstChild();                           \
     while(child) {                                                      \
       if(child->getNodeType() == xercesc::DOMNode::ELEMENT_NODE){       \
-        SgNode* astchild = this->visit(child,astParent);		\
+        SgNode* astchild = this->visit(child,astParent);                \
         if(exp==0)                                                      \
           exp = isSgExpression(astchild);                               \
       }                                                                 \
