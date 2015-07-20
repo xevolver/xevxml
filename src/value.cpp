@@ -306,6 +306,12 @@ XevXmlVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
 
   if(XmlGetAttributeValue(node,"single",&flag))
     ret->set_usesSingleQuotes(flag);
+  if(XmlGetAttributeValue(node,"wchar",&flag))
+    ret->set_wcharString(flag);
+  if(XmlGetAttributeValue(node,"string16",&flag))
+    ret->set_is16bitString(flag);
+  if(XmlGetAttributeValue(node,"string32",&flag))
+    ret->set_is32bitString(flag);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(oexp==0) oexp=isSgExpression(astchild);
@@ -322,6 +328,12 @@ void XevSageVisitor::attribSgStringVal(SgNode* node)
     sstr() << " value=\"" << XmlStr2Entity(n->get_value()) << "\" ";
     if(n->get_usesSingleQuotes()==true)
       sstr() << " single=\"1\" ";
+    if(n->get_wcharString()==true)
+      sstr() << " wchar=\"1\" ";
+    if(n->get_is16bitString()==true)
+      sstr() << " string16=\"1\" ";
+    if(n->get_is32bitString()==true)
+      sstr() << " string32=\"1\" ";
   }
 }
 /** XML internal node writer of SgStringVal */
@@ -331,4 +343,3 @@ void XevSageVisitor::inodeSgStringVal(SgNode* node) {
     this->visit(n->get_originalExpressionTree());
   return;
 }
-
