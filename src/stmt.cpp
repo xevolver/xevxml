@@ -41,12 +41,12 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
-static PreprocessingInfo* 
-attachRawText(SgLocatedNode* node, const std::string& text, 
+static PreprocessingInfo*
+attachRawText(SgLocatedNode* node, const std::string& text,
 	      PreprocessingInfo::RelativePositionType position=PreprocessingInfo::before)
 {
   PreprocessingInfo* ret = 0;
-  PreprocessingInfo::DirectiveType mytype 
+  PreprocessingInfo::DirectiveType mytype
     = PreprocessingInfo::CpreprocessorCompilerGeneratedLinemarker;
   //PreprocessingInfo::DirectiveType mytype = PreprocessingInfo::RawText; //error
   //PreprocessingInfo::DirectiveType mytype = PreprocessingInfo::LineReplacement; //replace
@@ -1977,6 +1977,8 @@ XevXmlVisitor::visitSgReturnStmt(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret = sb::buildReturnStmt(exp);
+  ret->set_parent(astParent);
+  if(exp) exp->set_parent(ret);
 
   if( si::is_Fortran_language() && isSgLabelRefExp(exp) ){
     // --- Fortran alternative return support ---

@@ -176,6 +176,7 @@ bool XevSageVisitor::hasInode(SgNode* node)
       return true;
   }
   switch((int)node->variantT()) {
+  case V_SgAggregateInitializer:
   case V_SgArithmeticIfStatement:
   case V_SgAttributeSpecificationStatement:
   case V_SgCompoundLiteralExp:

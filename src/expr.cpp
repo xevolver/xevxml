@@ -57,12 +57,15 @@ static void attribSgExpression(ostream& istr,SgNode* node)
 
   SgAssignInitializer* ini = isSgAssignInitializer(node);
   if(ini){
+    istr << " cast=\"" << ini->get_is_explicit_cast() <<"\" ";
+#if 0
     //SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
     SgCastExp* c = isSgCastExp(ini->get_operand());
     if(c && c->get_file_info() &&c->get_file_info()->isCompilerGenerated()==false)
       istr << " cast=\"" << ini->get_is_explicit_cast() <<"\" ";
     else
       istr << " cast=\"0\" ";
+#endif
   }
 }
 
@@ -85,7 +88,7 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   void XevSageVisitor::inodeSg##x(SgNode* node){                        \
   Sg##x* n = isSg##x(node);                                             \
     if(n){                                                              \
-    this->visit(n->get_type());                                                 \
+      this->visit(n->get_type());                                       \
     this->visit(n->get_originalExpressionTree());                       \
     }                                                                   \
   }
@@ -141,30 +144,31 @@ XevXmlVisitor::visitSgAggregateInitializer(xe::DOMNode* node, SgNode* astParent)
 {
   SgAggregateInitializer* ret = 0;
   SgExprListExp*          lst = 0;
-  //SgType*                 typ = 0;
+  SgType*                 typ = 0;
 
   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if( lst==0 )
         lst = isSgExprListExp(astchild);
+      if( typ==0 )
+        typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
 
-  if(lst!=NULL)
+  if(lst!=NULL && typ!=NULL)
+    ret = sb::buildAggregateInitializer( lst,typ );
+  else if(lst!=NULL)
     ret = sb::buildAggregateInitializer( lst,lst->get_type() );
   else {
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-
   ret->set_parent(astParent);
   lst->set_parent(ret);
 
   int brace=0;
   XmlGetAttributeValue(node,"need_brace",&brace);
   ret->set_need_explicit_braces(brace);
-
-
   return ret;
 }
 void XevSageVisitor::attribSgAggregateInitializer(SgNode* node)
@@ -176,7 +180,15 @@ void XevSageVisitor::attribSgAggregateInitializer(SgNode* node)
   }
   attribSgExpression(sstr(),node);
 }
-INODE_EXPR_DEFAULT(AggregateInitializer);
+void XevSageVisitor::inodeSgAggregateInitializer(SgNode* node)
+{
+  SgAggregateInitializer* n = isSgAggregateInitializer(node);
+  if(n){
+    this->visit(n->get_originalExpressionTree());
+    this->visit(n->get_type());
+  }
+}
+//INODE_EXPR_DEFAULT(AggregateInitializer);
 
 // ===============================================================================
 /// Visitor of a SgAsmOp element in an XML document
@@ -254,7 +266,6 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   if(exp){
-
     ret->set_operand(exp);
     exp->set_parent(ret);
   }
@@ -262,8 +273,8 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-
-  SgCastExp* c = isSgCastExp(exp);
+#if 0
+  SgCastExp* c = isSgCastExp(ret->get_operand());
   if(c && c->get_file_info()){
     int expl=0;
     if(XmlGetAttributeValue(node,"cast",&expl) && expl){
@@ -275,6 +286,11 @@ XevXmlVisitor::visitSgAssignInitializer(xe::DOMNode* node, SgNode* astParent)
       c->get_file_info()->setCompilerGenerated();
     }
   }
+#else
+  int expl=0;
+  if(XmlGetAttributeValue(node,"cast",&expl))
+    ret->set_is_explicit_cast(expl);
+#endif
   return ret;
 }
 EXPR_DEFAULT(AssignInitializer);
@@ -322,6 +338,7 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   if(typ && exp){
     ret = sb::buildCastExp(exp,typ,(SgCastExp::cast_type_enum)cty);
     ret->set_parent(astParent);
+    exp->set_parent(ret);
   }
   else {
     XEV_DEBUG_INFO(node);
@@ -329,14 +346,16 @@ XevXmlVisitor::visitSgCastExp(xe::DOMNode* node, SgNode* astParent)
   }
   if(imp && oexp){
     si::setSourcePosition(ret);
-    ret->get_startOfConstruct()->setCompilerGenerated();
-    ret->get_endOfConstruct()->setCompilerGenerated();
-    ret->get_operatorPosition()->setCompilerGenerated();
-    ret->get_file_info()->setCompilerGenerated();
+    //ret->get_startOfConstruct()->setCompilerGenerated();
+    //ret->get_endOfConstruct()->setCompilerGenerated();
+    //ret->get_operatorPosition()->setCompilerGenerated();
+    //ret->get_file_info()->setCompilerGenerated();
     ret->set_originalExpressionTree(oexp);
+    oexp->set_parent(ret);
   }
   else
     si::setSourcePositionAsTransformation(ret);
+
   return ret;
 }
 //ATTRIB_EXPR_DEFAULT(CastExp);
@@ -404,35 +423,29 @@ EXPR_DEFAULT(CompoundInitializer);
 SgNode*
 XevXmlVisitor::visitSgCompoundLiteralExp(xe::DOMNode* node, SgNode* astParent)
 {
-  //SgCompoundLiteralExp* ret = new SgCompoundLiteralExp(DEFAULT_FILE_INFO);
   SgCompoundLiteralExp* ret = new SgCompoundLiteralExp(DEFAULT_FILE_INFO);
   std::string name;
   SgType*        typ = 0;
   SgAggregateInitializer* ini = 0;
+  SgInitializedName* iname = 0;
 
   ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( typ==0 )
-        typ = isSgType(astchild);
-      if( ini==0 )
+      if(ini==0)
         ini = isSgAggregateInitializer(astchild);
     }
   SUBTREE_VISIT_END();
-
-  if(XmlGetAttributeValue(node,"symbol", &name)==false
-     || typ == 0 || ini == 0){
+  if(ini==0 || XmlGetAttributeValue(node,"symbol",&name)==false){
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
   ini->set_uses_compound_literal(true);
+  ini->set_parent(ret);
+  typ = ini->get_type();
 
-  SgScopeStatement* scope = sb::topScopeStack();
-  SgInitializedName* name1 = sb::buildInitializedName(name,typ);
-  name1->set_scope(scope); // NULL?
-  name1->set_initptr(ini);
-  SgVariableSymbol* vsym = new SgVariableSymbol(name1);
-  vsym->set_parent(scope);
+  iname = sb::buildInitializedName(name,typ,ini);
+  SgVariableSymbol* vsym = new SgVariableSymbol(iname);
   ret->set_symbol(vsym);
 
   return ret;
@@ -453,7 +466,6 @@ void XevSageVisitor::inodeSgCompoundLiteralExp(SgNode* node)
   if(n){
     SgVariableSymbol* vsym = n->get_symbol();
     this->visit(vsym->get_declaration()->get_initializer());
-    this->visit(n->get_type());
   }
   return;
 }
