@@ -627,8 +627,9 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
   SgModifierType* ret=NULL;
   SgType* typ =NULL;
   unsigned long mod=0;
+  unsigned long cv=0;
 
-  SUBTREE_VISIT_BEGIN(node,astchild,astParent)
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(typ==NULL)
         typ = isSgType(astchild);
@@ -638,7 +639,26 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-  ret = sb::buildModifierType(typ);
+
+  XmlGetAttributeValue(node,"cv_modifier",&cv);
+  //ret->get_typeModifier().get_constVolatileModifier()
+  //.set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
+  //XEV_DEBUG_INFO(node);
+  //cerr << "cv=" <<     ret->get_typeModifier().get_constVolatileModifier().get_modifier()
+  //<< endl;
+  switch(cv){
+  case SgConstVolatileModifier::e_const:
+    ret=sb::buildConstType(typ);
+    break;
+  case SgConstVolatileModifier::e_volatile:
+    ret=sb::buildVolatileType(typ);
+    break;
+  default:
+    // calling buildModifierType may cause a problem
+    ret=sb::buildModifierType(typ);
+    break;
+  }
+
   ret->set_parent(astParent);
   SgBitVector vec =  ret->get_typeModifier().get_modifierVector();
   for(size_t i(0);i<vec.size();i++){
@@ -646,12 +666,8 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
     mod >>= 1;
   }
   ret->get_typeModifier().set_modifierVector(vec);
+  //typ->set_parent(ret);
   //ret->set_base_type(typ);
-  typ->set_parent(ret);
-  if(XmlGetAttributeValue(node,"cv_modifier",&mod)) {
-    ret->get_typeModifier().get_constVolatileModifier()
-      .set_modifier((SgConstVolatileModifier::cv_modifier_enum)mod);
-  }
 
   return ret;
 }
@@ -999,6 +1015,7 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
   SgPointerType*      ret = new SgPointerType();
   SgType*             typ = 0;
 
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(typ==NULL){
@@ -1013,7 +1030,7 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
     XEV_DEBUG_INFO(node);
     XEV_ABORT();
   }
-  ret->set_parent(astParent);
+
   return ret;
 }
 /** XML attribute writer of SgPointerType */

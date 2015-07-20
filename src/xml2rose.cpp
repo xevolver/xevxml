@@ -97,7 +97,12 @@ bool XevXmlVisitor::read(std::istream& is, SgProject** prj) {
     *prj = getSgProject();
     //AstTests::runAllTests(*prj);
   }
+  catch(std::exception& e) {
+    XEV_WARN("Exception thrown. Conversion failed. " << e.what());
+    return false;
+  }
   catch(...) {
+    XEV_WARN("Exception thrown. Conversion failed. Unknown exception");
     return false;
   }
   return true;

@@ -1466,6 +1466,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    // -----------------------------------------------------------------------
    // function body
+   ret->set_parent(astParent);
    FUNCTION_BODY_VISIT_BEGIN(node,astchild,ret);
    {
      if(fdf==0)
@@ -1518,7 +1519,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      ret->get_functionModifier().setElemental();
    if(f_recur)
      ret->get_functionModifier().setRecursive();
-   ret->set_parent(astParent);
+
 
    return ret;
  }
