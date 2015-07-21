@@ -197,7 +197,7 @@ bool XevSageVisitor::hasInode(SgNode* node)
     return true;
   case V_SgTypeComplex:
   case V_SgTypeImaginary:
-  case V_SgTypeOfType:
+    //case V_SgTypeOfType:
   case V_SgTypeString:
     return true;
   case V_SgInterfaceBody:

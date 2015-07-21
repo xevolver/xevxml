@@ -947,6 +947,7 @@ void XevSageVisitor::inodeSgTypeLabel(SgNode* node){
   inodeSgType(this,node);
 }
 
+#if 0
 // ===============================================================================
 /// Visitor of a SgTypeOfType element in an XML document
 SgNode*
@@ -1006,6 +1007,7 @@ void XevSageVisitor::inodeSgTypeOfType(SgNode* node){
     this->visit(n->get_base_expression());
   }
 }
+#endif
 
 // ===============================================================================
 /// Visitor of a SgPointerType element in an XML document
