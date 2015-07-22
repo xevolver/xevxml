@@ -484,6 +484,7 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     decl->set_scope(scope);
     //decl->setForward();
     decl->set_forward(true);
+    decl->set_isUnNamed(unnamed);
     //defn->set_type(SgClassType::createType(defn));
     csym = new SgClassSymbol(decl);
     csym->set_declaration(decl);
@@ -504,6 +505,19 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   ret->set_firstNondefiningDeclaration(decl);
   ret->set_class_type( (SgClassDeclaration::class_types)typ);
   ret->set_type(SgClassType::createType(decl));
+
+  ret->set_isUnNamed(unnamed);
+
+  if(decl->get_definingDeclaration()){
+    SgClassDeclaration* cdecl
+      = isSgClassDeclaration(decl->get_definingDeclaration());
+    // avoid processing the class definition twice
+    ret->set_definition(cdecl->get_definition());
+    ret->set_definingDeclaration(cdecl);
+    ret->setForward();
+    ret->set_forward(true);
+    return ret;
+  }
 
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -527,7 +541,6 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     ret->setForward();
     ret->set_forward(true);
   }
-  ret->set_isUnNamed(unnamed);
   return ret;
 }
 /** XML attribute writer of SgClassDeclaration */
@@ -765,7 +778,12 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
     XEV_ABORT();
   }
   ret->set_parent(astParent);
+  ret->setForward();
+  ret->set_definingDeclaration(NULL);
 
+  if( XmlGetAttributeValue(node,"unnamed",&unnamed) ){
+    esym->get_declaration()->set_isUnNamed(unnamed);
+  }
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       SgInitializedName* ini = isSgInitializedName(astchild);
@@ -775,13 +793,11 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
         ret->set_definingDeclaration(ret);
         esym->get_declaration()->set_definingDeclaration(ret);
         //esym->set_declaration(ret);
+        ret->unsetForward();
       }
     }
   SUBTREE_VISIT_END();
 
-  if( XmlGetAttributeValue(node,"unnamed",&unnamed) ){
-    ret->set_isUnNamed(unnamed);
-  }
   esym = si::lookupEnumSymbolInParentScopes(name);
   if(esym==0){
     XEV_DEBUG_INFO(node);
@@ -799,7 +815,7 @@ void XevSageVisitor::attribSgEnumDeclaration(SgNode* node)
       sstr() << " unnamed=\"1\" ";
     sstr() << " name=" << n->get_name() << " ";
   }
-  attribSgStatement(sstr(),node);
+  attribSgDeclarationStatement(sstr(),node);
 }
 INODE_DECL_DEFAULT(EnumDeclaration);
 
@@ -1659,12 +1675,22 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    SgTypedefDeclaration*     ret  = 0;
    SgDeclarationStatement*   decl = 0;
    SgType*                   typ  = 0;
-
+   int                       lst  = 0;
    //xe::DOMNamedNodeMap* amap = node->getAttributes();
    //xe::DOMNode* satt = 0;
    string name;
+   bool first = false;
+   SgTypedefSymbol* tsym = 0;
 
-   XmlGetAttributeValue(node,"name",&name);
+   if(XmlGetAttributeValue(node,"name",&name)==false){
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   XmlGetAttributeValue(node,"list",&lst);
+
+   tsym = si::lookupTypedefSymbolInParentScopes(name);
+   if(lst && tsym==0)
+     first = true;
 
    SUBTREE_VISIT_BEGIN(node,astchild,astParent)
      {
@@ -1675,38 +1701,37 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      }
    SUBTREE_VISIT_END();
 
+   if(typ==NULL){
+     XEV_DEBUG_INFO(node);
+     XEV_ABORT();
+   }
+   ret = sb::buildTypedefDeclaration(name, typ);
+   XEV_ASSERT(ret!=NULL);
+   ret->set_parent(astParent);
+
    if(decl) {
-     SgNamedType *namedType = isSgNamedType(typ->findBaseType());
-     ret = sb::buildTypedefDeclaration( name.c_str(),
-                                        typ,
-                                        sb::topScopeStack());
-     XEV_ASSERT(ret!=NULL);
-     ret->set_declaration(decl->get_firstNondefiningDeclaration());
+     tsym = si::lookupTypedefSymbolInParentScopes(name);
+     XEV_ASSERT(tsym!=NULL);
+     ret->set_declaration(tsym->get_declaration());
      ret->set_definingDeclaration(ret);
      ret->set_requiresGlobalNameQualificationOnType(true);
      if(si::is_Fortran_language()==false)
        ret->set_typedefBaseTypeContainsDefiningDeclaration(true);
      decl->set_parent(ret);
+     tsym->get_declaration()->set_definingDeclaration(ret);
+   }
 
-     SgTypedefSymbol* tsym =si::lookupTypedefSymbolInParentScopes(name);
-     if(tsym){
-       tsym->get_declaration()->set_definingDeclaration(ret);
+   // If one typedef stmt declares multiple names, it is split into
+   // multiple stmts. In such a case, the class cannot be unnamed.
+   if(lst){
+     ret->set_isAssociatedWithDeclarationList(true);
+     SgClassDeclaration* cdecl = isSgClassDeclaration(decl);
+     if(cdecl) {
+       cdecl->set_isUnNamed(false);
+       isSgClassDeclaration(cdecl->get_firstNondefiningDeclaration())
+         ->set_isUnNamed(false);
      }
-     else{
-       XEV_DEBUG_INFO(node);
-       XEV_ABORT();
-     }
    }
-   else if(typ) {                                         // add (0819)
-     ret = sb::buildTypedefDeclaration( name.c_str(),
-                                        typ,
-                                        sb::topScopeStack());
-   }
-   else {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
-   }
-   ret->set_parent(astParent);
    return ret;
  }
  /** XML attribute writer of SgTypedefDeclaration */
@@ -1716,6 +1741,8 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    if(n) {
      sstr() << " name=" << n->get_name() << " ";
+     if(n->get_isAssociatedWithDeclarationList())
+       sstr() << " list=\"1\" ";
    }
    attribSgDeclarationStatement(sstr(),node);
  }

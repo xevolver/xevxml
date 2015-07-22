@@ -112,12 +112,13 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
 {
   SgLocatedNode* n = isSgLocatedNode(astNode);
   string file_info;
-  int gen=0;
+  int same=0;
 
   if(n==0) return;
   //if(isSgCastExp(n) == 0)
     si::setSourcePositionAsTransformation(n);
-  if(XmlGetAttributeValue(node, "codegen",&gen) && gen==0 ) {
+  if(XmlGetAttributeValue(node, "samefile", &same) && same==0 ) {
+    n->get_file_info()->set_file_id(Sg_File_Info::COMPILER_GENERATED_FILE_ID);
     if( n->get_parent()==0 || isSgType(n->get_parent()) || isSgGlobal(n->get_parent())
 	|| isSgNamespaceDefinitionStatement(n->get_parent()) || isSgCastExp(n) ){
       si::setSourcePosition(n);

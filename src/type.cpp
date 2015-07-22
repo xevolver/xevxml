@@ -506,7 +506,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     csym = new SgClassSymbol(dec);
     scope->insert_symbol(name,csym);
 #endif
-    if(atn){
+    if(atn && unn){
       SgClassDefinition* cdef = 0;
       SUBTREE_VISIT_BEGIN(node,astchild,dec)
         {

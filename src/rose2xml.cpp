@@ -317,9 +317,10 @@ void XevSageVisitor::visit(SgNode* node)
     XEV_WARN("unknown Sage AST node found \"" << node->class_name() << "\"");
     XEV_ABORT();
   }
-  if(node->get_file_info() && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false)
-    sstr() << " codegen=\"0\" ";
-
+  if(node->get_file_info()
+     && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false)
+    sstr() << " samefile=\"0\" ";
+  //sstr() << " filename=\""<<node->get_file_info()->get_filename() <<"\" ";
   if( hasInode(node) )
     sstr() << ">" << std::endl;
   else {
