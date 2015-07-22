@@ -465,10 +465,14 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   //xe::DOMNode*          nameatt=0;
   string                name,val;
   int                   typ=0;
+  int                   atn=0;
+  int                   unn=0;
   SgDeclarationStatement* ds = 0;
 
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"type",&typ);
+  XmlGetAttributeValue(node,"auto",&atn);
+  XmlGetAttributeValue(node,"unnamed",&unn);
 
   /*
   dec = sb::buildClassDeclaration( SgName(name.c_str()), scope );
@@ -494,6 +498,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     dec->set_firstNondefiningDeclaration(dec);
     dec->set_definition(NULL);
     dec->set_definingDeclaration(NULL);
+    dec->set_isUnNamed(unn);
     ds = isSgDeclarationStatement( dec );
     ds->setForward();
 #if 0
@@ -501,10 +506,25 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     csym = new SgClassSymbol(dec);
     scope->insert_symbol(name,csym);
 #endif
+    if(atn){
+      SgClassDefinition* cdef = 0;
+      SUBTREE_VISIT_BEGIN(node,astchild,dec)
+        {
+          if(cdef==0)
+            cdef = isSgClassDefinition(astchild);
+        }
+      SUBTREE_VISIT_END();
+      if(cdef){
+        dec->set_definition(cdef);
+        dec->set_definingDeclaration(dec);
+        dec->set_isAutonomousDeclaration(false);
+      }
+    }
   }
   XEV_ASSERT(ds!=NULL);
   ret = new SgClassType( ds );
   ret->set_parent(astParent);
+  ret->set_autonomous_declaration(atn);
   return ret;
 }
 /** XML attribute writer of SgClassType */
@@ -518,10 +538,31 @@ void XevSageVisitor::attribSgClassType(SgNode* node)
   //else
   sstr() << " name=" << n->get_name() << " ";
   sstr() << " type=\"" << cd->get_class_type() << "\" ";
+  if(n->get_autonomous_declaration())
+    sstr() << " auto=\"" << n->get_autonomous_declaration() << "\" ";
+  if(cd->get_isUnNamed())
+    sstr() << " unnamed=\"" << cd->get_isUnNamed() << "\" ";
 }
 /** XML internal node writer of SgClassType */
-void XevSageVisitor::inodeSgClassType(SgNode* node) {}
-
+void XevSageVisitor::inodeSgClassType(SgNode* node)
+{
+  SgClassType* n =  isSgClassType(node);
+  if(n && n->get_autonomous_declaration()){
+    SgClassDeclaration* decl = isSgClassDeclaration(n->get_declaration());
+    if(decl!=NULL){
+      decl = isSgClassDeclaration(decl->get_definingDeclaration());
+      if(decl!=NULL&&decl->get_definition()!=NULL){
+        if(decl->get_isUnNamed()){
+          si::setSourcePositionAsTransformation(decl->get_definition());
+          //cerr << decl->get_definition()->unparseToString() <<endl;
+          this->visit(decl->get_definition());
+        }
+      }
+      //else XEV_ABORT();
+    }
+    //else XEV_ABORT();
+  }
+}
 
 // ===============================================================================
 // SgEnumType

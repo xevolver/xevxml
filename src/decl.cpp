@@ -525,7 +525,7 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     ret->set_definition(NULL);
     ret->set_definingDeclaration(decl->get_definingDeclaration());
     ret->setForward();
-    //decl->set_forward(true);
+    ret->set_forward(true);
   }
   ret->set_isUnNamed(unnamed);
   return ret;
