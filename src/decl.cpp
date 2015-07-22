@@ -1025,6 +1025,11 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     if(n->get_prototypeIsWithoutParameters() ){
       sstr() << " no_params=\"1\"";
     }
+    if(n->get_gnu_regparm_attribute()>0 ){
+      sstr() << " regparm=\""
+             << n->get_gnu_regparm_attribute()
+             << "\"";
+    }
   }
   attribSgDeclarationStatement(sstr(),node);
 }

@@ -282,6 +282,7 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
 {
   SgDeclarationStatement* decl = isSgDeclarationStatement(astNode);
   int enf=0;
+  int regparm=0;
   unsigned long mod=0;
   string rname;
   if(decl==0) return;
@@ -353,8 +354,13 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
   if(XmlGetAttributeValue(node,"asm_name",&asmn))
     fdecl->set_asm_name(asmn);
 
+  if(XmlGetAttributeValue(node,"regparm",&regparm))
+    fdecl->set_gnu_regparm_attribute(regparm);
+
   if(fdecl->get_definition()!=NULL)
     fdecl->get_definition()->set_declaration(fdecl);
+
+
 #if 1
   if( si::is_Fortran_language() && XmlGetAttributeValue(node,"result",&rname) ){
 
