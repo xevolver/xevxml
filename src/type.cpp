@@ -467,8 +467,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   int                   typ=0;
   int                   atn=0;
   int                   unn=0;
-  SgDeclarationStatement* ds = 0;
-
+  SgClassDeclaration*    dec = 0;
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"type",&typ);
   XmlGetAttributeValue(node,"auto",&atn);
@@ -480,7 +479,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   */
   SgClassSymbol* csym = si::lookupClassSymbolInParentScopes(name);
   if(csym)
-    ds = isSgDeclarationStatement( csym->get_declaration() );
+    dec = csym->get_declaration();
   else {
     //SgScopeStatement* scope = si::getEnclosingProcedure (sb::topScopeStack());
     //if(scope==NULL) scope = _file->get_globalScope();
@@ -488,8 +487,8 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     // A dummy object is created and is not registered in the symbol table.
     // It is not used by other objects. It is put on the current scope.
     SgScopeStatement* scope = sb::topScopeStack();
-    SgClassDeclaration* dec
-      = new SgClassDeclaration(DEFAULT_FILE_INFO); //don't use high-level build function
+    //don't use high-level build function
+    dec = new SgClassDeclaration(DEFAULT_FILE_INFO);
 
     dec->set_class_type( (SgClassDeclaration::class_types)typ  );
     dec->set_name(name);
@@ -499,14 +498,13 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     dec->set_definition(NULL);
     dec->set_definingDeclaration(NULL);
     dec->set_isUnNamed(unn);
-    ds = isSgDeclarationStatement( dec );
-    ds->setForward();
+    dec->setForward();
 #if 0
     // don't insert symbol!
     csym = new SgClassSymbol(dec);
     scope->insert_symbol(name,csym);
 #endif
-    if(atn && unn){
+    if(atn){
       SgClassDefinition* cdef = 0;
       SUBTREE_VISIT_BEGIN(node,astchild,dec)
         {
@@ -518,13 +516,20 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
         dec->set_definition(cdef);
         dec->set_definingDeclaration(dec);
         dec->set_isAutonomousDeclaration(false);
+        dec->unsetForward();
       }
     }
   }
-  XEV_ASSERT(ds!=NULL);
-  ret = new SgClassType( ds );
+  XEV_ASSERT(dec!=NULL);
+  ret = new SgClassType( dec );
   ret->set_parent(astParent);
   ret->set_autonomous_declaration(atn);
+  if(atn && dec && csym==0) {
+    SgClassDeclaration* defdecl
+      = isSgClassDeclaration(dec->get_definingDeclaration());
+    if(defdecl)
+      defdecl->set_isAutonomousDeclaration(false);
+  }
   return ret;
 }
 /** XML attribute writer of SgClassType */
@@ -533,9 +538,7 @@ void XevSageVisitor::attribSgClassType(SgNode* node)
   SgClassType* n = isSgClassType(node);
   SgDeclarationStatement* ds = n->get_declaration();
   SgClassDeclaration*     cd = isSgClassDeclaration(ds);
-  //if( cd->get_isUnNamed() )
-  //sstr() << " name=\"\" ";
-  //else
+
   sstr() << " name=" << n->get_name() << " ";
   sstr() << " type=\"" << cd->get_class_type() << "\" ";
   if(n->get_autonomous_declaration())
@@ -546,21 +549,26 @@ void XevSageVisitor::attribSgClassType(SgNode* node)
 /** XML internal node writer of SgClassType */
 void XevSageVisitor::inodeSgClassType(SgNode* node)
 {
+
   SgClassType* n =  isSgClassType(node);
+  /* if this class is inside compound literal exp, the definition is needed */
   if(n && n->get_autonomous_declaration()){
     SgClassDeclaration* decl = isSgClassDeclaration(n->get_declaration());
     if(decl!=NULL){
       decl = isSgClassDeclaration(decl->get_definingDeclaration());
       if(decl!=NULL&&decl->get_definition()!=NULL){
-        if(decl->get_isUnNamed()){
+        if(decl->get_isAutonomousDeclaration()==false){
+	  // set this flag to avoid cyclic traversal
+	  // I don't know if this is a right way but it works
+	  decl->set_isAutonomousDeclaration(true);
           si::setSourcePositionAsTransformation(decl->get_definition());
           //cerr << decl->get_definition()->unparseToString() <<endl;
           this->visit(decl->get_definition());
+	  // unset the flag
+	  decl->set_isAutonomousDeclaration(false);
         }
       }
-      //else XEV_ABORT();
     }
-    //else XEV_ABORT();
   }
 }
 

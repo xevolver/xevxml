@@ -536,6 +536,10 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     // defining declaration
     ret->set_definition( exp );
     ret->set_definingDeclaration(ret);
+    if(ret->get_isUnNamed()==false){
+      // avoid printing the full definition at compound literal
+      ret->set_isAutonomousDeclaration(true);
+    }
     decl->set_definingDeclaration(ret);
     exp->set_declaration(ret);
     exp->set_parent(ret);
