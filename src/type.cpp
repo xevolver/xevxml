@@ -720,7 +720,7 @@ void XevSageVisitor::attribSgModifierType(SgNode* node){
     unsigned long mod = 0;
     SgBitVector vec = m.get_modifierVector();
     for(size_t i(0);i<vec.size();i++){
-      mod |= (((unsigned int)vec[i]) << i );
+      mod |= (((unsigned long)vec[i]) << i );
     }
     sstr() << " modifier=\"" << mod << "\" ";
 

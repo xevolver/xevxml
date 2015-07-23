@@ -80,6 +80,12 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
     istr << " thread_local=\"1\" ";
   }
 
+  if(decl->get_declarationModifier().get_gnu_attribute_visability()
+     > SgDeclarationModifier::e_unspecified_visibility)
+    istr << " visibility=\""
+	 << decl->get_declarationModifier().get_gnu_attribute_visability()
+	 << "\" ";
+
   if(si::is_Fortran_language()){
     if(decl->get_binding_label().size()){
       istr << " bind=\"" <<decl->get_binding_label() << "\" " << endl;
@@ -992,6 +998,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     //Sg_File_Info* info = DEFAULT_FILE_INFO;
     //info->setOutputInCodeGeneration();
     //def = new SgFunctionDefinition(info);
+    ret->set_forward(true);
     ret->get_declarationModifier().get_storageModifier().setExtern();
   }
   if(def && si::is_C_language()){
@@ -1008,6 +1015,17 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     def->set_parent(ret);
   lst->set_parent(ret);
   ret->set_definition(def);
+
+  int mod=0;
+  string str;
+  if(XmlGetAttributeValue(node,"gnu_visibility",&mod)){
+    ret->set_gnu_extension_visability
+      ((SgDeclarationStatement::gnu_extension_visability_attribute_enum)mod);
+  }
+  if(XmlGetAttributeValue(node,"gnu_alias",&str)){
+    ret->get_functionModifier().set_gnu_attribute_named_alias(str);
+  }
+
   return ret;
 }
 /** XML attribute writer of SgFunctionDeclaration */
@@ -1046,6 +1064,15 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
              << n->get_gnu_regparm_attribute()
              << "\"";
     }
+    /* GNU extensions */
+    if(n->get_gnu_extension_visability()
+       !=  (SgDeclarationStatement::e_gnu_attribute_visability_unspecified))
+      sstr() << " gnu_visibility=\"" << n->get_gnu_extension_visability() << "\" ";
+
+    /* SgFunctionDeclaration::get_gnu_extension_alias?? */
+    if(f.get_gnu_attribute_named_alias().size() > 0 )
+      sstr() << " gnu_alias=\""
+             << f.get_gnu_attribute_named_alias() << "\"";
   }
   attribSgDeclarationStatement(sstr(),node);
 }
@@ -1886,13 +1913,6 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       ret = sb::buildVariableDeclaration(name->get_name(),
                                          name->get_type(),
                                          name->get_initializer());
-      /* buildVariableDeclaration creates a new SgInitializedName so attributes must be copied */
-      SgInitializedName* decl_item = ret->get_decl_item(name->get_name());
-      decl_item->set_gnu_attribute_alignment(name->get_gnu_attribute_alignment());
-      decl_item->set_hasArrayTypeWithEmptyBracketSyntax(name->get_hasArrayTypeWithEmptyBracketSyntax());
-      decl_item->set_prev_decl_item(name->get_prev_decl_item());
-      decl_item->get_storageModifier().set_modifier(name->get_storageModifier().get_modifier());
-      decl_item->set_gnu_attribute_modifierVector(decl_item->get_gnu_attribute_modifierVector());
     }
     else {
       // this variable would already be defined in SgFunctionParameterList
@@ -1920,8 +1940,18 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     ret->append_variable(name,name->get_initializer());
     def->set_parent(ret);
   }
-
-  if(ret==0) {
+  if(ret!=NULL){
+    SgInitializedName* decl_item = ret->get_decl_item(name->get_name());
+    if(decl_item!=NULL){
+      /* some attributes of SgInitializedName must be copied excplititly */
+      decl_item->set_gnu_attribute_alignment(name->get_gnu_attribute_alignment());
+      decl_item->set_hasArrayTypeWithEmptyBracketSyntax(name->get_hasArrayTypeWithEmptyBracketSyntax());
+      decl_item->set_prev_decl_item(name->get_prev_decl_item());
+      decl_item->get_storageModifier().set_modifier(name->get_storageModifier().get_modifier());
+      decl_item->set_gnu_attribute_modifierVector(name->get_gnu_attribute_modifierVector());
+    }
+  }
+  else{
     XEV_DEBUG_INFO(node);XEV_ABORT();
   }
   ret->set_parent(astParent);
@@ -1992,11 +2022,43 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       }
     }
   }
+  int mod=0;
+  string str;
+  if(XmlGetAttributeValue(node,"gnu_visibility",&mod)){
+    ret->set_gnu_extension_visability
+      ((SgDeclarationStatement::gnu_extension_visability_attribute_enum)mod);
+  }
+  if(XmlGetAttributeValue(node,"gnu_declaration",&mod)){
+    ret->set_gnu_extension_declaration_attribute
+      ((SgVariableDeclaration::gnu_extension_declaration_attributes_enum)mod);
+  }
+  if(XmlGetAttributeValue(node,"gnu_section",&str)){
+    ret->set_gnu_extension_section(str);
+  }
+
+  if(XmlGetAttributeValue(node,"gnu_alias",&str)){
+    ret->set_gnu_extension_alias(str);
+  }
   return ret;
 }
 /** XML attribute writer of SgVariableDeclaration */
 void XevSageVisitor::attribSgVariableDeclaration(SgNode* node)
 {
+  SgVariableDeclaration* n = isSgVariableDeclaration(node);
+  if(n){
+    if(n->get_gnu_extension_visability()
+       !=  (SgDeclarationStatement::e_gnu_attribute_visability_unspecified))
+      sstr() << " gnu_visibility=\"" << n->get_gnu_extension_visability() << "\" ";
+    if(n->get_gnu_extension_declaration_attribute()
+       !=  (SgVariableDeclaration::e_gnu_attribute_unspecified))
+      sstr() << " gnu_declaration=\"" << n->get_gnu_extension_declaration_attribute() << "\" ";
+
+    if(n->get_gnu_extension_section().size()>0)
+      sstr() << " gnu_section=\"" << n->get_gnu_extension_section() << "\" ";
+    if(n->get_gnu_extension_alias().size()>0)
+      sstr() << " gnu_alias=\"" << n->get_gnu_extension_alias() << "\" ";
+
+  }
   attribSgDeclarationStatement(sstr(),node);
 }
 //INODE_DECL_DEFAULT(VariableDeclaration);

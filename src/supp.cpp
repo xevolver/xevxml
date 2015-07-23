@@ -625,6 +625,7 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
     }
     ret->set_prev_decl_item(ini);
   }
+
   if(XmlGetAttributeValue(node,"empty_bracket",&empty)){
     ret->set_hasArrayTypeWithEmptyBracketSyntax(empty);
     // the above function does not work as expected.

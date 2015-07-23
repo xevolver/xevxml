@@ -337,6 +337,12 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     decl->set_linkage(link);
   }
 
+  mod = SgDeclarationModifier::e_default_visibility;
+  if(XmlGetAttributeValue(node,"visibility",&mod)){
+    m.set_gnu_attribute_visability
+      ((SgDeclarationModifier::gnu_declaration_visability_enum) mod);
+  }
+
   SgFunctionDeclaration* fdecl = isSgFunctionDeclaration(decl);
   if(fdecl==NULL)return;
 
