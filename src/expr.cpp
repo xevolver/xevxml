@@ -465,7 +465,9 @@ void XevSageVisitor::inodeSgCompoundLiteralExp(SgNode* node)
 
   if(n){
     SgVariableSymbol* vsym = n->get_symbol();
+    g_withinCompoundLiteral = true;
     this->visit(vsym->get_declaration()->get_initializer());
+    g_withinCompoundLiteral = false;
   }
   return;
 }

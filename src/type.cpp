@@ -41,6 +41,8 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
+bool g_withinCompoundLiteral=false;
+
 #if 0
 SgType*
 XevXmlVisitor::buildType(xe::DOMNode* node, SgExpression* ex, SgNode* astParent)
@@ -465,12 +467,10 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   //xe::DOMNode*          nameatt=0;
   string                name,val;
   int                   typ=0;
-  int                   atn=0;
   int                   unn=0;
   SgClassDeclaration*    dec = 0;
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"type",&typ);
-  XmlGetAttributeValue(node,"auto",&atn);
   XmlGetAttributeValue(node,"unnamed",&unn);
 
   /*
@@ -504,32 +504,31 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     csym = new SgClassSymbol(dec);
     scope->insert_symbol(name,csym);
 #endif
-    if(atn){
-      SgClassDefinition* cdef = 0;
-      SUBTREE_VISIT_BEGIN(node,astchild,dec)
-        {
-          if(cdef==0)
-            cdef = isSgClassDefinition(astchild);
-        }
-      SUBTREE_VISIT_END();
-      if(cdef){
-        dec->set_definition(cdef);
-        dec->set_definingDeclaration(dec);
-        dec->set_isAutonomousDeclaration(false);
-        dec->unsetForward();
+    // needed for a class type in a compound literal to write its definition
+    dec->set_isAutonomousDeclaration(false);
+  }
+
+  SgClassDefinition* cdef = 0;
+  if(isSgClassDeclaration(dec->get_definingDeclaration())!=NULL){
+    cdef = isSgClassDeclaration(dec->get_definingDeclaration())->get_definition();
+  }
+  if(cdef==NULL){
+    SUBTREE_VISIT_BEGIN(node,astchild,dec)
+      {
+        if(cdef==0)
+          cdef = isSgClassDefinition(astchild);
       }
+    SUBTREE_VISIT_END();
+    if(cdef){
+      dec->set_definition(cdef);
+      dec->set_definingDeclaration(dec);
+      dec->unsetForward();
     }
   }
   XEV_ASSERT(dec!=NULL);
   ret = new SgClassType( dec );
   ret->set_parent(astParent);
-  ret->set_autonomous_declaration(atn);
-  if(atn && dec && csym==0) {
-    SgClassDeclaration* defdecl
-      = isSgClassDeclaration(dec->get_definingDeclaration());
-    if(defdecl)
-      defdecl->set_isAutonomousDeclaration(false);
-  }
+
   return ret;
 }
 /** XML attribute writer of SgClassType */
@@ -541,8 +540,6 @@ void XevSageVisitor::attribSgClassType(SgNode* node)
 
   sstr() << " name=" << n->get_name() << " ";
   sstr() << " type=\"" << cd->get_class_type() << "\" ";
-  if(n->get_autonomous_declaration())
-    sstr() << " auto=\"" << n->get_autonomous_declaration() << "\" ";
   if(cd->get_isUnNamed())
     sstr() << " unnamed=\"" << cd->get_isUnNamed() << "\" ";
 }
@@ -551,22 +548,27 @@ void XevSageVisitor::inodeSgClassType(SgNode* node)
 {
 
   SgClassType* n =  isSgClassType(node);
-  /* if this class is inside compound literal exp, the definition is needed */
-  if(n && n->get_autonomous_declaration()){
-    SgClassDeclaration* decl = isSgClassDeclaration(n->get_declaration());
-    if(decl!=NULL){
-      decl = isSgClassDeclaration(decl->get_definingDeclaration());
-      if(decl!=NULL&&decl->get_definition()!=NULL){
-        if(decl->get_isAutonomousDeclaration()==false){
-	  // set this flag to avoid cyclic traversal
-	  // I don't know if this is a right way but it works
-	  decl->set_isAutonomousDeclaration(true);
-          si::setSourcePositionAsTransformation(decl->get_definition());
-          //cerr << decl->get_definition()->unparseToString() <<endl;
-          this->visit(decl->get_definition());
-	  // unset the flag
-	  decl->set_isAutonomousDeclaration(false);
-        }
+  if(n==NULL) return;
+
+  SgClassDeclaration* decl = isSgClassDeclaration(n->get_declaration());
+  if(decl!=NULL){
+    decl = isSgClassDeclaration(decl->get_definingDeclaration());
+    if(decl!=NULL&&decl->get_definition()!=NULL){
+      /* the definition is needed if this type is in a compound literal */
+      if(g_withinCompoundLiteral == true){
+        // unset this flag to avoid cyclic traversal
+        // I don't know if this is a right way but it works
+        g_withinCompoundLiteral = false;
+        si::setSourcePositionAsTransformation(decl->get_definition());
+        //cerr << decl->get_definition()->unparseToString() <<endl;
+        this->visit(decl->get_definition());
+        // set the flag
+        g_withinCompoundLiteral = true;
+      }
+      else if(decl->get_isUnNamed()==true){
+        /* test2012_77.c */
+        /* I assume an unnamed class does not appear multiple times */
+        this->visit(decl->get_definition());
       }
     }
   }

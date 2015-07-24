@@ -48,9 +48,9 @@ extern void attribSgStatement(std::ostream& str,SgNode* node);
 static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
 {
   attribSgStatement(istr,node);
-
   SgDeclarationStatement* decl = isSgDeclarationStatement(node);
   if(decl==NULL) return;
+
 
   SgDeclarationModifier& modifier = decl->get_declarationModifier();
   unsigned long mod = 0;
@@ -489,10 +489,12 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   string                name,val;
   int                   typ=0;
   bool                  unnamed = false;
+  int                   auton=1;
 
   XmlGetAttributeValue(node,"type",&typ);
   XmlGetAttributeValue(node,"name",&name);
   XmlGetAttributeValue(node,"unnamed",&unnamed);
+  XmlGetAttributeValue(node,"autonomous",&auton);
 
   SgClassSymbol* csym = si::lookupClassSymbolInParentScopes(name);
   if(csym==NULL) {
@@ -530,6 +532,7 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
   ret->set_type(SgClassType::createType(decl));
 
   ret->set_isUnNamed(unnamed);
+  ret->set_isAutonomousDeclaration(auton);
 
   if(decl->get_definingDeclaration()){
     SgClassDeclaration* cdecl
@@ -553,10 +556,6 @@ XevXmlVisitor::visitSgClassDeclaration(xercesc::DOMNode* node, SgNode* astParent
     // defining declaration
     ret->set_definition( exp );
     ret->set_definingDeclaration(ret);
-    if(ret->get_isUnNamed()==false){
-      // avoid printing the full definition at compound literal
-      ret->set_isAutonomousDeclaration(true);
-    }
     decl->set_definingDeclaration(ret);
     exp->set_declaration(ret);
     exp->set_parent(ret);
@@ -576,6 +575,8 @@ void XevSageVisitor::attribSgClassDeclaration(SgNode* node)
   SgClassDeclaration*      n = isSgClassDeclaration(node);
 
   if(n) {
+    if(n->get_isAutonomousDeclaration()==false)
+      sstr() << " autonomous=\"0\" ";
     if( n->get_isUnNamed())
       sstr() << " unnamed=\"1\" ";
     sstr() << " name=" << n->get_name() << " ";
@@ -2038,6 +2039,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   int mod=0;
   string str;
+  int adecl=1;
+
   if(XmlGetAttributeValue(node,"gnu_visibility",&mod)){
     ret->set_gnu_extension_visability
       ((SgDeclarationStatement::gnu_extension_visability_attribute_enum)mod);

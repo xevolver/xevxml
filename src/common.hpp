@@ -101,4 +101,9 @@
 
 #define FUNCTION_BODY_VISIT_END()     }} cld_=cld_->getNextSibling();}}
 
+// flag to check if the current node is within a compound literal
+// - defined in type.cpp
+// - used in inodeSgClassType and inodeCompundLiteralExp
+extern bool g_withinCompoundLiteral;
+
 #endif /* ___COMMON_HPP___ */
