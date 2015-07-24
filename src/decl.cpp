@@ -96,6 +96,23 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
   }
 }
 
+static void copySgInitializedName(SgInitializedName* src, SgInitializedName* dst)
+{
+  if(src != NULL && dst !=NULL){
+    /* some attributes of SgInitializedName must be copied excplititly */
+    dst->set_gnu_attribute_alignment(src->get_gnu_attribute_alignment());
+    dst->set_hasArrayTypeWithEmptyBracketSyntax(src->get_hasArrayTypeWithEmptyBracketSyntax());
+    dst->set_prev_decl_item(src->get_prev_decl_item());
+    dst->get_storageModifier().set_modifier(src->get_storageModifier().get_modifier());
+    dst->set_gnu_attribute_modifierVector(src->get_gnu_attribute_modifierVector());
+
+    if(src->get_attachedPreprocessingInfoPtr()){
+      dst->set_attachedPreprocessingInfoPtr
+        (src->get_attachedPreprocessingInfoPtr());
+    }
+  }
+}
+
 #define INODE_DECL_DEFAULT(x)                           \
   /** XML internal node writer of Sg##x */              \
   void XevSageVisitor::inodeSg##x(SgNode* node)         \
@@ -1946,14 +1963,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   }
   if(ret!=NULL){
     SgInitializedName* decl_item = ret->get_decl_item(name->get_name());
-    if(decl_item!=NULL){
-      /* some attributes of SgInitializedName must be copied excplititly */
-      decl_item->set_gnu_attribute_alignment(name->get_gnu_attribute_alignment());
-      decl_item->set_hasArrayTypeWithEmptyBracketSyntax(name->get_hasArrayTypeWithEmptyBracketSyntax());
-      decl_item->set_prev_decl_item(name->get_prev_decl_item());
-      decl_item->get_storageModifier().set_modifier(name->get_storageModifier().get_modifier());
-      decl_item->set_gnu_attribute_modifierVector(name->get_gnu_attribute_modifierVector());
-    }
+    copySgInitializedName(name,decl_item);
   }
   else{
     XEV_DEBUG_INFO(node);XEV_ABORT();

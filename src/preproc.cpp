@@ -170,13 +170,16 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
   }
   //std::string pos;
   //std::string typ;
-  int pval=0;
-  int tval=0;
+  int tval = 0;
+  int pval = 0;
   SgLocatedNode* loc = isSgLocatedNode(astParent);
-
 
   if(XmlGetAttributeValue(node,"pos", &pval)
      && XmlGetAttributeValue(node,"type",&tval)){
+    PreprocessingInfo::DirectiveType dtype
+      = (PreprocessingInfo::DirectiveType)tval;
+    PreprocessingInfo::RelativePositionType pos
+      =(PreprocessingInfo::RelativePositionType)pval;
     std::string content = "";
     if(node->getFirstChild()){
       buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
@@ -187,11 +190,11 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
     //cerr << "-----------------------------------------\n";
     //cerr << content;
     //cerr << "-----------------------------------------\n";
-    //cerr << pval << ":" << astParent->class_name() << endl;
+    //cerr << pos << ":" << astParent->class_name() << endl;
 
-    PreprocessingInfo* info = new PreprocessingInfo((PreprocessingInfo::DirectiveType)tval,
-                                                    content,"transformation-generated", 0, 0, 0,
-                                                    (PreprocessingInfo::RelativePositionType)pval);
+    PreprocessingInfo* info
+      = new PreprocessingInfo(dtype,content,"transformation",0,0,0,pos);
+    info->set_file_info(loc->get_file_info());
     loc->addToAttachedPreprocessingInfo(info);
     //PreprocessingInfo* info
     //= si::attachArbitraryText(loc,content,
