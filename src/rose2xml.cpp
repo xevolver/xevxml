@@ -52,78 +52,6 @@ namespace XevXml {
   }
 }
 
-/*
- * creates a SgPramgaDeclaration node if a pragma prefix (!$) is found in the Fortran comment.
- */
-static void
-writeFortranPragma(std::ostream& sstr_, SgNode* node,
-                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before)
-{
-  if( SageInterface::is_Fortran_language()==false) return;
-
-  SgLocatedNode* loc =isSgLocatedNode(node);
-  if(loc==NULL) return;
-
-  AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
-  if(info==NULL) return;
-
-  std::string str;
-  int idx;
-
-  if(info){
-    for(size_t i(0);i<(*info).size();i++) {
-      if((*info)[i]->getRelativePosition()==pos){
-        str = (*info)[i]->getString();
-        std::transform(str.begin(),str.end(),str.begin(),::tolower);
-        idx = str.find( XEV_PRAGMA_PREFIX );
-        if( idx >= 0 ) {
-          str = (*info)[i]->getString(); // read the string again
-          sstr_ << "<SgPragmaDeclaration >\n";
-          sstr_ << "  "; // indent
-          sstr_ << "<SgPragma pragma=\"";
-          // assuming Fortran directives start with !$
-          sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
-          //sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\n";
-          sstr_ << "</SgPragmaDeclaration >\n";
-        }
-      }
-    }
-  }
-}
-
-/*
- * writes Preprocessing Info of a SgNode as a text element in XML.
- */
-static AttachedPreprocessingInfoType* getPreprocessingInfo(SgNode* n)
-{
-  SgLocatedNode* loc = isSgLocatedNode(n);
-  if(loc)
-    return loc->getAttachedPreprocessingInfo();
-  return NULL;
-}
-
-static AttachedPreprocessingInfoType*
-writePreprocessingInfo(std::ostream& sstr_,SgNode* n)
-{
-  AttachedPreprocessingInfoType* info=getPreprocessingInfo(n);
-  std::string str;
-
-  if(info){
-    for(size_t i(0);i<(*info).size();i++) {
-      str = (*info)[i]->getString();
-      str = XmlStr2Entity( str );
-      sstr_ << "<PreprocessingInfo pos=\"";
-      sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
-      sstr_ << " type=\"";
-      sstr_ << (*info)[i]->getTypeOfDirective() << "\">";
-      sstr_ << str;
-      //sstr_ << "\n";
-      sstr_ << "</PreprocessingInfo>\n";
-    }
-  }
-
-  return info;
-}
 
 bool XevSageVisitor::write(std::ostream& str, SgProject** prj){
   ostr_ = &str;
@@ -156,6 +84,15 @@ bool XevSageVisitor::write(std::ostream& str, SgProject** prj){
   return true; // success
 }
 
+static bool hasPreprocessingInfo(SgNode* node)
+{
+  SgLocatedNode* loc = isSgLocatedNode(node);
+  if(loc==NULL) return false;
+  AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
+
+  return ( (info!=NULL && info->size()>0) ? true:false);
+}
+
 bool XevSageVisitor::hasInode(SgNode* node)
 {
   SgType* t = isSgType(node);
@@ -171,7 +108,7 @@ bool XevSageVisitor::hasInode(SgNode* node)
     return true;
   if( t==NULL && node->get_numberOfTraversalSuccessors()>0)
     return true;
-  if( getPreprocessingInfo(node) )
+  if( hasPreprocessingInfo(node) )
     return true;
   if( e && e->get_originalExpressionTree()){
     if(SageInterface::is_Fortran_language()==false)

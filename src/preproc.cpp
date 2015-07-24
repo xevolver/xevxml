@@ -32,6 +32,7 @@
  */
 #include "common.hpp"
 #include "xml2rose.hpp"
+#include "rose2xml.hpp"
 
 namespace sb=SageBuilder;
 namespace si=SageInterface;
@@ -39,6 +40,107 @@ namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
+
+/* this function is borrowed from unparseCxx_expressions.C in ROSE */
+static bool removeIncludeDirectives(SgLocatedNode* loc)
+{
+  bool ret = false;
+  AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
+  AttachedPreprocessingInfoType dirs;
+  AttachedPreprocessingInfoType::iterator i;
+  if(info==NULL) return ret;
+  PreprocessingInfo::DirectiveType removedDirectiveType
+    = PreprocessingInfo::CpreprocessorIncludeDeclaration;
+  /* find a directive contained in a construct */
+  for(i=info->begin();i!=info->end();++i){
+    if(loc->get_startOfConstruct()->isSameFile((*i)->get_file_info())
+       && loc->get_endOfConstruct()->isSameFile((*i)->get_file_info())
+       && *(loc->get_startOfConstruct()) <= *((*i)->get_file_info())
+       && *(loc->get_endOfConstruct()) >= *((*i)->get_file_info())){
+      if((*i)->getTypeOfDirective()==removedDirectiveType) {
+        dirs.push_back(*i);
+      }
+    }
+  }
+
+  /* remove directories */
+  for(i=dirs.begin();i!=dirs.end();++i){
+    info->erase(find(info->begin(),info->end(),*i));
+  }
+  return ret;
+}
+
+namespace XevXml {
+/*
+ * find a prefix (!$) in the Fortran comment and create SgPragmaDeclaration.
+ */
+void
+writeFortranPragma(std::ostream& sstr_, SgNode* node,
+                   PreprocessingInfo::RelativePositionType pos)
+{
+  if( SageInterface::is_Fortran_language()==false) return;
+
+  SgLocatedNode* loc =isSgLocatedNode(node);
+  if(loc==NULL) return;
+
+  AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
+  if(info==NULL) return;
+
+  std::string str;
+  int idx;
+
+  if(info){
+    for(size_t i(0);i<(*info).size();i++) {
+      if((*info)[i]->getRelativePosition()==pos){
+        str = (*info)[i]->getString();
+        std::transform(str.begin(),str.end(),str.begin(),::tolower);
+        idx = str.find( XEV_PRAGMA_PREFIX );
+        if( idx >= 0 ) {
+          str = (*info)[i]->getString(); // read the string again
+          sstr_ << "<SgPragmaDeclaration >\n";
+          sstr_ << "  "; // indent
+          sstr_ << "<SgPragma pragma=\"";
+          // assuming Fortran directives start with !$
+          sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
+          //sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\n";
+          sstr_ << "</SgPragmaDeclaration >\n";
+        }
+      }
+    }
+  }
+}
+
+/*
+ * writes Preprocessing Info of a SgNode as a text element in XML.
+ */
+AttachedPreprocessingInfoType*
+writePreprocessingInfo(std::ostream& sstr_,SgNode* n)
+{
+
+  SgLocatedNode* loc = isSgLocatedNode(n);
+  if(loc==NULL) return NULL;
+  if(removeIncludeDirectives(loc)){
+    XEV_WARN("Include directives contained within a construct are removed.");
+  }
+
+  AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
+  if(info==NULL) return NULL;
+
+  std::string str;
+  for(size_t i(0);i<(*info).size();i++) {
+    str = (*info)[i]->getString();
+    str = XmlStr2Entity( str );
+    sstr_ << "<PreprocessingInfo pos=\"";
+    sstr_ << (*info)[i]->getRelativePosition() <<"\" ";
+    sstr_ << " type=\"";
+    sstr_ << (*info)[i]->getTypeOfDirective() << "\">";
+    sstr_ << str;
+    //sstr_ << "\n";
+      sstr_ << "</PreprocessingInfo>\n";
+  }
+
+  return info;
+}
 
 void
 XevXmlVisitor::checkPreprocInfo(xe::DOMNode* node, SgNode* astNode)
@@ -104,3 +206,5 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
 
   return 0;
 }
+
+} //namespace XevXml
