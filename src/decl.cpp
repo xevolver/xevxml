@@ -51,20 +51,21 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
   SgDeclarationStatement* decl = isSgDeclarationStatement(node);
   if(decl==NULL) return;
 
-
   SgDeclarationModifier& modifier = decl->get_declarationModifier();
   unsigned long mod = 0;
   SgBitVector vec = modifier.get_modifierVector();
   for(size_t i(0);i<vec.size();i++){
     mod |= (((unsigned int)vec[i]) << i );
   }
-  istr << " declaration_modifier=\"" << mod << "\" ";
+  if(mod>1)
+    istr << " declaration_modifier=\"" << mod << "\" ";
   mod = 0;
   vec = modifier.get_typeModifier().get_modifierVector();
   for(size_t i(0);i<vec.size();i++){
     mod |= (((unsigned int)vec[i]) << i );
   }
-  istr << " type_modifier=\"" << mod << "\" ";
+  if(mod>2) // 1:error, 2:default
+    istr << " type_modifier=\"" << mod << "\" ";
 
   if(modifier.get_typeModifier().get_constVolatileModifier().get_modifier()
      != SgConstVolatileModifier::e_default)
@@ -1060,10 +1061,13 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
       sstr() << " definition=\"1\" ";
     }
     SgStorageModifier m = (n->get_declarationModifier()).get_storageModifier();
-    sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
-    if(n->get_oldStyleDefinition())
-      sstr() << " old=\"1\" ";
-
+    if(si::is_Fortran_language()){
+      sstr() << " end_name=\"" << n->get_named_in_end_statement() << "\" ";
+    }
+    else {
+      if(n->get_oldStyleDefinition())
+	sstr() << " old=\"1\" ";
+    }
     SgFunctionModifier& f = n->get_functionModifier();
     SgBitVector bit = f.get_modifierVector();
     unsigned long fmod = 0;
@@ -1081,12 +1085,12 @@ void XevSageVisitor::attribSgFunctionDeclaration(SgNode* node)
     if(n->get_prototypeIsWithoutParameters() ){
       sstr() << " no_params=\"1\"";
     }
+    /* GNU extensions */
     if(n->get_gnu_regparm_attribute()>0 ){
       sstr() << " regparm=\""
              << n->get_gnu_regparm_attribute()
              << "\"";
     }
-    /* GNU extensions */
     if(n->get_gnu_extension_visability()
        !=  (SgDeclarationStatement::e_gnu_attribute_visability_unspecified))
       sstr() << " gnu_visibility=\"" << n->get_gnu_extension_visability() << "\" ";

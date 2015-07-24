@@ -308,6 +308,8 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     }
     m.get_typeModifier().set_modifierVector(vec);
   }
+  else
+    m.get_typeModifier().setDefault();
 
   mod=SgConstVolatileModifier::e_default;
   XmlGetAttributeValue(node,"cv_modifier",&mod);
