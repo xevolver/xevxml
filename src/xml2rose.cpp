@@ -116,6 +116,7 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
 
   if(n==0) return;
   //if(isSgCastExp(n) == 0)
+  if(isSgSourceFile(n) == 0)
     si::setSourcePositionAsTransformation(n);
   if(XmlGetAttributeValue(node, "samefile", &same) && same==0 ) {
     n->get_file_info()->set_file_id(Sg_File_Info::COMPILER_GENERATED_FILE_ID);

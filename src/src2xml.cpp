@@ -40,6 +40,11 @@
 
 using namespace std;
 
+#ifdef XEV_COMPILE4XMLREBUILD
+extern char* convertXml2TmpFile(void);
+extern bool  isFilenameGiven(const vector<string>& args);
+#endif
+
 static  struct option long_opts[]={
   {"check_fortran_pragma",  1, NULL, 'F'},
   {"help",                  0, NULL, 'h'},
@@ -91,10 +96,21 @@ int main(int argc, char** argv)
   //xevxml::Ast2XmlOpt opt;
   vector<string> args;
 
+  XevXml::XmlInitialize();
+
   ProcessOpts(argc,argv);
   for(int id(0);id<argc;++id)
     args.push_back( string(argv[id]) );
   args.push_back( string("-rose:skip_syntax_check")); // some Fortran codes need this
+
+#ifdef XEV_COMPILE4XMLREBUILD
+  if(isFilenameGiven(args)==true){
+    XEV_WARN("xmlrebuild read an XML file from standard input");
+    XEV_ABORT();
+  }
+  char* tmpl = convertXml2TmpFile();
+  args.push_back( string(tmpl)); // name of the temporal file created above
+#endif
 
   fd = dup(fileno(stdout));
   dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr
@@ -106,7 +122,7 @@ int main(int argc, char** argv)
     RoseHPCT::attachMetrics (opt.profiles,
                              sageProject, sageProject->get_verbose () > 0);
 #endif
-  XevXml::XmlInitialize();
+
   XevXml::XevXmlOption opt;
   opt.getFortranPragmaFlag() = fortran_pragma;
   //opt.getSkipCompilerGeneratedFlag() = true;

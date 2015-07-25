@@ -455,6 +455,7 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   xe::DOMNode* child=node->getFirstChild();
   int langid;
   int fmtid;
+  string fn;
 
   Sg_File_Info* info = DEFAULT_FILE_INFO;
   _file->set_file_info(info);
@@ -464,6 +465,10 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
     XEV_WARN("Language attribute is missing.");
   if(XmlGetAttributeValue(node,"fmt",&fmtid)==false)
     XEV_WARN("Format attribute is missing.");
+  if(XmlGetAttributeValue(node,"file",&fn)){
+    _file->set_sourceFileNameWithoutPath(fn);
+    //cerr << _file->get_sourceFileNameWithoutPath() << endl;
+  }
 
   // 0:error, 1: unknown, 2:C, 3:C++, 4:Fortran
   // C++ is not supported for now. trying to output as a C program
