@@ -90,7 +90,7 @@ void removeTmpFile(int, void* name)
 
 char* convertXml2TmpFile(void)
 {
-  int          p_id   = 0;
+  int          pid    = 0;
   int          status = 0;
   char*        tmpl   = NULL;
   size_t       fnlen  = 0;
@@ -102,8 +102,7 @@ char* convertXml2TmpFile(void)
   doc = parser.getDocument();
 
   if(doc==NULL){
-    XEV_WARN("XML parsing failed");
-    XEV_ABORT();
+    XEV_FATAL("XML parse failed");
   }
 
   // decide the name of a temporal file
@@ -111,9 +110,9 @@ char* convertXml2TmpFile(void)
   if(fn!=NULL)
     tmpfn = fn;
   else {
-    XEV_WARN("Cannot find the filename");
-    XEV_ABORT();
+    XEV_FATAL("cannot find a filename in the XML document");
   }
+
   fnlen = tmpfn.size();
   tmpfn = "/tmp/.XXXXXX-"+tmpfn;
   tmpl = new char[tmpfn.size()+1];
@@ -122,41 +121,41 @@ char* convertXml2TmpFile(void)
   // create a temporal file
   int fd = mkstemps(tmpl,fnlen+1); // '-' + (the filename length)
   if(fd<0) {
-    XEV_WARN("Cannot create a temporal file: " << tmpl << " (" << strerror(errno) << ")");
-    XEV_ABORT();
+    XEV_FATAL("cannot create a temporal file: " << tmpl << " (" << strerror(errno) << ")");
   }
-  else
-    std::cerr << tmpl << " is created" << std::endl;
+  else{
+    XEV_INFO(tmpl << " is created");
+  }
 
-  if ((p_id = fork()) == 0) {
+  if ((pid = fork()) == 0) {
     XevXmlVisitor visitor;
     SgProject*    prj=NULL;
 
     visitor.visit(doc,0);
     prj = visitor.getSgProject();
     if(prj==NULL){
-      XEV_WARN("AST rebuilding failed");
-      XEV_ABORT();
+      XEV_FATAL("XML-to-AST conversion failed");
     }
 
     // unparse the code and write it to the temporal file
     std::ofstream os(tmpl,ios::out);
     if(!os){
-      XEV_WARN("Cannot open a temporal file: " << tmpl);
-      XEV_ABORT();
+      XEV_FATAL("cannot open a temporal file: " << tmpl);
     }
     if(XevXml::XevUnparseToStream(os,&prj)==false){
-      XEV_WARN("Cannot unparse the AST");
-      XEV_ABORT();
+      XEV_FATAL("AST unparse failed");
     }
+    else {
+      XEV_INFO("AST unparsed successfully");
+    }
+    exit(0);
   }
   else {
-    if (p_id != -1) {
+    if (pid != -1) {
       wait(&status);
     }
     else {
-      XEV_WARN("fork failed");
-      XEV_ABORT();
+      XEV_FATAL("fork failed");
     }
   }
 
@@ -172,8 +171,7 @@ char* convertXml2TmpFile(void)
     }
   }
   else{
-    XEV_WARN("Cannot read a temporal file: " << tmpl);
-    XEV_ABORT();
+    XEV_FATAL("cannot read a temporal file: " << tmpl);
   }
 #endif
 
@@ -181,6 +179,13 @@ char* convertXml2TmpFile(void)
 }
 
 bool isFilenameGiven(const vector<string>& args){
-  /* not implemented yet*/
+  for(size_t i(0);i<args.size();i++){
+    /* wild guess */
+    if(i>0 && args[i][0]!='-'){
+      XEV_INFO( "\"" << args[i] << "\" may not be a command line option");
+      return true;
+    }
+  }
+
   return false;
 }

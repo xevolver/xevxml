@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 
   XevXml::XevInitialize();
   if( XevXml::XevConvertXmlToRose(cin,&prj) == false ){
-    XEV_ABORT();
+    XEV_FATAL("XML-to-AST conversion failed");
   }
   else {
     /* prtine all symbol tables  for debugging */
@@ -108,11 +108,13 @@ int main(int argc, char** argv)
     else {
       fstream os(argv[1],ios::out);
       if (!os) {
-        printf ("Error detected in opening file %s for output \n",argv[1]);
-        return -1;
+        XEV_FATAL("cannot open file \"" << argv[1] << "\"");
       }
       r = XevXml::XevUnparseToStream(os,&prj);
       os.close();
+    }
+    if(r==false) {
+      XEV_FATAL("AST unparse failed");
     }
   }
   XevXml::XevFinalize();

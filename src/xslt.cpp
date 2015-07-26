@@ -49,6 +49,8 @@
 #include <vector>
 #include <getopt.h>
 
+#include "xmlparser.hpp"
+
 using namespace std;
 namespace xe=xercesc;
 namespace xa=xalanc;
@@ -201,25 +203,21 @@ void XsltTransform(stringstream& istr, stringstream& ostr, string xsltfn, string
     //xalanc::XSLTInputSource xmlIn(str);
     xa::XalanTransformer transformer;
     transformer.setEntityResolver(new MyEntityResolver(xsltfn,libdirs));
+    transformer.setErrorHandler(new XevXml::XevErrorHandler());
     if( 0 != transformer.transform(istr,xsltfn.c_str(),ostr)){
-      XEV_WARN( transformer.getLastError());
-      XEV_ABORT();
+      XEV_FATAL( "transformation failed: " << transformer.getLastError());
     }
   }
   catch(xe::XMLException& e){
     char* message = xe::XMLString::transcode( e.getMessage() );
-    XEV_WARN( message );
+    XEV_FATAL( "transformation failed: " << message );
     xe::XMLString::release( &message );
-    XEV_ABORT();
   }
   catch(std::exception& e){
-    XEV_WARN( "XalanTransformer::transform() failed" );
-    XEV_WARN( e.what() );
-    XEV_ABORT();
+    XEV_FATAL( "transformation failed: " << e.what() );
   }
   catch(...){
-    XEV_WARN( "XalanTransformer::transform() failed due to an unknown error" );
-    XEV_ABORT();
+    XEV_FATAL( "transformation failed: unknown error" );
   }
 }
 

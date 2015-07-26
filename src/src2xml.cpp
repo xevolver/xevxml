@@ -41,6 +41,9 @@
 using namespace std;
 
 #ifdef XEV_COMPILE4XMLREBUILD
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
 extern char* convertXml2TmpFile(void);
 extern bool  isFilenameGiven(const vector<string>& args);
 #endif
@@ -90,7 +93,7 @@ void ProcessOpts(int argc,char** argv)
 
 int main(int argc, char** argv)
 {
-  int             fd=0;
+  int             fd  = 0;
   stringstream    xmlString1;
   SgProject*      sageProject=0;
   //xevxml::Ast2XmlOpt opt;
@@ -104,15 +107,18 @@ int main(int argc, char** argv)
   args.push_back( string("-rose:skip_syntax_check")); // some Fortran codes need this
 
 #ifdef XEV_COMPILE4XMLREBUILD
+  int             status=0;
+  int             pid = 0;
+
   if(isFilenameGiven(args)==true){
     XEV_WARN("xmlrebuild read an XML document from standard input");
-    XEV_WARN("Don't write a filename as the commandline argument");
-    XEV_ABORT();
+    XEV_WARN("don't write a filename as the commandline argument");
   }
   char* tmpl = convertXml2TmpFile();
   args.push_back( string(tmpl)); // name of the temporal file created above
-#endif
 
+  if( (pid=fork() ) == 0 ) {
+#endif
   fd = dup(fileno(stdout));
   dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr
   sageProject = frontend(args); // build an ROSE AST from a code
@@ -131,8 +137,29 @@ int main(int argc, char** argv)
   fflush(stdout);
   dup2(fd,1); // printf messages are written to stdout
   clearerr(stdout);
-  XevXml::XevConvertRoseToXml(cout,&sageProject,&opt);
-
+  if (XevXml::XevConvertRoseToXml(cout,&sageProject,&opt) == false){
+    XEV_WARN( "source-to-XML conversion failed");
+    exit(1);
+  }
   XevXml::XmlFinalize();
+  exit(0);
+#ifdef XEV_COMPILE4XMLREBUILD
+  }
+  else {
+    if (pid != -1) {
+      wait(&status);
+
+    }
+    else {
+      XEV_FATAL("fork failed");
+    }
+    if(status != 0 ){
+      XEV_WARN( "XML rebuild failed");
+      return status;
+    }
+  }
+  unlink(tmpl);
+#endif
+
   return 0;
 }

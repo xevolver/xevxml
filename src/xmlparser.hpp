@@ -38,14 +38,44 @@
 #include <xercesc/dom/DOMUserDataHandler.hpp>
 #include <xercesc/internal/XMLScanner.hpp>
 #include <xercesc/sax/ErrorHandler.hpp>
-
+#include <xercesc/sax/SAXParseException.hpp>
 
 namespace XevXml {
 
 typedef xercesc::DOMDocument XevXmlDocument;
 
+class XevErrorHandler : public xercesc::ErrorHandler {
+  void printMessage(const xercesc::SAXParseException& e){
+    char* buf = xercesc::XMLString::transcode(e.getMessage());
+    if(buf!=NULL)
+      std::cerr <<  buf << std::endl;
+    xercesc::XMLString::release(&buf);
+    std::cerr << "  LINE = " << e.getLineNumber()   << std::endl;
+    std::cerr << "  COL  = " << e.getColumnNumber() << std::endl;
+  }
+
+public:
+  XevErrorHandler(){}
+  ~XevErrorHandler(){}
+
+  void warning(const xercesc::SAXParseException& e){
+    std::cerr << "[WARN]: ";
+    this->printMessage(e);
+  }
+  void error(const xercesc::SAXParseException& e){
+    std::cerr << "[WARN]: ";
+    this->printMessage(e);
+  }
+  void fatalError(const xercesc::SAXParseException& e){
+    std::cerr << "[FATAL]: ";
+    this->printMessage(e);
+    throw e;
+  }
+  void resetErrors(){}
+};
+
 class XevXmlParser : public xercesc::XercesDOMParser {
-  class XevErrorHandler;
+
   class XevDataHandler;
   friend class XevDataHandler;
 

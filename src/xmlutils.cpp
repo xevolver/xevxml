@@ -43,7 +43,7 @@
 #include <xercesc/framework/MemBufFormatTarget.hpp>
 
 #include <xercesc/framework/MemBufInputSource.hpp>
-#include <xercesc/sax/SAXParseException.hpp>
+
 
 namespace xe=xercesc;
 namespace xa=xalanc;
@@ -181,35 +181,6 @@ string XmlGetNodePosition(xercesc::DOMNode* node)
   return pos.str() + path;
 }
 
-class XevXmlParser::XevErrorHandler : public xe::ErrorHandler {
-  void printMessage(const xe::SAXParseException& e){
-    char* buf = xercesc::XMLString::transcode(e.getMessage());
-    if(buf!=NULL)
-      cerr <<  buf << endl;
-    xercesc::XMLString::release(&buf);
-    cerr << "  LINE = " << e.getLineNumber()   << std::endl;
-    cerr << "  COL  = " << e.getColumnNumber() << std::endl;
-  }
-
-public:
-  XevErrorHandler(){}
-  ~XevErrorHandler(){}
-
-  void warning(const xe::SAXParseException& e){
-    cerr << "[WARN]: ";
-    this->printMessage(e);
-  }
-  void error(const xe::SAXParseException& e){
-    cerr << "[WARN]: ";
-    this->printMessage(e);
-  }
-  void fatalError(const xe::SAXParseException& e){
-    cerr << "[FATAL]: ";
-    this->printMessage(e);
-    throw e;
-  }
-  void resetErrors(){}
-};
 
 static XMLCh* attKey = 0;
 

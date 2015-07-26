@@ -48,7 +48,6 @@
 #ifdef XEVXML_DEBUG
 #define XEV_ABORT()                      {	\
     std::cerr << "[ABORT] " << std::endl;	\
-    XEV_PRINT_DEBUG_INFO();			\
     abort();					\
   }
 #else
@@ -61,6 +60,12 @@
 #define XEV_WARN(x)                      {                              \
     std::cerr << "[WARN] " << x << std::endl;				\
     XEV_PRINT_DEBUG_INFO();						\
+  }
+
+#define XEV_FATAL(x)                      {				\
+    std::cerr << "[FATAL] " << x << std::endl;				\
+    XEV_PRINT_DEBUG_INFO();						\
+    XEV_ABORT();							\
   }
 
 #define XEV_INFO(x)                      {                              \
