@@ -105,7 +105,8 @@ int main(int argc, char** argv)
 
 #ifdef XEV_COMPILE4XMLREBUILD
   if(isFilenameGiven(args)==true){
-    XEV_WARN("xmlrebuild read an XML file from standard input");
+    XEV_WARN("xmlrebuild read an XML document from standard input");
+    XEV_WARN("Don't write a filename as the commandline argument");
     XEV_ABORT();
   }
   char* tmpl = convertXml2TmpFile();

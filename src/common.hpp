@@ -1,7 +1,7 @@
 /**
  * \license This project is released under the BSD 2-clause license
  *
- * Copyright (C) 2010-2013 Hiroyuki TAKIZAWA. All rights reserved.
+ * Copyright (C) 2010-2015 Hiroyuki TAKIZAWA. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,37 +31,54 @@
 #ifndef ___COMMON_HPP___
 #define ___COMMON_HPP___
 #include <xevxml.hpp>
+#include <iostream>
 
 //#define XEVXML_DEBUG
 
 #ifdef XEVXML_DEBUG
-#define XEV_ABORT()                      {                      \
-    std::cerr << "ERROR @ " << __func__ << " :";                \
-    std::cerr << __FILE__ ;                                     \
-    std::cerr << "(" << __LINE__ << "): " << std::endl;         \
-    abort();                                                    \
+#define XEV_PRINT_DEBUG_INFO() {				\
+    std::cerr << "[DEBUG] " << __func__ << " :";		\
+    std::cerr << __FILE__ ;					\
+    std::cerr << "(" << __LINE__ << ") " << std::endl;		\
   }
 #else
-#define XEV_ABORT()                      {                      \
-    std::cerr << "ERROR @ " << __func__ << " :";                \
-    std::cerr << __FILE__ ;                                     \
-    std::cerr << "(" << __LINE__ << "): " << std::endl;         \
+#define XEV_PRINT_DEBUG_INFO() {}
+#endif
+
+#ifdef XEVXML_DEBUG
+#define XEV_ABORT()                      {	\
+    std::cerr << "[ABORT] " << std::endl;	\
+    XEV_PRINT_DEBUG_INFO();			\
+    abort();					\
+  }
+#else
+#define XEV_ABORT()                      {			\
+    std::cerr << "[ABORT] " << std::endl;			\
     std::exit(1);                                               \
   }
 #endif
 
 #define XEV_WARN(x)                      {                              \
-    std::cerr << "WARN @ " << __func__ << " :";                         \
-    std::cerr << __FILE__ ;                                             \
-    std::cerr << "(" << __LINE__ << "): "                               \
-              << x << std::endl;                                        \
+    std::cerr << "[WARN] " << x << std::endl;				\
+    XEV_PRINT_DEBUG_INFO();						\
   }
 
-#define XEV_ASSERT(x)            {if(!(x)) XEV_ABORT();}
+#define XEV_INFO(x)                      {                              \
+    std::cerr << "[INFO] " << x << std::endl;				\
+    XEV_PRINT_DEBUG_INFO();						\
+  }
 
-#define XEV_DEBUG_INFO(x) {                                     \
-    std::cerr << "XML Location Information:" << std::endl;      \
-    std::cerr << XevXml::XmlGetNodePosition(x) << std::endl;    \
+#define XEV_ASSERT(x)            {			\
+    if(!(x)) {						\
+      std::cerr << "[FATAL] assertion failed: ";	\
+      std::cerr << #x << std::endl;			\
+      XEV_ABORT();					\
+    }							\
+  }
+
+#define XEV_DEBUG_INFO(x) {						\
+    std::cerr << "[DEBUG] XML file location:" << std::endl;		\
+    std::cerr << XevXml::XmlGetNodePosition(x) << std::endl;		\
   }
 
 #define DEFAULT_FILE_INFO (Sg_File_Info::generateDefaultFileInfoForTransformationNode())

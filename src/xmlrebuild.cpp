@@ -33,6 +33,7 @@
 #include "common.hpp"
 #include "rose2xml.hpp"
 #include "xml2rose.hpp"
+#include "xmlparser.hpp"
 
 #include <vector>
 #include <string>
@@ -42,33 +43,78 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
 using namespace std;
+using namespace XevXml;
+namespace xe=xercesc;
+
+static const char* findFilename(xe::DOMNode* node) {
+  const char* filename=0;
+  if(node->getNodeType() != xe::DOMNode::DOCUMENT_NODE ){
+    if(node->getNodeType() == xe::DOMNode::ELEMENT_NODE){
+      char* buf = xe::XMLString::transcode(node->getNodeName());
+      string nname = buf;
+      xe::XMLString::release(&buf);
+      if(nname=="SgSourceFile"){
+	std::string fn;
+	XmlGetAttributeValue(node,"file",&fn);
+	if(fn.size()>0)
+	  return fn.c_str();
+	else{
+	  XEV_WARN("The SgSourceFile element does not have a \"file\" attribute");
+	  XEV_ABORT();
+	}
+      }
+    }
+    else
+      return NULL;
+  }
+
+  xercesc::DOMNode* cld = node->getFirstChild();
+  while(cld) {
+    filename = findFilename(cld);
+    if(filename != NULL ) return filename;
+  }
+  return NULL;
+}
+
 
 void removeTmpFile(int, void* name)
 {
   unlink((const char*)name);
 }
 
+
 char* convertXml2TmpFile(void)
 {
-  SgProject* prj   = 0;
-  char*      tmpl  = 0;
-  size_t     fnlen = 0;
+  int          p_id   = 0;
+  int          status = 0;
+  char*        tmpl   = NULL;
+  size_t       fnlen  = 0;
+  XevXmlDocument* doc = 0;
+  std::string  tmpfn;
+  XevXmlParser parser;
 
-  std::string tmpfn;
+  parser.read(cin);
+  doc = parser.getDocument();
 
-  // convert an XML AST to a source code
-  if( XevXml::XevConvertXmlToRose(std::cin,&prj) == true ){
-    SgSourceFile* src = isSgSourceFile(&prj->get_file(0));
-    tmpfn = src->get_sourceFileNameWithoutPath();
-    fnlen = tmpfn.size();
-  }
-  else {
-    XEV_WARN("Conversion from XML to Source failed");
+  if(doc==NULL){
+    XEV_WARN("XML parsing failed");
     XEV_ABORT();
   }
 
   // decide the name of a temporal file
+  const char* fn = findFilename(doc);
+  if(fn!=NULL)
+    tmpfn = fn;
+  else {
+    XEV_WARN("Cannot find the filename");
+    XEV_ABORT();
+  }
+  fnlen = tmpfn.size();
   tmpfn = "/tmp/.XXXXXX-"+tmpfn;
   tmpl = new char[tmpfn.size()+1];
   memcpy(tmpl,tmpfn.c_str(),tmpfn.size()+1);
@@ -82,19 +128,40 @@ char* convertXml2TmpFile(void)
   else
     std::cerr << tmpl << " is created" << std::endl;
 
-  // remove the temporal file at exit
-  on_exit(removeTmpFile,tmpl);
+  if ((p_id = fork()) == 0) {
+    XevXmlVisitor visitor;
+    SgProject*    prj=NULL;
 
-  // unparse the code and write it to the temporal file
-  std::ofstream os(tmpl,ios::out);
-  if(XevXml::XevUnparseToStream(os,&prj)==false){
-    XEV_WARN("Cannot open a temporal file: " << tmpl);
-    XEV_ABORT();
+    visitor.visit(doc,0);
+    prj = visitor.getSgProject();
+    if(prj==NULL){
+      XEV_WARN("AST rebuilding failed");
+      XEV_ABORT();
+    }
+
+    // unparse the code and write it to the temporal file
+    std::ofstream os(tmpl,ios::out);
+    if(!os){
+      XEV_WARN("Cannot open a temporal file: " << tmpl);
+      XEV_ABORT();
+    }
+    if(XevXml::XevUnparseToStream(os,&prj)==false){
+      XEV_WARN("Cannot unparse the AST");
+      XEV_ABORT();
+    }
+  }
+  else {
+    if (p_id != -1) {
+      wait(&status);
+    }
+    else {
+      XEV_WARN("fork failed");
+      XEV_ABORT();
+    }
   }
 
-  // the project is no longer required
-  delete prj;
-
+  // remove the temporal file at exit
+  //on_exit(removeTmpFile,tmpl);
 #if 0
   FILE *fp = fopen(tmpl,"r");
   if(fp!=NULL){

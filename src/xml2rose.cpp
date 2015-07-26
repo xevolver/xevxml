@@ -75,34 +75,24 @@ XevXmlVisitor::~XevXmlVisitor() {}
 
 bool XevXmlVisitor::read(std::istream& is, SgProject** prj) {
   if(prj == 0){ // if (*prj == 0) then *prj is set later.
-    XEV_WARN("Invalid SgProject pointer. Conversion failed.");
+    XEV_WARN("the second argument is NULL.");
     return false;
   }
 
-  try {
-    xe::DOMDocument* doc = 0;
-    //xe::XercesDOMParser parser;
-    XevDOMParser parser;
-    std::istreambuf_iterator<char> begin(is);
-    std::istreambuf_iterator<char> end;
-    std::string buf(begin,end);
-    //string buf = tr.str();
-    xe::MemBufInputSource
-      membuf((const XMLByte*)buf.c_str(), buf.length(), "memory_buffer");
-    parser.parse(membuf);
-    doc = parser.getDocument();
-    buf.clear();
-
-    visit(doc,0);
-    *prj = getSgProject();
-    //AstTests::runAllTests(*prj);
-  }
-  catch(std::exception& e) {
-    XEV_WARN("Exception thrown. Conversion failed. " << e.what());
+  XevXmlParser parser;
+  // read an XML file and build the document
+  if(parser.read(is)==false){
+    XEV_WARN( "XML parse failed.");
     return false;
   }
-  catch(...) {
-    XEV_WARN("Exception thrown. Conversion failed. Unknown exception");
+  XevXmlDocument* doc = parser.getDocument();
+
+  if(doc!=NULL) {
+    this->visit(doc,0);
+    *prj = this->getSgProject();
+  }
+  else {
+    XEV_WARN( "created XML document is NULL.");
     return false;
   }
   return true;

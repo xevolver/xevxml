@@ -37,16 +37,21 @@
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/dom/DOMUserDataHandler.hpp>
 #include <xercesc/internal/XMLScanner.hpp>
+#include <xercesc/sax/ErrorHandler.hpp>
+
 
 namespace XevXml {
 
-class XevDOMParser : public xercesc::XercesDOMParser {
+typedef xercesc::DOMDocument XevXmlDocument;
+
+class XevXmlParser : public xercesc::XercesDOMParser {
+  class XevErrorHandler;
   class XevDataHandler;
   friend class XevDataHandler;
 
 private:
   XevDataHandler* handler_;
-
+  XevXmlDocument* doc_;
 public:
   struct XmlLoc {
     void inc() {cnt++;}
@@ -57,8 +62,8 @@ public:
     int cnt;
   };
 
-  XevDOMParser();
-  ~XevDOMParser() {}
+  XevXmlParser();   // defined in xmluntils.cpp
+  ~XevXmlParser();  // defined in xmluntils.cpp
 
   virtual void startElement
   (
@@ -71,7 +76,9 @@ public:
    , const bool                    isRoot
   );
 
-  static const XevDOMParser::XmlLoc* getXmlLoc(const xercesc::DOMNode* node);
+  bool read(std::istream& is);
+
+  static const XevXmlParser::XmlLoc* getXmlLoc(const xercesc::DOMNode* node);
 };
 
 }

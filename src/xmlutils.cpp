@@ -42,6 +42,9 @@
 #include <xercesc/framework/StdOutFormatTarget.hpp>
 #include <xercesc/framework/MemBufFormatTarget.hpp>
 
+#include <xercesc/framework/MemBufInputSource.hpp>
+#include <xercesc/sax/SAXParseException.hpp>
+
 namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
@@ -161,7 +164,7 @@ string XmlGetNodePosition(xercesc::DOMNode* node)
   string path;
   stringstream pos;
 
-  const XevDOMParser::XmlLoc* loc = XevDOMParser::getXmlLoc(node);
+  const XevXmlParser::XmlLoc* loc = XevXmlParser::getXmlLoc(node);
   if(loc){
     pos << "LINE = " << loc->line << std::endl;
     pos << "COL  = " << loc->col  << std::endl;
@@ -178,17 +181,47 @@ string XmlGetNodePosition(xercesc::DOMNode* node)
   return pos.str() + path;
 }
 
+class XevXmlParser::XevErrorHandler : public xe::ErrorHandler {
+  void printMessage(const xe::SAXParseException& e){
+    char* buf = xercesc::XMLString::transcode(e.getMessage());
+    if(buf!=NULL)
+      cerr <<  buf << endl;
+    xercesc::XMLString::release(&buf);
+    cerr << "  LINE = " << e.getLineNumber()   << std::endl;
+    cerr << "  COL  = " << e.getColumnNumber() << std::endl;
+  }
+
+public:
+  XevErrorHandler(){}
+  ~XevErrorHandler(){}
+
+  void warning(const xe::SAXParseException& e){
+    cerr << "[WARN]: ";
+    this->printMessage(e);
+  }
+  void error(const xe::SAXParseException& e){
+    cerr << "[WARN]: ";
+    this->printMessage(e);
+  }
+  void fatalError(const xe::SAXParseException& e){
+    cerr << "[FATAL]: ";
+    this->printMessage(e);
+    throw e;
+  }
+  void resetErrors(){}
+};
+
 static XMLCh* attKey = 0;
 
-class XevDOMParser::XevDataHandler : public xe::DOMUserDataHandler {
+class XevXmlParser::XevDataHandler : public xe::DOMUserDataHandler {
 private:
-  XevDOMParser* parser_;
+  XevXmlParser* parser_;
 
 public:
   XevDataHandler():parser_(0) {}
   virtual ~XevDataHandler(){}
 
-  void setParser(XevDOMParser* p){
+  void setParser(XevXmlParser* p){
     parser_ = p;
   }
 
@@ -210,30 +243,70 @@ public:
     }
   }
 };
-  XevDOMParser::XevDOMParser() : handler_(new XevDataHandler()){ handler_->setParser(this); }
 
-  void XevDOMParser::startElement( const xe::XMLElementDecl &elemDecl,
-                                   const unsigned int uriId, const XMLCh *const prefixName,
-                                   const xe::RefVectorOf< xe::XMLAttr > &attrList,
-                                   const XMLSize_t attrCount, const bool isEmpty, const bool isRoot ) {
+XevXmlParser::XevXmlParser(): handler_(new XevDataHandler()),doc_(NULL) {
+  handler_->setParser(this);
+  this->setErrorHandler(new XevErrorHandler());
+}
 
-    XercesDOMParser::startElement(elemDecl, uriId, prefixName, attrList, attrCount, isEmpty, isRoot);
+XevXmlParser::~XevXmlParser() {
+  if(doc_!=NULL){
+    // Xerces-c will automatically delete this
+    // delete doc_;
+  }
+}
 
-    //if(!isEmpty){
-    if(1){
-      XmlLoc* loc = new XmlLoc();
-      const xe::Locator* locator = getScanner()->getLocator();
-      loc->line = locator->getLineNumber();
-      loc->col  = locator->getColumnNumber();
-      if(attKey==0){
-        attKey = xe::XMLString::transcode("LocAttrib1");
-      }
-      XercesDOMParser::fCurrentNode->setUserData(attKey, loc, handler_);
-      loc->inc();
+void XevXmlParser::startElement( const xe::XMLElementDecl &elemDecl,
+				 const unsigned int uriId, const XMLCh *const prefixName,
+				 const xe::RefVectorOf< xe::XMLAttr > &attrList,
+				 const XMLSize_t attrCount, const bool isEmpty, const bool isRoot ) {
+
+  XercesDOMParser::startElement(elemDecl, uriId, prefixName, attrList, attrCount, isEmpty, isRoot);
+
+  //if(!isEmpty){
+  if(1){
+    XmlLoc* loc = new XmlLoc();
+    const xe::Locator* locator = getScanner()->getLocator();
+    loc->line = locator->getLineNumber();
+    loc->col  = locator->getColumnNumber();
+    if(attKey==0){
+      attKey = xe::XMLString::transcode("LocAttrib1");
     }
+    XercesDOMParser::fCurrentNode->setUserData(attKey, loc, handler_);
+    loc->inc();
   }
+}
 
-  const XevDOMParser::XmlLoc* XevDOMParser::getXmlLoc(const xe::DOMNode* node){
-    return (XevDOMParser::XmlLoc*)(node->getUserData(attKey));
+const XevXmlParser::XmlLoc* XevXmlParser::getXmlLoc(const xe::DOMNode* node){
+  return (XevXmlParser::XmlLoc*)(node->getUserData(attKey));
+}
+
+bool XevXmlParser::read(std::istream& is) {
+  try {
+    std::istreambuf_iterator<char> begin(is);
+    std::istreambuf_iterator<char> end;
+    std::string buf(begin,end);
+    xe::MemBufInputSource
+      membuf((const XMLByte*)buf.c_str(), buf.length(), "memory_buffer");
+    this->parse(membuf);
+    doc_ = this->getDocument();
+    buf.clear();
   }
+  catch(xe::SAXParseException& e) {
+    // XevErrorHandler already prints the error message
+    return false;
+  }
+  catch(std::exception& e) {
+    cerr << "XML PARSE FAILED: " << e.what() << endl;
+    doc_=NULL;
+    return false;
+    }
+  catch(...) {
+    cerr << "XML PARSE FAILED: unknown exception" << endl;
+    doc_=NULL;
+    return false;
+  }
+  return true;
+}
+
 }
