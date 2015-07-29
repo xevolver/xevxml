@@ -11,7 +11,7 @@ override_dh_auto_configure:
 	export CMAKE_INCLUDE_PATH=/usr/local/include:/usr/local/include/rose
 	export CMAKE_LIBRARY_PATH=/usr/local/lib
 	if [ ! -d $(CURDIR)/mybuild ]; then mkdir $(CURDIR)/mybuild; fi
-	(cd $(CURDIR)/mybuild;cmake -DCMAKE_INSTA__PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release ../)
+	(cd $(CURDIR)/mybuild;cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release ../)
 
 #override_dh_auto_build:
 
