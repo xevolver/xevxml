@@ -132,8 +132,7 @@ public:
     char* apath=NULL;
     apath = realpath(xsltfn_.c_str(),NULL);
     if(apath==NULL) {
-      XEV_WARN("cannot find the absolute path of the XSLT file");
-      XEV_ABORT();
+      XEV_FATAL("cannot find the absolute path of the XSLT file");
     }
     xsltfn_ = apath;
     free(apath);

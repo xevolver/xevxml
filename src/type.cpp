@@ -250,6 +250,7 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
       }                                                                 \
     SUBTREE_VISIT_END();                                                \
     ret= Sg##Type::createType(kexp);                                    \
+      XEV_ASSERT(ret!=NULL);                                            \
     if( kexp )                                                          \
       kexp->set_parent(ret);                                            \
     ret->set_parent(astParent);                                         \
@@ -271,6 +272,7 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
   {                                                                     \
     SgType* ret=NULL;                                                   \
     ret= new Sg##Type();                                                \
+      XEV_ASSERT(ret!=NULL);                                            \
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
@@ -301,6 +303,7 @@ static void inodeSgType(XevXml::XevSageVisitor* v, SgNode* node)
     }                                                                   \
     if(kexp)                                                            \
       kexp->set_parent(ret);                                            \
+    XEV_ASSERT(ret!=NULL);                                              \
     ret->set_parent(astParent);                                         \
     return ret;                                                         \
   }                                                                     \
@@ -373,6 +376,8 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     idx = strtoul( str2.c_str(),0,0 );
 
   ret = new SgArrayType();
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
   ret->set_rank(rnk);
   //sav = ret;
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
@@ -388,14 +393,11 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  if(typ){
-    ret->set_base_type(typ);
-    typ->set_parent(ret);
+  if(typ==NULL){
+    XEV_MISSING_NODE(SgArrayType,SgType,true);
   }
-  else{
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  ret->set_base_type(typ);
+  typ->set_parent(ret);
 
   if(lst !=NULL){
     if((size_t)rnk == lst->get_expressions().size()){
@@ -404,15 +406,14 @@ XevXmlVisitor::visitSgArrayType(xe::DOMNode* node, SgNode* astParent)
     }
     else {
       XEV_DEBUG_INFO(node);
-      XEV_ABORT();
+      //XEV_ABORT();
+      XEV_FATAL("invalid expression list");
     }
   }
   if(iexp !=NULL){
     ret->set_index(iexp);
     iexp->set_parent(ret);
   }
-
-  ret->set_parent(astParent);
 
   return ret;
 }
@@ -489,7 +490,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
     SgScopeStatement* scope = sb::topScopeStack();
     //don't use high-level build function
     dec = new SgClassDeclaration(DEFAULT_FILE_INFO);
-
+    XEV_ASSERT(dec!=NULL);
     dec->set_class_type( (SgClassDeclaration::class_types)typ  );
     dec->set_name(name);
     dec->set_parent(scope);
@@ -527,6 +528,7 @@ XevXmlVisitor::visitSgClassType(xe::DOMNode* node, SgNode* astParent)
   }
   XEV_ASSERT(dec!=NULL);
   ret = new SgClassType( dec );
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
 
   return ret;
@@ -586,8 +588,7 @@ XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
   SgEnumSymbol* esym =0;
 
   if(XmlGetAttributeValue(node,"name",&name)==false){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_MISSING_ATTR(SgEnumType,name,true);
   }
   esym = si::lookupEnumSymbolInParentScopes(name);
   if(esym){
@@ -595,9 +596,10 @@ XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
     ret = new SgEnumType(decl);
   }
   else{
-    XEV_WARN("Symbol of enum " << name <<" is not found");
+    XEV_INFO("enum symbol, \"" << name <<"\" not found");
     SgScopeStatement* scope = sb::topScopeStack();
     SgEnumDeclaration* dec = new SgEnumDeclaration(DEFAULT_FILE_INFO);
+    XEV_ASSERT(dec!=NULL);
     dec->set_name(name);
     dec->set_parent(scope);
     dec->set_scope(scope);
@@ -608,6 +610,7 @@ XevXmlVisitor::visitSgEnumType(xe::DOMNode* node, SgNode* astParent)
     //XEV_DEBUG_INFO(node);
     //XEV_ABORT();
   }
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   return ret;
 }
@@ -640,13 +643,13 @@ XevXmlVisitor::visitSgFunctionType(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   if(lst==0){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_MISSING_NODE(SgFunctionType,SgFunctionParameterList,true);
   }
   if( typ==0 ) {
     typ = isSgType( sb::buildIntType() );
   }
   ret = sb::buildFunctionType( typ,lst );
+  XEV_ASSERT(ret!=NULL);
   ret->set_return_type(typ);
   ret->set_parent(astParent);
   lst->set_parent(ret);
@@ -686,10 +689,10 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
         typ = isSgType(astchild);
     }
   SUBTREE_VISIT_END();
-  if(typ==0 || XmlGetAttributeValue(node,"modifier",&mod)==false) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  if(typ==0)
+    XEV_MISSING_NODE(SgModifierType,SgType,true);
+  if(XmlGetAttributeValue(node,"modifier",&mod)==false)
+    XEV_MISSING_ATTR(SgModifierType,modifier,true);
 
   XmlGetAttributeValue(node,"cv_modifier",&cv);
   //ret->get_typeModifier().get_constVolatileModifier()
@@ -705,12 +708,14 @@ XevXmlVisitor::visitSgModifierType(xe::DOMNode* node, SgNode* astParent)
     ret=sb::buildVolatileType(typ);
     break;
   default:
-    // calling buildModifierType may cause a problem
+    XEV_INFO("calling buildModifierType may cause a problem");
+    XEV_INFO("modifier=" << mod << ", cv=" << cv);
     ret=sb::buildModifierType(typ);
     break;
   }
-
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
+
   SgBitVector vec =  ret->get_typeModifier().get_modifierVector();
   for(size_t i(0);i<vec.size();i++){
     vec[i] = (mod & 1);
@@ -778,11 +783,7 @@ XevXmlVisitor::visitSgTypeString(xe::DOMNode* node, SgNode* astParent)
   // it does not work with Fortran type kind
   ret = SgTypeString::createType( lexp,kexp );
 
-  if(ret==0) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   return ret;
 }
@@ -820,7 +821,7 @@ XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
       //don't use high-level build function
       = new SgTypedefDeclaration(DEFAULT_FILE_INFO,name,
                                  SgTypeUnknown::createType());
-
+    XEV_ASSERT(dec!=NULL);
     dec->set_name(name);
     dec->set_parent(scope);
     dec->set_scope(scope);
@@ -828,11 +829,13 @@ XevXmlVisitor::visitSgTypedefType(xe::DOMNode* node, SgNode* astParent)
     //dec->set_definition(NULL);
     dec->set_definingDeclaration(NULL);
     ds = isSgDeclarationStatement( dec );
+    XEV_ASSERT(ds!=NULL);
     ds->setForward();
     // don't insert symbol!
   }
   XEV_ASSERT(ds!=NULL);
   ret = new SgTypedefType( ds );
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   return ret;
 }
@@ -862,20 +865,18 @@ XevXmlVisitor::visitSgTypeComplex(xe::DOMNode* node, SgNode* astParent)
         kexp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
-  if(typ==NULL){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+
+  if(typ==NULL)
+    XEV_MISSING_NODE(SgTypeComplex,SgType,true);
+
   ret = sb::buildComplexType( typ );
-  if(ret==NULL) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
 
   if( kexp ) {
     ret->set_type_kind( kexp );
   }
-  ret->set_parent(astParent);
+
   return ret;
 }
 /** XML attribute writer of SgTypeComplex */
@@ -906,20 +907,18 @@ XevXmlVisitor::visitSgTypeImaginary(xe::DOMNode* node, SgNode* astParent)
         kexp = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
-  if(typ==NULL){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+
+  if(typ==NULL)
+    XEV_MISSING_NODE(SgTypeImaginary,SgType,true);
+
   ret = sb::buildImaginaryType( typ );
-  if(ret==NULL) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
 
   if( kexp ) {
     ret->set_type_kind( kexp );
   }
-  ret->set_parent(astParent);
+
   return ret;
 }
 /** XML attribute writer of SgTypeImaginary */
@@ -970,7 +969,6 @@ XevXmlVisitor::visitSgTypeLabel(xercesc::DOMNode* node, SgNode* astParent)
   string name;
   SgExpression* kexp = NULL;
 
-
   SUBTREE_VISIT_BEGIN(node,astchild,astParent)
     {
       if(kexp==0)
@@ -979,9 +977,12 @@ XevXmlVisitor::visitSgTypeLabel(xercesc::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret= SgTypeLabel::createType(kexp);
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+
   if(XmlGetAttributeValue(node,"name",&name))
     ret->set_name(name);
-  ret->set_parent(astParent);
+
   return ret;
 }
 /** XML attribute writer of SgTypeLabel */
@@ -998,7 +999,7 @@ void XevSageVisitor::inodeSgTypeLabel(SgNode* node){
   inodeSgType(this,node);
 }
 
-#if 0
+#if 0 // latest version of ROSE will require this class
 // ===============================================================================
 /// Visitor of a SgTypeOfType element in an XML document
 SgNode*
@@ -1032,7 +1033,8 @@ XevXmlVisitor::visitSgTypeOfType(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
   if(typ==NULL&&exp==NULL) {
     XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_FATAL("SgTypeOfType with no type nor expression");
+    //XEV_ABORT();
   }
   //ret = sb::buildTypeOfType(exp,typ);
   if(exp){
@@ -1068,6 +1070,7 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
   SgPointerType*      ret = new SgPointerType();
   SgType*             typ = 0;
 
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -1079,10 +1082,8 @@ XevXmlVisitor::visitSgPointerType(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  if(ret==NULL||typ==NULL) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  if(typ==NULL)
+    XEV_MISSING_NODE(SgPointerType,SgType,true);
 
   return ret;
 }

@@ -47,23 +47,23 @@ using namespace XevXml;
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
     Sg##valType* ret = 0;                                               \
-    SgExpression* oexp=0;						\
-    baseType ival=0;							\
+    SgExpression* oexp=0;                                               \
+    baseType ival=0;                                                    \
     std::string vstr;                                                   \
     if(XmlGetAttributeValue(node,"value",&ival)==false) {               \
-      XEV_DEBUG_INFO(node);                                             \
-      XEV_ABORT();                                                      \
+      XEV_MISSING_ATTR(Sg##valType,value,true);                         \
     }                                                                   \
     ret = sb::build##valType(ival);                                     \
+      XEV_ASSERT(ret!=NULL);                                            \
     ret->set_parent(astParent);                                         \
     if(XmlGetAttributeValue(node,"string",&vstr))                       \
-      ret->set_valueString(XmlEntity2Str(vstr));			\
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)				\
-      {									\
-	if(oexp==0) oexp=isSgExpression(astchild);			\
-      }									\
-    SUBTREE_VISIT_END();						\
-    if(oexp) ret->set_originalExpressionTree(oexp);			\
+      ret->set_valueString(XmlEntity2Str(vstr));                        \
+    SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
+      {                                                                 \
+        if(oexp==0) oexp=isSgExpression(astchild);                      \
+      }                                                                 \
+    SUBTREE_VISIT_END();                                                \
+    if(oexp) ret->set_originalExpressionTree(oexp);                     \
     return ret;                                                         \
   }                                                                     \
   /** XML attribute writer of Sg##vatType */                            \
@@ -73,16 +73,16 @@ using namespace XevXml;
       if(n) {                                                           \
         sstr() << " value=\"" << n->get_value() << "\" ";               \
         if(n->get_valueString().size())                                 \
-          sstr() << " string=\"" << XmlStr2Entity(n->get_valueString())	\
-		 << "\" ";						\
+          sstr() << " string=\"" << XmlStr2Entity(n->get_valueString()) \
+                 << "\" ";                                              \
       }                                                                 \
   }                                                                     \
   /** XML internal node writer of Sg##vatType */                        \
-  void XevSageVisitor::inodeSg##valType(SgNode* node) {			\
-    SgValueExp* n = isSgValueExp(node);					\
-    if(n && n->get_originalExpressionTree())				\
-      this->visit(n->get_originalExpressionTree());			\
-    return;								\
+  void XevSageVisitor::inodeSg##valType(SgNode* node) {                 \
+    SgValueExp* n = isSgValueExp(node);                                 \
+    if(n && n->get_originalExpressionTree())                            \
+      this->visit(n->get_originalExpressionTree());                     \
+    return;                                                             \
   }
 
 #define VISIT_VAL_NO_STRING(valType,baseType)                           \
@@ -91,21 +91,21 @@ using namespace XevXml;
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
     Sg##valType* ret = 0;                                               \
-    SgExpression* oexp=0;						\
+    SgExpression* oexp=0;                                               \
     baseType ival=0;                                                    \
     std::string vstr;                                                   \
     if(XmlGetAttributeValue(node,"value",&ival)==false) {               \
-      XEV_DEBUG_INFO(node);                                             \
-      XEV_ABORT();                                                      \
+      XEV_MISSING_ATTR(Sg##valType,value,true);                         \
     }                                                                   \
     ret = sb::build##valType(ival);                                     \
+      XEV_ASSERT(ret!=NULL);                                            \
     ret->set_parent(astParent);                                         \
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)				\
-      {									\
-	if(oexp==0) oexp=isSgExpression(astchild);			\
-      }									\
-    SUBTREE_VISIT_END();						\
-    if(oexp) ret->set_originalExpressionTree(oexp);			\
+    SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
+      {                                                                 \
+        if(oexp==0) oexp=isSgExpression(astchild);                      \
+      }                                                                 \
+    SUBTREE_VISIT_END();                                                \
+    if(oexp) ret->set_originalExpressionTree(oexp);                     \
     return ret;                                                         \
   }                                                                     \
   /** XML attribute writer of Sg##valType */                            \
@@ -113,40 +113,40 @@ using namespace XevXml;
   {                                                                     \
     Sg##valType* n = isSg##valType(node);                               \
       if(n) {                                                           \
-        sstr()<< " value=\"" << n->get_value() << "\" ";		\
+        sstr()<< " value=\"" << n->get_value() << "\" ";                \
       }                                                                 \
   }                                                                     \
   /** XML internal node writer of Sg##vatType */                        \
-  void XevSageVisitor::inodeSg##valType(SgNode* node) {			\
-    SgValueExp* n = isSgValueExp(node);					\
-    if(n && n->get_originalExpressionTree())				\
-      this->visit(n->get_originalExpressionTree());			\
-    return;								\
+  void XevSageVisitor::inodeSg##valType(SgNode* node) {                 \
+    SgValueExp* n = isSgValueExp(node);                                 \
+    if(n && n->get_originalExpressionTree())                            \
+      this->visit(n->get_originalExpressionTree());                     \
+    return;                                                             \
   }
 
-#define VISIT_VAL_CHAR(valType,baseType)				\
+#define VISIT_VAL_CHAR(valType,baseType)                                \
   /** Visitor of a Sg##valType element in an XML document */            \
   SgNode* XevXmlVisitor::                                               \
   visitSg##valType(xercesc::DOMNode* node, SgNode* astParent)           \
   {                                                                     \
     Sg##valType* ret = 0;                                               \
     baseType ival=0;                                                    \
-    unsigned long temp=0;						\
-    SgExpression* oexp=0;						\
+    unsigned long temp=0;                                               \
+    SgExpression* oexp=0;                                               \
     std::string vstr;                                                   \
     if(XmlGetAttributeValue(node,"value",&temp)==false) {               \
-      XEV_DEBUG_INFO(node);                                             \
-      XEV_ABORT();                                                      \
+      XEV_MISSING_ATTR(Sg##valType,value,true);                         \
     }                                                                   \
-    ival = (baseType)temp;						\
-    ret = sb::build##valType(ival);					\
+    ival = (baseType)temp;                                              \
+    ret = sb::build##valType(ival);                                     \
+      XEV_ASSERT(ret!=NULL);                                            \
     ret->set_parent(astParent);                                         \
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)				\
-      {									\
-	if(oexp==0) oexp=isSgExpression(astchild);			\
-      }									\
-    SUBTREE_VISIT_END();						\
-    if(oexp) ret->set_originalExpressionTree(oexp);			\
+    SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
+      {                                                                 \
+        if(oexp==0) oexp=isSgExpression(astchild);                      \
+      }                                                                 \
+    SUBTREE_VISIT_END();                                                \
+    if(oexp) ret->set_originalExpressionTree(oexp);                     \
     return ret;                                                         \
   }                                                                     \
   /** XML attribute writer of Sg##valType */                            \
@@ -154,16 +154,16 @@ using namespace XevXml;
   {                                                                     \
     Sg##valType* n = isSg##valType(node);                               \
       if(n) {                                                           \
-	unsigned long temp = (unsigned long)n->get_value();		\
-        sstr() << " value=\"" << temp << "\" ";				\
+        unsigned long temp = (unsigned long)n->get_value();             \
+        sstr() << " value=\"" << temp << "\" ";                         \
       }                                                                 \
   }                                                                     \
   /** XML internal node writer of Sg##vatType */                        \
-  void XevSageVisitor::inodeSg##valType(SgNode* node) {			\
-    SgValueExp* n = isSgValueExp(node);					\
-    if(n && n->get_originalExpressionTree())				\
-      this->visit(n->get_originalExpressionTree());			\
-    return;								\
+  void XevSageVisitor::inodeSg##valType(SgNode* node) {                 \
+    SgValueExp* n = isSgValueExp(node);                                 \
+    if(n && n->get_originalExpressionTree())                            \
+      this->visit(n->get_originalExpressionTree());                     \
+    return;                                                             \
   }
 
 VISIT_VAL_NO_STRING(BoolValExp,bool);
@@ -196,25 +196,25 @@ XevXmlVisitor::visitSgEnumVal(xe::DOMNode* node, SgNode* astParent)
   int           ival = 0;
   string        name,ename;
 
-  if(XmlGetAttributeValue(node,"name",&name)==false
-     || XmlGetAttributeValue(node,"value",&ival)==false){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  if(XmlGetAttributeValue(node,"name",&name)==false)
+    XEV_MISSING_ATTR(SgEnumVal,name,true);
+  if(XmlGetAttributeValue(node,"value",&ival)==false)
+    XEV_MISSING_ATTR(SgEnumVal,value,true);
+
   if(XmlGetAttributeValue(node,"enum",&ename)){
     esym = si::lookupEnumSymbolInParentScopes(ename);
     if(esym==0){
-      XEV_WARN("EnumSymbol not found");
+      XEV_INFO("enum symbol \"" << name << "\" not found");
     }
   }
   if(esym)
     ret = new SgEnumVal(ival,esym->get_declaration(),name);
   else
     ret = new SgEnumVal(ival,NULL,name);
-  if(ret){
-    ret->set_parent(astParent);
-    ret->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+  ret->set_startOfConstruct(DEFAULT_FILE_INFO);
+
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(oexp==0) oexp=isSgExpression(astchild);
@@ -258,7 +258,7 @@ XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
       else if (imag==0)
         imag = isSgValueExp(astchild);
       else if (oexp==0)
-	oexp = isSgExpression(oexp);
+        oexp = isSgExpression(oexp);
     }
   SUBTREE_VISIT_END();
   if( real==0 && imag ==0 ){
@@ -272,6 +272,7 @@ XevXmlVisitor::visitSgComplexVal(xercesc::DOMNode* node, SgNode* astParent)
   }
 
   ret = sb::buildComplexVal( real, imag );
+  XEV_ASSERT(ret!=NULL);
   return ret;
 }
 /** XML attribute writer of SgComplexVal */
@@ -296,11 +297,11 @@ XevXmlVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
   SgExpression*           oexp=0;
 
   if(XmlGetAttributeValue(node,"value",&str) == false){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_MISSING_ATTR(SgStringVal,value,true);
   }
   //if(str.size())                                // del (0821)
   ret = sb::buildStringVal(str);
+  XEV_ASSERT(ret!=NULL);
   //else XEV_ABORT();                                 // del (0821)
   ret->set_parent(astParent);
 

@@ -167,7 +167,8 @@ static bool isInSameFile(SgNode* node, SgFile* file){
       return true;
     else {
       SageInterface::dumpInfo(node);
-      XEV_ABORT();
+      //XEV_ABORT();
+      XEV_FATAL("unexpected kind of SgNode found");
     }
   }
   bool isFrontendSpecific = info->isFrontendSpecific();
@@ -251,8 +252,7 @@ void XevSageVisitor::visit(SgNode* node)
       break;
 #include "sgnode.hpp"
   default:
-    XEV_WARN("unknown Sage AST node found \"" << node->class_name() << "\"");
-    XEV_ABORT();
+    XEV_FATAL("unknown Sage AST node found \"" << node->class_name() << "\"");
   }
   if(node->get_file_info()
      && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false)
@@ -276,8 +276,7 @@ void XevSageVisitor::visit(SgNode* node)
       break;
 #include "sgnode.hpp"
   default:
-    XEV_WARN("unknown Sage AST node found");
-    XEV_ABORT();
+    XEV_FATAL("unknown Sage AST node found");
   }
   depth_  = depth_ - 1;
 

@@ -143,8 +143,7 @@ XevXmlVisitor::visitSgAsmStmt(xe::DOMNode* node, SgNode* astParent)
 
 
   if(XmlGetAttributeValue(node,"code",&asm_code) == false){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_MISSING_ATTR(SgAsmStmt,code,true);
   }
   asm_code = XmlEntity2Str( asm_code );
   ret = sb::buildAsmStatement( asm_code );
@@ -224,9 +223,9 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
     SgExpression*                       exp = 0;
     int                                 kind;
 
-    if(XmlGetAttributeValue(node,"kind",&kind)==false)
-      XEV_ABORT();
-
+    if(XmlGetAttributeValue(node,"kind",&kind)==false){
+      XEV_MISSING_ATTR(SgAttributeSpecificationStatement,kind,true);
+    }
     SgPntrArrRefExp*                aref = 0;
     SgVarRefExp*                    vref = 0;
     SgVariableSymbol*               simb = 0;
@@ -323,7 +322,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
                 }
                 else if(isSgFunctionParameterList(prnt)){
                   SgFunctionDefinition * f_def = si::getEnclosingProcedure (sb::topScopeStack());
-                  if(f_def==0) XEV_ABORT();
+                  XEV_ASSERT(f_def!=0);
                   inam->set_scope(f_def);
                   inam->set_definition(ret);
                   lst.push_back(exp);
@@ -338,7 +337,7 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
               lst.push_back(exp);
             else if(isSgFunctionParameterList(prnt)){
               SgFunctionDefinition * f_def = si::getEnclosingProcedure (sb::topScopeStack());
-              if(f_def==0) XEV_ABORT();
+              XEV_ASSERT(f_def!=0);
               inam->set_scope(f_def);
               inam->set_definition(ret);
               lst.push_back(exp);
@@ -405,14 +404,14 @@ XevXmlVisitor::visitSgAttributeSpecificationStatement(xe::DOMNode* node, SgNode*
           else{
             // is this an error?
             XEV_DEBUG_INFO(node);
-            XEV_ABORT();
+            XEV_FATAL("the variable symbol not found");
           }
         }
       }
       break;
     default:
       XEV_DEBUG_INFO(node);
-      XEV_ABORT();
+      XEV_FATAL("unknown kind found at SgAttributeSpecificationStatement");
       break;
     }
 
@@ -645,8 +644,7 @@ XevXmlVisitor::visitSgDerivedTypeStatement(xe::DOMNode* node, SgNode* astParent)
 
   if(XmlGetAttributeValue(node,"name",&name)==false){
     // name attribute is mandatory
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_MISSING_ATTR(SgDerivedTypeStatement,name,true);
   }
   //XmlGetAttributeValue(node,"type",&typ); // not used
 
@@ -793,22 +791,16 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
   string                name;
   bool unnamed=false;
 
-  if( XmlGetAttributeValue(node,"name",&name) ){
-    ret = sb::buildEnumDeclaration( name, scope );
-    esym = si::lookupEnumSymbolInParentScopes(name);
-    if(esym==0){
-      XEV_DEBUG_INFO(node);
-      XEV_ABORT();
-    }
-    //scope->get_symbol_table()->print();
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  if( XmlGetAttributeValue(node,"name",&name)==false )
+    XEV_MISSING_ATTR(SgEnumDeclaration,name,true);
+  ret = sb::buildEnumDeclaration( name, scope );
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   ret->setForward();
   ret->set_definingDeclaration(NULL);
+
+  esym = si::lookupEnumSymbolInParentScopes(name);
+  XEV_ASSERT(esym!=NULL);
 
   if( XmlGetAttributeValue(node,"unnamed",&unnamed) ){
     esym->get_declaration()->set_isUnNamed(unnamed);
@@ -826,12 +818,10 @@ XevXmlVisitor::visitSgEnumDeclaration(xe::DOMNode* node, SgNode* astParent)
       }
     }
   SUBTREE_VISIT_END();
-
+#if 0
   esym = si::lookupEnumSymbolInParentScopes(name);
-  if(esym==0){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  XEV_ASSERT(esym!=NULL);
+#endif
   return ret;
 }
 /** XML attribute writer of SgEnumDeclaration */
@@ -857,6 +847,8 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
   SgEquivalenceStatement* ret = new SgEquivalenceStatement(DEFAULT_FILE_INFO);
   SgExprListExp*          lst = 0;
 
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( lst==0 )
@@ -864,18 +856,14 @@ XevXmlVisitor::visitSgEquivalenceStatement(xe::DOMNode* node, SgNode* astParent)
     }
   SUBTREE_VISIT_END();
 
-  if( lst ) {
-    ret->set_equivalence_set_list(lst);
-    ret->set_definingDeclaration(ret);
-    lst->set_parent(ret);
-    if(lst->get_startOfConstruct()==0)
-      lst->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  ret->set_parent(astParent);
+  if( lst==NULL )
+    XEV_MISSING_NODE(SgEquivalenceStatement,SgExprListExp,true);
+
+  ret->set_equivalence_set_list(lst);
+  ret->set_definingDeclaration(ret);
+  lst->set_parent(ret);
+  if(lst->get_startOfConstruct()==0)
+    lst->set_startOfConstruct(DEFAULT_FILE_INFO);
 
   return ret;
 }
@@ -907,6 +895,8 @@ XevXmlVisitor::visitSgFormatStatement(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
   ret = new SgFormatStatement(DEFAULT_FILE_INFO,lst);
+  XEV_ASSERT(ret!=NULL);
+  XEV_ASSERT(lst!=NULL);
   lst->set_parent( ret );
   ret->set_parent(astParent);
   return ret;
@@ -933,13 +923,12 @@ XevXmlVisitor::visitSgFortranIncludeLine(xe::DOMNode* node, SgNode* astParent)
   //xe::DOMNode* nameatt = 0;
   std::string name;
 
-  if( XmlGetAttributeValue(node,"filename",&name) ){
-    ret = sb::buildFortranIncludeLine( name );
+  if( XmlGetAttributeValue(node,"filename",&name) ==false){
+    XEV_MISSING_ATTR(SgFortranIncludeLine,filename,true);
   }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+
+  ret = sb::buildFortranIncludeLine( name );
+  XEV_ASSERT(ret!=NULL);
   return ret;
 }
 /** XML attribute writer of SgFortranIncludeLine */
@@ -973,7 +962,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
   string name;
 
   if( XmlGetAttributeValue(node,"name",&name) == false )
-    XEV_ABORT();
+    XEV_MISSING_ATTR(SgFunctionDeclaration,name,true);
   XmlGetAttributeValue(node,"old"         ,&old   );
   XmlGetAttributeValue(node,"definition"  ,&hasdef);
   XmlGetAttributeValue(node,"no_params"   ,&noparams);
@@ -986,28 +975,25 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
         typ = isSgType(astchild);
     }
   FUNCTION_HEADER_VISIT_END();
-  if(typ==0){
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+  if(typ==NULL){
+    XEV_MISSING_NODE(SgFunctionDeclaration,SgType,true);
   }
-  if(lst) {
-    if(hasdef){
-      ret
-        = sb::buildDefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
-      //def = new SgFunctionDefinition(DEFAULT_FILE_INFO);
-      //def->set_parent(ret);
-      //ret->set_definition(def);
-    }
-    else
-      ret
-        = sb::buildNondefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
+  if(lst==NULL) {
+    XEV_MISSING_NODE(SgFunctionDeclaration,SgFunctionParameterList,true);
   }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+  if(hasdef){
+    ret
+      = sb::buildDefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
+    //def = new SgFunctionDefinition(DEFAULT_FILE_INFO);
+    //def->set_parent(ret);
+    //ret->set_definition(def);
   }
+  else
+    ret
+      = sb::buildNondefiningFunctionDeclaration(SgName(name.c_str()), typ, lst);
 
   def = 0; // for visiting SgFunctionDefinition
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   ret->set_prototypeIsWithoutParameters(noparams);
   FUNCTION_BODY_VISIT_BEGIN(node,astchild,ret)
@@ -1022,7 +1008,7 @@ XevXmlVisitor::visitSgFunctionDeclaration(xe::DOMNode* node, SgNode* astParent)
     //info->setOutputInCodeGeneration();
     //def = new SgFunctionDefinition(info);
     ret->set_forward(true);
-    ret->get_declarationModifier().get_storageModifier().setExtern();
+    //ret->get_declarationModifier().get_storageModifier().setExtern();
   }
   if(def && si::is_C_language()){
     ret->set_oldStyleDefinition(old);
@@ -1121,6 +1107,7 @@ XevXmlVisitor::visitSgFunctionParameterList(xercesc::DOMNode* node, SgNode* astP
   SgFunctionParameterList* ret = sb::buildFunctionParameterList();
   SgInitializedName* ini=0;
 
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -1149,6 +1136,7 @@ XevXmlVisitor::visitSgImplicitStatement(xe::DOMNode* node, SgNode* astParent)
   SgInitializedName*        inam  = 0;
   SgInitializedNamePtrList  lst;
 
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
@@ -1178,6 +1166,7 @@ XevXmlVisitor::visitSgImportStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpressionPtrList       lst;
   SgExpression*             exp = 0;
 
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
@@ -1217,6 +1206,7 @@ XevXmlVisitor::visitSgInterfaceStatement(xercesc::DOMNode* node, SgNode* astPare
   ret = new SgInterfaceStatement(DEFAULT_FILE_INFO,
                  SgName( name.c_str() ),(SgInterfaceStatement::generic_spec_enum)typ );
 
+  XEV_ASSERT(ret!=NULL);
   ret->set_generic_spec( (SgInterfaceStatement::generic_spec_enum) typ );
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
@@ -1263,6 +1253,9 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
   SgModuleStatement* ret = buildModuleStatementAndDefinition(
                 SgName( name.c_str() ), sb::topScopeStack());
   Sg_File_Info* info = Sg_File_Info::generateDefaultFileInfoForTransformationNode();
+  XEV_ASSERT(info!=NULL);
+  XEV_ASSERT(ret!=NULL);
+
   info->setOutputInCodeGeneration();
   ret->set_file_info(info);
   ret->set_parent(astParent);
@@ -1275,9 +1268,11 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
     non = isSgModuleStatement(csym->get_declaration());
   }
   else {
-    XEV_WARN("not implemented yet");
     XEV_DEBUG_INFO(node);
-    XEV_ABORT(); //TODO
+    XEV_INFO("the same module name is found in a symbol table");
+    XEV_FATAL("not implemented yet");
+    //XEV_DEBUG_INFO(node);
+    //XEV_ABORT(); //TODO
   }
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
@@ -1297,9 +1292,10 @@ XevXmlVisitor::visitSgModuleStatement(xe::DOMNode* node, SgNode* astParent)
     non->set_firstNondefiningDeclaration(non);
   }
   else {
-    XEV_WARN("nondefining module declaration is not implemented yet");
     XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_FATAL("nondefining module declaration is not implemented yet");
+    //XEV_DEBUG_INFO(node);
+    //XEV_ABORT();
   }
   return ret;
 }
@@ -1329,6 +1325,9 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
   //XmlGetAttributeValue(node,"group",&name);
 
   //Rose_STL_Container<std::string> slst;
+  XEV_ASSERT(ret!=NULL);
+  XEV_ASSERT(nondefn!=NULL);
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       grp = isSgNameGroup(astchild);
@@ -1343,7 +1342,7 @@ XevXmlVisitor::visitSgNamelistStatement(xe::DOMNode* node, SgNode* astParent)
   //grp->get_name_list() = slst;
   //grp->set_parent(NULL);
   //ret->get_group_list().push_back( grp );
-  ret->set_parent(astParent);
+
   ret->set_firstNondefiningDeclaration(nondefn);
   ret->set_definingDeclaration(ret);
   nondefn->set_parent(sb::topScopeStack());
@@ -1402,15 +1401,13 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      }
    SUBTREE_VISIT_END();
 
-   if(pr) {
-     ret = sb::buildPragmaDeclaration(pr->get_pragma());
-     pr->set_parent(ret);
-   }
-   else {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
-   }
+   if(pr==NULL)
+     XEV_MISSING_NODE(SgPragmaDeclaration,SgPragma,true);
+   ret = sb::buildPragmaDeclaration(pr->get_pragma());
+   XEV_ASSERT(ret!=NULL);
    ret->set_parent(astParent);
+
+   pr->set_parent(ret);
    return ret;
  }
  DECL_DEFAULT(PragmaDeclaration);
@@ -1471,36 +1468,39 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    }
    FUNCTION_HEADER_VISIT_END();
 
-   if(lst && typ){
-     if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-       lst2 = si::deepCopy(lst);
-       ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst2,
-                                                (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
-       //SgNode::get_globalFunctionTypeTable()->print_functypetable(std::cerr);
-       //std::cerr << "--------------------" << ret->get_type() -> get_return_type() -> class_name() << std::endl;
-       lst2->set_parent(ret);
-     }
-     else {
-       // add (block data) 0828
-       SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
-       ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf/*=NULL*/ );
-       ret->set_type(functionType);
-       ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
-     }
-     lst->set_parent(ret);
+   if(lst==NULL)
+     XEV_MISSING_NODE(SgProcedureHeaderStatement,SgParameterList,true);
+   if(typ==NULL)
+     XEV_MISSING_NODE(SgProcedureHeaderStatement,SgType,true);
+
+   if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
+     lst2 = si::deepCopy(lst);
+     ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst2,
+                                              (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
+     XEV_ASSERT(ret!=NULL);
+     //SgNode::get_globalFunctionTypeTable()->print_functypetable(std::cerr);
+     //std::cerr << "--------------------" << ret->get_type() -> get_return_type() -> class_name() << std::endl;
+     lst2->set_parent(ret);
    }
    else {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
+       // add (block data) 0828
+     SgFunctionType* functionType = new SgFunctionType(SgTypeVoid::createType(), false);
+     ret = new SgProcedureHeaderStatement( info,SgName(name), functionType,  fdf/*=NULL*/ );
+     XEV_ASSERT(ret!=NULL);
+     ret->set_type(functionType);
+     ret->set_subprogram_kind( (SgProcedureHeaderStatement::subprogram_kind_enum)kind );
    }
+   XEV_ASSERT(ret!=NULL);
+   ret->set_scope(scope);
+   ret->set_parent(astParent);
+   ret->set_oldStyleDefinition(f_old);
+   lst->set_parent(ret);
+
    if(var){
      var->set_parent(ret);
      var->set_scope(scope); // is this OK??
      //var->set_scope(sb::topScopeStack());
    }
-   ret->set_scope(scope);
-   ret->set_parent(astParent);
-   ret->set_oldStyleDefinition(f_old);
 
    // -----------------------------------------------------------------------
    // "*" in parameter list is considered an alternative return
@@ -1531,9 +1531,9 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
          if(isSgVariableSymbol(sym))
            ini->set_declptr(isSgVariableSymbol(sym)->get_declaration()->get_declptr());
        }
-       else{ // probably never reach here
+       else{
          XEV_DEBUG_INFO(node);
-         XEV_ABORT();
+         XEV_FATAL("unexpected error"); // never reach here
        }
      }
    } // if lst2
@@ -1557,36 +1557,35 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
        def->set_parent(fdf);
      fdf->set_parent(ret);
    }
-   if(fdf){
-     //si::replaceStatement( ret->get_definition()->get_body(),def,true );
-     ret->set_definition(fdf);
-     fdf->set_declaration(ret);
-     fdf->set_parent(ret);
-     VardefSearch search(name);
-     SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
-     if(ini){
-       ini->set_declptr(ret);
-       if(ret->isFunction() == false || ret->get_oldStyleDefinition()){
-         // This will remove type description before the function name
-         ret->get_type()->set_return_type(SgTypeVoid::createType());
-       }
-     }
-     var->set_scope(fdf);
 
-     if( isSgClassType(typ) ){
-       SgClassType* ctyp = isSgClassType(typ);
-       SgClassSymbol* csym
-         = si::lookupClassSymbolInParentScopes(ctyp->get_name(),fdf->get_body());
-       //body->get_symbol_table()->print();
-       if(csym!=NULL){
-         ctyp->set_declaration(csym->get_declaration());
-       }
+   if(fdf==NULL)
+     XEV_MISSING_NODE(SgProcedureHeaderStatement,SgFunctionDefinition,true);
+
+   //si::replaceStatement( ret->get_definition()->get_body(),def,true );
+   ret->set_definition(fdf);
+   fdf->set_declaration(ret);
+   fdf->set_parent(ret);
+   VardefSearch search(name);
+   SgInitializedName* ini = isSgInitializedName(search.visit(fdf));
+   if(ini){
+     ini->set_declptr(ret);
+     if(ret->isFunction() == false || ret->get_oldStyleDefinition()){
+       // This will remove type description before the function name
+       ret->get_type()->set_return_type(SgTypeVoid::createType());
      }
    }
-   else {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
+   var->set_scope(fdf);
+
+   if( isSgClassType(typ) ){
+     SgClassType* ctyp = isSgClassType(typ);
+     SgClassSymbol* csym
+       = si::lookupClassSymbolInParentScopes(ctyp->get_name(),fdf->get_body());
+     //body->get_symbol_table()->print();
+     if(csym!=NULL){
+       ctyp->set_declaration(csym->get_declaration());
+     }
    }
+
    if(f_pure)
      ret->get_functionModifier().setPure();
    if(f_elem)
@@ -1636,13 +1635,14 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    int elabel = 0;
 
    if(XmlGetAttributeValue(node,"name",&name)==false){
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
+     XEV_MISSING_ATTR(SgProgramHeaderStatement,name,true);
    }
    SgFunctionType* ftyp = new SgFunctionType(SgTypeVoid::createType(), false);
+   XEV_ASSERT(ftyp!=NULL);
+
    SgProgramHeaderStatement* ret
      = new SgProgramHeaderStatement(astParent->get_file_info(),SgName(name), ftyp, NULL);
-
+   XEV_ASSERT(ret!=NULL);
    ret->set_definingDeclaration(ret);
    ret->set_scope(sb::topScopeStack());
    ret->set_parent(astParent);
@@ -1673,6 +1673,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      def->setCaseInsensitive(true);
      def->set_parent(fdf);
    }
+   XEV_ASSERT(fdf!=NULL);
    fdf->set_parent(ret);
 
    Sg_File_Info* info = DEFAULT_FILE_INFO;
@@ -1681,14 +1682,9 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
 
    ret->set_name(SgName(name.c_str()));
    ret->set_definition(fdf);
-   if(fdf->get_file_info()==0) {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
-   }
-   if(def && def->get_file_info()==0) {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
-   }
+   // there must be a bug if these assertions are failed
+   XEV_ASSERT(fdf->get_file_info()!=NULL);
+   XEV_ASSERT(def==NULL || def->get_file_info()!=NULL);
 
    if(XmlGetAttributeValue(node,"elabel",&elabel)){
      SgLabelSymbol*  s = new SgLabelSymbol();
@@ -1736,8 +1732,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    SgTypedefSymbol* tsym = 0;
 
    if(XmlGetAttributeValue(node,"name",&name)==false){
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
+     XEV_MISSING_ATTR(SgTypedefDeclaration,name,true);
    }
    XmlGetAttributeValue(node,"list",&lst);
 
@@ -1755,8 +1750,7 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    SUBTREE_VISIT_END();
 
    if(typ==NULL){
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
+     XEV_MISSING_NODE(TypedefDeclaration,SgType,true);
    }
    ret = sb::buildTypedefDeclaration(name, typ);
    XEV_ASSERT(ret!=NULL);
@@ -1817,12 +1811,14 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
    SgRenamePair* rn = 0;
 
    XEV_ASSERT(astParent!=0);
-   if(XmlGetAttributeValue(node,"name",&name) && XmlGetAttributeValue(node,"only",&only))
-     ret = new SgUseStatement(DEFAULT_FILE_INFO,name,only);
-   else {
-     XEV_DEBUG_INFO(node);
-     XEV_ABORT();
-   }
+   if(XmlGetAttributeValue(node,"name",&name)==false)
+     XEV_MISSING_ATTR(SgUseStatement,name,true);
+   if(XmlGetAttributeValue(node,"only",&only)==false)
+     XEV_MISSING_ATTR(SgUseStatement,only,true);
+
+   ret = new SgUseStatement(DEFAULT_FILE_INFO,name,only);
+   XEV_ASSERT(ret!=0);
+   ret->set_parent(astParent);
    SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if((rn=isSgRenamePair(astchild))!=0){
@@ -1838,10 +1834,10 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
     // TODO: we have to fully support R1109 in SageBuiler.C (but now only partially).
     SgClassDeclaration* decl = csym->get_declaration();
     SgModuleStatement* mstmt = isSgModuleStatement(decl);
-    if(mstmt==0) XEV_ABORT();
+    if(mstmt==0) XEV_FATAL("SgUseStatement is associated with an invalid symbol");
     ret->set_module(mstmt);
     SgClassDefinition* defn = isSgClassDeclaration(decl->get_definingDeclaration())->get_definition();
-    if(defn==0) XEV_ABORT();
+    if(defn==0)  XEV_FATAL("SgUseStatement is associated with an undefined symbol");
     SgSymbol* sym = defn->first_any_symbol();
     while(sym!=0){
       SgAliasSymbol* asym = new SgAliasSymbol(sym,false);
@@ -1904,9 +1900,8 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
   SUBTREE_VISIT_END();
 
 
-  if(name==0) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+  if(name==NULL) {
+    XEV_MISSING_NODE(SgVariableDeclaration,SgInitializedName,true);
   }
 
   SgVariableSymbol* vsym = si::lookupVariableSymbolInParentScopes(name->get_name());
@@ -1930,6 +1925,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
                                        typ,
                                        name->get_initializer());
 
+    XEV_ASSERT(ret!=NULL);
     ret->set_baseTypeDefiningDeclaration( cls );
     cls->set_parent(ret);
   }
@@ -1939,11 +1935,13 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       ret = sb::buildVariableDeclaration(name->get_name(),
                                          name->get_type(),
                                          name->get_initializer());
+      XEV_ASSERT(ret!=NULL);
     }
     else {
       // this variable would already be defined in SgFunctionParameterList
       // calling buildVariableDeclaration craches so it is not called below.
       ret = new SgVariableDeclaration(DEFAULT_FILE_INFO);
+      XEV_ASSERT(ret!=NULL);
       if(vsym->get_declaration()){
 	if(isSgVariableDeclaration(vsym->get_declaration()->get_definition()))
 	  ret->set_definingDeclaration(vsym->get_declaration()->get_definition());
@@ -1961,23 +1959,23 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
     // probably, an unnamed structure or union member
     SgVariableDefinition* def = new SgVariableDefinition(DEFAULT_FILE_INFO);
     ret = new SgVariableDeclaration(DEFAULT_FILE_INFO);
+    XEV_ASSERT(def!=NULL);
+    XEV_ASSERT(ret!=NULL);
+
     name->set_declptr(def);
     name->set_definition(def);
     ret->append_variable(name,name->get_initializer());
     def->set_parent(ret);
   }
-  if(ret!=NULL){
-    SgInitializedName* decl_item = ret->get_decl_item(name->get_name());
-    copySgInitializedName(name,decl_item);
-  }
-  else{
-    XEV_DEBUG_INFO(node);XEV_ABORT();
-  }
+
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   ret->set_definingDeclaration(ret);
+  SgInitializedName* decl_item = ret->get_decl_item(name->get_name());
+  //  XEV_ASSERT(decl_item!=NULL);
+  copySgInitializedName(name,decl_item);
   //if(name->get_name().is_null()==false)
   //name->set_definition(ret->get_definition());
-
   // see buildVariableDeclaration in fortran_support.C
   if(si::is_Fortran_language())
     ret->set_variableDeclarationContainsBaseTypeDefiningDeclaration(false);
@@ -2005,6 +2003,7 @@ XevXmlVisitor::visitSgVariableDeclaration(xe::DOMNode* node, SgNode* astParent)
       SgVariableDeclaration* decl =sb::buildVariableDeclaration(varList[i]->get_name(),
                                                                 varList[i]->get_type(),
                                                                 varList[i]->get_initializer());
+      XEV_ASSERT(decl!=NULL);
       //varList[i]->set_definition(decl->get_definition());
       varList[i]->set_declptr(decl);
       decl->append_variable(varList[i],varList[i]->get_initializer());

@@ -65,8 +65,9 @@ SgNode*
 XevXmlVisitor::visitSgDataStatementGroup(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgDataStatementGroup*   ret = new SgDataStatementGroup();
-  ret->set_parent(NULL);
 
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(NULL);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       SgDataStatementObject* obj = isSgDataStatementObject(astchild);
@@ -104,19 +105,19 @@ XevXmlVisitor::visitSgDataStatementObject(xercesc::DOMNode* node, SgNode* astPar
 {
   SgDataStatementObject*  ret = new SgDataStatementObject();
   SgExprListExp* lst = 0;
+
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(NULL);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if(lst==0)
         lst = isSgExprListExp(astchild);
     }
   SUBTREE_VISIT_END();
-  if(lst)
-    ret->set_variableReference_list(lst);
-  else{
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-  ret->set_parent(NULL);
+  if(lst==NULL)
+    XEV_MISSING_NODE(SgDataStatementObject,SgExprListExp,true);
+  ret->set_variableReference_list(lst);
+
   return ret;
 }
 ATTRIB_SUPP_DEFAULT(DataStatementObject);
@@ -141,6 +142,8 @@ XevXmlVisitor::visitSgDataStatementValue(xercesc::DOMNode* node, SgNode* astPare
 
   XmlGetAttributeValue(node,"fmt",&format);
 
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       // assuming the order
@@ -159,7 +162,7 @@ XevXmlVisitor::visitSgDataStatementValue(xercesc::DOMNode* node, SgNode* astPare
   if(cnst)
     ret->set_constant_expression(cnst);
   ret->set_data_initialization_format((SgDataStatementValue::data_statement_value_enum)format);
-  ret->set_parent(astParent);
+
   return ret;
 }
 /** XML attribute writer of SgDataStatementValue */
@@ -206,37 +209,43 @@ XevXmlVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
 
   SgFormatItem*     ret = new SgFormatItem();
   SgFormatItemList* il = new SgFormatItemList();
-  //if(lst==0){
-    SUBTREE_VISIT_BEGIN(node,astchild,ret)
-      {
-        if(exp==0)
-          exp = isSgExpression(astchild);
-        if(isSgFormatItem(astchild))
-          il->get_format_item_list().push_back(isSgFormatItem(astchild));
-      }
-    SUBTREE_VISIT_END();
-    if(exp){
-      ret->set_data(exp);
-    }
-    if(il->get_format_item_list().size()){
-      ret->set_format_item_list(il);
-    }
 
-    if(exp && rpt==0 && il->get_format_item_list().size()==0) {
+  XEV_ASSERT(ret!=NULL);
+  XEV_ASSERT(il!=NULL);
+  ret->set_parent(NULL);
+  //if(lst==0){
+  SUBTREE_VISIT_BEGIN(node,astchild,ret)
+    {
+      if(exp==0)
+        exp = isSgExpression(astchild);
+      if(isSgFormatItem(astchild))
+        il->get_format_item_list().push_back(isSgFormatItem(astchild));
+    }
+  SUBTREE_VISIT_END();
+  //if(exp==NULL)
+  //XEV_MISSING_NODE(SgFormatItem,SgExpression,true);
+  if(exp!=NULL){
+    if(rpt==0 && il->get_format_item_list().size()==0){
       XEV_DEBUG_INFO(node);
-      XEV_ABORT();
+      XEV_FATAL("SgFormatList is empty");
     }
-    val = isSgStringVal( exp );
-    if( val && sgl == 1 ) {                     // add (0821)
-      val->set_usesSingleQuotes(true);
-    }
-    if( val && dbl == 1 ) {                     // add (0821)
-      val->set_usesDoubleQuotes(true);
-    }
-    if( rpt )
-      ret->set_repeat_specification(rpt);
-    //}
-    /*
+  }
+  if(exp)
+    ret->set_data(exp);
+  if(il->get_format_item_list().size()>0)
+    ret->set_format_item_list(il);
+
+  val = isSgStringVal( exp );
+  if( val && sgl == 1 ) {                     // add (0821)
+    val->set_usesSingleQuotes(true);
+  }
+  if( val && dbl == 1 ) {                     // add (0821)
+    val->set_usesDoubleQuotes(true);
+  }
+  if( rpt )
+    ret->set_repeat_specification(rpt);
+  //}
+  /*
     else {
     SgFormatItemList* il = new SgFormatItemList();
     SUBTREE_VISIT_BEGIN(node,astchild,ret)
@@ -247,7 +256,7 @@ XevXmlVisitor::visitSgFormatItem(xe::DOMNode* node, SgNode* astParent)
     SUBTREE_VISIT_END();
     ret->set_format_item_list(il);
     }*/
-  ret->set_parent(NULL);
+
   return ret;
 }
 /** XML attribute writer of SgFormatItem */
@@ -316,11 +325,13 @@ XevXmlVisitor::visitSgFunctionParameterTypeList(xe::DOMNode* node, SgNode* astPa
     exp = new SgExprListExp(DEFAULT_FILE_INFO );
   }
   ret =  sb::buildFunctionParameterTypeList( exp );
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+
   if(lst.size()>0){
     for(size_t i(0);i<lst.size();i++)
       ret->append_argument(lst[i]);
   }
-  ret->set_parent(astParent);
   exp->set_parent(ret);
 
   return ret;
@@ -343,26 +354,27 @@ XevXmlVisitor::visitSgNameGroup(xe::DOMNode* node, SgNode* astParent)
   string names;
   string gname;
 
-  if(XmlGetAttributeValue(node,"group",&gname) && XmlGetAttributeValue(node,"names",&names)){
-    char* str = (char*)names.c_str();
-    char* c;
-    SgStringList slst;
-    ret->set_group_name( gname );;
-
-    c = strtok(str,",");
-    if(c) slst.push_back(c);
-    while(c){
-      c = strtok(NULL,",");
-      if(c) slst.push_back(c);
-    }
-    ret->get_name_list() = slst;
-  }
-  else{
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(NULL);//parent must be set to NULL.
+
+  if(XmlGetAttributeValue(node,"group",&gname)==false)
+    XEV_MISSING_ATTR(SgNameGroup,group,true);
+  if(XmlGetAttributeValue(node,"names",&names)==false)
+    XEV_MISSING_ATTR(SgNameGroup,names,true);
+
+  char* str = (char*)names.c_str();
+  char* c;
+  SgStringList slst;
+  ret->set_group_name( gname );;
+
+  c = strtok(str,",");
+  if(c) slst.push_back(c);
+  while(c){
+    c = strtok(NULL,",");
+    if(c) slst.push_back(c);
+  }
+  ret->get_name_list() = slst;
+
   return ret;
 }
 /** XML attribute writer of SgNameGroup */
@@ -395,37 +407,11 @@ XevXmlVisitor::visitSgPragma(xe::DOMNode* node, SgNode* astParent)
   SgPragma* ret = 0;
   string line;
 
-  if(XmlGetAttributeValue(node,"pragma",&line)){
-#if 0
-    std::string tmp;
-    for(size_t i(0);i<line.size();i++){
-      if( line[i] != '\\')
-        tmp+=line[i];
-      else if(line[i+1] !='"')
-        tmp+=line[i];
-    }
-
-    ret = sb::buildPragma(tmp);
-#endif
-    //line = XmlEntity2Str(line);
-    ret = sb::buildPragma(line);
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
-#if 0
-  line = "";
-  if(node->getFirstChild()){
-    char* buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
-    line = buf+1;
-    *(line.rbegin())='\0';
-    xe::XMLString::release(&buf);
-  }
+  if(XmlGetAttributeValue(node,"pragma",&line)==false)
+    XEV_MISSING_ATTR(SgPragma,pragma,true);
   ret = sb::buildPragma(line);
-#endif
-  if(ret)
-    ret->set_parent(astParent);
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
   return ret;
 }
 /** XML attribute writer of SgPragma */
@@ -458,17 +444,24 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   string fn;
 
   Sg_File_Info* info = DEFAULT_FILE_INFO;
+  XEV_ASSERT(_file!=NULL);
   _file->set_file_info(info);
   info->set_parent(_file);
 
-  if(XmlGetAttributeValue(node,"lang",&langid)==false)
+  if(XmlGetAttributeValue(node,"lang",&langid)==false){
+    XEV_DEBUG_INFO(node);
     XEV_WARN("Language attribute is missing.");
-  if(XmlGetAttributeValue(node,"fmt",&fmtid)==false)
-    XEV_WARN("Format attribute is missing.");
-  if(XmlGetAttributeValue(node,"file",&fn)){
-    _file->set_sourceFileNameWithoutPath(fn);
-    //cerr << _file->get_sourceFileNameWithoutPath() << endl;
   }
+  if(XmlGetAttributeValue(node,"fmt",&fmtid)==false){
+    XEV_DEBUG_INFO(node);
+    XEV_WARN("Format attribute is missing.");
+  }
+  if(XmlGetAttributeValue(node,"file",&fn)==false){
+    // original file name is used by xmlrebuild
+    XEV_MISSING_ATTR(SgSourceFile,file,true);
+  }
+  _file->set_sourceFileNameWithoutPath(fn);
+  //cerr << _file->get_sourceFileNameWithoutPath() << endl;
 
   // 0:error, 1: unknown, 2:C, 3:C++, 4:Fortran
   // C++ is not supported for now. trying to output as a C program
@@ -519,6 +512,7 @@ XevXmlVisitor::visitSgTypedefSeq(xe::DOMNode* node, SgNode* astParent)
   SgTypedefSeq* ret = 0;
 
   ret = new SgTypedefSeq();
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(NULL);
   return ret;
 }
@@ -537,7 +531,8 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
 
   XmlGetAttributeValue(node,"name",&name);
   ret = sb::buildCommonBlockObject(name);
-
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
       if( para==0 )
@@ -545,13 +540,10 @@ XevXmlVisitor::visitSgCommonBlockObject(xercesc::DOMNode* node, SgNode* astParen
     }
   SUBTREE_VISIT_END();
 
-  if(para==0) {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+  if(para==NULL)
+    XEV_MISSING_NODE(SgCommonBlockObject,SgExprLisExp,true);
   ret->set_variable_reference_list(para);
   para->set_parent(ret);
-  ret->set_parent(astParent);
 
   return ret;
 }
@@ -595,9 +587,11 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   //  if(isSgArrayType(typ))
   //  typ = isSgArrayType(typ)->get_base_type();
   ret = sb::buildInitializedName(name.c_str(),typ,ini);
+  XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
   ret->set_scope(scope);// This was NG for s009 but needed by s005
   if(typ) {
+    //TODO: is this required?
     typ->set_parent(ret); // this must be true
   }
   if(ini) ini->set_parent(ret);
@@ -622,11 +616,15 @@ XevXmlVisitor::visitSgInitializedName(xe::DOMNode* node, SgNode* astParent)
   if(isSgTypeCrayPointer(typ) && XmlGetAttributeValue(node,"prev",&prev)){
     SgVariableSymbol* vsym = si::lookupVariableSymbolInParentScopes(SgName(prev.c_str()));
     if(vsym==0) {
-      XEV_DEBUG_INFO(node);XEV_ABORT();
+      XEV_DEBUG_INFO(node);
+      //XEV_ABORT();
+      XEV_FATAL("variable symbol \"" << prev << "\" not found for cray pointer" );
     }
     SgInitializedName* ini = vsym->get_declaration();
     if(ini==0) {
-      XEV_DEBUG_INFO(node);XEV_ABORT();
+      XEV_DEBUG_INFO(node);
+      //XEV_ABORT();
+      XEV_FATAL("invalid variable symbol \"" << prev << "\" for cray pointer" );
     }
     ret->set_prev_decl_item(ini);
   }
@@ -692,6 +690,7 @@ XevXmlVisitor::visitSgInterfaceBody(xercesc::DOMNode* node, SgNode* astParent)
   //ret = new SgInterfaceBody(Sg_File_Info::generateDefaultFileInfoForTransformationNode());
   //ret = new SgInterfaceBody( astParent->get_file_info() );
   ret = new SgInterfaceBody(name, NULL, true );
+  XEV_ASSERT(ret!=NULL);
   ret->set_file_info(astParent->get_file_info());
   ret->set_parent(astParent);
 #if 0
@@ -722,7 +721,9 @@ XevXmlVisitor::visitSgInterfaceBody(xercesc::DOMNode* node, SgNode* astParent)
   }
   else {
     XEV_DEBUG_INFO(node);
-    XEV_ABORT();
+    XEV_FATAL("SgInterfaceBody needs either SgFunctionDeclaration node or name attribute");
+    //XEV_DEBUG_INFO(node);
+    //XEV_ABORT();
   }
   return ret;
 }
@@ -755,26 +756,24 @@ XevXmlVisitor::visitSgRenamePair(xercesc::DOMNode* node, SgNode* astParent)
   string                      lname;
   string                      uname;
 
-  if(XmlGetAttributeValue(node,"lname",&lname)==false
-     || XmlGetAttributeValue(node,"uname",&uname)==false )
-    XEV_ABORT();
+  if(XmlGetAttributeValue(node,"lname",&lname)==false)
+    XEV_MISSING_ATTR(SgRenamePair,lname,true);
+  if(XmlGetAttributeValue(node,"uname",&uname)==false )
+    XEV_MISSING_ATTR(SgRenamePair,uname,true);
 
   ret = new SgRenamePair(lname,uname);
-  if(ret) {
-    ret->set_parent(astParent);
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
 #if 0
-    // add this SgRenamePair object to * its parent node *
-    SgUseStatement* useStmt = isSgUseStatement(astParent);
-    if(useStmt){ // this should be true
-      useStmt->get_rename_list().push_back(ret);
-    }
+  // add this SgRenamePair object to * its parent node *
+  SgUseStatement* useStmt = isSgUseStatement(astParent);
+  if(useStmt){ // this should be true
+    useStmt->get_rename_list().push_back(ret);
+  }
 #endif
-  }
-  else {
-    XEV_DEBUG_INFO(node);
-    XEV_ABORT();
-  }
+
   Sg_File_Info* info = DEFAULT_FILE_INFO;
+  XEV_ASSERT(info!=NULL);
   info->setOutputInCodeGeneration();
   ret->set_file_info(info);
   return ret;

@@ -70,8 +70,8 @@ void XmlInitialize(void)
     xa::XalanTransformer::initialize();
   }
   catch (const xe::XMLException& toCatch) {
-    // Do your failure processing here
-    XEV_ABORT();
+    XEV_FATAL("XML library initialization failed");
+    //XEV_ABORT();
   }
   return;
 }

@@ -60,9 +60,13 @@ using namespace XevXml;
 XevXmlVisitor::XevXmlVisitor()
 {
   _prj = new SgProject();
-  if(_prj==0){ XEV_ABORT(); }
+  XEV_ASSERT(_prj!=NULL);
+  //if(_prj==0){ XEV_ABORT(); }
+
   _file = new SgSourceFile();
-  if(_file==0){ XEV_ABORT(); }
+  XEV_ASSERT(_file!=NULL);
+  //if(_file==0){ XEV_ABORT(); }
+
   _prj->set_file(*_file); // set_file() is obsolete.
   _file->set_parent(_prj);
 
@@ -169,7 +173,7 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
     }
     else {
       //#define XEVXML_DEBUG
-#ifdef XEVXML_DEBUG
+#if 0
       static int g_count=0;
 #define SAGE3(x) if(nname=="Sg"#x) { cerr << #x << "(" << g_count++ << ")" << endl; ret = visitSg##x (node,astParent);}
 #else
@@ -178,8 +182,8 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 #include "sgnode.hpp"
 
       if(ret==NULL && nname != "PreprocessingInfo") {
-        XEV_WARN( "unknown AST node found: " << nname );
-        XEV_ABORT();
+        XEV_FATAL( "unknown AST node found: " << nname );
+        //XEV_ABORT();
       }
       if(ret!=NULL && ret->get_parent() != astParent) {
         ret->set_parent(astParent);
@@ -193,9 +197,9 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
       checkDeclStmt(node,ret);
       checkLocatedNode(node,ret);
       if(isSgType(ret)==0 && isSgSourceFile(ret)==0 && astParent==0 ){
-	XEV_WARN("SgNode with no parent is found\n");
-	XEV_DEBUG_INFO(node);
-        XEV_ABORT();
+	XEV_FATAL("SgNode with no parent is found\n");
+	//XEV_DEBUG_INFO(node);
+        //XEV_ABORT();
       }
       return ret;
     }
@@ -241,11 +245,12 @@ XevXmlVisitor::checkStatement(xe::DOMNode* node, SgNode* astNode)
   if(stmt && XmlGetAttributeValue(node,"label",&ino)) {
     SgNode* astParent = astNode->get_parent();
     SgLabelSymbol*  s = new SgLabelSymbol();
+    XEV_ASSERT(s!=NULL);
     s->set_parent(stmt);
     if(astParent == 0) {
-      XEV_WARN (astNode->class_name() << " does not have a parent node.");
-      XEV_DEBUG_INFO(node);
-      XEV_ABORT();
+      XEV_FATAL (astNode->class_name() << " does not have a parent node.");
+      //XEV_DEBUG_INFO(node);
+      //XEV_ABORT();
     }
     s->set_fortran_statement( new SgStatement(astParent->get_file_info()));
     s->get_fortran_statement()->set_parent(s);
@@ -258,7 +263,7 @@ XevXmlVisitor::checkStatement(xe::DOMNode* node, SgNode* astNode)
   }
   if(isSgScopeStatement(stmt) ) {
     if(stmt->get_parent()==0 || stmt->get_scope()==0) {
-#if XEV_DEBUG
+#if 0
       XEV_WARN( stmt->class_name() << " does not have parent or scope.");
       XEV_DEBUG_INFO(node);
       //XEV_ABORT();
@@ -369,7 +374,8 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
       fdf = si::getEnclosingProcedure (sb::topScopeStack());
     if(fdf==0) {
       XEV_DEBUG_INFO(node);
-      XEV_ABORT();
+      XEV_FATAL("enclosing function definition not found");
+      //XEV_ABORT();
     }
     // the symbol table of fdf is not created yet. i don't know why.
     VardefSearch search(rname);
@@ -382,6 +388,7 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
     else {
       //XEV_WARN("result variable not found");
       ini = sb::buildInitializedName(rname,fdecl->get_type()->get_return_type());
+      XEV_ASSERT(ini!=NULL);
       ini->set_parent(fdecl);
       //ini->set_definition(fdf);
       //ini->set_declptr(ret); // s005.f90:mismatch if uncommented, but needed for h025.f90
@@ -389,6 +396,7 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
       ini->set_scope(fdf);
 
       SgVariableSymbol* sym = new SgVariableSymbol(ini);
+      XEV_ASSERT(sym!=NULL);
       sym->set_parent(fdf);
     }
     if(isSgProcedureHeaderStatement(decl)){

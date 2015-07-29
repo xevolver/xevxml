@@ -64,8 +64,7 @@ static const char* findFilename(xe::DOMNode* node) {
 	if(fn.size()>0)
 	  return fn.c_str();
 	else{
-	  XEV_WARN("The SgSourceFile element does not have a \"file\" attribute");
-	  XEV_ABORT();
+	  XEV_FATAL("The SgSourceFile element does not have a \"file\" attribute");
 	}
       }
     }

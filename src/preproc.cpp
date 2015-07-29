@@ -120,7 +120,7 @@ writePreprocessingInfo(std::ostream& sstr_,SgNode* n)
   SgLocatedNode* loc = isSgLocatedNode(n);
   if(loc==NULL) return NULL;
   if(removeIncludeDirectives(loc)){
-    XEV_WARN("Include directives contained within a construct are removed.");
+    XEV_INFO("Include directives contained within a construct are removed.");
   }
 
   AttachedPreprocessingInfoType* info = loc->getAttachedPreprocessingInfo();
@@ -164,8 +164,8 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
 
   if(nname!="PreprocessingInfo") return 0;
   if(astParent==0 || isSgLocatedNode(astParent)==0) {
-    XEV_WARN("Preprocessing Info ignored");
     XEV_DEBUG_INFO(node);
+    XEV_INFO("PreprocessingInfo ignored");
     return 0;;
   }
   //std::string pos;
@@ -174,38 +174,46 @@ XevXmlVisitor::visitPreprocessingInfo(xe::DOMNode* node, SgNode* astParent)
   int pval = 0;
   SgLocatedNode* loc = isSgLocatedNode(astParent);
 
-  if(XmlGetAttributeValue(node,"pos", &pval)
-     && XmlGetAttributeValue(node,"type",&tval)){
-    PreprocessingInfo::DirectiveType dtype
-      = (PreprocessingInfo::DirectiveType)tval;
-    PreprocessingInfo::RelativePositionType pos
-      =(PreprocessingInfo::RelativePositionType)pval;
-    std::string content = "";
-    if(node->getFirstChild()){
-      buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
-      content = buf;
-      xe::XMLString::release(&buf);
-    }
-    content = XevXml::XmlEntity2Str(content);
-    //cerr << "-----------------------------------------\n";
-    //cerr << content;
-    //cerr << "-----------------------------------------\n";
-    //cerr << pos << ":" << astParent->class_name() << endl;
-
-    PreprocessingInfo* info
-      = new PreprocessingInfo(dtype,content,"transformation",0,0,0,pos);
-    info->set_file_info(loc->get_file_info());
-    loc->addToAttachedPreprocessingInfo(info);
-    //PreprocessingInfo* info
-    //= si::attachArbitraryText(loc,content,
-    //                          (PreprocessingInfo::RelativePositionType)pval);
-    //cerr << "-----------------------------------------\n";
-    //si::dumpPreprocInfo(loc);
-    //cerr << "-----------------------------------------\n";
-    //info->get_file_info()->display();
-    //loc->get_file_info()->display();
+  if(loc==NULL){
+    XEV_DEBUG_INFO(node);
+    XEV_WARN("PreprocessingInfo ignored");
+    XEV_WARN("its parent is not a kind of SgLoatedNode");
+    return 0;
   }
-  else XEV_ABORT();
+  if(XmlGetAttributeValue(node,"pos", &pval)==false)
+    XEV_MISSING_ATTR(PreprocessingInfo,pos,true);
+  if(XmlGetAttributeValue(node,"type",&tval)==false)
+    XEV_MISSING_ATTR(PreprocessingInfo,type,true);
+
+  PreprocessingInfo::DirectiveType dtype
+    = (PreprocessingInfo::DirectiveType)tval;
+  PreprocessingInfo::RelativePositionType pos
+    =(PreprocessingInfo::RelativePositionType)pval;
+  std::string content = "";
+  if(node->getFirstChild()){
+    buf = xe::XMLString::transcode(node->getFirstChild()->getNodeValue());
+    content = buf;
+    xe::XMLString::release(&buf);
+  }
+  content = XevXml::XmlEntity2Str(content);
+  //cerr << "-----------------------------------------\n";
+  //cerr << content;
+  //cerr << "-----------------------------------------\n";
+  //cerr << pos << ":" << astParent->class_name() << endl;
+
+  PreprocessingInfo* info
+    = new PreprocessingInfo(dtype,content,"transformation",0,0,0,pos);
+  XEV_ASSERT(info!=NULL);
+  info->set_file_info(loc->get_file_info());
+  loc->addToAttachedPreprocessingInfo(info);
+  //PreprocessingInfo* info
+  //= si::attachArbitraryText(loc,content,
+  //                          (PreprocessingInfo::RelativePositionType)pval);
+  //cerr << "-----------------------------------------\n";
+  //si::dumpPreprocInfo(loc);
+  //cerr << "-----------------------------------------\n";
+  //info->get_file_info()->display();
+  //loc->get_file_info()->display();
 
   return 0;
 }
