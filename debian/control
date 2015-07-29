@@ -5,6 +5,7 @@ Standards-Version: 3.9.6.1
 
 Package: xevxml
 Architecture: i386
+Depends: edg4x-rose-xev,libxerces-c3.1,libxalan-c111
 Description: XevXML is developed for XML-based AST transformations to
  provide an easy way for user-defined code transformations.  The
  current implementation of XevXML is built on top of the ROSE compiler

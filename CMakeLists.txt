@@ -11,8 +11,8 @@ INCLUDE( xevdocs )
 
 INSTALL_FILES( /lib/xev-trans/ FILES ${PROJECT_SOURCE_DIR}/xev-trans/lib/)
 INSTALL_FILES( /include/ FILES ${PROJECT_SOURCE_DIR}/include/)
-INSTALL_FILES( /share/doc/${PROJECT}/ FILES ${PROJECT_SOURCE_DIR}/README.md)
-INSTALL_FILES( /share/doc/${PROJECT}/tests/identity/ FILES ${PROJECT_SOURCE_DIR}/test/identity/)
-INSTALL_FILES( /share/doc/${PROJECT}/tests/xsltgen/  FILES ${PROJECT_SOURCE_DIR}/test/xsltgen/)
+INSTALL_FILES( /share/${PROJECT_NAME}/ FILES ${PROJECT_SOURCE_DIR}/README.md)
+INSTALL_FILES( /share/${PROJECT_NAME}/tests/identity/ FILES ${PROJECT_SOURCE_DIR}/test/identity/)
+INSTALL_FILES( /share/${PROJECT_NAME}/tests/xsltgen/  FILES ${PROJECT_SOURCE_DIR}/test/xsltgen/)
 
 INCLUDE( xevtests )
