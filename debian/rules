@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+#
+package = xevxml
+MAKE=make
+
+# environment variables when running configure script
+%:
+	dh $@ --builddirectory=$(CURDIR)/mybuild 
+
+override_dh_auto_configure:
+	export CMAKE_INCLUDE_PATH=/usr/local/include:/usr/local/include/rose
+	export CMAKE_LIBRARY_PATH=/usr/local/lib
+	if [ ! -d $(CURDIR)/mybuild ]; then mkdir $(CURDIR)/mybuild; fi
+	(cd $(CURDIR)/mybuild;cmake -DCMAKE_INSTA__PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release ../)
+
+#override_dh_auto_build:
+
+override_dh_auto_test:
+	# do nothing
+
+#override_dh_auto_install: 
+
+override_dh_usrlocal:
+	# do nothing
+
+clean::
+	dh clean
+	-@rm -rf $(CURDIR)/mybuild
+
