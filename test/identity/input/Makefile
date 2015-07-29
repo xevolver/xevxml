@@ -1,6 +1,6 @@
 ROSECOMP=identityTranslator
 
-ALL=*.f90 *.c *.F
+ALL=*.f90 *.c *.F *.f *.f03
 
 .SUFFIXES: .f90 .dif .xml
 
@@ -8,7 +8,7 @@ all: mod.rmod
 	-@for i in $(ALL) ; do (cd ../;sh ./test.sh input/$$i) > /dev/null;  done
 
 mod.rmod : module/mod.f90
-	@$(ROSECOMP) -c input/module/mod.f90 -rose:o input/module/rose_mod.f90
+	@$(ROSECOMP) -c module/mod.f90 -rose:o module/rose_mod.f90
 
 clean:
 	-@rm -f *.rmod *.o rose_*.f90 *.mod

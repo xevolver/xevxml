@@ -25,4 +25,5 @@ ADD_CUSTOM_TARGET(apidoc_forced
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 INSTALL_FILES( /share/doc/${PROJECT}/html/ FILES ${PROJECT_SOURCE_DIR}/docs/doxygen/html/)
+INSTALL_FILES( /share/doc/${PROJECT}/tutorial/ FILES ${PROJECT_SOURCE_DIR}/docs/doxygen/tex/)
 ENDIF (DOXYGEN_FOUND)
