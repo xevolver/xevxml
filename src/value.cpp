@@ -41,6 +41,15 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
+/* unparseLanguageIndependentConstructs.h */
+/* this is what unparser does for values */
+template <typename T>
+std::string tostring(T t) {
+  std::ostringstream oss;
+  oss << std::showpoint << t << std::flush;
+  return oss.str();
+}
+
 #define VISIT_VAL(valType,baseType)                                     \
   /** Visitor of a Sg##valType element in an XML document */            \
   SgNode* XevXmlVisitor::                                               \
@@ -54,10 +63,13 @@ using namespace XevXml;
       XEV_MISSING_ATTR(Sg##valType,value,true);                         \
     }                                                                   \
     ret = sb::build##valType(ival);                                     \
-      XEV_ASSERT(ret!=NULL);                                            \
+    XEV_ASSERT(ret!=NULL);                                              \
     ret->set_parent(astParent);                                         \
-    if(XmlGetAttributeValue(node,"string",&vstr))                       \
-      ret->set_valueString(XmlEntity2Str(vstr));                        \
+    if(XmlGetAttributeValue(node,"value",&vstr)) {                      \
+      vstr = XmlEntity2Str(vstr);                                       \
+      if(vstr != tostring(ival))                                        \
+        ret->set_valueString(vstr);                                     \
+    }                                                                   \
     SUBTREE_VISIT_BEGIN(node,astchild,ret)                              \
       {                                                                 \
         if(oexp==0) oexp=isSgExpression(astchild);                      \
@@ -71,10 +83,14 @@ using namespace XevXml;
   {                                                                     \
     Sg##valType* n = isSg##valType(node);                               \
       if(n) {                                                           \
-        sstr() << " value=\"" << n->get_value() << "\" ";               \
-        if(n->get_valueString().size())                                 \
-          sstr() << " string=\"" << XmlStr2Entity(n->get_valueString()) \
-                 << "\" ";                                              \
+        std::string unparsedString = tostring(n->get_value());          \
+        if(n->get_valueString().size() > 0                              \
+           && n->get_valueString() != unparsedString ){                 \
+          sstr() << " value=\""                                         \
+                 << XmlStr2Entity(n->get_valueString()) << "\" ";       \
+        }                                                               \
+        else                                                            \
+          sstr() << " value=\"" << unparsedString << "\" ";             \
       }                                                                 \
   }                                                                     \
   /** XML internal node writer of Sg##vatType */                        \
@@ -300,7 +316,7 @@ XevXmlVisitor::visitSgStringVal(xercesc::DOMNode* node, SgNode* astParent)
     XEV_MISSING_ATTR(SgStringVal,value,true);
   }
   //if(str.size())                                // del (0821)
-  ret = sb::buildStringVal(str);
+  ret = sb::buildStringVal(XmlEntity2Str(str));
   XEV_ASSERT(ret!=NULL);
   //else XEV_ABORT();                                 // del (0821)
   ret->set_parent(astParent);
