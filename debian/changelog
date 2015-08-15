@@ -1,3 +1,9 @@
+xevxml (1.0.0-2) UNRELEASED; urgency=medium
+
+  * Fix PreprocessingInfo bugs
+
+ -- Hiroyuki Takizawa <takizawa@cc.tohoku.ac.jp>  Sat, 15 Aug 2015 16:43:06 +0900
+
 xevxml (1.0.0-1) unstable; urgency=low
 
   * Initial Release
