@@ -219,12 +219,14 @@ XevXmlVisitor::checkExpression(xe::DOMNode* node, SgNode* astNode)
 
   if(e) {
     int parenf=0;
-    int lvalf=0;
 
     XmlGetAttributeValue(node,"paren",&parenf);
-    XmlGetAttributeValue(node,"lvalue",&lvalf);
     e->set_need_paren(parenf);
-    e->set_lvalue(lvalf);
+    if(si::is_Fortran_language()==false){
+      SgBinaryOp* bop = isSgBinaryOp(e);
+      if( isSgAssignOp(bop)!=NULL || isSgCompoundAssignOp(bop)!=NULL )
+        bop->get_lhs_operand()->set_lvalue(true);
+    }
   }
 #if 1
   SgAssignInitializer* ini = isSgAssignInitializer(astNode);

@@ -52,8 +52,8 @@ static void attribSgExpression(ostream& istr,SgNode* node)
   if(n->get_need_paren())
     istr << " paren=\"1\" ";
 
-  if(n->get_lvalue() && si::is_Fortran_language()==false)
-    istr << " lvalue=\"1\" ";
+  //if(n->get_lvalue() && si::is_Fortran_language()==false)
+  //istr << " lvalue=\"1\" ";
 
   SgAssignInitializer* ini = isSgAssignInitializer(node);
   if(ini){
