@@ -76,7 +76,7 @@ namespace XevXml {
  */
 void
 writeFortranPragma(std::ostream& sstr_, SgNode* node,
-                   PreprocessingInfo::RelativePositionType pos)
+                   PreprocessingInfo::RelativePositionType pos, bool unparse)
 {
   if( SageInterface::is_Fortran_language()==false) return;
 
@@ -97,7 +97,10 @@ writeFortranPragma(std::ostream& sstr_, SgNode* node,
         idx = str.find( XEV_PRAGMA_PREFIX );
         if( idx >= 0 ) {
           str = (*info)[i]->getString(); // read the string again
-          sstr_ << "<SgPragmaDeclaration >\n";
+          sstr_ << "<SgPragmaDeclaration ";
+          if(unparse==false)
+            sstr_ << "unparse=\"0\"";
+          sstr_ << " >\n";
           sstr_ << "  "; // indent
           sstr_ << "<SgPragma pragma=\"";
           // assuming Fortran directives start with !$

@@ -50,10 +50,12 @@ extern bool  isFilenameGiven(const vector<string>& args);
 
 static  struct option long_opts[]={
   {"check_fortran_pragma",  1, NULL, 'F'},
+  {"unparse_fortran_pragma",1, NULL, 'U'},
   {"help",                  0, NULL, 'h'},
   {0,0,0,0}
 };
 bool fortran_pragma=true;
+bool unparse_pragma=false;
 
 void ProcessOpts(int argc,char** argv)
 {
@@ -64,7 +66,7 @@ void ProcessOpts(int argc,char** argv)
 
   while(1){
     int option_index = 0;
-    c = getopt_long(argc,argv,"F:h",long_opts,&option_index);
+    c = getopt_long(argc,argv,"F:U:h",long_opts,&option_index);
     if(c==-1){
       break;
     }
@@ -77,10 +79,19 @@ void ProcessOpts(int argc,char** argv)
       else
         fortran_pragma = atoi(optarg);
       break;
+    case'U':
+      if( string("true") == optarg )
+        unparse_pragma = true;
+      else if ( string("false") == optarg )
+        unparse_pragma = false;
+      else
+        unparse_pragma = atoi(optarg);
+      break;
     case 'h':
       cerr << "USAGE:" << argv[0] << " [OPTION]... FILENAME " << endl;
       cerr << "OPTIONS:" << endl;
       cerr << "-F, --check_fortran_pragma <bool>\t Enable Fortran pragma support (default:true)\n";
+      cerr << "-U, --unparse_fortran_pragma <bool>\t Unparse extra Fortran pragmas (default:false)\n";
       cerr << "-h, --help                       \t Print this message\n";
       exit(0);
       break;
@@ -132,6 +143,7 @@ int main(int argc, char** argv)
 
   XevXml::XevXmlOption opt;
   opt.getFortranPragmaFlag() = fortran_pragma;
+  opt.getFortranPragmaUnparseFlag() = unparse_pragma;
   //opt.getSkipCompilerGeneratedFlag() = true;
   opt.getSkipCompilerGeneratedFlag() = false;
   fflush(stdout);

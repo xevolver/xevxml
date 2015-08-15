@@ -154,6 +154,23 @@ bool XevSageVisitor::hasInode(SgNode* node)
   return false;
 }
 
+static bool isInCppFile(SgNode* node, SgFile* file){
+  if(SageInterface::is_Fortran_language()==false)
+    return false;
+
+  Sg_File_Info* ninfo = node->get_file_info();
+  Sg_File_Info* finfo = file->get_file_info();
+  std::string fn = finfo->get_filenameString();
+  SgSourceFile* src = isSgSourceFile(file);
+  XEV_ASSERT(src!=NULL);
+
+  std::string cppFile 
+    = src->generate_C_preprocessor_intermediate_filename(fn);
+  if(ninfo->get_filenameString() == fn ) return true;
+  if(ninfo->get_filenameString() == cppFile ) return true;
+  return false;
+}
+
 /* check if the node is in the target file.
    See SgTreeTraversal_inFileToTraverse() in AstProcessing.h
 */
@@ -185,11 +202,11 @@ static bool isInSameFile(SgNode* node, SgFile* file){
       && !isSgGlobal(node->get_parent())
       && !isSgNamespaceDefinitionStatement(node->get_parent());
   }
-  bool isRightFile = info->isSameFile(file);
+  bool isRightFile = info->isSameFile(file) || isInCppFile(node,file);
 #if 0
-  if(isSgGlobal(node->get_parent())){
+  if(isSgGlobal(node->get_parent()) || isSgInitializedName(node)){
     info->display(node->class_name());
-    std::cout << node->get_parent()->class_name() << std::endl;
+    //std::cout << node->get_parent()->class_name() << std::endl;
     if(isCompilerGenerated || isRightFile || isCode)
       std::cout << "  true " << std::endl;
     else
@@ -239,7 +256,8 @@ void XevSageVisitor::visit(SgNode* node)
   if(needIndent(node))
     writeIndent();
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(sstr(),node,PreprocessingInfo::before);
+    writeFortranPragma(sstr(),node,PreprocessingInfo::before,
+                       getXmlOption()->getFortranPragmaUnparseFlag());
 
   // --- write the element name ---
   sstr() << "<" << node->class_name();
@@ -255,7 +273,8 @@ void XevSageVisitor::visit(SgNode* node)
     XEV_FATAL("unknown Sage AST node found \"" << node->class_name() << "\"");
   }
   if(node->get_file_info()
-     && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false)
+     && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false
+     && isInCppFile(node,this->getSgFileToVisit()) == false )
     sstr() << " samefile=\"0\" ";
   //sstr() << " filename=\""<<node->get_file_info()->get_filename() <<"\" ";
   if( hasInode(node) )
@@ -282,13 +301,15 @@ void XevSageVisitor::visit(SgNode* node)
 
   writePreprocessingInfo(sstr(),node);
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(sstr(),node,PreprocessingInfo::inside);
+    writeFortranPragma(sstr(),node,PreprocessingInfo::inside,
+                       getXmlOption()->getFortranPragmaUnparseFlag());
 
   if(needIndent(node))
     writeIndent();
   sstr() << "</" << node->class_name() << ">" << std::endl;
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(sstr(),node,PreprocessingInfo::after);
+    writeFortranPragma(sstr(),node,PreprocessingInfo::after,
+                       getXmlOption()->getFortranPragmaUnparseFlag());
   return;
 }
 

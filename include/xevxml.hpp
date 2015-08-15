@@ -94,7 +94,7 @@ namespace XevXml {
     bool faddr_;   /// print address attribute
     bool fscg_;    /// skip compiler-generated nodes
     bool fpragma_; /// analyze Fortran pragmas
-
+    bool fupragma_; /// unparse generated Fortran Pragmas
 
 
     void init() {
@@ -102,6 +102,7 @@ namespace XevXml {
       faddr_   = false;
       fscg_    = false;
       fpragma_ = false;
+      fupragma_ = false;
     }
   public:
     XevXmlOption(){init();}
@@ -111,6 +112,7 @@ namespace XevXml {
     bool&  getPrintAddressFlag()           {return faddr_;}
     bool&  getSkipCompilerGeneratedFlag()  {return fscg_;}
     bool&  getFortranPragmaFlag()          {return fpragma_;}
+    bool&  getFortranPragmaUnparseFlag()   {return fupragma_;}
   };
 
 

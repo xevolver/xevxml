@@ -157,6 +157,7 @@ SgNode*
 XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
 {
   SgNode* ret = 0;
+  int unparse = 1;
 
   if(node) {
     char* buf = xe::XMLString::transcode(node->getNodeName());
@@ -171,6 +172,9 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
         child=next;
       }
     }
+    // ignore the XML node if "unparse" attribute is 0
+    // otherwise generate the SgNode corresponding to the XML node.
+    //else if( XmlGetAttributeValue(node,"unparse",&unparse)==false || unparse != 0 ){
     else {
       //#define XEVXML_DEBUG
 #if 0

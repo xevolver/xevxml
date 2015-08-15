@@ -47,7 +47,7 @@ namespace XevXml {
  */
 extern void
 writeFortranPragma(std::ostream& sstr_, SgNode* node,
-         PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before);
+                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before, bool unparse=false);
 
 /*
  * writes Attached Preprocessing Info of each SgNode node to XML.
