@@ -46,8 +46,8 @@ namespace XevXml {
  * creates SgPramgaDeclaration elements from Fortran comments.
  */
 extern void
-writeFortranPragma(std::ostream& sstr_, SgNode* node,
-                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before, bool unparse=false);
+writeFortranPragma(XevXml::XevSageVisitor* visitor, SgNode* node,
+                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before);
 
 /*
  * writes Attached Preprocessing Info of each SgNode node to XML.

@@ -75,11 +75,11 @@ namespace XevXml {
  * find a prefix (!$) in the Fortran comment and create SgPragmaDeclaration.
  */
 void
-writeFortranPragma(std::ostream& sstr_, SgNode* node,
-                   PreprocessingInfo::RelativePositionType pos, bool unparse)
+writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
+                   PreprocessingInfo::RelativePositionType pos)
 {
   if( SageInterface::is_Fortran_language()==false) return;
-
+  std::ostream& sstr_ = visitor->sstr();
   SgLocatedNode* loc =isSgLocatedNode(node);
   if(loc==NULL) return;
 
@@ -97,15 +97,18 @@ writeFortranPragma(std::ostream& sstr_, SgNode* node,
         idx = str.find( XEV_PRAGMA_PREFIX );
         if( idx >= 0 ) {
           str = (*info)[i]->getString(); // read the string again
+          visitor->writeIndent();
           sstr_ << "<SgPragmaDeclaration ";
-          if(unparse==false)
+          if(visitor->getXmlOption()->getFortranPragmaUnparseFlag()==false)
             sstr_ << "unparse=\"0\"";
           sstr_ << " >\n";
+          visitor->writeIndent();
           sstr_ << "  "; // indent
           sstr_ << "<SgPragma pragma=\"";
           // assuming Fortran directives start with !$
           sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
           //sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\n";
+          visitor->writeIndent();
           sstr_ << "</SgPragmaDeclaration >\n";
         }
       }

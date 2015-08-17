@@ -107,11 +107,30 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
   SgLocatedNode* n = isSgLocatedNode(astNode);
   string file_info;
   int same=0;
+  int unp=0;
 
   if(n==0) return;
   //if(isSgCastExp(n) == 0)
   if(isSgSourceFile(n) == 0)
     si::setSourcePositionAsTransformation(n);
+
+  if(XmlGetAttributeValue(node, "unparse", &unp) && unp==0 ) {
+    n->get_file_info()->set_file_id(Sg_File_Info::COMPILER_GENERATED_FILE_ID);
+    si::setSourcePosition(n);
+    n->get_file_info()->setCompilerGenerated();
+    n->get_startOfConstruct()->setCompilerGenerated();
+    n->get_endOfConstruct()->setCompilerGenerated();
+    n->get_file_info()->setFrontendSpecific();
+    n->get_startOfConstruct()->setFrontendSpecific();
+    n->get_endOfConstruct()->setFrontendSpecific();
+    n->get_file_info()->unsetOutputInCodeGeneration();
+    n->get_startOfConstruct()->unsetOutputInCodeGeneration();
+    n->get_endOfConstruct()->unsetOutputInCodeGeneration();
+    n->get_file_info()->unsetTransformation();
+    n->get_startOfConstruct()->unsetTransformation();
+    n->get_endOfConstruct()->unsetTransformation();
+  }
+#if 0
   if(XmlGetAttributeValue(node, "samefile", &same) && same==0 ) {
     n->get_file_info()->set_file_id(Sg_File_Info::COMPILER_GENERATED_FILE_ID);
     if( n->get_parent()==0 || isSgType(n->get_parent()) || isSgGlobal(n->get_parent())
@@ -133,6 +152,7 @@ void checkLocatedNode(xe::DOMNode* node, SgNode* astNode)
       //si::dumpPreprocInfo(n);
     }
   }
+#endif
   if(XmlGetAttributeValue(node,"file_info",&file_info)) {
     int fid, line, col;
     stringstream ss;
@@ -172,9 +192,6 @@ XevXmlVisitor::visit(xe::DOMNode* node, SgNode* astParent)
         child=next;
       }
     }
-    // ignore the XML node if "unparse" attribute is 0
-    // otherwise generate the SgNode corresponding to the XML node.
-    //else if( XmlGetAttributeValue(node,"unparse",&unparse)==false || unparse != 0 ){
     else {
       //#define XEVXML_DEBUG
 #if 0

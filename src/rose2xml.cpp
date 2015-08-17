@@ -253,13 +253,11 @@ void XevSageVisitor::visit(SgNode* node)
     }
   }
 
+  if(getXmlOption()->getFortranPragmaFlag())
+    writeFortranPragma(this,node,PreprocessingInfo::before);
+  // --- write the element name ---
   if(needIndent(node))
     writeIndent();
-  if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(sstr(),node,PreprocessingInfo::before,
-                       getXmlOption()->getFortranPragmaUnparseFlag());
-
-  // --- write the element name ---
   sstr() << "<" << node->class_name();
 
   // --- write attributes of this node ---
@@ -272,10 +270,19 @@ void XevSageVisitor::visit(SgNode* node)
   default:
     XEV_FATAL("unknown Sage AST node found \"" << node->class_name() << "\"");
   }
+  if(isSgBasicBlock(node->get_parent())||isSgGlobal(node->get_parent())){
+    Sg_File_Info* info = node->get_file_info();
+    if(info && info->isCompilerGenerated()) {
+      sstr() << " unparse=\"0\" ";
+      //info->display(node->class_name());
+    }
+  }
+  /*
   if(node->get_file_info()
      && node->get_file_info()->isSameFile(this->getSgFileToVisit())==false
      && isInCppFile(node,this->getSgFileToVisit()) == false )
     sstr() << " samefile=\"0\" ";
+  */
   //sstr() << " filename=\""<<node->get_file_info()->get_filename() <<"\" ";
   if( hasInode(node) )
     sstr() << ">" << std::endl;
@@ -301,15 +308,13 @@ void XevSageVisitor::visit(SgNode* node)
 
   writePreprocessingInfo(sstr(),node);
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(sstr(),node,PreprocessingInfo::inside,
-                       getXmlOption()->getFortranPragmaUnparseFlag());
+    writeFortranPragma(this,node,PreprocessingInfo::inside);
 
   if(needIndent(node))
     writeIndent();
   sstr() << "</" << node->class_name() << ">" << std::endl;
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(sstr(),node,PreprocessingInfo::after,
-                       getXmlOption()->getFortranPragmaUnparseFlag());
+    writeFortranPragma(this,node,PreprocessingInfo::after);
   return;
 }
 

@@ -1,7 +1,7 @@
 #!/bin/sh -
 
 
-SRC2XML=@CMAKE_BINARY_DIR@/src/src2xml
+SRC2XML="@CMAKE_BINARY_DIR@/src/src2xml --unparse_fortran_pragma=true"
 XML2SRC=@CMAKE_BINARY_DIR@/src/xml2src
 XSLTGEN=@CMAKE_BINARY_DIR@/src/xsltgen
 XSLTEXEC="@CMAKE_BINARY_DIR@/src/xsltexec -L @PROJECT_SOURCE_DIR@/xev-trans/lib"

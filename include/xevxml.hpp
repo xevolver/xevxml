@@ -123,7 +123,7 @@ namespace XevXml {
 
     SgFile* file_;
     int  depth_;
-  protected:
+  public:
     std::ostream& sstr() {
       return *ostr_;
     }
@@ -139,7 +139,6 @@ namespace XevXml {
     SgFile* getSgFileToVisit()         {return file_;}
     void    setSgFileToVisit(SgFile* f){file_=f;}
 
-  public:
     void setXmlOption(XevXmlOption* o)  {opt_ = o;}
     XevXmlOption* getXmlOption(){return opt_;}
     std::ostream& getOutputStream() {return sstr();}
