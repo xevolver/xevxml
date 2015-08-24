@@ -757,6 +757,7 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
     new SgElseWhereStatement(DEFAULT_FILE_INFO);
   SgExpression*         cond  = 0;
   SgBasicBlock*         body  = 0;
+  SgElseWhereStatement* elsew  = 0;
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
@@ -766,6 +767,8 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
         cond = isSgExpression(astchild);
       else if (body==0)
         body = isSgBasicBlock(astchild);
+      else if (elsew==0)
+        elsew = isSgElseWhereStatement(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -776,6 +779,10 @@ XevXmlVisitor::visitSgElseWhereStatement(xercesc::DOMNode* node, SgNode* astPare
 
   ret->set_condition( cond );
   ret->set_body( body );
+  if(elsew!=NULL){
+    ret->set_elsewhere(elsew);
+    elsew->set_parent(ret);
+  }
   return ret;
 }
 STMT_DEFAULT(ElseWhereStatement);
