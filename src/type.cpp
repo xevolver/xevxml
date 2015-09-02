@@ -999,7 +999,6 @@ void XevSageVisitor::inodeSgTypeLabel(SgNode* node){
   inodeSgType(this,node);
 }
 
-#if 0 // latest version of ROSE will require this class
 // ===============================================================================
 /// Visitor of a SgTypeOfType element in an XML document
 SgNode*
@@ -1014,35 +1013,24 @@ XevXmlVisitor::visitSgTypeOfType(xe::DOMNode* node, SgNode* astParent)
     {
       if(typ==NULL){
         typ = isSgType(astchild);
-        /*
-        if(typ){
-          ret->set_base_type(typ);
-          typ->set_parent(ret);
-        }
-        */
       }
       if(exp==NULL){
         exp = isSgExpression(astchild);
-        /*
-        if(exp){
-          ret->set_base_expression(exp);
-          exp->set_parent(ret);
-          }*/
       }
     }
   SUBTREE_VISIT_END();
+
   if(typ==NULL&&exp==NULL) {
     XEV_DEBUG_INFO(node);
-    XEV_FATAL("SgTypeOfType with no type nor expression");
-    //XEV_ABORT();
+    XEV_FATAL("SgTypeOfType expects a child node of either SgType or SgExpression");
   }
-  //ret = sb::buildTypeOfType(exp,typ);
-  if(exp){
+
+  if(exp!=NULL){
     exp->set_parent(ret);
     ret->set_base_expression(exp);
     ret->set_base_type(exp->get_type());
   }
-  else if(typ){
+  else if(typ!=NULL){
     typ->set_parent(ret);
     ret->set_base_type(typ);
   }
@@ -1060,7 +1048,6 @@ void XevSageVisitor::inodeSgTypeOfType(SgNode* node){
     this->visit(n->get_base_expression());
   }
 }
-#endif
 
 // ===============================================================================
 /// Visitor of a SgPointerType element in an XML document

@@ -880,11 +880,14 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
     //build a dummy function symbol based on the name (C language)
     SgType* rtype = sb::buildIntType();
     SgFunctionParameterList *lst = sb::buildFunctionParameterList();
-    SgGlobal* globalscope = si::getGlobalScope(sb::topScopeStack());
-    XEV_ASSERT(rtype && lst && globalscope);
+    //SgGlobal* globalscope = si::getGlobalScope(sb::topScopeStack());
+    SgScopeStatement* scope = sb::topScopeStack();
+    XEV_ASSERT(rtype!=NULL);
+    XEV_ASSERT(lst!=NULL);
+    XEV_ASSERT(scope!=NULL);
 
     SgFunctionDeclaration * decl =
-      sb::buildNondefiningFunctionDeclaration(name,rtype,lst,globalscope);
+      sb::buildNondefiningFunctionDeclaration(name,rtype,lst,scope);
     decl->get_declarationModifier().get_storageModifier().setExtern();
 
     functionSymbol = si::lookupFunctionSymbolInParentScopes(name);

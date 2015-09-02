@@ -106,6 +106,8 @@ bool XevSageVisitor::hasInode(SgNode* node)
     return true;
   if(t && isSgClassType(t) && isSgClassType(t)->get_autonomous_declaration())
     return true;
+  if(t && isSgTypeOfType(t))
+    return true;
   if( t==NULL && node->get_numberOfTraversalSuccessors()>0)
     return true;
   if( hasPreprocessingInfo(node) )
@@ -164,7 +166,7 @@ static bool isInCppFile(SgNode* node, SgFile* file){
   SgSourceFile* src = isSgSourceFile(file);
   XEV_ASSERT(src!=NULL);
 
-  std::string cppFile 
+  std::string cppFile
     = src->generate_C_preprocessor_intermediate_filename(fn);
   if(ninfo->get_filenameString() == fn ) return true;
   if(ninfo->get_filenameString() == cppFile ) return true;
