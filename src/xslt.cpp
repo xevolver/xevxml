@@ -65,7 +65,7 @@ class MyEntityResolver: public xe::EntityResolver, public xe::XMLEntityResolver
   /*
     systemId has the absolute path to the file being accessed.
   */
-  std::string GetPath(const XMLCh* systemId)
+ const char* GetPath(const XMLCh* systemId)
   {
     char* buf = xe::XMLString::transcode(systemId);
     std::string abs = buf;
@@ -101,7 +101,7 @@ class MyEntityResolver: public xe::EntityResolver, public xe::XMLEntityResolver
         ifs.open(fn.c_str(),ios::in);
         if(ifs){ // found!
           ifs.close();
-          return fn;
+          return fn.c_str();
         }
       }
       return NULL;
@@ -121,7 +121,7 @@ class MyEntityResolver: public xe::EntityResolver, public xe::XMLEntityResolver
       ifs.open(fn.c_str(), ios::in);
       if(ifs){ // found!
         ifs.close();
-        return fn;
+        return fn.c_str();
       }
     }
     return NULL;
@@ -171,10 +171,10 @@ public:
                 const XMLCh* const  p/* publicId */,
                 const XMLCh* const  systemId)
   {
-    std::string uri = GetPath(systemId);
+    const char* uri = GetPath(systemId);
     xe::InputSource* src = 0;
-
-    src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri.c_str()));
+    if(uri!=NULL)
+      src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri));
     return src;
   }
   virtual xe::InputSource*
@@ -183,10 +183,10 @@ public:
   {
     if (resourceIdentifier->getResourceIdentifierType()
         == xe::XMLResourceIdentifier::ExternalEntity){
-      std::string uri = GetPath(resourceIdentifier->getSystemId());
+      const char* uri = GetPath(resourceIdentifier->getSystemId());
       xe::InputSource* src = 0;
-
-      src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri.c_str()));
+      if(uri!=NULL)
+        src = new xe::LocalFileInputSource(xe::XMLString::transcode(uri));
       return src;
     }
 
