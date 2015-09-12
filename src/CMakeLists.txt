@@ -20,13 +20,8 @@ CONFIGURE_FILE(
   )
 
 CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/test/identity/test.sh.in"
-  "${PROJECT_SOURCE_DIR}/test/identity/test.sh"
-  )
-
-CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh.in"
-  "${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh"
+  "${PROJECT_SOURCE_DIR}/test/xevxml_vars.sh.in"
+  "${PROJECT_SOURCE_DIR}/test/xevxml_vars.sh"
   )
 
 CONFIGURE_FILE(

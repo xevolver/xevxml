@@ -1,0 +1,20 @@
+#!/bin/sh -
+if [ -z $JAVA_HOME ];then
+	JAVA_HOME=`readlink /etc/alternatives/java_sdk`
+fi
+
+LD_LIBRARY_PATH=@Boost_LIBRARY_DIR@:@CMAKE_XEVXML_PREFIX@/lib:$JAVA_HOME/jre/lib/amd64/server/
+
+if [ -z $XEV_TEST_MODE ]; then
+    if [ -d @CMAKE_BINARY_DIR@/src/ ]; then
+        PATH=@CMAKE_BINARY_DIR@/src/:$PATH
+        XEVTRANSLIB=@PROJECT_SOURCE_DIR@/xev-trans/lib
+    fi
+else
+    PATH=@ROSE_LIBDIR@/../bin:@CMAKE_XEVXML_PREFIX@/bin:$PATH
+    XEVTRANSLIB=@CMAKE_XEVXML_PREFIX@/lib/xev-trans
+fi
+
+export PATH LD_LIBRARY_PATH XEVTRANSLIB
+export XEV_ENCODE="EUC-JP" # for testing h024.f90
+

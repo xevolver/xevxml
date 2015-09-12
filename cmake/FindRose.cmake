@@ -5,6 +5,9 @@ FIND_PATH(CMAKE_ROSE_INCLUDE NAMES rose.h
   $ENV{CMAKE_ROSE_INCLUDE_PATH}
   $ENV{CMAKE_INCLUDE_PATH}
   ${CMAKE_INCLUDE_PATH}
+  $ENV{CMAKE_ROSE_INCLUDE_PATH}/rose
+  $ENV{CMAKE_INCLUDE_PATH}/rose
+  ${CMAKE_INCLUDE_PATH}/rose
   /usr/local/include
   /usr/local/include/rose
   /usr/include

@@ -14,5 +14,6 @@ INSTALL_FILES( /include/ FILES ${PROJECT_SOURCE_DIR}/include/)
 INSTALL_FILES( /share/${PROJECT_NAME}/ FILES ${PROJECT_SOURCE_DIR}/README.md)
 INSTALL_FILES( /share/${PROJECT_NAME}/tests/identity/ FILES ${PROJECT_SOURCE_DIR}/test/identity/)
 INSTALL_FILES( /share/${PROJECT_NAME}/tests/xsltgen/  FILES ${PROJECT_SOURCE_DIR}/test/xsltgen/)
+INSTALL_FILES( /share/${PROJECT_NAME}/tests/xevxml_vars.sh  FILES ${PROJECT_SOURCE_DIR}/test/xevxml_vars.sh)
 
 INCLUDE( xevtests )

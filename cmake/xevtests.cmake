@@ -44,8 +44,8 @@ file(GLOB files ${PROJECT_SOURCE_DIR}/xev-trans/test/*.f90)
 foreach(absname ${files})
   get_filename_component(filename ${absname} NAME)
   add_test(NAME "xev-trans-identity-${filename}"
-    COMMAND sh test.sh ${absname}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/
+    COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/test.sh ${absname}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/module
     )
 endforeach()
 
@@ -57,7 +57,7 @@ foreach(absname ${files})
   get_filename_component(filename ${absname} NAME)
   add_test(NAME "identity-${filename}"
     COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/test.sh ${absname}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/module
     )
 endforeach()
 
