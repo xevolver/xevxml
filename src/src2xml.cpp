@@ -52,6 +52,7 @@ static  struct option long_opts[]={
   {"check_fortran_pragma",  1, NULL, 'F'},
   {"unparse_fortran_pragma",1, NULL, 'U'},
   {"help",                  0, NULL, 'h'},
+  {"version",               0, NULL, 'v'},
   {0,0,0,0}
 };
 bool fortran_pragma=true;
@@ -66,7 +67,7 @@ void ProcessOpts(int argc,char** argv)
 
   while(1){
     int option_index = 0;
-    c = getopt_long(argc,argv,"F:U:h",long_opts,&option_index);
+    c = getopt_long(argc,argv,"F:U:hv",long_opts,&option_index);
     if(c==-1){
       break;
     }
@@ -95,6 +96,10 @@ void ProcessOpts(int argc,char** argv)
       cerr << "-h, --help                       \t Print this message\n";
       exit(0);
       break;
+    case 'v':
+      cerr << "XevXML ver." << XEVXML_PROGRAM_VERSION ;
+      cerr << "-" << XEVXML_FORMAT_VERSION << " " << endl;
+      exit(0);
     case ':':
     case '?':
       ; /* do nothing */

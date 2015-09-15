@@ -30,6 +30,7 @@
  */
 #ifndef ___COMMON_HPP___
 #define ___COMMON_HPP___
+#include "config.h"
 #include <xevxml.hpp>
 #include <iostream>
 

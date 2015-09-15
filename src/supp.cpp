@@ -441,7 +441,7 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
   xe::DOMNode* child=node->getFirstChild();
   int langid;
   int fmtid;
-  string fn;
+  string fn,ver,fmt;
 
   Sg_File_Info* info = DEFAULT_FILE_INFO;
   XEV_ASSERT(_file!=NULL);
@@ -450,15 +450,27 @@ XevXmlVisitor::visitSgSourceFile(xe::DOMNode* node, SgNode* astParent)
 
   if(XmlGetAttributeValue(node,"lang",&langid)==false){
     XEV_DEBUG_INFO(node);
-    XEV_WARN("Language attribute is missing.");
+    XEV_WARN("Language attribute \"lang\" is missing.");
   }
-  if(XmlGetAttributeValue(node,"fmt",&fmtid)==false){
+  if(XmlGetAttributeValue(node,"ofmt",&fmtid)==false){
     XEV_DEBUG_INFO(node);
-    XEV_WARN("Format attribute is missing.");
+    XEV_WARN("Output format attribute \"ofmt\" is missing.");
   }
   if(XmlGetAttributeValue(node,"file",&fn)==false){
     // original file name is used by xmlrebuild
     XEV_MISSING_ATTR(SgSourceFile,file,true);
+  }
+  if(XmlGetAttributeValue(node,"version",&ver)==false){
+    XEV_MISSING_ATTR(SgSourceFile,version,true);
+  }
+  else if(ver != XEVXML_PROGRAM_VERSION) {
+    XEV_WARN("XevXML program version does not match.");
+  }
+  if(XmlGetAttributeValue(node,"format",&fmt)==false){
+    XEV_MISSING_ATTR(SgSourceFile,format,true);
+  }
+  else if(fmt != XEVXML_FORMAT_VERSION) {
+    XEV_WARN("XML AST format version does not match.");
   }
   _file->set_sourceFileNameWithoutPath(fn);
   //cerr << _file->get_sourceFileNameWithoutPath() << endl;
@@ -497,7 +509,9 @@ void XevSageVisitor::attribSgSourceFile(SgNode* node)
   if(n) {
     sstr() << " file=\"" << n->get_sourceFileNameWithoutPath() << "\"";
     sstr() << " lang=\"" << n->get_outputLanguage() << "\"";
-    sstr() << " fmt=\"" << n->get_outputFormat() << "\"";
+    sstr() << " ofmt=\"" << n->get_outputFormat() << "\"";
+    sstr() << " version=\"" << XEVXML_PROGRAM_VERSION << "\"";
+    sstr() << " format=\"" << XEVXML_FORMAT_VERSION << "\"";
   }
 }
 INODE_SUPP_DEFAULT(SourceFile);
