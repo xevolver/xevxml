@@ -12,7 +12,7 @@ foreach(f90absname ${sources})
   foreach(absname ${files})
     get_filename_component(filename ${absname} NAME)
     add_test(NAME "xsltgen-${f90name}-${filename}"
-      COMMAND sh ${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh ${f90name} ${filename}
+      COMMAND env XEV_TEST_MODE="ctest" sh ${PROJECT_SOURCE_DIR}/test/xsltgen/test.sh ${f90name} ${filename}
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/xsltgen
       )
   endforeach()
@@ -44,7 +44,7 @@ file(GLOB files ${PROJECT_SOURCE_DIR}/xev-trans/test/*.f90)
 foreach(absname ${files})
   get_filename_component(filename ${absname} NAME)
   add_test(NAME "xev-trans-identity-${filename}"
-    COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/test.sh ${absname}
+    COMMAND env XEV_TEST_MODE="ctest" sh ${PROJECT_SOURCE_DIR}/test/identity/test.sh ${absname}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/module
     )
 endforeach()
@@ -56,7 +56,7 @@ file(GLOB files ${PROJECT_SOURCE_DIR}/test/identity/input/*.f90
 foreach(absname ${files})
   get_filename_component(filename ${absname} NAME)
   add_test(NAME "identity-${filename}"
-    COMMAND sh ${PROJECT_SOURCE_DIR}/test/identity/test.sh ${absname}
+    COMMAND env XEV_TEST_MODE="ctest" sh ${PROJECT_SOURCE_DIR}/test/identity/test.sh ${absname}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/identity/input/module
     )
 endforeach()

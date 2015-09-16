@@ -7,7 +7,7 @@ ALL=*.f90 *.c *.F *.f *.f03
 all: mod.rmod
 	-@for i in $(ALL) ; \
 	do if [ -f $$i ]; then \
-	(cd module;XEV_TEST_MODE="true" sh ../../test.sh ../$$i) > /dev/null;\
+	(cd module;sh ../../test.sh ../$$i) > /dev/null;\
 	fi; done
 
 mod.rmod : module/mod.f90
