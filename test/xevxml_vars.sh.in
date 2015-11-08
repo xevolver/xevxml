@@ -7,14 +7,15 @@ LD_LIBRARY_PATH=@Boost_LIBRARY_DIR@:@CMAKE_XEVXML_PREFIX@/lib:$JAVA_HOME/jre/lib
 
 if [ "x$XEV_TEST_MODE" = "xctest" ]; then
     if [ -d @CMAKE_BINARY_DIR@/src/ ]; then
-        PATH=@CMAKE_BINARY_DIR@/src/:$PATH
+        PATH=@ROSE_LIBDIR@/../bin:@CMAKE_BINARY_DIR@/src/:$PATH
         XEVTRANSLIB=@PROJECT_SOURCE_DIR@/xev-trans/lib
     fi
+    export XEV_ENCODE="EUC-JP" # for testing h024.f90
 else
     PATH=@ROSE_LIBDIR@/../bin:@CMAKE_XEVXML_PREFIX@/bin:$PATH
     XEVTRANSLIB=@CMAKE_XEVXML_PREFIX@/lib/xev-trans
 fi
 
 export PATH LD_LIBRARY_PATH XEVTRANSLIB
-export XEV_ENCODE="EUC-JP" # for testing h024.f90
+
 

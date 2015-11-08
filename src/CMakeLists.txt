@@ -11,7 +11,7 @@ FIND_PACKAGE( Rose )
 FIND_PACKAGE( Xerces )
 FIND_PACKAGE( Xalan )
 
-GET_FILENAME_COMPONENT(ROSE_LIBDIR ${CMAKE_ROSE_LIBRARY} DIRECTORY)
+GET_FILENAME_COMPONENT(ROSE_LIBDIR ${CMAKE_ROSE_LIBRARY} PATH)
 
 #####################################################################################
 CONFIGURE_FILE(
