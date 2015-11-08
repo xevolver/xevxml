@@ -4,8 +4,8 @@
 # generated files
 /docs/doxygen/html/
 /src/config.h
-/test/identity/test.sh
-/test/xsltgen/test.sh
+#/test/identity/test.sh
+#/test/xsltgen/test.sh
 /xev-trans/lib/Makefile-xev.mk
 
 # identity test files
