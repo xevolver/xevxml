@@ -33,6 +33,7 @@
 #include "common.hpp"
 #include "xml2rose.hpp"
 #include "rose2xml.hpp"
+#include <map>
 
 namespace sb=SageBuilder;
 namespace si=SageInterface;
@@ -40,6 +41,99 @@ namespace xe=xercesc;
 namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
+
+map<string,int> g_iostmtAttrib;
+enum iostmtAttrib {
+  IOSTMT_FMT,
+  IOSTMT_IOLENGTH,
+  IOSTMT_UNIT,
+  IOSTMT_IOSTAT,
+  IOSTMT_ERR,
+  IOSTMT_IOMSG,
+  IOSTMT_FILE,
+  IOSTMT_ACCESS,
+  IOSTMT_FORM,
+  IOSTMT_RECL,
+  IOSTMT_BLANK,
+  IOSTMT_EXIST,
+  IOSTMT_OPENED,
+  IOSTMT_NUMBER,
+  IOSTMT_NAMED,
+  IOSTMT_NAME,
+  IOSTMT_SEQUENTIAL,
+  IOSTMT_DIRECT,
+  IOSTMT_FORMATTED,
+  IOSTMT_UNFORMATTED,
+  IOSTMT_NEXTREC,
+  IOSTMT_POSITION,
+  IOSTMT_ACTION,
+  IOSTMT_READ,
+  IOSTMT_WRITE,
+  IOSTMT_READWRITE,
+  IOSTMT_DELIM,
+  IOSTMT_PAD,
+  IOSTMT_ASYNCHRONOUS,
+  IOSTMT_DECIMAL,
+  IOSTMT_STREAM,
+  IOSTMT_SIZE,
+  IOSTMT_PENDING,
+  IOSTMT_STATUS,
+  IOSTMT_ROUND,
+  IOSTMT_SIGN,
+  IOSTMT_ADVANCE,
+  IOSTMT_REC,
+  IOSTMT_END,
+  IOSTMT_EOR,
+  IOSTMT_NML
+};
+
+static void allocIostmtAttrib(void){
+  if(  g_iostmtAttrib.size() > 0 ) return;
+
+  g_iostmtAttrib["fmt"]          = IOSTMT_FMT;      //write,read,print
+  g_iostmtAttrib["iolength"]     = IOSTMT_IOLENGTH; // SgInquireStatement
+  g_iostmtAttrib["unit"]         = IOSTMT_UNIT;     //write,read
+  g_iostmtAttrib["iostat"]       = IOSTMT_IOSTAT;   //write,read
+  g_iostmtAttrib["err"]          = IOSTMT_ERR;      //write,read
+  g_iostmtAttrib["iomsg"]        = IOSTMT_IOMSG;    //write
+  g_iostmtAttrib["file"]         = IOSTMT_FILE;     //write
+  g_iostmtAttrib["access"]       = IOSTMT_ACCESS;   //write
+  g_iostmtAttrib["form"]         = IOSTMT_FORM;     //write
+  g_iostmtAttrib["recl"]         = IOSTMT_RECL;     //write
+  g_iostmtAttrib["blank"]        = IOSTMT_BLANK;    //write
+  g_iostmtAttrib["exist"]        = IOSTMT_EXIST;
+  g_iostmtAttrib["opened"]       = IOSTMT_OPENED;
+  g_iostmtAttrib["number"]       = IOSTMT_NUMBER;
+  g_iostmtAttrib["named"]        = IOSTMT_NAMED;
+  g_iostmtAttrib["name"]         = IOSTMT_NAME;
+  g_iostmtAttrib["sequential"]   = IOSTMT_SEQUENTIAL;
+  g_iostmtAttrib["direct"]       = IOSTMT_DIRECT;
+  g_iostmtAttrib["formatted"]    = IOSTMT_FORMATTED;
+  g_iostmtAttrib["unformatted"]  = IOSTMT_UNFORMATTED;
+  g_iostmtAttrib["nextrec"]      = IOSTMT_NEXTREC;
+  g_iostmtAttrib["position"]     = IOSTMT_POSITION; //write
+  g_iostmtAttrib["action"]       = IOSTMT_ACTION; //write
+  g_iostmtAttrib["read"]         = IOSTMT_READ;
+  g_iostmtAttrib["write"]        = IOSTMT_WRITE;
+  g_iostmtAttrib["readwrite"]    = IOSTMT_READWRITE;
+  g_iostmtAttrib["delim"]        = IOSTMT_DELIM; //write
+  g_iostmtAttrib["pad"]          = IOSTMT_PAD; //write
+  g_iostmtAttrib["asynchronous"] = IOSTMT_ASYNCHRONOUS; //write.read
+  g_iostmtAttrib["decimal"]      = IOSTMT_DECIMAL;
+  g_iostmtAttrib["stream"]       = IOSTMT_STREAM;
+  g_iostmtAttrib["size"]         = IOSTMT_SIZE;
+  g_iostmtAttrib["pending"]      = IOSTMT_PENDING;
+  g_iostmtAttrib["status"]       = IOSTMT_STATUS; // SgCloseStatement
+  g_iostmtAttrib["round"]        = IOSTMT_ROUND; // SgWriteStatement
+  g_iostmtAttrib["sign"]         = IOSTMT_SIGN; // SgWriteStatement
+  g_iostmtAttrib["advance"]      = IOSTMT_ADVANCE; // SgReadStatement
+  g_iostmtAttrib["rec"]          = IOSTMT_REC; // SgReadStatement
+  g_iostmtAttrib["end"]          = IOSTMT_END; // SgReadStatement
+  g_iostmtAttrib["eor"]          = IOSTMT_EOR; // SgReadStatement
+  g_iostmtAttrib["nml"]          = IOSTMT_NML; // SgReadStatement
+
+  return;
+}
 
 static PreprocessingInfo*
 attachRawText(SgLocatedNode* node, const std::string& text,
@@ -120,22 +214,6 @@ void traverseStatementsAndTexts(XevXmlVisitor* vis, xe::DOMNode* node, SgNode* b
 }
 
 
-static void attribSgIOStatement(std::ostream& str,SgNode* node)
-{
-  SgIOStatement*      n = isSgIOStatement(node);
-
-  if(n) {
-    // print the attribute only if it should be 1.
-    // (assuming the default value is 0)
-    if(n->get_unit())
-      str << " unit=\"1\" ";
-    if(n->get_iostat())
-      str << " iostat=\"1\" ";
-    if(n->get_err())
-      str << " err=\"1\" ";
-  }
-}
-
 void attribSgStatement(std::ostream& str,SgNode* node)
 {
   SgStatement*    stmt = isSgStatement(node);
@@ -145,8 +223,14 @@ void attribSgStatement(std::ostream& str,SgNode* node)
     if(l)
       str << " label=\"" << l->get_numeric_label_value() << "\" ";
   }
-  attribSgIOStatement(str,node);
+  //attribSgIOStatement(str,node);
 }
+#define TRAVERSE_IF_EXISTS(n,x) if(x){                  \
+    SgActualArgumentExpression* exp =                   \
+    sb::buildActualArgumentExpression( n,x );           \
+    this->visit(exp);                                   \
+    delete exp;                                         \
+  }
 
 #define ATTRIB_STMT_DEFAULT(x)                          \
   /** XML attribute writer of Sg##x */                  \
@@ -160,6 +244,14 @@ void attribSgStatement(std::ostream& str,SgNode* node)
   /** XML internal node writer of Sg##x */              \
   void XevSageVisitor::inodeSg##x(SgNode* node)         \
   {                                                     \
+    SgIOStatement*      n = isSgIOStatement(node);      \
+    if(n) {                                             \
+      allocIostmtAttrib();                              \
+      TRAVERSE_IF_EXISTS("unit",  n->get_unit());       \
+      TRAVERSE_IF_EXISTS("iostat",n->get_iostat());     \
+      TRAVERSE_IF_EXISTS("err",   n->get_err());        \
+      TRAVERSE_IF_EXISTS("iomsg", n->get_iomsg());      \
+    }                                                   \
     return;                                             \
   }
 
@@ -167,7 +259,6 @@ void attribSgStatement(std::ostream& str,SgNode* node)
   ATTRIB_STMT_DEFAULT(x)                        \
   INODE_STMT_DEFAULT(x)
 
-#define TRAVERSE_IF_EXISTS(x) if(x){this->visit(x);}
 
 // ===============================================================================
 /// Visitor of a SgAllocateStatement element in an XML document
@@ -291,43 +382,48 @@ XevXmlVisitor::visitSgBackspaceStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgBackspaceStatement*   ret =
     new SgBackspaceStatement(DEFAULT_FILE_INFO);
-  SgExpression*           unt = 0;
-  SgExpression*           err = 0;
-  SgExpression*           ist = 0;
-  bool f_ist=false, f_unt=false, f_err=false;
 
-  XmlGetAttributeValue(node,"iostat",&f_ist);
-  XmlGetAttributeValue(node,"unit",  &f_unt);
-  XmlGetAttributeValue(node,"err",   &f_err);
-
+  XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_backspace);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      //assuming these stmts appear in this order
-      if( f_unt && unt==0 )
-        unt = isSgExpression(astchild);
-      else if( f_ist && ist==0 )
-        ist = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
-
-  if( unt ) {
-    ret->set_unit( unt );
-    unt->set_parent(ret);
-    unt->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
-
-  if( err ) {
-    ret->set_err( err );
-    err->set_parent(ret);
-    err->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
-  if( ist ) {
-    ret->set_iostat( ist );
-    ist->set_parent(ret);
-    ist->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
 
   return ret;
 }
@@ -533,54 +629,72 @@ SgNode*
 XevXmlVisitor::visitSgCloseStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgCloseStatement*     ret = new SgCloseStatement(DEFAULT_FILE_INFO);
-  SgExpression*         unt = 0;
-  SgExpression*         err = 0;
-  SgExpression*         ist = 0;
-  SgExpression*         stt = 0;
-  bool f_ist=false, f_unt=false, f_err=false,f_stt=false;
-
-  XmlGetAttributeValue(node,"iostat",&f_ist);
-  XmlGetAttributeValue(node,"unit",  &f_unt);
-  XmlGetAttributeValue(node,"err",   &f_err);
-  XmlGetAttributeValue(node,"status",&f_stt);
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_close);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( f_unt && unt==0 )
-        unt = isSgExpression(astchild);
-      else if( f_ist && ist==0 )
-        ist = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
-      else if( f_stt && stt==0 )
-        stt = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        case IOSTMT_STATUS:
+          ret->set_status( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
 
-  if(unt)
-    ret->set_unit(unt);
-  if(err)
-    ret->set_err(err);
-  if(ist)
-    ret->set_iostat(ist);
-  if(stt)
-    ret->set_status(stt);
-
   return ret;
 }
-/** XML attribute writer of SgClassDefinition */
-void XevSageVisitor::attribSgCloseStatement(SgNode* node)
+/** XML attribute writer of SgCloseStatement */
+ATTRIB_STMT_DEFAULT(CloseStatement);
+
+/** XML attribute writer of SgCloseStatement */
+void XevSageVisitor::inodeSgCloseStatement(SgNode* node)
 {
   SgCloseStatement*      n = isSgCloseStatement(node);
 
   if(n) {
-    sstr() << " status=\"" << (n->get_status()!=0) << "\" ";
+    allocIostmtAttrib();
+    TRAVERSE_IF_EXISTS("unit",  n->get_unit());
+    TRAVERSE_IF_EXISTS("iostat",n->get_iostat());
+    TRAVERSE_IF_EXISTS("err",   n->get_err());
+    TRAVERSE_IF_EXISTS("err",   n->get_iomsg());
+    TRAVERSE_IF_EXISTS("status",n->get_status());
   }
-  attribSgStatement(sstr(),node);
 }
-INODE_STMT_DEFAULT(CloseStatement);
+
 
 // ===============================================================================
 /// Visitor of a SgComputedGotoStatement element in an XML document
@@ -794,40 +908,48 @@ XevXmlVisitor::visitSgEndfileStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgEndfileStatement*     ret =
     new SgEndfileStatement(DEFAULT_FILE_INFO);
-  SgExpression*          unt = 0;
-  SgExpression*          err = 0;
-  SgExpression*          ist = 0;
-  bool f_ist, f_unt, f_err;
-
-  XmlGetAttributeValue(node,"iostat",&f_ist);
-  XmlGetAttributeValue(node,"unit",  &f_unt);
-  XmlGetAttributeValue(node,"err",   &f_err);
 
   XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_endfile);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( f_unt && unt==0 )
-        unt = isSgExpression(astchild);
-      else if( f_ist && ist==0 )
-        ist = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
-
-  if( unt ) {
-    ret->set_unit( unt );
-    unt->set_parent(ret);
-    unt->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
-
-  if( err ) {
-    ret->set_err( err );
-    err->set_parent(ret);
-    err->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
-  if( ist )
-    ret->set_iostat( ist );
 
   return ret;
 }
@@ -866,32 +988,48 @@ SgNode*
 XevXmlVisitor::visitSgFlushStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgFlushStatement* ret = new SgFlushStatement(DEFAULT_FILE_INFO);
-  SgExpression*     unt = 0;
-  SgExpression*     ist = 0;
 
-  // The attributes by attribSgIOStatement() are simply ignored
-  // because unit is always required and the others are not used.
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
+  allocIostmtAttrib();
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( unt==0 )
-        unt = isSgExpression(astchild);
-      else if( ist==0 )
-        ist = isSgExpression(astchild);
+      SgActualArgumentExpression*  arg = isSgActualArgumentExpression(astchild);
+
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
-
-  if( unt ) {
-    ret->set_unit( unt );
-    unt->set_parent(ret);
-    unt->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
-  if( ist ) {
-    ret->set_iostat( ist );
-    ist->set_parent(ret);
-    ist->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
 
   return ret;
 }
@@ -1344,267 +1482,189 @@ SgNode*
 XevXmlVisitor::visitSgInquireStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgInquireStatement* ret = new SgInquireStatement(DEFAULT_FILE_INFO);
-  SgExpression*       exp = 0;
-  SgLabelRefExp*      lbl = 0;
-  SgVarRefExp*        var = 0;
-  SgExprListExp*      ele = 0;
-  //xe::DOMNamedNodeMap*    amap = node->getAttributes();
-  //xe::DOMNode*            nameatt = 0;
-  //string                  nlabel;
-  int                 ino = 0;
-  int                 flg[33];
-  const char* arg_type[] ={
-    "iolength",    // 1
-    "unit",        // 2
-    "iostat",      // 3
-    "err",         // 4
-    "iomsg",       // 5
-    "file",        // 6
-    "access",      // 7
-    "form",        // 8
-    "recl",        // 9
-    "blank",       //10
-    "exist",       //11
-    "opened",      //12
-    "number",      //13
-    "named",       //14
-    "name",        //15
-    "sequential",  //16
-    "direct",      //17
-    "formatted",   //18
-    "unformatted", //19
-    "nextrec",     //20
-    "position",    //21
-    "action",      //22
-    "access",      //23
-    "read",        //24
-    "write",       //25
-    "readwrite",   //26
-    "delim",       //27
-    "pad",         //28
-    "asynchronous",//29
-    "decimal",     //30
-    "stream",      //31
-    "size",        //32
-    "pending"      //33
-  };
+  SgExprListExp*               exl = 0;
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
-  ino = 0;
-  memset( flg,0,sizeof(flg) );
-  for(int i(0);i<33;i++){
-    int val;
-    if( XmlGetAttributeValue(node,arg_type[i],&val) ){
-      flg[ino] = i+1;
-      ino++;
-    }
-  }
-
-  ino = 0;
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_inquire);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      exp = isSgExpression(astchild);
-      switch( flg[ino] ){
-      case 1:
-        ele = isSgExprListExp(astchild);
-        var = isSgVarRefExp(astchild);
-        if( ele ) {
-          ret->set_io_stmt_list(ele);
-          ele->set_parent(ret);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(exl==0){
+        exl = isSgExprListExp(astchild);
+        if(exl){
+          exl->set_parent(ret);
+          ret->set_io_stmt_list(exl);
         }
-        if( var ) {
-          ret->set_iolengthExp(var);
-          var->set_parent(ret);
-        }
-        ino--;
-        break;
-
-      case 2:
-        ret->set_unit( exp );
-        break;
-      case 3:
-        ret->set_iostat( exp );
-        break;
-      case 4:
-        lbl = isSgLabelRefExp(astchild);
-        if(lbl==NULL)
-          XEV_MISSING_NODE(SgInquireStatement,SgLabelRefExp,true);
-        ret->set_err( lbl );
-        lbl->set_parent(ret);
-        break;
-      case 5:
-        ret->set_iomsg( exp );
-        break;
-      case 6:
-        ret->set_file( exp );
-        break;
-      case 7:
-        ret->set_access( exp );
-        break;
-      case 8:
-        ret->set_form( exp );
-        break;
-      case 9:
-        ret->set_recl( exp );
-        break;
-      case 10:
-        ret->set_blank( exp );
-        break;
-      case 11:
-        ret->set_exist( exp );
-        break;
-      case 12:
-        ret->set_opened( exp );
-        break;
-      case 13:
-        ret->set_number( exp );
-        break;
-      case 14:
-        ret->set_named( exp );
-        break;
-      case 15:
-        ret->set_name( exp );
-        break;
-      case 16:
-        ret->set_sequential( exp );
-        break;
-      case 17:
-        ret->set_direct( exp );
-        break;
-      case 18:
-        ret->set_formatted( exp );
-        break;
-      case 19:
-        ret->set_unformatted( exp );
-        break;
-      case 20:
-        ret->set_nextrec( exp );
-        break;
-      case 21:
-        ret->set_position( exp );
-        break;
-      case 22:
-        ret->set_action( exp );
-        break;
-      case 23:
-        ret->set_read( exp );
-        break;
-      case 24:
-        ret->set_write( exp );
-        break;
-      case 25:
-        ret->set_readwrite( exp );
-        break;
-      case 26:
-        ret->set_delim( exp );
-        break;
-      case 27:
-        ret->set_pad( exp );
-        break;
-      case 28:
-        ret->set_asynchronous( exp );
-        break;
-      case 29:
-        ret->set_opened( exp );
-        break;
-      case 30:
-        ret->set_decimal( exp );
-        break;
-      case 31:
-        ret->set_stream( exp );
-        break;
-      case 32:
-        ret->set_size( exp );
-        break;
-      case 33:
-        ret->set_pending( exp );
-        break;
       }
-      ino++;
+      if( arg ){
+        std::string name = arg->get_argument_name().getString();
+
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("unknown attribute \"" << name << "\" ");
+        }
+        int flg           = g_iostmtAttrib[name];
+        SgExpression* exp = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch( flg ){
+        case IOSTMT_IOLENGTH:
+          if( isSgVarRefExp(exp)) {
+            ret->set_iolengthExp(isSgVarRefExp(exp));
+          }
+          else{
+            XEV_MISSING_NODE(SgInquireStatement,SgVarRefExp,true);
+          }
+        break;
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        case IOSTMT_FILE:
+          ret->set_file( exp );
+          break;
+        case IOSTMT_ACCESS:
+          ret->set_access( exp );
+          break;
+        case IOSTMT_FORM:
+          ret->set_form( exp );
+          break;
+        case IOSTMT_RECL:
+          ret->set_recl( exp );
+          break;
+        case IOSTMT_BLANK:
+          ret->set_blank( exp );
+          break;
+        case IOSTMT_EXIST:
+          ret->set_exist( exp );
+          break;
+        case IOSTMT_OPENED:
+          ret->set_opened( exp );
+          break;
+        case IOSTMT_NUMBER:
+          ret->set_number( exp );
+          break;
+        case IOSTMT_NAMED:
+          ret->set_named( exp );
+          break;
+        case IOSTMT_NAME:
+          ret->set_name( exp );
+          break;
+        case IOSTMT_SEQUENTIAL:
+          ret->set_sequential( exp );
+          break;
+        case IOSTMT_DIRECT:
+          ret->set_direct( exp );
+          break;
+        case IOSTMT_FORMATTED:
+          ret->set_formatted( exp );
+          break;
+        case IOSTMT_UNFORMATTED:
+          ret->set_unformatted( exp );
+          break;
+        case IOSTMT_NEXTREC:
+          ret->set_nextrec( exp );
+          break;
+        case IOSTMT_POSITION:
+          ret->set_position( exp );
+          break;
+        case IOSTMT_ACTION:
+          ret->set_action( exp );
+          break;
+        case IOSTMT_READ:
+          ret->set_read( exp );
+          break;
+        case IOSTMT_WRITE:
+          ret->set_write( exp );
+          break;
+        case IOSTMT_READWRITE:
+          ret->set_readwrite( exp );
+          break;
+        case IOSTMT_DELIM:
+          ret->set_delim( exp );
+          break;
+        case IOSTMT_PAD:
+          ret->set_pad( exp );
+          break;
+        case IOSTMT_ASYNCHRONOUS:
+          ret->set_asynchronous( exp );
+          break;
+        case IOSTMT_DECIMAL:
+          ret->set_decimal( exp );
+          break;
+        case IOSTMT_STREAM:
+          ret->set_stream( exp );
+          break;
+        case IOSTMT_SIZE:
+          ret->set_size( exp );
+          break;
+        case IOSTMT_PENDING:
+          ret->set_pending( exp );
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
 
   return ret;
 }
 /** XML attribute writer of SgInquireStatement */
-void XevSageVisitor::attribSgInquireStatement(SgNode* node)
-{
-  SgInquireStatement*      n = isSgInquireStatement(node);
+ATTRIB_STMT_DEFAULT(InquireStatement);
 
-  if(n) {
-    if( n->get_iolengthExp() )  sstr() << " iolength=\"1\" ";
-    //if( n->get_unit() )         sstr() << " unit=\"1\" ";
-    //if( n->get_iostat() )       sstr() << " iostat=\"1\" ";
-    //if( n->get_err() )          sstr() << " err=\"1\" ";
-    if( n->get_iomsg() )        sstr() << " iomsg=\"1\" ";
-    if( n->get_file() )         sstr() << " file=\"1\" ";
-    if( n->get_access() )       sstr() << " access=\"1\" ";
-    if( n->get_form() )         sstr() << " form=\"1\" ";
-    if( n->get_recl() )         sstr() << " recl=\"1\" ";
-    if( n->get_blank() )        sstr() << " blank=\"1\" ";
-    if( n->get_exist() )        sstr() << " exist=\"1\" ";
-    if( n->get_opened() )       sstr() << " opened=\"1\" ";
-    if( n->get_number() )       sstr() << " number=\"1\" ";
-    if( n->get_named() )        sstr() << " named=\"1\" ";
-    if( n->get_name() )         sstr() << " name=\"1\" ";
-    if( n->get_sequential() )   sstr() << " sequential=\"1\" ";
-    if( n->get_direct() )       sstr() << " direct=\"1\" ";
-    if( n->get_formatted() )    sstr() << " formatted=\"1\" ";
-    if( n->get_unformatted() )  sstr() << " unformatted=\"1\" ";
-    if( n->get_nextrec() )      sstr() << " nextrec=\"1\" ";
-    if( n->get_position() )     sstr() << " position=\"1\" ";
-    if( n->get_action() )       sstr() << " action=\"1\" ";
-    if( n->get_read() )         sstr() << " read=\"1\" ";
-    if( n->get_write() )        sstr() << " write=\"1\" ";
-    if( n->get_readwrite() )    sstr() << " readwrite=\"1\" ";
-    if( n->get_delim() )        sstr() << " delim=\"1\" ";
-    if( n->get_pad() )          sstr() << " pad=\"1\" ";
-    if( n->get_asynchronous() ) sstr() << " asynchronous=\"1\" ";
-    if( n->get_decimal() )      sstr() << " decimal=\"1\" ";
-    if( n->get_stream() )       sstr() << " stream=\"1\" ";
-    if( n->get_size() )         sstr() << " size=\"1\" ";
-    if( n->get_pending() )      sstr() << " pending=\"1\" ";
-  }
-  attribSgStatement(sstr(),node);
-}
 /** XML interanal node writer of SgInquireStatement */
 void XevSageVisitor::inodeSgInquireStatement(SgNode* node)
 {
-  if(isSgInquireStatement(node)){
-    SgInquireStatement* inq = isSgInquireStatement(node);
-    TRAVERSE_IF_EXISTS(inq->get_iolengthExp());
-    //TRAVERSE_IF_EXISTS(inq->get_unit());
-    //TRAVERSE_IF_EXISTS(inq->get_iostat());
-    //TRAVERSE_IF_EXISTS(inq->get_err());
-    TRAVERSE_IF_EXISTS(inq->get_iomsg());
-    TRAVERSE_IF_EXISTS(inq->get_file());
-    TRAVERSE_IF_EXISTS(inq->get_access());
-    TRAVERSE_IF_EXISTS(inq->get_form());
-    TRAVERSE_IF_EXISTS(inq->get_recl());
-    TRAVERSE_IF_EXISTS(inq->get_blank());
-    TRAVERSE_IF_EXISTS(inq->get_exist());
-    TRAVERSE_IF_EXISTS(inq->get_opened());
-    TRAVERSE_IF_EXISTS(inq->get_number());
-    TRAVERSE_IF_EXISTS(inq->get_named());
-    TRAVERSE_IF_EXISTS(inq->get_name());
-    TRAVERSE_IF_EXISTS(inq->get_sequential());
-    TRAVERSE_IF_EXISTS(inq->get_direct());
-    TRAVERSE_IF_EXISTS(inq->get_formatted());
-    TRAVERSE_IF_EXISTS(inq->get_unformatted());
-    TRAVERSE_IF_EXISTS(inq->get_nextrec());
-    TRAVERSE_IF_EXISTS(inq->get_position());
-    TRAVERSE_IF_EXISTS(inq->get_action());
-    TRAVERSE_IF_EXISTS(inq->get_read());
-    TRAVERSE_IF_EXISTS(inq->get_write());
-    TRAVERSE_IF_EXISTS(inq->get_readwrite());
-    TRAVERSE_IF_EXISTS(inq->get_delim());
-    TRAVERSE_IF_EXISTS(inq->get_pad());
-    TRAVERSE_IF_EXISTS(inq->get_asynchronous());
-    TRAVERSE_IF_EXISTS(inq->get_decimal());
-    TRAVERSE_IF_EXISTS(inq->get_stream());
-    TRAVERSE_IF_EXISTS(inq->get_size());
-    TRAVERSE_IF_EXISTS(inq->get_pending());
+  SgInquireStatement* inq = isSgInquireStatement(node);
+  if(inq){
+    if(inq->get_io_stmt_list()){
+      this->visit(inq->get_io_stmt_list());
+    }
+    allocIostmtAttrib();
+    TRAVERSE_IF_EXISTS("iolength",inq->get_iolengthExp());
+    TRAVERSE_IF_EXISTS("unit",inq->get_unit());
+    TRAVERSE_IF_EXISTS("iostat",inq->get_iostat());
+    TRAVERSE_IF_EXISTS("err",inq->get_err());
+    TRAVERSE_IF_EXISTS("iomsg",inq->get_iomsg());
+    TRAVERSE_IF_EXISTS("file",inq->get_file());
+    TRAVERSE_IF_EXISTS("access",inq->get_access());
+    TRAVERSE_IF_EXISTS("form",inq->get_form());
+    TRAVERSE_IF_EXISTS("recl",inq->get_recl());
+    TRAVERSE_IF_EXISTS("blank",inq->get_blank());
+    TRAVERSE_IF_EXISTS("exist",inq->get_exist());
+    TRAVERSE_IF_EXISTS("opened",inq->get_opened());
+    TRAVERSE_IF_EXISTS("number",inq->get_number());
+    TRAVERSE_IF_EXISTS("named",inq->get_named());
+    TRAVERSE_IF_EXISTS("name",inq->get_name());
+    TRAVERSE_IF_EXISTS("sequential",inq->get_sequential());
+    TRAVERSE_IF_EXISTS("direct",inq->get_direct());
+    TRAVERSE_IF_EXISTS("formatted",inq->get_formatted());
+    TRAVERSE_IF_EXISTS("unformatted",inq->get_unformatted());
+    TRAVERSE_IF_EXISTS("nextrec",inq->get_nextrec());
+    TRAVERSE_IF_EXISTS("position",inq->get_position());
+    TRAVERSE_IF_EXISTS("action",inq->get_action());
+    TRAVERSE_IF_EXISTS("read",inq->get_read());
+    TRAVERSE_IF_EXISTS("write",inq->get_write());
+    TRAVERSE_IF_EXISTS("readwrite",inq->get_readwrite());
+    TRAVERSE_IF_EXISTS("delim",inq->get_delim());
+    TRAVERSE_IF_EXISTS("pad",inq->get_pad());
+    TRAVERSE_IF_EXISTS("asynchronous",inq->get_asynchronous());
+    TRAVERSE_IF_EXISTS("decimal",inq->get_decimal());
+    TRAVERSE_IF_EXISTS("stream",inq->get_stream());
+    TRAVERSE_IF_EXISTS("size",inq->get_size());
+    TRAVERSE_IF_EXISTS("padding",inq->get_pending());
   }
 }
 
@@ -1719,102 +1779,84 @@ SgNode*
 XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgOpenStatement* ret = new SgOpenStatement(DEFAULT_FILE_INFO);
-  SgExpression*    exp = NULL;
-  SgLabelRefExp*   lbl = NULL;
-  int              ino = 0;
-  int              flg[17];
-  int              val;
-  const char* open_arg [] = {
-    "unit",    // 1
-    "iostat",  // 2
-    "err",     // 3
-    "file",    // 4
-    "status",  // 5
-    "access",  // 6
-    "form",    // 7
-    "recl",    // 8
-    "blank",   // 9
-    "position",// 10
-    "action",  // 11
-    "delim",   // 12
-    "pad",     // 13
-    "iomsg",   // 14
-    "round",   // 15
-    "sign",    // 16
-    "asynchronous" // 17
-  };
 
   XEV_ASSERT(ret!=NULL);
-  ino = 0;
-  memset( flg,0,sizeof(flg) );
-  for(int i=0;i<17;i++){
-    if(XmlGetAttributeValue(node,open_arg[i],&val)){
-      flg[ino] = i+1;
-      ino++;
-    }
-  }
-
-  ino = 0;
+  ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_open);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      exp = isSgExpression(astchild);
-      if(exp) {
-        switch( flg[ino] ){
-        case 1:
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
           ret->set_unit( exp );
           break;
-        case 2:
+        case IOSTMT_IOSTAT:
           ret->set_iostat( exp );
           break;
-        case 3:
-          lbl = isSgLabelRefExp(astchild);
-          ret->set_err( lbl );
-          lbl->set_parent(ret);
+        case IOSTMT_ERR:
+          ret->set_err( exp );
           break;
-        case 4:
-          ret->set_file( exp );
-          break;
-        case 5:
-          ret->set_status( exp );
-          break;
-        case 6:
-          ret->set_access( exp );
-          break;
-        case 7:
-          ret->set_form( exp );
-          break;
-        case 8:
-          ret->set_recl( exp );
-          break;
-        case 9:
-          ret->set_blank( exp );
-          break;
-        case 10:
-          ret->set_position( exp );
-          break;
-        case 11:
-          ret->set_action( exp );
-          break;
-        case 12:
-          ret->set_delim( exp );
-          break;
-        case 13:
-          ret->set_pad( exp );
-          break;
-        case 14:
+        case IOSTMT_IOMSG:
           ret->set_iomsg( exp );
           break;
-        case 15:
-          ret->set_round( exp );
+        case IOSTMT_FILE:
+          ret->set_file( exp );
           break;
-        case 16:
-          ret->set_sign( exp );
+        case IOSTMT_ACCESS:
+          ret->set_access( exp );
           break;
-        case 17:
+        case IOSTMT_FORM:
+          ret->set_form( exp );
+          break;
+        case IOSTMT_RECL:
+          ret->set_recl( exp );
+          break;
+        case IOSTMT_BLANK:
+          ret->set_blank( exp );
+          break;
+        case IOSTMT_POSITION:
+          ret->set_position( exp );
+          break;
+        case IOSTMT_ACTION:
+          ret->set_action( exp );
+          break;
+        case IOSTMT_DELIM:
+          ret->set_delim( exp );
+          break;
+        case IOSTMT_PAD:
+          ret->set_pad( exp );
+          break;
+        case IOSTMT_ASYNCHRONOUS:
           ret->set_asynchronous( exp );
           break;
+        case IOSTMT_STATUS:
+          ret->set_status( exp );
+          break;
+        case IOSTMT_ROUND:
+          ret->set_round( exp );
+          break;
+        case IOSTMT_SIGN:
+          ret->set_sign( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
         }
-        ino++;
       }
     }
   SUBTREE_VISIT_END();
@@ -1822,32 +1864,34 @@ XevXmlVisitor::visitSgOpenStatement(xe::DOMNode* node, SgNode* astParent)
   return ret;
 }
 /** XML attribute writer of SgOpenStatement */
-void XevSageVisitor::attribSgOpenStatement(SgNode* node)
+ATTRIB_STMT_DEFAULT(OpenStatement)
+
+/** XML internal node writer of SgOpenStatement */
+void XevSageVisitor::inodeSgOpenStatement(SgNode* node)
 {
   SgOpenStatement*      n = isSgOpenStatement(node);
 
   if(n) {
-    //if( n->get_unit() )         sstr() << " unit=\"1\" ";
-    //if( n->get_iostat() )       sstr() << " iostat=\"1\" ";
-    //if( n->get_err() )          sstr() << " err=\"1\" ";
-    if( n->get_file() )         sstr() << " file=\"1\" ";
-    if( n->get_status() )       sstr() << " status=\"1\" ";
-    if( n->get_access() )       sstr() << " access=\"1\" ";
-    if( n->get_form() )         sstr() << " form=\"1\" ";
-    if( n->get_recl() )         sstr() << " recl=\"1\" ";
-    if( n->get_blank() )        sstr() << " blank=\"1\" ";
-    if( n->get_position() )     sstr() << " position=\"1\" ";
-    if( n->get_action() )       sstr() << " action=\"1\" ";
-    if( n->get_delim() )        sstr() << " delim=\"1\" ";
-    if( n->get_pad() )          sstr() << " pad=\"1\" ";
-    if( n->get_iomsg() )        sstr() << " iomsg=\"1\" ";
-    if( n->get_round() )        sstr() << " round=\"1\" ";
-    if( n->get_sign() )         sstr() << " sign=\"1\" ";
-    if( n->get_asynchronous() ) sstr() << " asynchronous=\"1\" ";
+    allocIostmtAttrib();
+    TRAVERSE_IF_EXISTS("unit",  n->get_unit() );
+    TRAVERSE_IF_EXISTS("iostat",n->get_iostat() );
+    TRAVERSE_IF_EXISTS("err",   n->get_err() );
+    TRAVERSE_IF_EXISTS("file",  n->get_file() );
+    TRAVERSE_IF_EXISTS("status", n->get_status() );
+    TRAVERSE_IF_EXISTS("access", n->get_access() );
+    TRAVERSE_IF_EXISTS("form",   n->get_form() );
+    TRAVERSE_IF_EXISTS("recl",   n->get_recl() );
+    TRAVERSE_IF_EXISTS("blank",  n->get_blank() );
+    TRAVERSE_IF_EXISTS("position", n->get_position() );
+    TRAVERSE_IF_EXISTS("action", n->get_action() );
+    TRAVERSE_IF_EXISTS("delim", n->get_delim() );
+    TRAVERSE_IF_EXISTS("pad",   n->get_pad() );
+    TRAVERSE_IF_EXISTS("iomsg", n->get_iomsg() );
+    TRAVERSE_IF_EXISTS("round", n->get_round() );
+    TRAVERSE_IF_EXISTS("sign",  n->get_sign() );
+    TRAVERSE_IF_EXISTS("asynchronous", n->get_asynchronous() );
   }
-  attribSgStatement(sstr(),node);
 }
-INODE_STMT_DEFAULT(OpenStatement)
 
 // ===============================================================================
 /// Visitor of a SgPrintStatement element in an XML document
@@ -1855,31 +1899,68 @@ SgNode*
 XevXmlVisitor::visitSgPrintStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgPrintStatement*     ret = new SgPrintStatement(DEFAULT_FILE_INFO);
-  SgExprListExp*        exp = 0;
-  SgExpression*         fmt = 0;
-
-  // The attributes by attribSgIOStatement() are simply ignored
-  // because they are not used.
+  SgExprListExp*        exl = 0;
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_print);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( exp==0 )
-        exp = isSgExprListExp(astchild);
-      else if( fmt==0 )
-        fmt = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if( exl==0 ) {
+        exl = isSgExprListExp(astchild);
+        if( exl) {
+          exl->set_parent(ret);
+          ret->set_io_stmt_list(exl);
+        }
+      }
+      if( arg ) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_FMT:
+          ret->set_format( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
 
-  ret->set_io_stmt_list(exp);
-  ret->set_format( fmt );
-  if(exp)exp->set_parent(ret);
-  if(fmt)fmt->set_parent(ret);
-
   return ret;
 }
-STMT_DEFAULT(PrintStatement);
+/** XML attribute writer of SgPrintStatement */
+ATTRIB_STMT_DEFAULT(PrintStatement);
+
+/** XML internal node writer of SgPrintStatement */
+void XevSageVisitor::inodeSgPrintStatement(SgNode* node)
+{
+  SgPrintStatement*      n = isSgPrintStatement(node);
+
+  if(n) {
+    if(n->get_io_stmt_list()){
+      this->visit(n->get_io_stmt_list());
+    }
+    allocIostmtAttrib();
+    TRAVERSE_IF_EXISTS("fmt",  n->get_format() );
+  }
+}
+
+
 
 // ===============================================================================
 /// Visitor of a SgReadStatement element in an XML document
@@ -1887,138 +1968,112 @@ SgNode*
 XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgReadStatement*        ret = new SgReadStatement(DEFAULT_FILE_INFO);
-  SgExprListExp*          exp = 0;
-  SgExpression*           fmt = 0;
-  SgExpression*           iost = 0;
-  SgExpression*           rec = 0;
-  SgExpression*           end = 0;
-  SgExpression*           err = 0;
-  SgExpression*           eor = 0;
-  SgExpression*           unt = 0;
-  SgExpression*           asy = 0;
-  SgExpression*           adv = 0;
-  SgExpression*           nml = 0;
-
-  int f_unt = 0;
-  int f_fmt = 0;
-  int f_ios = 0;
-  int f_rec = 0;
-  int f_end = 0;
-  int f_err = 0;
-  int f_eor = 0;
-  int f_asy = 0;
-  int f_adv = 0;
-  int f_nml = 0;
-
-  XmlGetAttributeValue(node,"async" ,&f_asy);
-  XmlGetAttributeValue(node,"advance",&f_adv);
-  XmlGetAttributeValue(node,"fmt"   ,&f_fmt);
-  XmlGetAttributeValue(node,"iostat",&f_ios);
-  XmlGetAttributeValue(node,"rec",   &f_rec);
-  XmlGetAttributeValue(node,"end",   &f_end);
-  XmlGetAttributeValue(node,"err",   &f_err);
-  XmlGetAttributeValue(node,"eor",   &f_eor);
-  XmlGetAttributeValue(node,"nml",   &f_nml);
-  XmlGetAttributeValue(node,"unit",  &f_unt);
+  SgExprListExp*          exl = 0;
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_read);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      //assuming these stmts appear in this order
-      if( exp==0 )
-        exp = isSgExprListExp(astchild);
-      else if( f_unt && unt==0 )
-        unt = isSgExpression(astchild);
-      else if( f_ios && iost==0 )
-        iost = isSgExpression(astchild);
-      else if( f_rec && rec==0 )
-        rec = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
-      else if( f_fmt && fmt==0 )
-        fmt = isSgExpression(astchild);
-      else if( f_end && end==0 )
-        end = isSgExpression(astchild);
-      else if( f_nml && nml==0 )
-        nml = isSgExpression(astchild);
-      else if( f_adv && adv==0)
-        adv = isSgExpression(astchild);
-      else if( f_eor && eor==0 )
-        eor = isSgExpression(astchild);
-      else if( f_asy && asy==0 )
-        asy = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if( exl==0 ) {
+        exl = isSgExprListExp(astchild);
+        if(exl) {
+          exl->set_parent(ret);
+          ret->set_io_stmt_list(exl);
+        }
+      }
+      if( arg ) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        case IOSTMT_FMT:
+          ret->set_format( exp );
+          break;
+        case IOSTMT_REC:
+          ret->set_rec( exp );
+          break;
+        case IOSTMT_END:
+          ret->set_end( exp );
+          break;
+        case IOSTMT_NML:
+          ret->set_namelist( exp );
+          break;
+        case IOSTMT_ADVANCE:
+          ret->set_advance( exp );
+          break;
+        case IOSTMT_SIZE:
+          ret->set_size( exp );
+          break;
+        case IOSTMT_EOR:
+          ret->set_eor( exp );
+          break;
+        case IOSTMT_ASYNCHRONOUS:
+          ret->set_asynchronous( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
 
-  //ret->set_format( fmt );
-  if(unt){
-    ret->set_unit(unt);
-    unt->set_parent(ret);
-  }
-  if(exp){
-    ret->set_io_stmt_list(exp);
-    exp->set_parent(ret);
-  }
-  if(fmt){
-    ret->set_format(fmt);
-    fmt->set_parent(ret);
-  }
-  if(iost){
-    ret->set_iostat(iost);
-    iost->set_parent(ret);
-  }
-  if(rec){
-    ret->set_rec(rec);
-    rec->set_parent(ret);
-  }
-  if(end){
-    ret->set_end(end);
-    end->set_parent(ret);
-  }
-  if(err){
-    ret->set_err(err);
-    err->set_parent(ret);
-  }
-  if(asy){
-    ret->set_asynchronous(asy);
-    asy->set_parent(ret);
-  }
-  if(adv){
-    ret->set_advance(adv);
-    adv->set_parent(ret);
-  }
-  if(nml){
-    ret->set_namelist(nml);
-    nml->set_parent(ret);
-  }
   return ret;
 }
 /** XML attribute writer of SgReadStatement */
-void XevSageVisitor::attribSgReadStatement(SgNode* node)
+ATTRIB_STMT_DEFAULT(ReadStatement);
+
+/** XML internal node writer of SgReadStatement */
+void XevSageVisitor::inodeSgReadStatement(SgNode* node)
 {
   SgReadStatement* n = isSgReadStatement(node);
+
   if(n) {
-    if( n->get_format() )
-      sstr() << " fmt=\"1\"";
-    //if( n->get_iostat() )
-    //sstr() << " iostat=\"1\"";
-    if( n->get_rec() )
-      sstr() << " rec=\"1\"";
-    if( n->get_end() )
-      sstr() << " end=\"1\"";
-    //if( n->get_err() )
-    //sstr() << " err=\"1\"";
-    if( n->get_asynchronous() )
-      sstr() << " async=\"1\"";
-    if( n->get_advance() )
-      sstr() << " advance=\"1\"";
-    if( n->get_namelist() )
-      sstr() << " nml=\"1\"";
+    if(n->get_io_stmt_list()){
+      this->visit(n->get_io_stmt_list());
+    }
+
+    allocIostmtAttrib();
+    TRAVERSE_IF_EXISTS("unit",         n->get_unit());
+    TRAVERSE_IF_EXISTS("iostat",       n->get_iostat());
+    TRAVERSE_IF_EXISTS("err",          n->get_err());
+    TRAVERSE_IF_EXISTS("iomsg",        n->get_iomsg());
+    TRAVERSE_IF_EXISTS("fmt",          n->get_format());
+    TRAVERSE_IF_EXISTS("rec",          n->get_rec());
+    TRAVERSE_IF_EXISTS("end",          n->get_end());
+    TRAVERSE_IF_EXISTS("nml",          n->get_namelist());
+    TRAVERSE_IF_EXISTS("advance",      n->get_advance());
+    TRAVERSE_IF_EXISTS("size",         n->get_size());
+    TRAVERSE_IF_EXISTS("eor",          n->get_eor());
+    TRAVERSE_IF_EXISTS("asynchronous", n->get_asynchronous());
   }
-  attribSgStatement(sstr(),node);
 }
-INODE_STMT_DEFAULT(ReadStatement);
+
 
 // ===============================================================================
 /// Visitor of a SgReturnStmt element in an XML document
@@ -2099,24 +2154,50 @@ SgNode*
 XevXmlVisitor::visitSgRewindStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgRewindStatement*      ret =  new SgRewindStatement(DEFAULT_FILE_INFO);
-  SgExpression*           unt = 0;
 
   // The attributes by attribSgIOStatement() are simply ignored
   // because unit is always required and the others are not used.
-
   XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_rewind);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      if( unt==0 )
-        unt = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
-
-  if( unt ) {
-    ret->set_unit( unt );
-    unt->set_parent(ret);
-    unt->set_startOfConstruct(DEFAULT_FILE_INFO);
-  }
 
   return ret;
 }
@@ -2242,45 +2323,48 @@ SgNode*
 XevXmlVisitor::visitSgWaitStatement(xercesc::DOMNode* node, SgNode* astParent)
 {
   SgWaitStatement*     ret = new SgWaitStatement(DEFAULT_FILE_INFO);
-  SgExpression*           iost = 0;
-  SgExpression*           err = 0;
-  SgExpression*           unt = 0;
-
-  int f_ios = 0;
-  int f_err = 0;
-
-  XmlGetAttributeValue(node,"iostat",&f_ios);
-  XmlGetAttributeValue(node,"err",   &f_err);
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
+  allocIostmtAttrib();
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      //assuming these stmts appear in this order
-      if( unt==0 )
-        unt = isSgExpression(astchild);
-      else if( f_ios && iost==0 )
-        iost = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
 
-  if(unt){
-    unt->set_parent(ret);
-    unt->set_startOfConstruct(DEFAULT_FILE_INFO);
-    ret->set_unit(unt);
-  }
-  if(iost){
-    iost->set_parent(ret);
-    iost->set_startOfConstruct(DEFAULT_FILE_INFO);
-    ret->set_iostat(iost);
-  }
-  if(err){
-    err->set_parent(ret);
-    err->set_startOfConstruct(DEFAULT_FILE_INFO);
-    ret->set_err(err);
-  }
   return ret;
 }
 STMT_DEFAULT(WaitStatement);
@@ -2429,84 +2513,96 @@ SgNode*
 XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
 {
   SgWriteStatement*     ret = new SgWriteStatement(DEFAULT_FILE_INFO);
-  SgExprListExp*        exp = 0;
-  SgExpression*         fmt = 0;
-  SgExpression*         iost = 0;
-  SgExpression*         rec = 0;
-  SgExpression*         err = 0;
-  SgExpression*         unt = 0;
-  SgExpression*         nml = 0;
-
-  //xe::DOMNamedNodeMap*  amap = node->getAttributes();
-  //xe::DOMNode*          nameatt = 0;
-  //string                nlabel;
-
-  int f_fmt = 0;
-  int f_ios = 0;
-  int f_rec = 0;
-  int f_err = 0;
-  int f_nml = 0;
-
-  // ignore unit attribute written by attribSgIOStatement
-  XmlGetAttributeValue(node,"fmt",   &f_fmt);
-  XmlGetAttributeValue(node,"iostat",&f_ios);
-  XmlGetAttributeValue(node,"rec",   &f_rec);
-  XmlGetAttributeValue(node,"err",   &f_err);
-  XmlGetAttributeValue(node,"nml",   &f_nml);
+  SgExprListExp*        exl = 0;
 
   XEV_ASSERT(ret!=NULL);
+  ret->set_parent(astParent);
+  allocIostmtAttrib();
+  ret->set_io_statement(SgIOStatement::e_write);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
     {
-      //assuming these stmts appear in this order
-      if( exp==0 )
-        exp = isSgExprListExp(astchild);
-      else if( unt==0 )
-        unt = isSgExpression(astchild);
-      else if( f_err && err==0 )
-        err = isSgExpression(astchild);
-      else if( f_fmt && fmt==0 )
-        fmt = isSgExpression(astchild);
-      else if( f_ios && iost==0 )
-        iost = isSgExpression(astchild);
-      else if( f_rec && rec==0 )
-        rec = isSgExpression(astchild);
-      else if( f_nml && nml==0 )
-        nml = isSgExpression(astchild);
+      SgActualArgumentExpression* arg = isSgActualArgumentExpression(astchild);
+      if( exl==0 ) {
+        exl = isSgExprListExp(astchild);
+        if( exl ) {
+          exl->set_parent(ret);
+          ret->set_io_stmt_list(exl);
+        }
+      }
+      if(arg) {
+        std::string   name = arg->get_argument_name().getString();
+        if( g_iostmtAttrib.count(name) <= 0 ){
+          XEV_FATAL("Unknown attribute \"" << name << "\" ");
+        }
+        int flg = g_iostmtAttrib[name];
+
+        SgExpression* exp  = arg->get_expression();
+        if( exp == 0 ){
+          XEV_FATAL("Expression of \"" << name << "\" is null");
+        }
+        exp->set_parent(ret);
+        exp->set_startOfConstruct(DEFAULT_FILE_INFO);
+
+        switch(flg){
+        case IOSTMT_UNIT:
+          ret->set_unit( exp );
+          break;
+        case IOSTMT_IOSTAT:
+          ret->set_iostat( exp );
+          break;
+        case IOSTMT_ERR:
+          ret->set_err( exp );
+          break;
+        case IOSTMT_IOMSG:
+          ret->set_iomsg( exp );
+          break;
+        case IOSTMT_FMT:
+          ret->set_format( exp );
+          break;
+        case IOSTMT_REC:
+          ret->set_rec( exp );
+          break;
+        case IOSTMT_ADVANCE:
+          ret->set_advance( exp );
+          break;
+        case IOSTMT_NML:
+          ret->set_namelist( exp );
+          break;
+        case IOSTMT_ASYNCHRONOUS:
+          ret->set_asynchronous( exp );
+          break;
+        default:
+          XEV_FATAL("Invalid attribute \"" << name << "\" ");
+          break;
+        }
+      }
     }
   SUBTREE_VISIT_END();
 
-  ret->set_io_stmt_list(exp);
-  ret->set_format( fmt );
-  ret->set_iostat( iost );
-  ret->set_rec( rec );
-  ret->set_err( err );
-  ret->set_io_statement(SgIOStatement::e_write);
-  ret->set_unit(unt);
-  ret->set_namelist(nml);
-  if(exp)exp->set_parent(ret);
-  if(fmt)fmt->set_parent(ret);
-  if(iost)iost->set_parent(ret);
-  if(rec)rec->set_parent(ret);
-  if(err)err->set_parent(ret);
-  if(nml)nml->set_parent(ret);
   return ret;
 }
 /** XML attribute writer of SgWriteStatement */
-void XevSageVisitor::attribSgWriteStatement(SgNode* node)
+ATTRIB_STMT_DEFAULT(WriteStatement);
+
+/** XML internal node writer of SgWriteStatement */
+void XevSageVisitor::inodeSgWriteStatement(SgNode* node)
 {
   SgWriteStatement* n = isSgWriteStatement(node);
+
   if(n) {
-    if( n->get_format() )
-      sstr() << " fmt=\"1\"";
-    //if( n->get_iostat() )
-    //sstr() << " iostat=\"1\"";
-    if( n->get_rec() )
-      sstr() << " rec=\"1\"";
-    //if( n->get_err() )
-    //sstr() << " err=\"1\"";
-    if( n->get_namelist() )
-      sstr() << " nml=\"1\"";
+    if(n->get_io_stmt_list()){
+      this->visit(n->get_io_stmt_list());
+    }
+
+    allocIostmtAttrib();
+    TRAVERSE_IF_EXISTS("unit",     n->get_unit());
+    TRAVERSE_IF_EXISTS("iostat",   n->get_iostat());
+    TRAVERSE_IF_EXISTS("err",      n->get_err());
+    TRAVERSE_IF_EXISTS("iomsg",    n->get_iomsg());
+    TRAVERSE_IF_EXISTS("fmt",      n->get_format());
+    TRAVERSE_IF_EXISTS("rec",      n->get_rec());
+    TRAVERSE_IF_EXISTS("advance",  n->get_advance());
+    TRAVERSE_IF_EXISTS("nml",      n->get_namelist());
+    TRAVERSE_IF_EXISTS("asynchronous", n->get_asynchronous());
   }
-  attribSgStatement(sstr(),node);
 }
-INODE_STMT_DEFAULT(WriteStatement);
