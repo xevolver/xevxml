@@ -43,21 +43,132 @@ namespace xa=xalanc;
 using namespace std;
 using namespace XevXml;
 
+#define MANGLE_BASE_TYPE(name) {                                \
+    name* tmp_type = is##name(typ);                             \
+      XEV_ASSERT(tmp_type!=NULL);                               \
+      mangled+=getMangledTypes(tmp_type->get_base_type());      \
+  }
+static string getMangledTypes(SgType* typ)
+{
+  std::string mangled;
+  switch(typ->variantT()){
+  case V_SgModifierType:
+    {
+      SgModifierType* mtype = isSgModifierType(typ);
+      XEV_ASSERT(mtype!=NULL);
+      SgTypeModifier& tmod  = mtype->get_typeModifier();
+      SgConstVolatileModifier& cvmod = tmod.get_constVolatileModifier();
+      if(cvmod.isConst())      mangled = "K"+mangled;
+      if(cvmod.isVolatile())   mangled = "V"+mangled;
+      if(tmod.isRestrict())    mangled = "r"+mangled;
+      mangled+=getMangledTypes(mtype->get_base_type());
+      break;
+    }
+    //-- BEGIN --- built-in types
+  case V_SgTypeVoid                 : mangled+='v'; break;
+  case V_SgTypeWchar                : mangled+='w'; break;
+  case V_SgTypeBool                 : mangled+='b'; break;
+  case V_SgTypeChar                 : mangled+='c'; break;
+  case V_SgTypeSignedChar           : mangled+='a'; break;
+  case V_SgTypeUnsignedChar         : mangled+='h'; break;
+  case V_SgTypeSignedShort          : // go through
+  case V_SgTypeShort                : mangled+='s'; break;
+  case V_SgTypeUnsignedShort        : mangled+='t'; break;
+  case V_SgTypeSignedInt            : // go through
+  case V_SgTypeInt                  : mangled+='i'; break;
+  case V_SgTypeUnsignedInt          : mangled+='j'; break;
+  case V_SgTypeSignedLong           : // go through
+  case V_SgTypeLong                 : mangled+='l'; break;
+  case V_SgTypeUnsignedLong         : mangled+='m'; break;
+  case V_SgTypeSignedLongLong       : // go through
+  case V_SgTypeLongLong             : mangled+='x'; break;
+  case V_SgTypeUnsignedLongLong     : mangled+='y'; break;
+  case V_SgTypeSigned128bitInteger  : mangled+='n'; break;
+  case V_SgTypeUnsigned128bitInteger: mangled+='o'; break;
+  case V_SgTypeFloat                : mangled+='f'; break;
+  case V_SgTypeDouble               : mangled+='d'; break;
+  case V_SgTypeLongDouble           : mangled+='e'; break;
+  case V_SgTypeEllipse              : mangled+='z'; break;
+    //-- END --- built-in types
+
+    // SgTypeDefault is considered as "auto" temporarily.
+    // I don't know if this is OK...
+  case V_SgTypeDefault              : mangled+="Da"; break;
+
+  case V_SgTypeString               : mangled+="Ac"; break;
+
+    // vendor extension
+  case V_SgTypeCrayPointer:
+    mangled+="u11craypointer"; 
+    break;
+
+    // types with base types
+  case V_SgTypeComplex:
+    mangled+='C';
+    MANGLE_BASE_TYPE(SgTypeComplex);
+    break;
+  case V_SgTypeImaginary:
+    mangled+='G';
+    MANGLE_BASE_TYPE(SgTypeImaginary);
+    break;
+  case V_SgPointerType:
+    mangled+='P';
+    MANGLE_BASE_TYPE(SgPointerType);
+    break;
+  case V_SgArrayType:
+    mangled+='A';
+    MANGLE_BASE_TYPE(SgArrayType);
+    break;
+
+  case V_SgFunctionType:
+    mangled+='F';
+    {
+      SgFunctionType* ftype = isSgFunctionType(typ);
+      if(ftype){
+        mangled+=getMangledTypes(ftype->get_return_type());
+        SgTypePtrList& args = ftype->get_arguments();
+        for(SgTypePtrList::iterator i=args.begin();i!=args.end();++i){
+          mangled+=getMangledTypes(*i);
+        }
+      }
+    }
+    break;
+
+  default:
+    {
+      SgNamedType* ntype = isSgNamedType(typ);
+      if(ntype){
+        std::stringstream ss;
+        ss << ntype->get_name().get_length()
+           << ntype->get_name().getString();
+        mangled+=ss.str();
+        break;
+      }
+    }
+    XEV_FATAL("unsupported type found (" << typ->class_name() << ")");
+  }
+
+  return mangled;
+}
 
 static void attribSgExpression(ostream& istr,SgNode* node)
 {
   SgExpression*  n = isSgExpression(node);
   if(n==0)return;
 
+  if(n->get_type() && n->get_type()->variantT() != V_SgTypeDefault) {
+    istr << " type=\"" << getMangledTypes(n->get_type()) << "\"";
+  }
+
   if(n->get_need_paren())
-    istr << " paren=\"1\" ";
+    istr << " paren=\"1\"";
 
   //if(n->get_lvalue() && si::is_Fortran_language()==false)
   //istr << " lvalue=\"1\" ";
 
   SgAssignInitializer* ini = isSgAssignInitializer(node);
   if(ini){
-    istr << " cast=\"" << ini->get_is_explicit_cast() <<"\" ";
+    istr << " cast=\"" << ini->get_is_explicit_cast() <<"\"";
 #if 0
     //SgCastExp* c = isSgCastExp(ini->get_originalExpressionTree());
     SgCastExp* c = isSgCastExp(ini->get_operand());
@@ -928,12 +1039,12 @@ XevXmlVisitor::visitSgFunctionRefExp(xercesc::DOMNode* node, SgNode* astParent)
 void XevSageVisitor::attribSgFunctionRefExp(SgNode* node){
   SgFunctionRefExp* n = isSgFunctionRefExp(node);
   if(n){
-    sstr() << " name=" << n->get_symbol()->get_name() << " ";
+    sstr() << " name=" << n->get_symbol()->get_name();
 
     SgProcedureHeaderStatement* h =
       isSgProcedureHeaderStatement( n->get_symbol()->get_declaration() );
     if(h && h->get_subprogram_kind () != SgProcedureHeaderStatement::e_function_subprogram_kind){
-      sstr() << " kind=\"" << h->get_subprogram_kind () << "\" ";
+      sstr() << " kind=\"" << h->get_subprogram_kind () << "\"";
     }
   }
   attribSgExpression(sstr(),node);
