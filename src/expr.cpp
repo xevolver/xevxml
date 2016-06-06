@@ -1112,7 +1112,7 @@ XevXmlVisitor::visitSgLabelRefExp(xe::DOMNode* node, SgNode* astParent)
   int                   type  = 0;
 
   XmlGetAttributeValue(node,"nlabel",&ino);
-  XmlGetAttributeValue(node,"type"  ,&type);
+  XmlGetAttributeValue(node,"ltype"  ,&type);
 
   SgLabelSymbol*  s = new SgLabelSymbol();
   XEV_ASSERT(s!=NULL);
@@ -1137,7 +1137,7 @@ void XevSageVisitor::attribSgLabelRefExp(SgNode* node){
   SgLabelRefExp*      n = isSgLabelRefExp(node);
 
   if(n) {
-    sstr() << " type=\"" << n->get_symbol()->get_label_type() << "\" ";
+    sstr() << " ltype=\"" << n->get_symbol()->get_label_type() << "\" ";
     if(n->get_symbol()->get_label_type() != SgLabelSymbol::e_alternative_return_type){
       sstr() << " nlabel=\"" << n->get_symbol()->get_numeric_label_value() << "\" ";
     }
