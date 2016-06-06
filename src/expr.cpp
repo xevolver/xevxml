@@ -137,10 +137,17 @@ static string getMangledTypes(SgType* typ)
   default:
     {
       SgNamedType* ntype = isSgNamedType(typ);
+      SgTypeLabel* ltype = isSgTypeLabel(typ);
+      std::stringstream ss;
       if(ntype){
-        std::stringstream ss;
         ss << ntype->get_name().get_length()
            << ntype->get_name().getString();
+        mangled+=ss.str();
+        break;
+      }
+      else if(ltype){
+        ss << ltype->get_name().get_length()
+           << ltype->get_name().getString();
         mangled+=ss.str();
         break;
       }
