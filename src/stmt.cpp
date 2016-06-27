@@ -1898,6 +1898,7 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpression*           asy = 0;
   SgExpression*           adv = 0;
   SgExpression*           nml = 0;
+  SgExpression*           siz = 0;
 
   int f_unt = 0;
   int f_fmt = 0;
@@ -1909,6 +1910,7 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   int f_asy = 0;
   int f_adv = 0;
   int f_nml = 0;
+  int f_siz = 0;
 
   XmlGetAttributeValue(node,"async" ,&f_asy);
   XmlGetAttributeValue(node,"advance",&f_adv);
@@ -1920,6 +1922,7 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"eor",   &f_eor);
   XmlGetAttributeValue(node,"nml",   &f_nml);
   XmlGetAttributeValue(node,"unit",  &f_unt);
+  XmlGetAttributeValue(node,"size",  &f_siz);
 
   XEV_ASSERT(ret!=NULL);
   ret->set_parent(astParent);
@@ -1944,10 +1947,12 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
         nml = isSgExpression(astchild);
       else if( f_adv && adv==0)
         adv = isSgExpression(astchild);
-      else if( f_eor && eor==0 )
-        eor = isSgExpression(astchild);
       else if( f_asy && asy==0 )
         asy = isSgExpression(astchild);
+      else if( f_siz && siz==0 )
+        siz = isSgExpression(astchild);
+      else if( f_eor && eor==0 )
+        eor = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -1992,6 +1997,15 @@ XevXmlVisitor::visitSgReadStatement(xe::DOMNode* node, SgNode* astParent)
     ret->set_namelist(nml);
     nml->set_parent(ret);
   }
+  if(siz){
+    ret->set_size(siz);
+    siz->set_parent(ret);
+  }
+  if(eor){
+    ret->set_eor(eor);
+    eor->set_parent(ret);
+  }
+
   return ret;
 }
 /** XML attribute writer of SgReadStatement */
@@ -2015,6 +2029,10 @@ void XevSageVisitor::attribSgReadStatement(SgNode* node)
       sstr() << " advance=\"1\"";
     if( n->get_namelist() )
       sstr() << " nml=\"1\"";
+    if( n->get_size() )
+      sstr() << " size=\"1\"";
+    if( n->get_eor() )
+      sstr() << " eor=\"1\"";
   }
   attribSgStatement(sstr(),node);
 }
