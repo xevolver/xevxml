@@ -2436,6 +2436,7 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   SgExpression*         err = 0;
   SgExpression*         unt = 0;
   SgExpression*         nml = 0;
+  SgExpression*         adv = 0;
 
   //xe::DOMNamedNodeMap*  amap = node->getAttributes();
   //xe::DOMNode*          nameatt = 0;
@@ -2446,6 +2447,7 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   int f_rec = 0;
   int f_err = 0;
   int f_nml = 0;
+  int f_adv = 0;
 
   // ignore unit attribute written by attribSgIOStatement
   XmlGetAttributeValue(node,"fmt",   &f_fmt);
@@ -2453,6 +2455,7 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   XmlGetAttributeValue(node,"rec",   &f_rec);
   XmlGetAttributeValue(node,"err",   &f_err);
   XmlGetAttributeValue(node,"nml",   &f_nml);
+  XmlGetAttributeValue(node,"advance",&f_adv);
 
   XEV_ASSERT(ret!=NULL);
   SUBTREE_VISIT_BEGIN(node,astchild,ret)
@@ -2472,6 +2475,8 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
         rec = isSgExpression(astchild);
       else if( f_nml && nml==0 )
         nml = isSgExpression(astchild);
+      else if( f_adv && adv==0 )
+        adv = isSgExpression(astchild);
     }
   SUBTREE_VISIT_END();
 
@@ -2483,12 +2488,14 @@ XevXmlVisitor::visitSgWriteStatement(xe::DOMNode* node, SgNode* astParent)
   ret->set_io_statement(SgIOStatement::e_write);
   ret->set_unit(unt);
   ret->set_namelist(nml);
+  ret->set_advance(adv);
   if(exp)exp->set_parent(ret);
   if(fmt)fmt->set_parent(ret);
   if(iost)iost->set_parent(ret);
   if(rec)rec->set_parent(ret);
   if(err)err->set_parent(ret);
   if(nml)nml->set_parent(ret);
+  if(adv)adv->set_parent(ret);
   return ret;
 }
 /** XML attribute writer of SgWriteStatement */
@@ -2506,6 +2513,8 @@ void XevSageVisitor::attribSgWriteStatement(SgNode* node)
     //sstr() << " err=\"1\"";
     if( n->get_namelist() )
       sstr() << " nml=\"1\"";
+    if( n->get_advance() )
+      sstr() << " advance=\"1\"";
   }
   attribSgStatement(sstr(),node);
 }
