@@ -336,9 +336,12 @@ XevXmlVisitor::checkDeclStmt(xe::DOMNode* node, SgNode* astNode)
   mod=-1;
   if(XmlGetAttributeValue(node,"alignment",&mod))
     m.get_typeModifier().set_gnu_attribute_alignment(mod);
-  mod=SgAccessModifier::e_default;
-  XmlGetAttributeValue(node,"access_modifier",&mod);
-  m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)mod);
+  if(si::is_Fortran_language())
+    mod=SgAccessModifier::e_undefined;
+  else
+    mod=SgAccessModifier::e_default;
+  if(XmlGetAttributeValue(node,"access_modifier",&mod))
+    m.get_accessModifier().set_modifier((SgAccessModifier::access_modifier_enum)mod);
 
   mod =SgStorageModifier::e_default;
   XmlGetAttributeValue(node,"storage_modifier",&mod);
