@@ -1475,7 +1475,8 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      XEV_MISSING_NODE(SgProcedureHeaderStatement,SgType,true);
 
    if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-     lst2 = si::deepCopy(lst);
+     //lst2 = si::deepCopy(lst);
+     lst2 = lst;
      ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst2,
                                               (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
      XEV_ASSERT(ret!=NULL);
