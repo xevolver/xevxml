@@ -93,6 +93,8 @@ int main(int argc, char** argv)
 {
   SgProject* prj = 0;
   bool r = false;
+  int fd = dup(fileno(stdout));
+  dup2(fileno(stderr),fileno(stdout)); // printf messages are written to stderr
 
   XevXml::XevInitialize();
   if( XevXml::XevConvertXmlToRose(cin,&prj) == false ){
@@ -103,8 +105,10 @@ int main(int argc, char** argv)
     //XevXML::PrintSymTable test;
     //test.visit(&prj->get_file(0));
 
-    if( argc < 2 )
-      r = XevXml::XevUnparseToStream(cout,&prj);
+    if( argc < 2 ){
+      dup2(fd,2); // cerr messages (XML) are written to stdout
+      r = XevXml::XevUnparseToStream(cerr,&prj);
+    }
     else {
       fstream os(argv[1],ios::out);
       if (!os) {

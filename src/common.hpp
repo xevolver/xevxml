@@ -38,9 +38,9 @@
 
 #ifdef XEVXML_DEBUG
 #define XEV_PRINT_DEBUG_INFO() {                                \
-    std::cerr << "[DEBUG] " << __func__ << " :";                \
-    std::cerr << __FILE__ ;                                     \
-    std::cerr << "(" << __LINE__ << ") " << std::endl;          \
+    std::cout << "[DEBUG] " << __func__ << " :";                \
+    std::cout << __FILE__ ;                                     \
+    std::cout << "(" << __LINE__ << ") " << std::endl;          \
   }
 #else
 #define XEV_PRINT_DEBUG_INFO() {}
@@ -48,30 +48,30 @@
 
 #ifdef XEVXML_DEBUG
 #define XEV_INFO(x)                      {   \
-  std::cerr << "[INFO] " << x << std::endl;  \
+  std::cout << "[INFO] " << x << std::endl;  \
   XEV_PRINT_DEBUG_INFO();                    \
 }
 
 #define XEV_ABORT()                      {   \
-    std::cerr << "[ABORT] " << std::endl;    \
+    std::cout << "[ABORT] " << std::endl;    \
     abort();                                 \
   }
 #else
 #define XEV_INFO(x) {}
 
 #define XEV_ABORT()                      {   \
-    std::cerr << "[ABORT] " << std::endl;    \
+    std::cout << "[ABORT] " << std::endl;    \
     std::exit(1);                            \
   }
 #endif
 
 #define XEV_WARN(x)                      {   \
-    std::cerr << "[WARN] " << x << std::endl;\
+    std::cout << "[WARN] " << x << std::endl;\
     XEV_PRINT_DEBUG_INFO();                  \
   }
 
 #define XEV_FATAL(x)                      {    \
-    std::cerr << "[FATAL] " << x << std::endl; \
+    std::cout << "[FATAL] " << x << std::endl; \
     XEV_PRINT_DEBUG_INFO();                    \
     XEV_ABORT();                               \
   }
@@ -79,16 +79,16 @@
 
 #define XEV_ASSERT(x)            {               \
     if(!(x)) {                                   \
-      std::cerr << "[FATAL] assertion failed: "; \
-      std::cerr << #x << std::endl;              \
+      std::cout << "[FATAL] assertion failed: "; \
+      std::cout << #x << std::endl;              \
       XEV_PRINT_DEBUG_INFO();                    \
       XEV_ABORT();                               \
     }                                            \
   }
 
 #define XEV_DEBUG_INFO(x) {                                             \
-    std::cerr << "[DEBUG] node position in the XML file:" << std::endl; \
-    std::cerr << XevXml::XmlGetNodePosition(x) << std::endl;            \
+    std::cout << "[DEBUG] node position in the XML file:" << std::endl; \
+    std::cout << XevXml::XmlGetNodePosition(x) << std::endl;            \
   }
 
 #define XEV_MISSING_NODE(x,y,z) {                                \
