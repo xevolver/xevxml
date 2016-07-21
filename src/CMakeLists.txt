@@ -29,7 +29,7 @@ CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/xev-trans/lib/Makefile-xev.mk"
   )
 
-ADD_LIBRARY(xevxml STATIC
+ADD_LIBRARY(xevxml SHARED
   xmlutils.cpp
   type.cpp
   rose2xml.cpp
@@ -70,4 +70,4 @@ TARGET_LINK_LIBRARIES(xmlrebuild xevxml  ${CMAKE_ROSE_LIBRARY} ${CMAKE_XALAN_LIB
 SET_TARGET_PROPERTIES(xmlrebuild PROPERTIES COMPILE_DEFINITIONS XEV_COMPILE4XMLREBUILD)
 
 INSTALL_PROGRAMS( /bin FILES src2xml xml2src xsltexec xsltgen xmlrebuild)
-INSTALL_FILES( /lib FILES libxevxml.a)
+INSTALL_FILES( /lib FILES libxevxml.so)

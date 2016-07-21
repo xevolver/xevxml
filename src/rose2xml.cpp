@@ -231,7 +231,7 @@ static bool needIndent(SgNode* node)
 
 static void visitSuccessors(SgNode *node, XevSageVisitor* visitor)
 {
-  if(isSgType(node)==NULL){
+  if(isSgType(node)==NULL && isSgIOStatement(node)==NULL ){
     for(size_t i(0);i<node->get_numberOfTraversalSuccessors();i++){
       SgNode* succ = node->get_traversalSuccessorByIndex(i);
       if(succ!= NULL)
@@ -391,7 +391,6 @@ static bool hasInode(SgNode* node)
   case V_SgEquivalenceStatement:
   case V_SgFormatStatement:
   case V_SgFunctionParameterTypeList:
-  case V_SgInquireStatement:
   case V_SgInquireStatement:
   case V_SgNamelistStatement:
   case V_SgPointerDerefExp:

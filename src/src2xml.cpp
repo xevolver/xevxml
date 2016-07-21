@@ -152,9 +152,10 @@ int main(int argc, char** argv)
   //opt.getSkipCompilerGeneratedFlag() = true;
   opt.getSkipCompilerGeneratedFlag() = false;
   fflush(stdout);
-  dup2(fd,1); // printf messages are written to stdout
+  //dup2(fd,1); // printf messages are written to stdout
   clearerr(stdout);
-  if (XevXml::XevConvertRoseToXml(cout,&sageProject,&opt) == false){
+  dup2(fd,2); // cerr messages (XML) are written to stdout
+  if (XevXml::XevConvertRoseToXml(cerr,&sageProject,&opt) == false){
     XEV_WARN( "source-to-XML conversion failed");
     exit(1);
   }

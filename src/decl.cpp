@@ -72,7 +72,8 @@ static void attribSgDeclarationStatement(ostream& istr, SgNode* node)
     istr << " cv_modifier=\"" <<  modifier.get_typeModifier().get_constVolatileModifier().get_modifier()<< "\" ";
   if(modifier.get_typeModifier().get_gnu_attribute_alignment()>=0)
     istr << " alignment=\"" << modifier.get_typeModifier().get_gnu_attribute_alignment() << "\" ";
-  if( SageInterface::is_C_language() == false )
+  if( si::is_Fortran_language() && TransformationSupport::getModuleStatement(decl)!=NULL )
+    // C++ is not considered for now.
     istr << " access_modifier=\"" <<  modifier.get_accessModifier().get_modifier()<< "\" ";
   if(modifier.get_storageModifier().get_modifier() != SgStorageModifier::e_default){
     istr << " storage_modifier=\"" <<  modifier.get_storageModifier().get_modifier()<< "\" ";
@@ -1474,7 +1475,8 @@ void XevSageVisitor::inodeSgNamelistStatement(SgNode* node)
      XEV_MISSING_NODE(SgProcedureHeaderStatement,SgType,true);
 
    if( kind != SgProcedureHeaderStatement::e_block_data_subprogram_kind ){
-     lst2 = si::deepCopy(lst);
+     //lst2 = si::deepCopy(lst);
+     lst2 = lst;
      ret = sb::buildProcedureHeaderStatement( (const char*)(name.c_str()), typ, lst2,
                                               (SgProcedureHeaderStatement::subprogram_kind_enum)kind, scope);
      XEV_ASSERT(ret!=NULL);
