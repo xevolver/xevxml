@@ -256,7 +256,7 @@ void XevSageVisitor::visit(SgNode* node)
   }
 
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(this,node,PreprocessingInfo::before);
+    writeFortranPragma(this,node,PreprocessingInfo::before,this->file_);
   // --- write the element name ---
   if(needIndent(node))
     writeIndent();
@@ -310,13 +310,13 @@ void XevSageVisitor::visit(SgNode* node)
 
   writePreprocessingInfo(sstr(),node);
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(this,node,PreprocessingInfo::inside);
+    writeFortranPragma(this,node,PreprocessingInfo::inside,this->file_);
 
   if(needIndent(node))
     writeIndent();
   sstr() << "</" << node->class_name() << ">" << std::endl;
   if(getXmlOption()->getFortranPragmaFlag())
-    writeFortranPragma(this,node,PreprocessingInfo::after);
+    writeFortranPragma(this,node,PreprocessingInfo::after,this->file_);
   return;
 }
 

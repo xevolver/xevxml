@@ -76,7 +76,7 @@ namespace XevXml {
  */
 void
 writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
-                   PreprocessingInfo::RelativePositionType pos)
+                   PreprocessingInfo::RelativePositionType pos, SgFile* sgfile)
 {
   if( SageInterface::is_Fortran_language()==false) return;
   std::ostream& sstr_ = visitor->sstr();
@@ -94,7 +94,16 @@ writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
       if((*info)[i]->getRelativePosition()==pos){
         str = (*info)[i]->getString();
         std::transform(str.begin(),str.end(),str.begin(),::tolower);
-        idx = str.find( XEV_PRAGMA_PREFIX );
+        if (sgfile->get_inputFormat() == SgFile::e_free_form_output_format){
+          idx = str.find( XEV_PRAGMA_PREFIX );
+        }
+        else {
+          if( !strncmp( str.c_str(), XEV_PRAGMA_PREFIX, 5) ||
+              !strncmp( str.c_str(), XEV_PRAGMA_PREFIX_A, 5) ||
+              !strncmp( str.c_str(), XEV_PRAGMA_PREFIX_C, 5) )
+            idx = 0;
+          else idx = -1;
+        }
         if( idx >= 0 ) {
           if (node->get_parent() == NULL
               || (isSgScopeStatement(node->get_parent()) == NULL

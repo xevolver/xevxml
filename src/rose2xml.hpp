@@ -40,6 +40,8 @@
 namespace XevXml {
 
 #define XEV_PRAGMA_PREFIX "!$xev"
+#define XEV_PRAGMA_PREFIX_A "*$xev"
+#define XEV_PRAGMA_PREFIX_C "c$xev"
 #define XEV_ENCODE "XEV_ENCODE"
 
 /*
@@ -47,7 +49,7 @@ namespace XevXml {
  */
 extern void
 writeFortranPragma(XevXml::XevSageVisitor* visitor, SgNode* node,
-                   PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before);
+    PreprocessingInfo::RelativePositionType pos=PreprocessingInfo::before, SgFile* =NULL);
 
 /*
  * writes Attached Preprocessing Info of each SgNode node to XML.
