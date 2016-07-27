@@ -255,7 +255,7 @@ void XevSageVisitor::visit(SgNode* node)
     }
   }
 
-  if(getXmlOption()->getFortranPragmaFlag())
+  if(getXmlOption()->getFortranPragmaFlag() && isSgGlobal(node) == NULL)
     writeFortranPragma(this,node,PreprocessingInfo::before,this->file_);
   // --- write the element name ---
   if(needIndent(node))
@@ -292,10 +292,13 @@ void XevSageVisitor::visit(SgNode* node)
     sstr() << "/>" << std::endl;
     return;
   }
+  depth_  = depth_ + 1;
 
+  // write pragmas within the global scope
+  if(getXmlOption()->getFortranPragmaFlag() && isSgGlobal(node) != NULL)
+    writeFortranPragma(this,node,PreprocessingInfo::before,this->file_);
 
   // --- write successor nodes and inodes ---
-  depth_  = depth_ + 1;
   visitSuccessors(node,this);
   switch((int)node->variantT()) {
 #define SAGE3(x)                                                        \

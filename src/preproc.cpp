@@ -70,6 +70,136 @@ static bool removeIncludeDirectives(SgLocatedNode* loc)
   return ret;
 }
 
+static size_t lastVisibleCharPos(std::string& str, std::string& cmt)
+{
+  size_t pos = -1;
+  // ignore the first letter because it could be '!'
+  for (size_t i(1);i<str.size();i++) {
+    if(str[i]=='!') {
+      cmt += str.substr(i)+'\n';
+      str = str.substr(0,i);
+      break;
+    }
+    if (!isspace(str[i]))
+      pos = i;
+  }
+  //std::cerr << "last=" << c << std::endl;
+  return pos;
+}
+
+static std::string findContinuedDirective(SgLocatedNode* node, int index,
+                                          std::string& cmt_before,
+                                          std::string& cmt_after,
+                                          PreprocessingInfo::RelativePositionType pos, bool isFixed, bool cont=false)
+{
+  std::string ret;
+  if (node == NULL) return ret;
+  AttachedPreprocessingInfoType* info = node->getAttachedPreprocessingInfo();
+  if (info == NULL || index >= info->size()) return ret;
+  PreprocessingInfo* ppi = (*info)[index];
+  if (ppi  == NULL) return ret;
+  if (ppi->isTransformation())
+    return ret;
+
+  std::string str = ppi->getString();
+  std::transform(str.begin(),str.end(),str.begin(),::tolower);
+
+  int dirpos = -1;
+  bool isDirective = false;
+  if (isFixed) {
+    isDirective = !strncmp( str.c_str(), XEV_PRAGMA_PREFIX, 5)
+      || !strncmp( str.c_str(), XEV_PRAGMA_PREFIX_A, 5)
+      || !strncmp( str.c_str(), XEV_PRAGMA_PREFIX_C, 5);
+    dirpos = 0;
+  }
+  else {
+    dirpos = str.find( XEV_PRAGMA_PREFIX );
+    if (dirpos >= 0)
+      isDirective = true;
+  }
+
+  if (isDirective) {
+    if (cont == false)
+      ret = ppi->getString().substr(dirpos);
+    else {
+      if (isFixed) {
+        if (str.size() > 5 && !isspace(str[5])) {
+          ret = ppi->getString().substr(dirpos).substr(6);
+          ppi->setAsTransformation();
+        }
+        else
+          return ret; // this is not a continued line
+      }
+      else {
+        if (str.size() > 5 && str[5]=='&'){
+          ret = ppi->getString().substr(dirpos).substr(6);
+          ppi->setAsTransformation();
+        }
+        else {
+          ret = findContinuedDirective(node,index+1,cmt_before,cmt_after,pos,isFixed,true);
+          return ret;
+        }
+      }
+    }
+    size_t last = -1;
+    if(cont) last = lastVisibleCharPos(ret,cmt_after);
+    else last = lastVisibleCharPos(ret,cmt_before);
+
+    if (isFixed == false) {
+      if (last < 0 || ret[last] != '&')
+        // the line is not continued any more
+        return ret;
+      XEV_ASSERT(last >= 0);
+      XEV_ASSERT(ret[last] == '&');
+      ret = ret.substr(0,last);
+    }
+
+    // --- looking for the next line and checking if it is a continued line
+    std::string contdir
+      = findContinuedDirective(node,index+1,cmt_before,cmt_after,pos,isFixed,true);
+
+
+    if (isFixed == false) {
+      if (contdir.size() > 0){
+        ret += contdir;
+        return ret; // continued line is found.
+      }
+    }
+
+    SgStatement* stmt = isSgStatement(node);
+    SgStatement* nextstmt = NULL;
+    PreprocessingInfo::RelativePositionType nextpos
+      = PreprocessingInfo::before;
+
+    switch(pos){
+    case PreprocessingInfo::after:
+      nextstmt = si::getNextStatement(stmt);
+      contdir += findContinuedDirective(stmt,0,cmt_before,cmt_after,nextpos,isFixed,true);
+      break;
+    case PreprocessingInfo::before:
+      for (int ii(0);ii<node->get_numberOfTraversalSuccessors();ii++){
+        SgLocatedNode* loc = isSgLocatedNode(node->get_traversalSuccessorByIndex(ii));
+        std::string cont2;
+        if(loc)
+          cont2 = findContinuedDirective(loc,0,cmt_before,cmt_after,nextpos,isFixed,true);
+        if(cont2.size() > 0) {
+          contdir += cont2;
+          break;
+        }
+      }
+      break;
+    default:
+      if (isFixed == false)
+        XEV_WARN("no other options for searching the continued directive");
+    }
+    if (contdir.size()>0)
+      ret += contdir;
+    else if (isFixed == false)
+      XEV_WARN("a directive line is continued. but the continued line is not found");
+  }
+  return ret;
+}
+
 namespace XevXml {
 /*
  * find a prefix (!$) in the Fortran comment and create SgPragmaDeclaration.
@@ -88,13 +218,15 @@ writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
 
   std::string str;
   int idx;
-
+  bool isFixed = (sgfile->get_inputFormat()==SgFile::e_fixed_form_output_format);
   if(info){
     for(size_t i(0);i<(*info).size();i++) {
       if((*info)[i]->getRelativePosition()==pos){
+        std::string cmt_before;
+        std::string cmt_after;
         str = (*info)[i]->getString();
         std::transform(str.begin(),str.end(),str.begin(),::tolower);
-        if (sgfile->get_inputFormat() == SgFile::e_free_form_output_format){
+        if (isFixed == false){
           idx = str.find( XEV_PRAGMA_PREFIX );
         }
         else {
@@ -104,14 +236,19 @@ writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
             idx = 0;
           else idx = -1;
         }
-        if( idx >= 0 ) {
+
+        if(idx >= 0)
+          // this line is a directive
+          str = findContinuedDirective(loc,i,cmt_before,cmt_after,pos,isFixed);
+
+        if( idx >= 0 && str.size() > 0 ) {
           if (node->get_parent() == NULL
               || (isSgScopeStatement(node->get_parent()) == NULL
                   && isSgSourceFile(node->get_parent())  == NULL )){
             XEV_WARN( "Directive \"" << str << "\" might be ignored");
           }
 
-          str = (*info)[i]->getString(); // read the string again
+          //str = (*info)[i]->getString(); // read the string again
           visitor->writeIndent();
           sstr_ << "<SgPragmaDeclaration ";
           if(visitor->getXmlOption()->getFortranPragmaUnparseFlag()==false)
@@ -123,6 +260,18 @@ writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
           // assuming Fortran directives start with !$
           sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
           //sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\n";
+          if (cmt_before.size() > 0) {
+            cmt_before = XevXml::XmlStr2Entity(cmt_before);
+            sstr_ << "<PreprocessingInfo pos=\"2\" type=\"3\">";
+            sstr_ << cmt_before << "</PreprocessingInfo>\n";
+            cmt_before.clear();
+          }
+          if (cmt_after.size() > 0) {
+            cmt_after = XevXml::XmlStr2Entity(cmt_after);
+            sstr_ << "<PreprocessingInfo pos=\"3\" type=\"3\">";
+            sstr_ << cmt_after << "</PreprocessingInfo>\n";
+            cmt_after.clear();
+          }
           visitor->writeIndent();
           sstr_ << "</SgPragmaDeclaration >\n";
         }
