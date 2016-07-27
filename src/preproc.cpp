@@ -96,6 +96,12 @@ writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
         std::transform(str.begin(),str.end(),str.begin(),::tolower);
         idx = str.find( XEV_PRAGMA_PREFIX );
         if( idx >= 0 ) {
+          if (node->get_parent() == NULL
+              || (isSgScopeStatement(node->get_parent()) == NULL
+                  && isSgSourceFile(node->get_parent())  == NULL )){
+            XEV_WARN( "Directive \"" << str << "\" might be ignored");
+          }
+
           str = (*info)[i]->getString(); // read the string again
           visitor->writeIndent();
           sstr_ << "<SgPragmaDeclaration ";
