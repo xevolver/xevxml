@@ -258,7 +258,7 @@ writeFortranPragma(XevSageVisitor* visitor, SgNode* node,
           sstr_ << "  "; // indent
           sstr_ << "<SgPragma pragma=\"";
           // assuming Fortran directives start with !$
-          sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\" />\n";
+          sstr_ << XevXml::XmlStr2Entity(str.substr( strlen("!$") )) << "\" />\n";
           //sstr_ << XevXml::XmlStr2Entity(str.substr( idx+strlen("!$") )) << "\n";
           if (cmt_before.size() > 0) {
             cmt_before = XevXml::XmlStr2Entity(cmt_before);
