@@ -9,7 +9,7 @@ if [ "x$XEV_TEST_MODE" = "xctest" ]; then
     if [ -d @CMAKE_BINARY_DIR@/src/ ]; then
         PATH=@ROSE_LIBDIR@/../bin:@CMAKE_BINARY_DIR@/src/:$PATH
         XEVTRANSLIB=@PROJECT_SOURCE_DIR@/xev-trans/lib
-        XEVTOOLSDIR=@PROJECT_SOURCE_DIR@/tools
+        XEVTOOLSDIR=@PROJECT_SOURCE_DIR@/tools/conf
     fi
     export XEV_ENCODE="EUC-JP" # for testing h024.f90
 else
