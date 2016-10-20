@@ -37,4 +37,6 @@ set_target_properties(xml_indent       PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(xevutil_continu  PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(xevtgen          PROPERTIES LINKER_LANGUAGE C)
 
-INSTALL_PROGRAMS( /bin FILES xevpreparse xevpostparse xevpreunparse xevpostunparse xevparse xevunparse xevrestruct xml_indent xevutil_continu xevtgen)
+INSTALL_PROGRAMS( /bin FILES xevparse xevunparse xml_indent xevtgen)
+INSTALL_PROGRAMS( /lib/xev-tools FILES xevpreparse xevpostparse xevpreunparse xevpostunparse xevrestruct xevutil_continu)
+
